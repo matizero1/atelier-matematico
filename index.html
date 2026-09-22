@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Atelier Matemático — 20 Obras Maestras</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#030308; --card:rgba(10,10,24,0.75); --border:rgba(140,120,255,0.15); }
+  body { background:var(--bg); color:#e2e8f0; font-family:'Plus Jakarta Sans',sans-serif; overflow-x:hidden; }
+  .serif  { font-family:'Cinzel',serif; }
+  .mono   { font-family:'Space Mono',monospace; }
+  .glass  { background:var(--card); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--border); }
+  .glow:hover { border-color:rgba(168,85,247,.4); box-shadow:0 0 25px rgba(139,92,246,.25); }
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:rgba(139,92,246,.3); border-radius:3px; }
+</style>
+</head>
+<body class="selection:bg-purple-900 selection:text-purple-100">
+
+<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px]">
+      <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
+    </div>
+    <div>
+      <span class="serif tracking-[.2em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
+      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">20 Obras · Física & Caos · v3.0</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-3">
+    <a href="#cat" class="text-xs text-slate-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-white/5 mono">Colección</a>
+    <button onclick="downloadArtwork()" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-2 rounded-full font-medium transition">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Exportar HD
+    </button>
+  </div>
+</header>
+
+<main class="pt-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col gap-8 pb-16">
+
+  <!-- HERO -->
+  <div class="text-center max-w-3xl mx-auto pt-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-4">
+      <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+      20 Ecuaciones · Silicio Nativo · Tiempo Real
+    </div>
+    <h1 class="text-3xl md:text-5xl serif font-bold tracking-tight text-white leading-tight mb-3">
+      Donde las leyes del cosmos<br>
+      <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">se convierten en forma y luz</span>
+    </h1>
+    <p class="text-sm text-slate-400 font-light leading-relaxed">Desde Apolonio de Pérgamo (200 a.C.) hasta Yoshida (1990): veinte siglos de matemática convertidos en arte vivo.</p>
+  </div>
+
+  <!-- VISOR + TARJETA EDITORIAL -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+    <!-- Canvas -->
+    <div class="lg:col-span-8 glass rounded-2xl p-2 relative flex flex-col min-h-[520px] md:min-h-[640px] shadow-2xl overflow-hidden">
+      <canvas id="stage" class="w-full h-full rounded-xl cursor-grab active:cursor-grabbing bg-[#04020c] block flex-1"></canvas>
+
+      <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+        <div class="glass px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto border-white/10">
+          <span class="text-xs text-purple-300 mono" id="badge">OBRA 01</span>
+          <span class="text-slate-500 text-xs">·</span>
+          <span class="text-xs text-white/90 font-medium" id="title-mini">Atractor de Lorenz</span>
+        </div>
+        <div class="flex gap-2 pointer-events-auto">
+          <button onclick="togglePalette()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">
+            <span class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-amber-400"></span>Paleta
+          </button>
+          <button onclick="restartArtwork()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">↻ Reiniciar</button>
+        </div>
+      </div>
+
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass px-4 py-1.5 rounded-full pointer-events-none border-white/10 text-[11px] text-purple-200/70 mono flex items-center gap-2">
+        <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+        <span id="hint">Arrastra para rotar en 3D</span>
+      </div>
+    </div>
+
+    <!-- Tarjeta Editorial -->
+    <div class="lg:col-span-4 glass rounded-2xl p-6 flex flex-col justify-between border-white/10 relative overflow-hidden">
+      <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div>
+        <div class="flex justify-between text-xs text-purple-400 mono mb-2">
+          <span id="category">TEORÍA DEL CAOS · 1963</span>
+          <span id="solver">RK4</span>
+        </div>
+        <h2 id="art-title" class="text-2xl serif font-bold text-white mb-1">El Vuelo de Lorenz</h2>
+        <p id="art-sub" class="text-xs text-purple-300/70 mono mb-4">El aleteo que gobierna el infinito</p>
+
+        <div class="bg-black/40 rounded-xl p-3 border border-white/5 mb-4">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
+          <div id="art-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
+        </div>
+
+        <div class="mb-4">
+          <h3 class="text-[10px] uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
+          </h3>
+          <p id="art-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
+        </div>
+
+        <div class="mb-4">
+          <h3 class="text-[10px] uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
+          </h3>
+          <p id="art-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
+        </div>
+      </div>
+      <div class="pt-3 border-t border-white/5">
+        <button onclick="downloadArtwork()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 mono">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Exportar Cuadro para Regalo (PNG HD)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATÁLOGO 20 OBRAS -->
+  <div id="cat" class="pt-10">
+    <div class="flex justify-between items-end mb-6 border-b border-white/5 pb-4">
+      <div>
+        <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-1">Colección Permanente</span>
+        <h2 class="text-2xl serif font-bold text-white">Veinte Siglos de Matemática Viva</h2>
+      </div>
+      <p class="text-xs text-slate-400 mono hidden md:block">Selecciona una obra para explorarla</p>
+    </div>
+    <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+  </div>
+
+  <!-- MANIFIESTO -->
+  <div class="my-8 glass rounded-2xl p-8 border-white/10 max-w-3xl">
+    <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-2">Manifiesto del Atelier</span>
+    <h2 class="text-2xl serif font-bold text-white mb-4 leading-snug">"El arte más puro no imita la naturaleza: habla su mismo lenguaje matemático."</h2>
+    <p class="text-sm text-slate-300 font-light leading-relaxed mb-3">Veinte capítulos de la historia de la ciencia, desde el año 200 antes de Cristo hasta 1990, convertidos en luz interactiva calculada en tiempo real en silicio nativo.</p>
+    <p class="text-purple-300 font-medium text-xs mono">Obra desarrollada por Matías Cortés Figueroa · Timonel Suite · Santiago de Chile.</p>
+  </div>
+
+</main>
+
+<footer class="border-t border-white/5 py-6 text-center text-xs text-slate-500 mono">
+  Atelier Matemático © 2026 · Creado para imprimir, contemplar y regalar · Santiago, Chile
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// ATELIER MATEMÁTICO v3.0 — 20 MOTORES MATEMÁTICOS EN TIEMPO REAL
+// ═══════════════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('stage');
+const ctx    = canvas.getContext('2d');
+let W, H, currentArt = 0, currentPal = 0, animId;
+let isDrag = false, dragX = 0, dragY = 0;
+let mouseX = -9999, mouseY = -9999, mouseDown = false;
+
+// ── Utilidades de color ──────────────────────────────────────────
+function hsl2rgb(h, s, l) {
+  h /= 360; s /= 100; l /= 100;
+  let r, g, b;
+  if (!s) { r = g = b = l; }
+  else {
+    const q = l < .5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+    const hue = (p, q, t) => {
+      if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6)return p+(q-p)*6*t;
+      if(t<1/2)return q;
+      if(t<2/3)return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    r=hue(p,q,h+1/3); g=hue(p,q,h); b=hue(p,q,h-1/3);
+  }
+  return [r*255|0, g*255|0, b*255|0];
+}
+
+const PALS_RGB = [
+  // 0 Cósmico
+  f => hsl2rgb(250-f*210, 90, 45+f*35),
+  // 1 Neón
+  f => [f*40|0, 120+f*135|0, Math.max(0,200-f*50)|0],
+  // 2 Fuego
+  f => [Math.min(255,60+f*220)|0, Math.min(255,f>.6?(f-.6)*450:20)|0, f<.3?180:20],
+  // 3 Mármol dorado
+  f => [220+f*35|0, 180+f*70|0, 120+f*135|0],
+];
+const PALS_CSS = [
+  f => `hsla(${250-f*210},90%,${45+f*35}%,${.08+f*.7})`,
+  f => `rgba(${f*40|0},${120+f*135|0},${Math.max(0,200-f*50)|0},${.08+f*.7})`,
+  f => `rgba(${Math.min(255,60+f*220)|0},${Math.min(255,f>.6?(f-.6)*450:20)|0},${f<.3?180:20},${.08+f*.75})`,
+  f => `rgba(${220+f*35|0},${180+f*70|0},${120+f*135|0},${.08+f*.65})`,
+];
+
+// ── Resize ───────────────────────────────────────────────────────
+function resize() {
+  const r = canvas.parentElement.getBoundingClientRect();
+  W = canvas.width  = r.width  | 0;
+  H = canvas.height = (r.height - 8) | 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 20 MOTORES — init + step
+// ═══════════════════════════════════════════════════════════════════
+
+// ── 01 LORENZ ────────────────────────────────────────────────────
+let lTrajs=[], lRotZ=.5, lRotX=.3;
+function init01(){
+  lTrajs=[];
+  for(let i=0;i<12;i++){
+    let x=.1+i*.04,y=i*.02,z=14+i*.03;
+    for(let k=0;k<400;k++){x+=.005*(10*(y-x));y+=.005*(x*(28-z)-y);z+=.005*(x*y-2.667*z);}
+    lTrajs.push({x,y,z,pts:[],max:700});
+  }
+}
+function step01(){
+  ctx.fillStyle='rgba(4,2,12,.035)'; ctx.fillRect(0,0,W,H);
+  lRotZ+=.0008;
+  const sc=Math.min(W,H)*.015;
+  for(const tr of lTrajs){
+    for(let s=0;s<6;s++){
+      const dt=.004, f=(x,y,z)=>[10*(y-x),x*(28-z)-y,x*y-2.667*z];
+      const [k1x,k1y,k1z]=f(tr.x,tr.y,tr.z);
+      const [k2x,k2y,k2z]=f(tr.x+dt/2*k1x,tr.y+dt/2*k1y,tr.z+dt/2*k1z);
+      const [k3x,k3y,k3z]=f(tr.x+dt/2*k2x,tr.y+dt/2*k2y,tr.z+dt/2*k2z);
+      const [k4x,k4y,k4z]=f(tr.x+dt*k3x,tr.y+dt*k3y,tr.z+dt*k3z);
+      tr.x+=dt/6*(k1x+2*k2x+2*k3x+k4x); tr.y+=dt/6*(k1y+2*k2y+2*k3y+k4y); tr.z+=dt/6*(k1z+2*k2z+2*k3z+k4z);
+      const cz=tr.z-25, rx=tr.x*Math.cos(lRotZ)-tr.y*Math.sin(lRotZ);
+      const ry=tr.x*Math.sin(lRotZ)+tr.y*Math.cos(lRotZ);
+      const rz=ry*Math.sin(lRotX)+cz*Math.cos(lRotX);
+      tr.pts.push([W/2+rx*sc, H/2-rz*sc]); if(tr.pts.length>tr.max)tr.pts.shift();
+    }
+    const n=tr.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){
+      const f=j/n; ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.5+f*1.5;
+      ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke();
+    }
+  }
+}
+
+// ── 02 VON MISES ─────────────────────────────────────────────────
+let vmPts=[],vmSpr=[]; const VMC=36,VMR=24;
+function init02(){
+  vmPts=[]; vmSpr=[];
+  const dx=W/(VMC-1), dy=H/(VMR-1);
+  for(let r=0;r<VMR;r++)for(let c=0;c<VMC;c++)
+    vmPts.push({x:c*dx,y:r*dy,ox:c*dx,oy:r*dy,vx:0,vy:0,s:0,fx:(r===0||r===VMR-1||c===0||c===VMC-1)});
+  const add=(i,j)=>vmSpr.push({a:i,b:j,rest:Math.hypot(vmPts[i].ox-vmPts[j].ox,vmPts[i].oy-vmPts[j].oy)});
+  for(let r=0;r<VMR;r++)for(let c=0;c<VMC;c++){
+    const i=r*VMC+c;
+    if(c<VMC-1)add(i,i+1); if(r<VMR-1)add(i,i+VMC); if(c<VMC-1&&r<VMR-1)add(i,i+VMC+1);
+  }
+}
+function step02(){
+  ctx.fillStyle='rgba(4,2,12,.2)'; ctx.fillRect(0,0,W,H);
+  for(const s of vmSpr){
+    const pa=vmPts[s.a],pb=vmPts[s.b],dx=pb.x-pa.x,dy=pb.y-pa.y;
+    const d=Math.hypot(dx,dy)||.001, f=.2*(d-s.rest)/d;
+    if(!pa.fx){pa.vx+=f*dx;pa.vy+=f*dy;} if(!pb.fx){pb.vx-=f*dx;pb.vy-=f*dy;}
+  }
+  if(mouseDown)for(const p of vmPts){
+    if(p.fx)continue; const dx=p.x-mouseX,dy=p.y-mouseY,d2=dx*dx+dy*dy;
+    if(d2<120*120&&d2>1){const d=Math.sqrt(d2),f=.45*(120-d)/d; p.vx+=f*dx;p.vy+=f*dy;}
+  }
+  let ms=.01;
+  for(let r=1;r<VMR-1;r++)for(let c=1;c<VMC-1;c++){
+    const i=r*VMC+c,p=vmPts[i]; p.vx*=.88;p.vy*=.88;p.x+=p.vx;p.y+=p.vy;
+    const exx=(vmPts[i+1].x-vmPts[i-1].x)*.1, eyy=(vmPts[i+VMC].y-vmPts[i-VMC].y)*.1;
+    const exy=(vmPts[i+1].y-vmPts[i-1].y+vmPts[i+VMC].x-vmPts[i-VMC].x)*.05;
+    p.s=Math.sqrt(Math.max(0,exx*exx-exx*eyy+eyy*eyy+3*exy*exy)); if(p.s>ms)ms=p.s;
+  }
+  for(const s of vmSpr){
+    const pa=vmPts[s.a],pb=vmPts[s.b],st=(pa.s+pb.s)*.5,f=Math.min(1,st/ms);
+    ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.6+f*1.6;
+    ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+  }
+}
+
+// ── 03 YOSHIDA ───────────────────────────────────────────────────
+let yTrails=[];
+function init03(){
+  yTrails=[]; const L=Math.min(W,H)*.22;
+  for(let i=0;i<16;i++) yTrails.push({th1:Math.PI*(.4+i*.03),th2:Math.PI*(.8+i*.02),w1:0,w2:0,pts:[],max:550,cx:W/2,cy:H*.42,L});
+}
+function step03(){
+  ctx.fillStyle='rgba(4,2,12,.03)'; ctx.fillRect(0,0,W,H);
+  const c1=.6756,c0=-.1756,d1=1.3512,d0=-1.7024,g=9.8,dt=.03;
+  for(const tr of yTrails){
+    for(let s=0;s<5;s++)for(const [c,d] of [[c1,d1],[c0,d0],[c1,d1]]){
+      tr.th1+=c*dt*tr.w1; tr.th2+=c*dt*tr.w2;
+      const dth=tr.th1-tr.th2, den=2-Math.cos(2*dth);
+      const dw1=(-g*(2*Math.sin(tr.th1)-Math.cos(dth)*Math.sin(tr.th2))-Math.sin(dth)*(tr.w2*tr.w2+tr.w1*tr.w1*Math.cos(dth)))/den;
+      const dw2=(g*(2*Math.cos(dth)*Math.sin(tr.th1)-2*Math.sin(tr.th2))+Math.sin(dth)*(2*tr.w1*tr.w1+tr.w2*tr.w2*Math.cos(dth)))/den;
+      tr.w1+=d*dt*dw1; tr.w2+=d*dt*dw2;
+    }
+    const x1=tr.cx+tr.L*Math.sin(tr.th1),y1=tr.cy+tr.L*Math.cos(tr.th1);
+    tr.pts.push([x1+tr.L*Math.sin(tr.th2),y1+tr.L*Math.cos(tr.th2)]); if(tr.pts.length>tr.max)tr.pts.shift();
+    const n=tr.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){
+      const f=j/n; ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.5+f*1.4;
+      ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke();
+    }
+  }
+}
+
+// ── 04 CLIFFORD ──────────────────────────────────────────────────
+let cfSeeds=[];
+function init04(){
+  cfSeeds=[]; for(let i=0;i<180;i++) cfSeeds.push({x:Math.random()*W,y:Math.random()*H,pts:[],max:160+(i%80)});
+}
+function step04(){
+  ctx.fillStyle='rgba(4,2,12,.04)'; ctx.fillRect(0,0,W,H);
+  for(const p of cfSeeds){
+    for(let s=0;s<2;s++){
+      const a=Math.sin(p.y*.005)*Math.cos(p.x*.005)*Math.PI*2.5;
+      p.x+=Math.cos(a)*2.2; p.y+=Math.sin(a)*2.2;
+      p.pts.push([p.x,p.y]); if(p.pts.length>p.max)p.pts.shift();
+      if(p.x<0||p.x>W||p.y<0||p.y>H){p.x=Math.random()*W;p.y=Math.random()*H;p.pts=[];}
+    }
+    const n=p.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){
+      const f=j/n; ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.4+f*1.2;
+      ctx.beginPath(); ctx.moveTo(p.pts[j-1][0],p.pts[j-1][1]); ctx.lineTo(p.pts[j][0],p.pts[j][1]); ctx.stroke();
+    }
+  }
+}
+
+// ── 05 CHLADNI ───────────────────────────────────────────────────
+let chSand=[], chM=3, chN=5;
+function init05(){
+  chSand=[]; for(let i=0;i<5500;i++) chSand.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:0});
+}
+function step05(){
+  ctx.fillStyle='rgba(4,2,12,.12)'; ctx.fillRect(0,0,W,H);
+  const L=Math.min(W,H)*.85, ox=(W-L)/2, oy=(H-L)/2;
+  for(const p of chSand){
+    const u=(p.x-ox)/L,v=(p.y-oy)/L;
+    if(u>=0&&u<=1&&v>=0&&v<=1){
+      const val=Math.sin(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-Math.sin(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
+      const gx=chN*Math.PI*Math.cos(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-chM*Math.PI*Math.cos(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
+      const gy=chM*Math.PI*Math.sin(chN*Math.PI*u)*Math.cos(chM*Math.PI*v)-chN*Math.PI*Math.sin(chM*Math.PI*u)*Math.cos(chN*Math.PI*v);
+      p.vx=p.vx*.82-Math.sign(val)*gx*.08+(Math.random()-.5)*.4;
+      p.vy=p.vy*.82-Math.sign(val)*gy*.08+(Math.random()-.5)*.4;
+      p.x+=p.vx; p.y+=p.vy;
+      const prox=Math.exp(-Math.abs(val)*6);
+      ctx.fillStyle=PALS_CSS[currentPal](prox); ctx.fillRect(p.x,p.y,1.2,1.2);
+    } else { p.x=ox+Math.random()*L; p.y=oy+Math.random()*L; p.vx=p.vy=0; }
+  }
+}
+
+// ── 06 TURING ────────────────────────────────────────────────────
+let tAgents=[];
+function init06(){
+  tAgents=[]; for(let i=0;i<280;i++) tAgents.push({x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,angle:Math.random()*Math.PI*2,sp:i%2,pts:[]});
+}
+function step06(){
+  ctx.fillStyle='rgba(4,2,12,.025)'; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<tAgents.length;i++){
+    const ag=tAgents[i]; let repX=0,repY=0;
+    for(let j=0;j<30;j++){
+      const o=tAgents[(i+j*7)%tAgents.length],dx=o.x-ag.x,dy=o.y-ag.y,dist=Math.hypot(dx,dy)||1;
+      if(dist<45){const f=(ag.sp===o.sp?-1:1.4)*(45-dist)/dist; repX+=f*dx;repY+=f*dy;}
+    }
+    ag.angle+=(Math.atan2(repY,repX)-ag.angle)*.08+(Math.random()-.5)*.2;
+    ag.x+=Math.cos(ag.angle)*1.8; ag.y+=Math.sin(ag.angle)*1.8;
+    if(ag.x<0)ag.x=W; if(ag.x>W)ag.x=0; if(ag.y<0)ag.y=H; if(ag.y>H)ag.y=0;
+    ag.pts.push([ag.x,ag.y]); if(ag.pts.length>70)ag.pts.shift();
+    if(ag.pts.length>2){
+      ctx.strokeStyle=PALS_CSS[currentPal](ag.sp===0?.85:.2);
+      ctx.lineWidth=ag.sp===0?2.2:1.2;
+      ctx.beginPath(); ctx.moveTo(ag.pts[ag.pts.length-2][0],ag.pts[ag.pts.length-2][1]); ctx.lineTo(ag.pts[ag.pts.length-1][0],ag.pts[ag.pts.length-1][1]); ctx.stroke();
+    }
+  }
+}
+
+// ── 07 RÖSSLER ───────────────────────────────────────────────────
+let rTrajs=[], rRot=0;
+function init07(){
+  rTrajs=[];
+  for(let i=0;i<14;i++){
+    let x=.5+i*.06,y=.2,z=.1;
+    for(let k=0;k<300;k++){x+=.02*(-y-z);y+=.02*(x+.2*y);z+=.02*(.2+z*(x-5.7));}
+    rTrajs.push({x,y,z,pts:[],max:600});
+  }
+}
+function step07(){
+  ctx.fillStyle='rgba(4,2,12,.035)'; ctx.fillRect(0,0,W,H);
+  rRot+=.0012; const sc=Math.min(W,H)*.035;
+  for(const tr of rTrajs){
+    for(let s=0;s<4;s++){
+      const dt=.02;
+      const dx=-tr.y-tr.z, dy=tr.x+.2*tr.y, dz=.2+tr.z*(tr.x-5.7);
+      tr.x+=dt*dx; tr.y+=dt*dy; tr.z+=dt*dz;
+      const rx=tr.x*Math.cos(rRot)-tr.y*Math.sin(rRot);
+      const ry=tr.x*Math.sin(rRot)+tr.y*Math.cos(rRot);
+      const rz=ry*.4+(tr.z-8)*.8;
+      tr.pts.push([W/2+rx*sc, H/2-rz*sc]); if(tr.pts.length>tr.max)tr.pts.shift();
+    }
+    const n=tr.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){
+      const f=j/n; ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.6+f*1.6;
+      ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke();
+    }
+  }
+}
+
+// ── 08 APOLONIO ──────────────────────────────────────────────────
+let apAngle=0;
+function init08(){ apAngle=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
+function drawCircle(x,y,r,depth){
+  if(depth>5||r<2)return;
+  const f=1-depth/6; ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=Math.max(.4,1.8-depth*.3);
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
+  const sub=depth===0?3:2, subR=r*.38;
+  for(let i=0;i<sub;i++){
+    const th=apAngle+(i*2*Math.PI)/sub+depth*.4;
+    drawCircle(x+Math.cos(th)*(r-subR),y+Math.sin(th)*(r-subR),subR,depth+1);
+  }
+}
+function step08(){
+  ctx.fillStyle='rgba(4,2,12,.06)'; ctx.fillRect(0,0,W,H);
+  apAngle+=.003; drawCircle(W/2,H/2,Math.min(W,H)*.42,0);
+}
+
+// ── 09 JULIA (Progressive per-pixel) ─────────────────────────────
+let julRow=0, julAngle=0, julImgData=null;
+function init09(){ julRow=0; julAngle=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); julImgData=ctx.createImageData(W,1); }
+function step09(){
+  julAngle+=.006;
+  const cR=.7885*Math.cos(julAngle), cI=.7885*Math.sin(julAngle);
+  const ROWS=12, maxIt=100, scale=3.2/Math.min(W,H);
+  const cx=W/2, cy=H/2;
+  const id=ctx.createImageData(W,ROWS);
+  for(let dy=0;dy<ROWS&&(julRow+dy)<H;dy++){
+    const zy=((julRow+dy)-cy)*scale;
+    for(let px=0;px<W;px++){
+      let zr=(px-cx)*scale, zi=zy, n=0;
+      while(zr*zr+zi*zi<4&&n<maxIt){const t=zr*zr-zi*zi+cR; zi=2*zr*zi+cI; zr=t; n++;}
+      let r=0,g=0,b=0;
+      if(n<maxIt){
+        const sm=n+1-Math.log2(.5*Math.log(zr*zr+zi*zi+1e-9));
+        const t=Math.max(0,Math.min(1,sm/maxIt));
+        [r,g,b]=PALS_RGB[currentPal](t);
+      }
+      const idx=(dy*W+px)*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(id,0,julRow);
+  julRow=(julRow+ROWS)%H;
+}
+
+// ── 10 LANGTON'S ANT ─────────────────────────────────────────────
+let langGrid=null, langAnts=[], langStep=0, langGW=0, langGH=0, langCellSize=8;
+function init10(){
+  langCellSize=8; langGW=W/langCellSize|0; langGH=H/langCellSize|0;
+  langGrid=new Uint8Array(langGW*langGH);
+  langAnts=[]; langStep=0;
+  for(let i=0;i<4;i++){
+    langAnts.push({gx:langGW/2|0,gy:langGH/2|0,dir:i,col:i});
+  }
+  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+}
+function step10(){
+  // Each frame advance the ant many steps for fast visible progress
+  for(let s=0;s<600;s++){
+    for(const ant of langAnts){
+      const idx=ant.gy*langGW+ant.gx;
+      if(langGrid[idx]===0){ant.dir=(ant.dir+1)%4; langGrid[idx]=1;}
+      else{ant.dir=(ant.dir+3)%4; langGrid[idx]=0;}
+      const dx=[0,1,0,-1],dy=[-1,0,1,0];
+      ant.gx=(ant.gx+dx[ant.dir]+langGW)%langGW;
+      ant.gy=(ant.gy+dy[ant.dir]+langGH)%langGH;
+    }
+    langStep++;
+  }
+  // Redraw grid
+  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+  for(let y=0;y<langGH;y++)for(let x=0;x<langGW;x++){
+    if(langGrid[y*langGW+x]){
+      const f=(x/langGW*.5+y/langGH*.5);
+      ctx.fillStyle=PALS_CSS[currentPal](f);
+      ctx.fillRect(x*langCellSize,y*langCellSize,langCellSize-1,langCellSize-1);
+    }
+  }
+  // Draw ants
+  for(const ant of langAnts){
+    ctx.fillStyle='rgba(255,255,255,.9)';
+    ctx.fillRect(ant.gx*langCellSize,ant.gy*langCellSize,langCellSize,langCellSize);
+  }
+  // Show step counter
+  ctx.fillStyle='rgba(180,150,255,.5)'; ctx.font='11px Space Mono';
+  ctx.fillText(`Paso: ${langStep.toLocaleString()}`,12,H-16);
+}
+
+// ── 11 KdV SOLITONS ──────────────────────────────────────────────
+let kdvT=0;
+function init11(){ kdvT=0; }
+function step11(){
+  ctx.fillStyle='rgba(4,2,12,.15)'; ctx.fillRect(0,0,W,H);
+  kdvT+=.02;
+  // Multiple analytical 1-soliton solutions: u = -2k² sech²(k(x - 4k²t) - x₀)
+  const solitons=[
+    {k:.8, x0:W*.2, col:0.85},
+    {k:.5, x0:W*.1, col:0.5},
+    {k:1.1,x0:W*.4, col:0.65},
+    {k:.35,x0:0,    col:0.3},
+  ];
+  const yBase=H/2;
+  const amp=H*.28;
+
+  // Draw grid lines
+  ctx.strokeStyle='rgba(100,100,180,.12)'; ctx.lineWidth=.5;
+  for(let y=H*.2;y<H*.85;y+=H*.15){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Draw solitons
+  for(const sol of solitons){
+    ctx.beginPath();
+    for(let px=0;px<W;px++){
+      const x=(px/W)*20-10; // normalized x
+      const arg=sol.k*(x*3-4*sol.k*sol.k*kdvT)-sol.x0/W*30;
+      const u=-2*sol.k*sol.k/(Math.cosh(arg)**2);
+      const py=yBase-u*amp;
+      px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle=PALS_CSS[currentPal](sol.col); ctx.lineWidth=2; ctx.stroke();
+
+    // Glow fill
+    ctx.save();
+    ctx.beginPath();
+    for(let px=0;px<W;px++){
+      const x=(px/W)*20-10;
+      const arg=sol.k*(x*3-4*sol.k*sol.k*kdvT)-sol.x0/W*30;
+      const u=-2*sol.k*sol.k/(Math.cosh(arg)**2);
+      const py=yBase-u*amp;
+      px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.lineTo(W,yBase); ctx.lineTo(0,yBase); ctx.closePath();
+    const [r,g,b]=PALS_RGB[currentPal](sol.col);
+    ctx.fillStyle=`rgba(${r},${g},${b},.06)`; ctx.fill();
+    ctx.restore();
+  }
+
+  // Reference line
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,yBase); ctx.lineTo(W,yBase); ctx.stroke();
+}
+
+// ── 12 VORONOI ───────────────────────────────────────────────────
+let vorSeeds=[], vorT=0;
+function init12(){
+  vorSeeds=[]; vorT=0;
+  const n=12+Math.random()*8|0;
+  for(let i=0;i<n;i++) vorSeeds.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
+  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+}
+function step12(){
+  vorT++;
+  // Move seeds
+  for(const s of vorSeeds){
+    s.x+=s.vx; s.y+=s.vy;
+    if(s.x<0||s.x>W)s.vx*=-1; if(s.y<0||s.y>H)s.vy*=-1;
+  }
+  // Recompute every 2 frames
+  if(vorT%2===0){
+    const id=ctx.createImageData(W,H);
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+      let d1=Infinity,d2=Infinity;
+      for(const s of vorSeeds){
+        const d=Math.hypot(x-s.x,y-s.y);
+        if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;
+      }
+      // Border detection: very thin cells border
+      const border=d2-d1<3;
+      const t=border?1.0:Math.max(0,1-(d1/(Math.min(W,H)*.3)));
+      const [r,g,b]=PALS_RGB[currentPal](t);
+      const alpha=border?220:60+t*120|0;
+      const idx=(y*W+x)*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=alpha;
+    }
+    ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+    ctx.putImageData(id,0,0);
+  }
+  // Draw seed points
+  for(const s of vorSeeds){
+    ctx.fillStyle='rgba(255,255,255,.7)';
+    ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2); ctx.fill();
+  }
+}
+
+// ── 13 NEWTON FRACTAL ────────────────────────────────────────────
+let newRow=0;
+const ROOTS=[{r:1,i:0},{r:-.5,i:.866},{r:-.5,i:-.866}];
+const RCOLS=[[.85,.1,.1],[.1,.85,.1],[.1,.1,.85]];
+function init13(){ newRow=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
+function step13(){
+  const ROWS=16, maxIt=60, scale=3.0/Math.min(W,H);
+  const id=ctx.createImageData(W,ROWS);
+  const cx=W/2, cy=H/2;
+  for(let dy=0;dy<ROWS&&(newRow+dy)<H;dy++){
+    const zy=((newRow+dy)-cy)*scale;
+    for(let px=0;px<W;px++){
+      let zr=(px-cx)*scale, zi=zy;
+      let whichRoot=-1, n=0;
+      for(;n<maxIt;n++){
+        // z → z - (z³-1)/(3z²)  ≡  (2z³+1)/(3z²)
+        const zr2=zr*zr-zi*zi, zi2=2*zr*zi;
+        const zr3=zr2*zr-zi2*zi, zi3=zr2*zi+zi2*zr;
+        const den=9*(zr2*zr2+zi2*zi2)+1e-12;
+        const nr=(2*zr3+1)*(3*(zr2))+2*zi3*(3*zi2);
+        const ni=(2*zi3)*(3*(zr2))-(2*zr3+1)*(3*zi2);
+        zr=nr/den; zi=ni/den;
+        // Find closest root
+        for(let ri=0;ri<3;ri++){
+          if(Math.hypot(zr-ROOTS[ri].r,zi-ROOTS[ri].i)<.0001){whichRoot=ri;break;}
+        }
+        if(whichRoot>=0)break;
+      }
+      const shade=Math.max(0,1-n/maxIt);
+      const rc=whichRoot>=0?RCOLS[whichRoot]:[0,0,0];
+      const [pr,pg,pb]=PALS_RGB[currentPal](shade);
+      const idx=(dy*W+px)*4;
+      id.data[idx]  =rc[0]*pr|0; id.data[idx+1]=rc[1]*pg|0;
+      id.data[idx+2]=rc[2]*pb|0; id.data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(id,0,newRow);
+  newRow=(newRow+ROWS)%H;
+}
+
+// ── 14 BÉNARD CONVECTION ─────────────────────────────────────────
+let benPts=[];
+function init14(){
+  benPts=[]; const n=500;
+  for(let i=0;i<n;i++) benPts.push({x:Math.random()*W,y:Math.random()*H,T:Math.random(),vx:0,vy:0});
+}
+function step14(){
+  ctx.fillStyle='rgba(4,2,12,.06)'; ctx.fillRect(0,0,W,H);
+  // Convection: hot particles (T>0.5) rise, cold sink; horizontal repulsion creates cells
+  for(let i=0;i<benPts.length;i++){
+    const p=benPts[i];
+    let fx=0,fy=p.T>.5?-.8:.8; // buoyancy
+    for(let j=0;j<benPts.length;j+=6){
+      const o=benPts[j]; if(o===p)continue;
+      const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy);
+      if(d<40&&d>0){fx+=dx/(d*d)*12;fy+=dy/(d*d)*6;}
+    }
+    p.vx=(p.vx+fx*.04)*.9; p.vy=(p.vy+fy*.04)*.9;
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    if(p.y<5)   {p.y=5;  p.vy*=-1;p.T=Math.max(0,p.T-.01);}
+    if(p.y>H-5) {p.y=H-5;p.vy*=-1;p.T=Math.min(1,p.T+.01);}
+    const f=p.T; const [r,g,b]=PALS_RGB[currentPal](f);
+    ctx.fillStyle=`rgba(${r},${g},${b},.7)`; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+  }
+  // Hot/cold border lines
+  ctx.fillStyle=PALS_CSS[currentPal](1); ctx.fillRect(0,0,W,3);
+  ctx.fillStyle=PALS_CSS[currentPal](0); ctx.fillRect(0,H-3,W,3);
+}
+
+// ── 15 HOPF FIBRATION ────────────────────────────────────────────
+let hopfAngle=0, hopfFibers=[];
+function init15(){
+  hopfFibers=[]; hopfAngle=0;
+  // Sample points on S² (η levels and ξ angles)
+  for(let eta=.1;eta<Math.PI/2-.05;eta+=.2){
+    for(let xi=0;xi<Math.PI*2;xi+=.3){
+      hopfFibers.push({eta,xi,pts:[]});
+    }
+  }
+}
+function step15(){
+  ctx.fillStyle='rgba(4,2,12,.04)'; ctx.fillRect(0,0,W,H);
+  hopfAngle+=.006;
+  const sc=Math.min(W,H)*.22;
+
+  for(const fib of hopfFibers){
+    fib.pts=[];
+    for(let t=0;t<Math.PI*2;t+=.08){
+      // Hopf fiber parametrization on S³
+      const e=fib.eta, x1=fib.xi, t2=t;
+      const p=[Math.cos(e)*Math.cos(t2), Math.cos(e)*Math.sin(t2), Math.sin(e)*Math.cos(x1+t2), Math.sin(e)*Math.sin(x1+t2)];
+      // Stereographic projection S³ → R³ (avoiding w→1)
+      const denom=1-p[3]+.001;
+      const X=p[0]/denom, Y=p[1]/denom, Z=p[2]/denom;
+      // Rotate + project R³ → R²
+      const cosH=Math.cos(hopfAngle), sinH=Math.sin(hopfAngle);
+      const rx=X*cosH-Z*sinH, rz=X*sinH+Z*cosH;
+      const cosV=.35, sinV=.93; // fixed tilt
+      const fy=Y*cosV-rz*sinV;
+      const fz=Y*sinV+rz*cosV;
+      const perspective=1/(1+fz*.3+.01);
+      fib.pts.push([W/2+rx*sc*perspective, H/2-fy*sc*perspective, fz]);
+    }
+    if(fib.pts.length<2)continue;
+    // Color by eta value
+    const f=fib.eta/(Math.PI/2);
+    for(let j=1;j<fib.pts.length;j++){
+      const depth=(fib.pts[j][2]+3)/6; const alpha=.05+Math.max(0,depth)*.4;
+      ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.globalAlpha=alpha; ctx.lineWidth=.7;
+      ctx.beginPath(); ctx.moveTo(fib.pts[j-1][0],fib.pts[j-1][1]); ctx.lineTo(fib.pts[j][0],fib.pts[j][1]); ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+}
+
+// ── 16 BARNSLEY FERN ─────────────────────────────────────────────
+let bfX=0, bfY=0, bfPts=[];
+function init16(){ bfX=0; bfY=0; bfPts=[]; }
+function step16(){
+  ctx.fillStyle='rgba(4,2,12,.02)'; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<4000;i++){
+    const r=Math.random();
+    let nx,ny;
+    if(r<.01){nx=0;ny=.16*bfY;}
+    else if(r<.86){nx=.85*bfX+.04*bfY; ny=-.04*bfX+.85*bfY+1.6;}
+    else if(r<.93){nx=.2*bfX-.26*bfY; ny=.23*bfX+.22*bfY+1.6;}
+    else{nx=-.15*bfX+.28*bfY; ny=.26*bfX+.24*bfY+.44;}
+    bfX=nx; bfY=ny;
+    const px=W*.5+bfX*(W*.09);
+    const py=H*.97-bfY*(H*.09);
+    if(px>0&&px<W&&py>0&&py<H){
+      const f=Math.min(1,Math.max(0,bfY/10));
+      const [r2,g,b]=PALS_RGB[currentPal](f);
+      ctx.fillStyle=`rgba(${r2},${g},${b},.4)`; ctx.fillRect(px,py,1.2,1.2);
+    }
+  }
+}
+
+// ── 17 FIBONACCI SPIRAL ──────────────────────────────────────────
+let fibN=0, fibMax=1600;
+function init17(){ fibN=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
+function step17(){
+  ctx.fillStyle='rgba(4,2,12,.01)'; ctx.fillRect(0,0,W,H);
+  const GOLDEN=137.508*(Math.PI/180);
+  const cx=W/2, cy=H/2, scale=Math.min(W,H)*.008;
+  const addN=Math.min(20,fibMax-fibN);
+  for(let k=0;k<addN;k++){
+    const n=fibN+k;
+    const r=Math.sqrt(n)*scale;
+    const theta=n*GOLDEN;
+    const x=cx+r*Math.cos(theta), y=cy+r*Math.sin(theta);
+    const f=n/fibMax; const [rr,g,b]=PALS_RGB[currentPal](f);
+    const radius=Math.max(.8,1.8*(1-n/fibMax)+.5);
+    ctx.fillStyle=`rgba(${rr},${g},${b},.85)`; ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill();
+  }
+  fibN+=addN; if(fibN>=fibMax)fibN=0;
+}
+
+// ── 18 BELOUSOV-ZHABOTINSKY ──────────────────────────────────────
+let bzU=null,bzV=null,bzBW=0,bzBH=0;
+const BZ_SCALE=4;
+function init18(){
+  bzBW=W/BZ_SCALE|0; bzBH=H/BZ_SCALE|0;
+  bzU=new Float32Array(bzBW*bzBH); bzV=new Float32Array(bzBW*bzBH);
+  // Init with random activator + a spiral seed
+  for(let i=0;i<bzBW*bzBH;i++){bzU[i]=1;bzV[i]=0;}
+  // Spiral seed
+  for(let y=bzBH*.3;y<bzBH*.7;y++)for(let x=bzBW*.3;x<bzBW*.7;x++){
+    bzU[y*bzBW+x|0]=Math.random(); bzV[y*bzBW+x|0]=Math.random();
+  }
+}
+function step18(){
+  const Du=.16,Dv=.08,F=.035,k=.065;
+  const nu=new Float32Array(bzBW*bzBH), nv=new Float32Array(bzBW*bzBH);
+  for(let y=1;y<bzBH-1;y++)for(let x=1;x<bzBW-1;x++){
+    const idx=y*bzBW+x;
+    const lapU=bzU[idx-1]+bzU[idx+1]+bzU[idx-bzBW]+bzU[idx+bzBW]-4*bzU[idx];
+    const lapV=bzV[idx-1]+bzV[idx+1]+bzV[idx-bzBW]+bzV[idx+bzBW]-4*bzV[idx];
+    const uvv=bzU[idx]*bzV[idx]*bzV[idx];
+    nu[idx]=bzU[idx]+Du*lapU-uvv+F*(1-bzU[idx]);
+    nv[idx]=bzV[idx]+Dv*lapV+uvv-(F+k)*bzV[idx];
+    nu[idx]=Math.max(0,Math.min(1,nu[idx])); nv[idx]=Math.max(0,Math.min(1,nv[idx]));
+  }
+  bzU=nu; bzV=nv;
+  // Render
+  const id=ctx.createImageData(W,H);
+  for(let y=0;y<bzBH;y++)for(let x=0;x<bzBW;x++){
+    const u=bzU[y*bzBW+x], v=bzV[y*bzBW+x];
+    const f=Math.max(0,Math.min(1,u-v*.5+.3));
+    const [r,g,b]=PALS_RGB[currentPal](f);
+    for(let dy=0;dy<BZ_SCALE;dy++)for(let dx=0;dx<BZ_SCALE;dx++){
+      const px=(y*BZ_SCALE+dy)*W+(x*BZ_SCALE+dx);
+      const idx=px*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(id,0,0);
+}
+
+// ── 19 SCHRÖDINGER WAVE ──────────────────────────────────────────
+let schT=0, schSources=[];
+function init19(){
+  schT=0; schSources=[];
+  for(let i=0;i<3;i++) schSources.push({
+    x:W*(.3+Math.random()*.4), y:H*(.3+Math.random()*.4),
+    kx:(Math.random()-.5)*4, ky:(Math.random()-.5)*4,
+    sig:50+Math.random()*30, omega:2+Math.random()*2
+  });
+}
+function step19(){
+  schT+=.04;
+  const id=ctx.createImageData(W,H);
+  for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){
+    let psiR=0,psiI=0;
+    for(const src of schSources){
+      const dx=x-src.x,dy=y-src.y;
+      const r2=dx*dx+dy*dy;
+      const env=Math.exp(-r2/(2*src.sig*src.sig*(1+schT*.3)));
+      const phase=src.kx*dx+src.ky*dy-src.omega*schT;
+      psiR+=env*Math.cos(phase); psiI+=env*Math.sin(phase);
+    }
+    const prob=Math.min(1,(psiR*psiR+psiI*psiI)/3);
+    const phase=Math.atan2(psiI,psiR)/Math.PI*.5+.5;
+    const [r,g,b]=PALS_RGB[currentPal](phase);
+    for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
+      const idx=((y+dy)*W+(x+dx))*4;
+      id.data[idx]=r*prob|0; id.data[idx+1]=g*prob|0;
+      id.data[idx+2]=b*prob|0; id.data[idx+3]=200;
+    }
+  }
+  ctx.putImageData(id,0,0);
+}
+
+// ── 20 RULE 110 ──────────────────────────────────────────────────
+let r110Grid=null,r110Row=0,r110GW=0;
+function init20(){
+  r110GW=W; r110Row=0;
+  r110Grid=new Uint8Array(r110GW);
+  r110Grid[r110GW>>1]=1;
+  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+}
+function step20(){
+  // Scroll up
+  if(r110Row>=H){
+    ctx.drawImage(canvas,0,1,W,H-1,0,0,W,H-1);
+    ctx.fillStyle='#04020c'; ctx.fillRect(0,H-1,W,1);
+    r110Row=H-1;
+    // Advance one automaton row
+    const ng=new Uint8Array(r110GW);
+    const RULE110=0b01101110;
+    for(let x=0;x<r110GW;x++){
+      const l=r110Grid[(x-1+r110GW)%r110GW];
+      const c=r110Grid[x];
+      const r=r110Grid[(x+1)%r110GW];
+      const pattern=(l<<2)|(c<<1)|r;
+      ng[x]=(RULE110>>pattern)&1;
+    }
+    r110Grid=ng;
+    for(let x=0;x<r110GW;x++){
+      if(r110Grid[x]){
+        const f=x/r110GW;
+        const [rr,g,b]=PALS_RGB[currentPal](f);
+        ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,H-1,1,1);
+      }
+    }
+  } else {
+    const ng=new Uint8Array(r110GW);
+    const RULE110=0b01101110;
+    for(let x=0;x<r110GW;x++){
+      const l=r110Grid[(x-1+r110GW)%r110GW];
+      const c=r110Grid[x];
+      const r=r110Grid[(x+1)%r110GW];
+      const pattern=(l<<2)|(c<<1)|r;
+      ng[x]=(RULE110>>pattern)&1;
+    }
+    r110Grid=ng;
+    for(let x=0;x<r110GW;x++){
+      if(r110Grid[x]){
+        const f=x/r110GW;
+        const [rr,g,b]=PALS_RGB[currentPal](f);
+        ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,r110Row,1,1);
+      }
+    }
+    r110Row++;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// METADATOS DE LAS 20 OBRAS
+// ═══════════════════════════════════════════════════════════════════
+const ARTWORKS=[
+  {badge:"01",mini:"Atractor de Lorenz",cat:"TEORÍA DEL CAOS · 1963",solver:"RK4 Integrator",
+   title:"El Vuelo de Lorenz",sub:"El aleteo que gobierna el infinito",
+   eq:"dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
+   hist:"En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora. Aquella millonésima desató un tornado y demostró que sistemas perfectamente deterministas pueden ser perpetuamente impredecibles.",
+   poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás. Cada decisión ínfima abre una órbita completamente nueva en el tejido del universo."',
+   hint:"Arrastra para rotar el atractor en 3D"},
+  {badge:"02",mini:"Von Mises",cat:"MECÁNICA CONTINUA · 1913",solver:"Cardano Eigensolver",
+   title:"El Umbral de la Materia",sub:"Donde el dolor se vuelve luz",
+   eq:"σ_v = √((σ₁-σ₂)²+(σ₂-σ₃)²+(σ₃-σ₁)²)/√2",
+   hist:"En 1913, Richard von Mises encontró el límite exacto donde un metal cede plásticamente para siempre bajo carga. Su criterio formuló la energía de distorsión con precisión geométrica.",
+   poem:'"La materia resiste hasta que la tensión interna ya no cabe en sus átomos. Azul donde descansa, fuego donde sostiene el peso del mundo."',
+   hint:"Mueve el cursor para deformar la tela elástica"},
+  {badge:"03",mini:"Yoshida Péndulo",cat:"HAMILTONIANO · 1990",solver:"Symplectic 4th Order",
+   title:"La Danza de Yoshida",sub:"La memoria que el tiempo jamás disuelve",
+   eq:"z_{n+1}=exp(c_i·Δt·D_A)·exp(d_i·Δt·D_B)·z_n",
+   hist:"En 1990, Haruo Yoshida descubrió coeficientes analíticos de 4º orden que preservan la energía exacta de cualquier sistema hamiltoniano sin perder jamás un julio.",
+   poem:'"Dos cuerpos bailan al borde del abismo, sin motor ni fricción. Es la música pura de la conservación: lo que nació con energía seguirá cantando por la eternidad."',
+   hint:"Observa las cintas de fase: energía conservada al 100%"},
+  {badge:"04",mini:"Ríos de Clifford",cat:"ÁLGEBRA DIFERENCIAL · 1873",solver:"Dual Numbers Autodiff",
+   title:"Los Ríos Invisibles",sub:"La sombra que revela el gradiente sin error",
+   eq:"f(x+d·ε) = f(x) + d·f'(x)·ε  donde ε²=0",
+   hist:"William Clifford inventó en 1873 un número infinitesimal ε cuyo cuadrado es cero exacto, permitiendo calcular derivadas analíticas sin error de truncamiento.",
+   poem:'"Corrientes subterráneas que horadan la roca en silencio. Las partículas siguen el gradiente sin dudar, tejiendo auroras en las laderas del potencial."',
+   hint:"Líneas de corriente analíticas sin error de truncamiento"},
+  {badge:"05",mini:"Cantos de Chladni",cat:"CIMÁTICA · 1787",solver:"Helmholtz Standing Wave",
+   title:"Los Cantos de Chladni",sub:"La arquitectura que el sonido dibuja en el silencio",
+   eq:"w(x,y)=sin(nπx/L)sin(mπy/L)-sin(mπx/L)sin(nπy/L)=0",
+   hist:"En 1787, Ernst Chladni pasó un arco de violín por una placa metálica con arena fina. El sonido expulsó a la arena hacia las líneas nodales de reposo, revelando mandalas perfectos.",
+   poem:'"El silencio no es vacío; es el punto donde las ondas opuestas se abrazan y se anulan, permitiendo que la arena del mundo descanse en geometría sagrada."',
+   hint:"Mueve el mouse para cambiar los armónicos (m,n) de la placa"},
+  {badge:"06",mini:"Telar de Turing",cat:"MORFOGÉNESIS · 1952",solver:"Reaction-Diffusion PDE",
+   title:"El Telar de Turing",sub:"Cómo el leopardo tejió sus manchas en el caos",
+   eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v",
+   hist:"En su último artículo antes de morir en 1952, Alan Turing demostró que dos sustancias químicas simples, difundiéndose a velocidades desiguales, bastan para generar todas las manchas de los felinos.",
+   poem:'"La vida no necesitó un pincel: solo dos moléculas jugando a perseguirse durante eones, tejiendo corales y pieles en el tiempo."',
+   hint:"Haz clic en el canvas para sembrar nuevos núcleos de morfogénesis"},
+  {badge:"07",mini:"Cinta de Rössler",cat:"TOPOLOGÍA CAÓTICA · 1976",solver:"Smale Horseshoe Attractor",
+   title:"La Cinta del Panadero",sub:"El espacio que se amasa a sí mismo sin romperse",
+   eq:"dx/dt=-y-z\ndy/dt=x+0.2y\ndz/dt=0.2+z(x-5.7)",
+   hist:"Otto Rössler diseñó en 1976 el atractor caótico más simple: un espiral suave que de pronto se dispara y se pliega sobre sí mismo, exactamente como el panadero amasa la masa.",
+   poem:'"El tiempo es una cinta de seda que el universo estira y dobla, devolviéndonos siempre al mismo origen pero en una octava más alta."',
+   hint:"Arrastra para contemplar el pliegue 3D de Rössler"},
+  {badge:"08",mini:"Esferas de Apolonio",cat:"FRACTAL CLÁSICO · 200 a.C.",solver:"Descartes Circle Theorem",
+   title:"Las Esferas de Apolonio",sub:"La infinita compañía que llena todo vacío",
+   eq:"(k₁+k₂+k₃+k₄)²=2(k₁²+k₂²+k₃²+k₄²)\nk=1/r",
+   hist:"Apolonio de Pérgamo y Descartes en 1643 demostraron que siempre existen exactamente dos círculos que tocan a tres dados, permitiendo empacar infinitas esferas en cualquier vacío.",
+   poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera. El vacío nunca está solo: es una puerta abierta hacia el infinito que nos abraza."',
+   hint:"Observa el fractal de curvatura girando suavemente"},
+  {badge:"09",mini:"Conjuntos de Julia",cat:"GEOMETRÍA COMPLEJA · 1918",solver:"Smooth Escape Coloring",
+   title:"El Espejo de Julia",sub:"Universos infinitos desde una ecuación cuadrática",
+   eq:"z_{n+1} = z_n² + c\n|c| = 0.7885 (órbita lenta)",
+   hist:"Gaston Julia, con 25 años y sin nariz (la perdió en la guerra), escribió 200 páginas a mano describiendo imágenes que nunca pudo ver. Murió sin saber lo que había creado.",
+   poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles. Cada valor del parámetro c es un cosmos completo que jamás volvió a repetirse."',
+   hint:"Observa cómo el conjunto muta al orbitar el parámetro c"},
+  {badge:"10",mini:"Hormiga de Langton",cat:"AUTÓMATA CELULAR · 1986",solver:"Deterministic CA Rule",
+   title:"La Autopista del Caos",sub:"El orden que nace espontáneamente de dos reglas",
+   eq:"Blanco→girar_derecha+pintar_negro\nNegro→girar_izquierda+pintar_blanco",
+   hist:"La Hormiga de Langton produce puro caos por 10.000 pasos. En el paso 10.001, de forma completamente inesperada, comienza a construir una autopista periódica infinita sin que nadie se lo dijera.",
+   poem:'"El orden no necesita arquitecto: solo necesita suficiente tiempo perdido en el caos. La autopista emerge cuando nadie la espera."',
+   hint:"Observa el momento exacto en que el caos construye orden perfecto"},
+  {badge:"11",mini:"Solitones KdV",cat:"ONDAS NO LINEALES · 1834",solver:"Analytical 1-Soliton Formula",
+   title:"La Ola Eterna",sub:"La onda que viaja para siempre sin deformarse",
+   eq:"u(x,t) = -2k² · sech²(k(x - 4k²t))\nutₓₓₓ + 6uuₓ + uₜ = 0",
+   hist:"John Scott Russell vio en 1834 una ola de canal viajar millas sin dispersarse. La física oficial lo ignoró por 130 años. Zabusky y Kruskal le dieron la razón en 1965: existen ondas que viajan solas por la eternidad.",
+   poem:'"Hay personas que, como estas olas, cruzan cada tormenta sin perder su forma. Colisionan, se atraviesan como fantasmas y salen intactas al otro lado."',
+   hint:"Observa las olas colisionar y salir intactas"},
+  {badge:"12",mini:"Voronoi",cat:"GEOMETRÍA DE LA JUSTICIA · 1908",solver:"Dirichlet Tessellation",
+   title:"La Piel de la Jirafa",sub:"La partición más justa del espacio",
+   eq:"Cel(sᵢ) = {x ∈ ℝⁿ : d(x,sᵢ) ≤ d(x,sⱼ) ∀j≠i}",
+   hist:"Georgy Voronoi describió la partición perfecta del espacio: cada región contiene todos los puntos más cercanos a su semilla. Sin saber nada de biología, describió la piel de la jirafa, el ojo de mosca y las galaxias.",
+   poem:'"La naturaleza divide el mundo de la forma más justa: a cada semilla, todo lo que está más cerca de ella. El ojo de la mosca lo sabía antes que Voronoi."',
+   hint:"Las semillas se mueven; el espacio se redistribuye en tiempo real"},
+  {badge:"13",mini:"Fractal de Newton",cat:"CUENCAS DE ATRACCIÓN · 1669",solver:"Newton's Method z³-1",
+   title:"Los Ríos de Newton",sub:"Las fronteras del camino más corto a la verdad",
+   eq:"z_{n+1} = (2z³+1)/(3z²)\nf(z) = z³-1 en ℂ",
+   hist:"Newton inventó el método para encontrar raíces de ecuaciones. En el plano complejo, la frontera entre los territorios de cada raíz no es una línea limpia: es un fractal de infinita complejidad.",
+   poem:'"Incluso Newton, que inventó el camino más corto a la verdad, jamás pudo saber qué camino tomará el caos para llegar a ella."',
+   hint:"El fractal se construye progresivamente: cada banda es una nueva frontera"},
+  {badge:"14",mini:"Celdas de Bénard",cat:"CONVECCIÓN TÉRMICA · 1900",solver:"Thermal Buoyancy Simulation",
+   title:"Las Celdas del Sol",sub:"Los hexágonos que el calor dibuja sin querer",
+   eq:"Ra = gαΔTL³/(νκ) > Ra_crit ≈ 1708\nNaturally-emergent hexagonal convection",
+   hist:"Henri Bénard calentó aceite en una bandeja y descubrió que al superar un umbral crítico, el fluido se autoorganizaba en hexágonos perfectos: las mismas formas del panal, la superficie del Sol y los desiertos de piedra.",
+   poem:'"El calor no destruye el orden: lo fabrica, siempre en hexágonos, porque esa es la forma más eficiente que el universo conoce."',
+   hint:"Partículas calientes suben (arriba), frías bajan (abajo): convección natural"},
+  {badge:"15",mini:"Fibración de Hopf",cat:"TOPOLOGÍA 4D · 1931",solver:"Stereographic S³→R³ Projection",
+   title:"La Danza de los Cuatro Mundos",sub:"La esfera de cuatro dimensiones proyectada en luz",
+   eq:"π: S³→S² · Fibras: (η,ξ₁,ξ₂)→círculos de S³\n(x₁,x₂,x₃,x₄)→(x₁,x₂,x₃)/(1-x₄)",
+   hist:"Heinz Hopf demostró en 1931 que la esfera 4D puede desmontarse en círculos perfectos que se entrelazan sin cortarse jamás, de una forma imposible en tres dimensiones.",
+   poem:'"Hay dimensiones que no podemos ver pero cuya sombra, al caer sobre nuestra realidad, es la forma más hermosa que jamás imaginamos."',
+   hint:"Anillos 4D entrelazados proyectados a 3D; giran continuamente"},
+  {badge:"16",mini:"Helecho de Barnsley",cat:"SISTEMAS IFS · 1988",solver:"Chaos Game 4-Transform IFS",
+   title:"El Juego del Caos",sub:"El orden perfecto que emerge del azar puro",
+   eq:"f₁: [0,0;0,.16] p=0.01 · f₂: [.85,.04;-.04,.85] p=0.85\nf₃: [.2,-.26;.23,.22] p=0.07 · f₄: [-.15,.28;.26,.24] p=0.07",
+   hist:"Michael Barnsley demostró en 1988 que cuatro transformaciones aleatorias con probabilidades exactas convergen siempre al mismo fractal: un helecho perfecto. El azar puro, bien encauzado, construye orden biológico.",
+   poem:'"Tres instrucciones simples y un dado bastan para dibujar la misma hoja de helecho que la naturaleza tardó millones de años en diseñar."',
+   hint:"4000 puntos aleatorios por frame convergiendo al helecho de Barnsley"},
+  {badge:"17",mini:"Espiral de Fibonacci",cat:"FILOTAXIS ÁUREA · 1202",solver:"Golden Angle Phyllotaxis",
+   title:"Las Flores del Girasol",sub:"La ley secreta del crecimiento de las plantas",
+   eq:"θₙ = n · 137.508°  (ángulo áureo)\nrₙ = c√n",
+   hist:"En 1202, Fibonacci contó conejos. Nadie imaginó que su secuencia 1,1,2,3,5,8... aparecería 800 años después en las semillas del girasol, piñón, caracol y galaxias espirales.",
+   poem:'"La flor no sabe matemáticas: solo crece de la forma más eficiente posible. En esa eficiencia está la belleza más antigua del universo."',
+   hint:"Cada semilla se planta en el ángulo áureo exacto (137.508°)"},
+  {badge:"18",mini:"Belousov-Zhabotinsky",cat:"OSCILACIÓN QUÍMICA · 1951",solver:"Gray-Scott Reaction-Diffusion",
+   title:"Las Espirales Químicas",sub:"El latido del universo en un tubo de ensayo",
+   eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v",
+   hist:"En 1951, Belousov descubrió una reacción que pulsaba sola entre rojo y azul. Sus colegas la rechazaron por 'imposible'. Era correcta: el corazón humano late usando el mismo mecanismo.",
+   poem:'"El corazón late usando la misma ecuación que Belousov descubrió en un tubo de ensayo. Cada latido tuyo es una reacción química que se negó a detenerse."',
+   hint:"Espirales químicas vivas; haz clic para sembrar nuevos focos de oscilación"},
+  {badge:"19",mini:"Onda de Schrödinger",cat:"MECÁNICA CUÁNTICA · 1926",solver:"Gaussian Wavepacket Analytical",
+   title:"El Colapso de la Ola Cuántica",sub:"La probabilidad que pinta el universo antes de ser observado",
+   eq:"iℏ ∂ψ/∂t = -ℏ²/2m ∇²ψ + Vψ\n|ψ(x,t)|² = densidad de probabilidad",
+   hist:"En 1926, Schrödinger escribió la ecuación que describe la probabilidad de encontrar un electrón. La solución es una ola que existe en todas partes simultáneamente hasta que alguien la observa.",
+   poem:'"Antes de ser mirado, el electrón existe en todos los lugares a la vez. Lo mismo ocurre con las decisiones no tomadas: existen como olas hasta que elegimos."',
+   hint:"Tres paquetes gaussianos interfiriendo en el espacio cuántico"},
+  {badge:"20",mini:"Regla 110",cat:"COMPUTACIÓN UNIVERSAL · 1983",solver:"Wolfram Turing-Complete CA",
+   title:"El Laberinto Perfecto",sub:"El programa más simple que puede calcular todo",
+   eq:"Regla 110: 111→0 · 110→1 · 101→1 · 100→0\n011→1 · 010→1 · 001→1 · 000→0",
+   hist:"Wolfram estudió 256 autómatas celulares de 1D. La Regla 110 resultó ser Turing-completa: con una sola regla de tres vecinos, puede calcular cualquier cosa que una computadora pueda calcular.",
+   poem:'"Una sola celda negra en un mar blanco. Una sola regla. Y de eso nace todo lo que una mente puede imaginar o calcular en el universo."',
+   hint:"Una celda inicial genera un patrón computacionalmente universal"},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// ORQUESTACIÓN
+// ═══════════════════════════════════════════════════════════════════
+const INITS =[init01,init02,init03,init04,init05,init06,init07,init08,init09,init10,init11,init12,init13,init14,init15,init16,init17,init18,init19,init20];
+const STEPS =[step01,step02,step03,step04,step05,step06,step07,step08,step09,step10,step11,step12,step13,step14,step15,step16,step17,step18,step19,step20];
+
+function togglePalette(){ currentPal=(currentPal+1)%4; restartArtwork(); }
+
+function selectArtwork(idx){
+  currentArt=idx;
+  const d=ARTWORKS[idx];
+  document.getElementById('badge').textContent='OBRA '+d.badge;
+  document.getElementById('title-mini').textContent=d.mini;
+  document.getElementById('category').textContent=d.cat;
+  document.getElementById('solver').textContent=d.solver;
+  document.getElementById('art-title').textContent=d.title;
+  document.getElementById('art-sub').textContent=d.sub;
+  document.getElementById('art-eq').innerHTML=d.eq.replace(/\n/g,'<br>');
+  document.getElementById('art-hist').textContent=d.hist;
+  document.getElementById('art-poem').textContent=d.poem;
+  document.getElementById('hint').textContent=d.hint;
+  document.querySelectorAll('#catalog-grid > div').forEach((c,i)=>{
+    c.classList.toggle('border-purple-500/50',i===idx);
+    c.classList.toggle('bg-purple-900/15',i===idx);
+  });
+  restartArtwork();
+}
+
+function restartArtwork(){
+  cancelAnimationFrame(animId);
+  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+  INITS[currentArt]();
+  loop();
+}
+
+function loop(){
+  STEPS[currentArt]();
+  animId=requestAnimationFrame(loop);
+}
+
+// Mouse / touch
+canvas.addEventListener('mousedown',e=>{
+  isDrag=true; dragX=e.clientX; dragY=e.clientY; mouseDown=true;
+  const r=canvas.getBoundingClientRect(); mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
+  if(currentArt===5){ tAgents.push({x:mouseX,y:mouseY,angle:Math.random()*Math.PI*2,sp:0,pts:[]}); }
+  if(currentArt===17){ bzU&&(()=>{const bx=mouseX/BZ_SCALE|0,by=mouseY/BZ_SCALE|0; for(let dy=-4;dy<5;dy++)for(let dx=-4;dx<5;dx++){const idx=(by+dy)*bzBW+(bx+dx); if(idx>=0&&idx<bzU.length){bzU[idx]=.5;bzV[idx]=.25;}}})(); }
+});
+window.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect(); mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
+  if(currentArt===4){ chM=Math.max(1,Math.min(8,Math.floor((mouseX/r.width)*8)+1)); chN=Math.max(1,Math.min(8,Math.floor((mouseY/r.height)*8)+1)); }
+  if(!isDrag)return;
+  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=(e.clientX-dragX)*.005; lRotX+=(e.clientY-dragY)*.005; rRot+=(e.clientX-dragX)*.005; }
+  dragX=e.clientX; dragY=e.clientY;
+});
+window.addEventListener('mouseup',()=>{ isDrag=false; mouseDown=false; });
+canvas.addEventListener('touchstart',e=>{
+  const t=e.touches[0]; isDrag=true; dragX=t.clientX; dragY=t.clientY; mouseDown=true;
+  const r=canvas.getBoundingClientRect(); mouseX=t.clientX-r.left; mouseY=t.clientY-r.top;
+},{passive:true});
+window.addEventListener('touchmove',e=>{
+  const t=e.touches[0]; const r=canvas.getBoundingClientRect(); mouseX=t.clientX-r.left; mouseY=t.clientY-r.top;
+  if(!isDrag)return;
+  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=(t.clientX-dragX)*.005; lRotX+=(t.clientY-dragY)*.005; rRot+=(t.clientX-dragX)*.005; }
+  dragX=t.clientX; dragY=t.clientY;
+},{passive:true});
+window.addEventListener('touchend',()=>{ isDrag=false; mouseDown=false; });
+
+function downloadArtwork(){
+  const a=document.createElement('a');
+  a.download=`Atelier_${ARTWORKS[currentArt].title.replace(/\s+/g,'_')}_Timonel.png`;
+  a.href=canvas.toDataURL('image/png'); a.click();
+}
+
+// ── Construir catálogo en el DOM ──────────────────────────────────
+function buildCatalog(){
+  const grid=document.getElementById('catalog-grid');
+  ARTWORKS.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='glass glow rounded-xl p-3 cursor-pointer transition transform hover:-translate-y-0.5 relative group';
+    el.innerHTML=`
+      <div class="flex justify-between items-center text-[9px] text-slate-400 mono mb-1.5">
+        <span>OBRA ${d.badge}</span>
+      </div>
+      <h3 class="serif font-bold text-white text-sm mb-0.5 group-hover:text-purple-300 transition leading-tight">${d.title}</h3>
+      <div class="text-[10px] mono text-cyan-400/70 mt-1.5 truncate">${d.cat.split('·')[0].trim()}</div>`;
+    el.onclick=()=>selectArtwork(i);
+    grid.appendChild(el);
+  });
+}
+
+window.addEventListener('resize',()=>{ resize(); restartArtwork(); });
+resize();
+buildCatalog();
+selectArtwork(0);
+</script>
+</body>
+</html>

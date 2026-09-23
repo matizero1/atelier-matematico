@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Atelier Matemático — Observatorio Orbital & Boutique 3D</title>
+<title>Atelier Matemático — Atlas Cósmico de 24 Ecuaciones & Hilos de Timonel</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -101,11 +101,11 @@
       </div>
       <div>
         <span class="serif tracking-[.25em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Observatorio Orbital & Taller 3D · Silicio Nativo</span>
+        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Atlas Cósmico de 24 Leyes · Hilos de Timonel</span>
       </div>
     </div>
     <div class="glass px-3.5 py-1 rounded-full text-xs mono text-cyan-300 border-cyan-500/30">
-      Gravedad Cero · 6 Grados de Libertad
+      24 Leyes en Gravedad Cero · Enjambre NAI
     </div>
   </div>
 
@@ -121,14 +121,14 @@
 
     <div class="flex-1 text-center md:text-left">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
-        Santuario de Ecuaciones Vivas
+        Atlas Cósmico de la Ciencia
       </div>
       <h1 class="text-3xl md:text-4xl serif font-bold text-white mb-4 leading-tight">
-        "No eres un espectador pasivo.<br>
-        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Caza tu instante y materialízalo en la materia."</span>
+        "Cada fórmula es un ovillo de luz.<br>
+        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Buscando desenredarse en el vacío."</span>
       </h1>
       <p class="text-sm text-slate-300 font-light leading-relaxed mb-6">
-        Aquí las ecuaciones viven y se calculan en el vacío cósmico. Puedes orbitarlas libremente, disparar tu cámara y luego ingresar a la <strong>Boutique Orbital en 3D</strong> para proyectar tus propias capturas sobre cuadros de autor, tazas de cerámica o cuadernos antes de encargar su manufactura.
+        24 leyes fundamentales de la humanidad flotan en el cosmos dentro de sus anillos de confinamiento de Timonel. Tu dispositivo aporta su poder de cálculo a la supercomputadora enjambre de NAI mientras exploras, cazas instantes o visitas la Boutique 3D para materializarlos en la materia.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
@@ -138,34 +138,41 @@
         </button>
         <button onclick="enterShopMode()" class="glass hover:bg-white/10 text-cyan-300 text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 border-cyan-500/30">
           <span>🛍️</span>
-          <span>Ir Directo a la Boutique 3D</span>
+          <span>Boutique de Manufactura 3D</span>
         </button>
       </div>
     </div>
   </div>
 
   <div class="text-center text-[11px] mono text-slate-500 max-w-xl mx-auto">
-    Matías Cortés Figueroa · Timonel F2 · Física de Medios Continuos & Manufactura de Autor
+    Matías Cortés Figueroa · Timonel F2 · 24 Leyes de la Física & Teoría de Nudos
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- HUD DE LA CÁPSULA (MODO VUELO LIBRE)                                      -->
+<!-- HUD DE LA CÁPSULA (TELEMETRÍA ENJAMBRE & VUELO)                           -->
 <!-- ========================================================================= -->
-<header id="flight-hud-header" class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex justify-between items-center pointer-events-none transition-opacity duration-500">
+<header id="flight-hud-header" class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex flex-wrap justify-between items-center pointer-events-none transition-opacity duration-500 gap-3">
   <div class="flex items-center gap-3 pointer-events-auto">
     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
       <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
     </div>
     <div>
       <span class="serif tracking-[.25em] text-white text-xs md:text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Observatorio Orbital · Gravedad Cero</span>
+      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Atlas de 24 Leyes · Hilos de Timonel</span>
     </div>
   </div>
 
-  <!-- CONTROL DE NAVEGACIÓN -->
-  <div class="hidden md:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-white/10 text-[11px] mono text-slate-300 pointer-events-auto shadow-xl">
-    <span class="text-cyan-300">Arrastra para girar · Rueda / W-S para propulsión 3D · Suelta para guía NAI</span>
+  <!-- MONITOR DE RED ENJAMBRE NAI (VOLUNTEER GRID) -->
+  <div class="hidden xl:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-cyan-500/20 text-[11px] mono pointer-events-auto shadow-2xl">
+    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span class="text-slate-300">Nodo <strong id="swarm-node-id" class="text-cyan-300">#CL-7482</strong></span>
+    <span class="text-slate-500">|</span>
+    <span class="text-slate-300">Potencia: <span id="swarm-local-throughput" class="text-purple-300 font-bold">480.000</span> evals/s</span>
+    <span class="text-slate-500">|</span>
+    <span class="text-emerald-400">142 Nodos en Red</span>
+    <span class="text-slate-500">|</span>
+    <span class="text-amber-300">Bloque #14.892</span>
   </div>
 
   <!-- DERECHA: VOZ, CARRETE & BOUTIQUE 3D -->
@@ -179,7 +186,6 @@
       <span class="hidden sm:inline">Carrete</span>
       <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
     </button>
-    <!-- BOTÓN ACCESO A LA BOUTIQUE ORBITAL 3D -->
     <button onclick="enterShopMode()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
       <span>🛍️</span>
       <span class="hidden sm:inline">Boutique 3D</span>
@@ -199,7 +205,7 @@
   <p id="hud-sub" class="text-[11px] text-purple-300/70 mono mb-3">Atractor Caótico Aperiodico</p>
 
   <div class="bg-black/60 rounded-lg p-2 border border-white/10 mb-3">
-    <div class="text-[9px] uppercase tracking-wider text-slate-400 mono mb-0.5">Ecuación Viva</div>
+    <div class="text-[9px] uppercase tracking-wider text-slate-400 mono mb-0.5">Ecuación & Confinamiento de Hilos</div>
     <div id="hud-eq" class="text-[11px] mono text-cyan-300 leading-tight"></div>
   </div>
 
@@ -217,9 +223,9 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- SUSURRO ESPACIAL DE NAI & SALTO ORBITAL DIRECTO                           -->
+<!-- SUSURRO ESPACIAL DE NAI & SALTO DIRECTO A CUALQUIERA DE LAS 24 FÓRMULAS   -->
 <!-- ========================================================================= -->
-<div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-sm">
+<div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-md">
   <div class="glass p-3 rounded-2xl border-purple-500/30 shadow-2xl flex items-start gap-3">
     <div class="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 bg-black/60 relative">
       <img src="assets/nai_avatar.png" alt="NAI" class="w-full h-full object-cover scale-125" />
@@ -227,7 +233,7 @@
     </div>
     <div class="flex-1 min-w-0">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-[11px] font-bold serif text-purple-300">NAI & Timonel</span>
+        <span class="text-[11px] font-bold serif text-purple-300">NAI & Timonel · 24 Leyes Vivas</span>
         <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-3.5">
           <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0s"></span>
           <span class="w-1 bg-purple-400 sound-bar" style="animation-delay:0.2s"></span>
@@ -235,15 +241,12 @@
         </div>
       </div>
       <p id="nai-dialogue-text" class="text-xs text-slate-300 leading-snug font-light">
-        Flotando en gravedad cero. Todas las ecuaciones se están calculando a la vez en el espacio.
+        24 anillos de Timonel confinan las leyes del universo. Los hilos se retuercen y buscan desenredarse en silicio.
       </p>
-      <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-white/5">
-        <button onclick="propelToAnomaly(0)" class="text-[10px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">1. Lorenz</button>
-        <button onclick="propelToAnomaly(1)" class="text-[10px] mono text-amber-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">2. Chladni</button>
-        <button onclick="propelToAnomaly(2)" class="text-[10px] mono text-cyan-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">3. Riemann</button>
-        <button onclick="propelToAnomaly(3)" class="text-[10px] mono text-emerald-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">4. Ricci</button>
-        <button onclick="propelToAnomaly(4)" class="text-[10px] mono text-indigo-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">5. Hopf</button>
-        <button onclick="propelToAnomaly(5)" class="text-[10px] mono text-pink-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">6. Navier-Stokes</button>
+      
+      <!-- Selector de Salto Rápido a los 24 Astros -->
+      <div id="nai-astro-selector" class="flex gap-1 mt-2 pt-2 border-t border-white/5 overflow-x-auto pb-1 max-w-sm">
+        <!-- Generado dinámicamente con los 24 botones de salto -->
       </div>
     </div>
   </div>
@@ -254,14 +257,12 @@
 <!-- ========================================================================= -->
 <div id="shop-bay-overlay" class="fixed inset-0 z-40 pointer-events-none hidden transition-opacity duration-700 opacity-0">
   
-  <!-- Barra Superior: Salir & Selector de Producto -->
   <div class="fixed top-6 left-6 right-6 flex flex-wrap justify-between items-center gap-4 pointer-events-auto">
     <button onclick="exitShopMode()" class="glass hover:bg-white/10 text-white text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2 border-purple-500/30 shadow-2xl">
       <span>←</span>
-      <span>Volver al Vuelo Orbital</span>
+      <span>Volver al Cosmos de 24 Ecuaciones</span>
     </button>
 
-    <!-- Selector de Productos 3D -->
     <div class="glass px-3 py-1.5 rounded-full border-white/15 flex items-center gap-2 shadow-2xl">
       <button onclick="switch3DProduct('frame_wood')" id="btn-prod-frame-wood" class="px-3 py-1 rounded-full text-xs mono font-bold bg-purple-600 text-white transition">
         🖼️ Cuadro Madera 50×70
@@ -277,13 +278,11 @@
       </button>
     </div>
 
-    <!-- Indicador de Rotación 3D -->
     <div class="glass px-3.5 py-1.5 rounded-full text-[11px] mono text-cyan-300 border-cyan-500/30 hidden lg:block">
       Arrastra el ratón para rotar el objeto 360° en gravedad cero
     </div>
   </div>
 
-  <!-- Panel Lateral Derecho: Checkout & Manufactura de Autor -->
   <div class="fixed top-24 right-6 w-full max-w-sm glass rounded-2xl p-5 border-purple-500/30 shadow-2xl space-y-4 pointer-events-auto max-h-[82vh] overflow-y-auto">
     <div class="flex justify-between items-start pb-3 border-b border-white/10">
       <div>
@@ -295,7 +294,6 @@
       </div>
     </div>
 
-    <!-- Aviso de Confección & Despacho de 15 a 20 Días -->
     <div class="bg-black/50 p-3 rounded-xl border border-white/10 text-[11px] space-y-1.5 font-light">
       <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
         <span>🛡️</span> Confección Artesanal a Pedido
@@ -308,7 +306,6 @@
       </div>
     </div>
 
-    <!-- Formulario de Despacho Inmediato -->
     <div class="space-y-2.5 pt-1">
       <div>
         <label class="text-[10px] mono text-slate-400 block mb-1">Nombre Completo:</label>
@@ -324,7 +321,6 @@
       </div>
     </div>
 
-    <!-- Botón de Pago con 100% de Abono Anticipado -->
     <div class="pt-2">
       <button onclick="processDirectCheckout()" class="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-mono text-xs py-3 rounded-xl font-bold transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2">
         <span>💳</span>
@@ -336,18 +332,15 @@
     </div>
   </div>
 
-  <!-- Bandeja Inferior Flotante: Proyector de Texturas UV (Fotos del Carrete + Obras Maestras) -->
   <div class="fixed bottom-6 left-6 right-6 md:right-auto md:max-w-2xl glass rounded-2xl p-3 border-purple-500/30 shadow-2xl pointer-events-auto space-y-2">
     <div class="flex justify-between items-center text-[11px] mono">
       <span class="text-white font-bold flex items-center gap-1.5">
         <span>🪄</span> Proyectar Textura en el Objeto 3D:
       </span>
-      <span class="text-slate-400 text-[10px]">Haz clic en cualquier imagen para mapearla</span>
+      <span class="text-slate-400 text-[10px]">24 Leyes de la Ciencia + Tus Fotos</span>
     </div>
-
-    <!-- Carrusel de Miniaturas -->
     <div id="texture-tray-carousel" class="flex gap-2.5 overflow-x-auto pb-1 pt-0.5">
-      <!-- Generado dinámicamente con las fotos del usuario + obras maestras -->
+      <!-- Generado dinámicamente con las 24 obras maestras + fotos del carrete -->
     </div>
   </div>
 
@@ -371,7 +364,7 @@
     </div>
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
       <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
-        Aún no has tomado fotografías.<br>Acércate a un astro matemático y dispara el obturador.
+        Aún no has tomado fotografías.<br>Acércate a cualquiera de las 24 leyes y dispara el obturador.
       </div>
     </div>
   </div>
@@ -394,169 +387,203 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT: MOTOR COMPLETO 3D CON BOUTIQUE INTERACTIVA                     -->
+<!-- JAVASCRIPT: ATLAS CÓSMICO DE 24 LEYES & HILOS DE TIMONEL                   -->
 <!-- ========================================================================= -->
 <script>
-// Metadatos y Posiciones Esféricas de las 6 Fórmulas Vivas
-const ASTROS_DATA = [
-  {
-    id: 0,
-    badge: "01",
-    title: "El Vuelo de Lorenz",
-    sub: "Atractor Caótico Aperiodico",
-    cat: "TEORÍA DEL CAOS · 1963",
-    pos: [-8.0, -2.5, -6.0],
-    eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
-    timonelMetric: "Lyapunov: λ₁ = +0.9056",
-    hist: "Edward Lorenz demostró que una millonésima de redondeo numérico desata órbitas infinitamente distintas en sistemas deterministas.",
-    poem: 'Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás.'
-  },
-  {
-    id: 1,
-    badge: "05",
-    title: "Los Cantos de Chladni",
-    sub: "Relajación Nodal Cimática",
-    cat: "CIMÁTICA ACÚSTICA · 1787",
-    pos: [8.5, 1.5, -4.0],
-    eq: "w(x,y) = sin(nπx)sin(mπy) - sin(mπx)sin(nπy) = 0",
-    timonelMetric: "Residuo Nodal: ‖F(x)‖ ≤ 2.4e-5",
-    hist: "Las partículas de materia son expulsadas por el sonido hasta descansar en las líneas nodales de reposo absoluto.",
-    poem: 'El silencio es el punto exacto donde las ondas se anulan y la materia descansa en geometría sagrada.'
-  },
-  {
-    id: 2,
-    badge: "21",
-    title: "Los Ceros de Riemann",
-    sub: "Espiral Crítica en s = 1/2 + it",
-    cat: "PROBLEMA DEL MILENIO · 1859",
-    pos: [0.0, 7.5, -16.0],
-    eq: "ζ(1/2 + it) = 0  ⇒  γ₁ ≈ 14.134, γ₂ ≈ 21.022...",
-    timonelMetric: "Línea Crítica: Re(s) = 0.500000",
-    hist: "Todos los ceros no triviales de la función Zeta yacen en la línea crítica, gobernando la distribución íntima de los números primos.",
-    poem: 'Una cuerda de luz tensada a través de la nada que besa el cero absoluto en cada primo del universo.'
-  },
-  {
-    id: 3,
-    badge: "24",
-    title: "El Flujo de Ricci de Poincaré",
-    sub: "Alisamiento Métrico a 3-Esfera",
-    cat: "PROBLEMA DEL MILENIO · 2002",
-    pos: [-9.0, 4.5, -18.0],
-    eq: "∂g_ij/∂t = -2 R_ij  ⇒  M³ → S³",
-    timonelMetric: "Curvatura Escalar: R(t) → 1.000",
-    hist: "Grigori Perelman usó el flujo de calor geométrico para alisar las arrugas del espacio tridimensional.",
-    poem: 'El calor geométrico plancha cada arruga hasta devolver la materia a la pureza de la primera esfera.'
-  },
-  {
-    id: 4,
-    badge: "15",
-    title: "La Fibración de Hopf",
-    sub: "Proyección Cuadridimensional S³ → R³",
-    cat: "TOPOLOGÍA 4D · 1931",
-    pos: [7.5, -5.0, -14.0],
-    eq: "π: S³ → S²  (Fibras: Toros entrelazados)",
-    timonelMetric: "Invariante de Hopf: H(f) = 1",
-    hist: "La 4ª dimensión proyecta sobre nuestro espacio tridimensional infinitos círculos entrelazados sin tocarse jamás.",
-    poem: 'La sombra de cuatro dimensiones cayendo como una flor geométrica sobre nuestra realidad.'
-  },
-  {
-    id: 5,
-    badge: "23",
-    title: "Vórtices de Navier-Stokes",
-    sub: "Turbulencia & Estiramiento de Filamentos",
-    cat: "PROBLEMA DEL MILENIO · 1845",
-    pos: [0.0, -6.5, -8.0],
-    eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u",
-    timonelMetric: "Enstrofía: Ω(t) < ∞ (Conservada)",
-    hist: "¿Puede la velocidad del agua explotar a infinito? El enigma de $1.000.000 USD de la física de fluidos.",
-    poem: 'Tubos de remolinos microscópicos que se trenzan como músculos de luz en la furia del océano.'
-  }
+// CATÁLOGO COMPLETO DE LAS 24 LEYES DE LA HUMANIDAD
+const ARTWORKS_24 = [
+  { id: 0, badge:"01", title:"El Vuelo de Lorenz", sub:"Atractor Caótico Aperiodico", cat:"TEORÍA DEL CAOS · 1963",
+    eq:"dx/dt=10(y-x)\ndy/dt=x(28-z)-y\ndz/dt=xy-(8/3)z", metric:"Lyapunov: λ₁ = +0.9056",
+    hist:"Edward Lorenz descubrió que una millonésima de redondeo desata trayectorias perpetuamente impredecibles.",
+    poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás."', radius: 12, theta: 0.0, phi: -0.2 },
+
+  { id: 1, badge:"02", title:"El Umbral de la Materia", sub:"Límite de Fluencia Tensorial", cat:"MECÁNICA CONTINUA · 1913",
+    eq:"σ_v = √((σ₁-σ₂)²+(σ₂-σ₃)²+(σ₃-σ₁)²)/√2", metric:"Von Mises: J₂ ≤ k²",
+    hist:"Richard von Mises encontró la cota exacta donde un metal cede plásticamente bajo tensión multiaxial.",
+    poem:'"La materia resiste hasta que la tensión ya no cabe en sus átomos."', radius: 12, theta: 1.05, phi: 0.3 },
+
+  { id: 2, badge:"03", title:"La Danza de Yoshida", sub:"Conservación Hamiltoniana Pura", cat:"INTEGRADORES SIMPLÉCTICOS · 1990",
+    eq:"z_{n+1}=exp(c_i·Δt·D_A)·exp(d_i·Δt·D_B)·z_n", metric:"Energía: ΔH ≤ 1e-15",
+    hist:"Haruo Yoshida descubrió coeficientes analíticos de 4º orden que conservan la energía sin perder un solo julio.",
+    poem:'"Dos cuerpos bailan al borde del abismo sin motor ni fricción."', radius: 12, theta: 2.1, phi: -0.1 },
+
+  { id: 3, badge:"04", title:"Los Ríos Invisibles", sub:"Autodiferenciación con Clifford", cat:"ÁLGEBRA DUAL · 1873",
+    eq:"f(x+d·ε) = f(x) + d·f'(x)·ε  (ε²=0)", metric:"Error Truncamiento: 0.000",
+    hist:"William Clifford formuló el número infinitesimal ε cuyo cuadrado es cero para obtener derivadas sin error.",
+    poem:'"Corrientes subterráneas que horadan la roca en silencio."', radius: 12, theta: 3.14, phi: 0.2 },
+
+  { id: 4, badge:"05", title:"Los Cantos de Chladni", sub:"Relajación Nodal Cimática", cat:"CIMÁTICA ACÚSTICA · 1787",
+    eq:"w(x,y)=sin(nπx)sin(mπy)-sin(mπx)sin(nπy)=0", metric:"Residuo Nodal: ‖F(x)‖ ≤ 2.4e-5",
+    hist:"Ernst Chladni pasó un arco de violín por una placa de bronce y reveló los mandalas sagrados del sonido.",
+    poem:'"El silencio es el punto exacto donde las ondas se anulan."', radius: 12, theta: 4.2, phi: -0.25 },
+
+  { id: 5, badge:"06", title:"El Telar de Turing", sub:"Morfogénesis y Reacción-Difusión", cat:"MORFOGÉNESIS · 1952",
+    eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v", metric:"Turing Wavelength: λ_c ≈ 0.42",
+    hist:"Alan Turing demostró cómo dos sustancias químicas difundiéndose bastan para tejer las manchas del leopardo.",
+    poem:'"La vida no necesitó pincel: solo dos moléculas jugando a perseguirse."', radius: 12, theta: 5.25, phi: 0.15 },
+
+  { id: 6, badge:"07", title:"La Cinta del Panadero", sub:"Plegado Caótico de Rössler", cat:"TOPOLOGÍA CAÓTICA · 1976",
+    eq:"dx/dt=-y-z\ndy/dt=x+0.2y\ndz/dt=0.2+z(x-5.7)", metric:"Fractal Dim: D ≈ 2.01",
+    hist:"Otto Rössler diseñó el atractor que se estira y pliega sobre sí mismo como el panadero amasa la masa.",
+    poem:'"El tiempo es una cinta de seda que el universo estira y dobla."', radius: 22, theta: 0.3, phi: 0.4 },
+
+  { id: 7, badge:"08", title:"Las Esferas de Apolonio", cat:"Empaquetamiento Fractal", sub:"Teorema de Círculos de Descartes", cat:"GEOMETRÍA FRACTAL · 200 a.C.",
+    eq:"(k₁+k₂+k₃+k₄)²=2(k₁²+k₂²+k₃²+k₄²)", metric:"Curvatura: k = 1/r",
+    hist:"Apolonio demostró que tres círculos tangentes dejan un hueco donde cabe exactamente una nueva esfera infinita.",
+    poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera."', radius: 22, theta: 0.9, phi: -0.4 },
+
+  { id: 8, badge:"09", title:"El Espejo de Julia", sub:"Dinámica Holomorfa en C", cat:"GEOMETRÍA COMPLEJA · 1918",
+    eq:"z_{n+1} = z_n² + c  (|c| ≈ 0.7885)", metric:"Mandelbrot Boundary ∂M",
+    hist:"Gaston Julia escribió 200 páginas a mano describiendo fractales que jamás pudo ver en una pantalla.",
+    poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles."', radius: 22, theta: 1.5, phi: 0.2 },
+
+  { id: 9, badge:"10", title:"La Autopista del Caos", sub:"Autómata de Langton", cat:"AUTÓMATA CELULAR · 1986",
+    eq:"Blanco→girar_derecha+pintar_negro\nNegro→girar_izquierda+pintar_blanco", metric:"Paso crítico: t=10.000",
+    hist:"Tras 10.000 pasos de caos absoluto, la hormiga construye espontáneamente una autopista infinita.",
+    poem:'"El orden no necesita arquitecto: emerge cuando nadie lo espera."', radius: 22, theta: 2.1, phi: -0.3 },
+
+  { id: 10, badge:"11", title:"La Ola Eterna", sub:"Solitones Analíticos de KdV", cat:"ONDAS NO LINEALES · 1834",
+    eq:"u(x,t) = -2k² · sech²(k(x - 4k²t))", metric:"Solitón Invariante: ‖u‖_L2 = cte",
+    hist:"John Scott Russell vio una ola en un canal viajar millas sin deformarse ni morir jamás.",
+    poem:'"Hay personas que, como estas olas, colisionan y salen intactas al otro lado."', radius: 22, theta: 2.7, phi: 0.35 },
+
+  { id: 11, badge:"12", title:"La Piel de la Jirafa", sub:"Partición Natural de Voronoi", cat:"TESELACIÓN ESPACIAL · 1908",
+    eq:"Cel(sᵢ) = {x : d(x,sᵢ) ≤ d(x,sⱼ)}", metric:"Métrica: Euclidiana L₂",
+    hist:"Georgy Voronoi describió la división celular que gobierna los ojos de mosca y las galaxias.",
+    poem:'"A cada semilla, todo lo que está más cerca de ella."', radius: 22, theta: 3.3, phi: -0.2 },
+
+  { id: 12, badge:"13", title:"Los Ríos de Newton", sub:"Cuencas Fractales de Atracción", cat:"ANÁLISIS COMPLEJO · 1669",
+    eq:"z_{n+1} = (2z³+1)/(3z²)  (z³-1 = 0)", metric:"Convergencia: z → 1, e^{i2π/3}",
+    hist:"El método de Newton para hallar raíces genera fronteras fractales infinitas en el plano complejo.",
+    poem:'"Incluso Newton jamás supo qué camino tomará el caos para llegar a la verdad."', radius: 22, theta: 3.9, phi: 0.4 },
+
+  { id: 13, badge:"14", title:"Las Celdas del Sol", sub:"Convección de Rayleigh-Bénard", cat:"TERMODINÁMICA · 1900",
+    eq:"Ra = gαΔTL³/(νκ) > 1708 (Hexágonos)", metric:"Rayleigh: Ra/Ra_c = 1.45",
+    hist:"Henri Bénard demostró que el calor no destruye el orden: fabrica hexágonos perfectos como el Sol.",
+    poem:'"El calor siempre fabrica hexágonos, la forma más eficiente del universo."', radius: 22, theta: 4.5, phi: -0.35 },
+
+  { id: 14, badge:"15", title:"La Fibración de Hopf", sub:"Proyección Cuadridimensional S³→R³", cat:"TOPOLOGÍA 4D · 1931",
+    eq:"π: S³ → S² (Fibras entrelazadas)", metric:"Invariante de Hopf: H = 1",
+    hist:"Heinz Hopf demostró que la esfera 4D se desmonta en infinitos círculos que no se tocan jamás.",
+    poem:'"La sombra de cuatro dimensiones cayendo como una flor sobre nuestra realidad."', radius: 22, theta: 5.1, phi: 0.25 },
+
+  { id: 15, badge:"16", title:"El Juego del Caos", sub:"Helecho Fractal de Barnsley", cat:"SISTEMAS IFS · 1988",
+    eq:"w_i(x) = A_i x + b_i (4 Matrices)", metric:"Hausdorff Dimension D ≈ 1.82",
+    hist:"Michael Barnsley demostró que tirar un dado con cuatro reglas reproduce una hoja de helecho perfecta.",
+    poem:'"Tres instrucciones y un dado bastan para dibujar la vida."', radius: 22, theta: 5.7, phi: -0.4 },
+
+  { id: 16, badge:"17", title:"Las Flores del Girasol", sub:"Filotaxis de Fibonacci", cat:"GEOMETRÍA ÁUREA · 1202",
+    eq:"θₙ = n · 137.508° (Ángulo Áureo)", metric:"Razón Áurea: φ ≈ 1.618033",
+    hist:"En 1202 Fibonacci contó conejos y descubrió la espiral que empaqueta las semillas de los girasoles.",
+    poem:'"La flor no sabe matemáticas: solo crece de la forma más hermosa."', radius: 32, theta: 0.2, phi: -0.2 },
+
+  { id: 17, badge:"18", title:"Las Espirales Químicas", sub:"Reacción Belousov-Zhabotinsky", cat:"OSCILACIÓN NO LINEAL · 1951",
+    eq:"∂u/∂t = Dᵤ∇²u + f(u,v)", metric:"Período químico: T ≈ 4.2s",
+    hist:"Boris Belousov descubrió una reacción química que latía como un corazón y la ciencia lo tildó de loco.",
+    poem:'"Cada latido tuyo es una reacción química que se negó a detenerse."', radius: 32, theta: 0.95, phi: 0.35 },
+
+  { id: 18, badge:"19", title:"El Colapso Cuántico", sub:"Ecuación de Schrödinger", cat:"MECÁNICA CUÁNTICA · 1926",
+    eq:"iℏ ∂ψ/∂t = -ℏ²/2m ∇²ψ + Vψ", metric:"Norma Unitaria: ∫|ψ|² dV = 1",
+    hist:"Erwin Schrödinger formuló la ola de probabilidad donde las cosas existen en todos lados hasta ser observadas.",
+    poem:'"Antes de ser mirado, el electrón existe en todas partes a la vez."', radius: 32, theta: 1.7, phi: -0.4 },
+
+  { id: 19, badge:"20", title:"El Laberinto Perfecto", sub:"Regla 110 de Wolfram", cat:"COMPUTACIÓN UNIVERSAL · 1983",
+    eq:"111→0 · 110→1 · 101→1 · 100→0...", metric:"Clase 4: Turing-Completo",
+    hist:"Stephen Wolfram demostró que una regla elemental de tres celdas puede computar cualquier cosa en el universo.",
+    poem:'"Una sola celda negra en un mar blanco, capaz de pensarlo todo."', radius: 32, theta: 2.45, phi: 0.2 },
+
+  { id: 20, badge:"21", title:"Los Ceros de Riemann", sub:"Espiral Crítica en s = 1/2 + it", cat:"PROBLEMA DEL MILENIO · 1859",
+    eq:"ζ(s) = ∑ 1/nˢ = 0 ⇒ Re(s) = 1/2", metric:"Línea Crítica: Re(s) = 0.500000",
+    hist:"Bernhard Riemann planteó el enigma de $1.000.000 USD sobre el ritmo íntimo de los números primos.",
+    poem:'"Una cuerda de luz tensada que besa el cero absoluto en cada primo."', radius: 32, theta: 3.2, phi: -0.3 },
+
+  { id: 21, badge:"22", title:"El Desierto de Beal", sub:"Conjetura de Beal Coprima", cat:"TEORÍA DE NÚMEROS · 1993",
+    eq:"Aˣ + Bʸ = Cᶻ (x,y,z > 2) ⇒ mcd > 1", metric:"Exclusión Coprima: 100% Vacío",
+    hist:"Andrew Beal ofreció $1.000.000 USD a quien demuestre por qué las potencias coprimas se repelen en el vacío.",
+    poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse."', radius: 32, theta: 3.95, phi: 0.3 },
+
+  { id: 22, badge:"23", title:"Vórtices de Navier-Stokes", sub:"Singularidades y Turbulencia 3D", cat:"PROBLEMA DEL MILENIO · 1845",
+    eq:"∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u", metric:"Enstrofía: Ω(t) < ∞ (Búsqueda)",
+    hist:"¿Puede la velocidad del agua explotar a infinito? El misterio del millón de dólares de la física de fluidos.",
+    poem:'"Tubos de remolinos microscópicos trenzándose como músculos de luz."', radius: 32, theta: 4.7, phi: -0.25 },
+
+  { id: 23, badge:"24", title:"El Flujo de Ricci de Poincaré", sub:"Alisamiento Métrico a 3-Esfera", cat:"PROBLEMA DEL MILENIO · 2002",
+    eq:"∂g_ij/∂t = -2 R_ij ⇒ M³ → S³", metric:"Curvatura Escalar: R(t) → 1.000",
+    hist:"Grigori Perelman usó el flujo de calor métrico para alisar el espacio, y rechazó la Medalla Fields.",
+    poem:'"El calor geométrico plancha cada arruga hasta devolver la pureza a la primera esfera."', radius: 32, theta: 5.45, phi: 0.35 }
 ];
 
 // Variables Three.js & Silicio
 let scene, camera, renderer;
-let astros = [];
-let dynamicUpdaters = [];
+let astros24 = [];
+let knotFilamentUpdaters = [];
 
 // Entidad 3D de NAI
 let nai3D = {
-  group: null,
-  core: null,
-  outerHalo: null,
-  light: null,
-  targetPos: new THREE.Vector3(0, 0, -8),
-  currentIndex: 0,
-  pulseTime: 0
+  group: null, core: null, outerHalo: null, light: null,
+  targetPos: new THREE.Vector3(0, 0, -8), currentIndex: 0, pulseTime: 0
 };
 
 // Navegación Inercial 6DOF de la Cápsula
 let velocity = new THREE.Vector3(0, 0, 0);
 let orientation = { pitch: 0, yaw: 0 };
 let targetOrientation = { pitch: 0, yaw: 0 };
-let isDragging = false;
-let dragPrev = { x: 0, y: 0 };
+let isDragging = false, dragPrev = { x: 0, y: 0 };
 let userInertiaTimer = 0;
 let currentFocusedAstro = null;
 
-// Audio Espacial Web Audio
-let audioCtx = null, droneGain = null, resonanceGain = null, resonanceOsc = null;
+// Telemetría Enjambre
+let totalEvaluations = 480000;
+let swarmNodeId = "CL-" + Math.floor(1000 + Math.random() * 9000);
+
+// Audio & Carrete
 let voiceGuideEnabled = true, isSpeaking = false, currentUtterance = null;
 let userCameraRoll = [];
 
-// ── VARIABLES DE LA BOUTIQUE ORBITAL 3D ───────────────────────────
+// Boutique Orbital 3D
 let isInShopMode = false;
 let savedCameraState = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
 let shopBayGroup = null;
-let shopProducts = {
-  frameWood: null,
-  frameAcrylic: null,
-  mug: null,
-  notebook: null,
-  certificate: null
-};
+let shopProducts = { frameWood: null, frameAcrylic: null, mug: null, notebook: null, certificate: null };
 let currentProductType = 'frame_wood';
-let activeTextureCanvas = null;
 let activeProductTexture = null;
-let productRotation = { x: 0, y: 0 };
-let targetProductRotation = { x: 0, y: 0 };
+let productRotation = { x: 0, y: 0 }, targetProductRotation = { x: 0, y: 0 };
 
-// ── INICIALIZACIÓN THREE.JS ───────────────────────────────────────
-function initOrbitalSpace() {
+// ── INICIALIZACIÓN PRINCIPAL ──────────────────────────────────────
+function initAtlasCosmico() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x010004);
-  scene.fog = new THREE.FogExp2(0x010004, 0.016);
+  scene.fog = new THREE.FogExp2(0x010004, 0.012);
 
-  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 160);
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
   camera.position.set(0, 0, 4);
 
-  renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: false,
-    powerPreference: "low-power",
-    preserveDrawingBuffer: true
-  });
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "low-power", preserveDrawingBuffer: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(1.0);
   renderer.shadowMap.enabled = false;
+
+  document.getElementById('swarm-node-id').textContent = "#" + swarmNodeId;
 
   buildCosmicVoid();
   buildNaiSovereignEntity();
   buildShopBay3D();
   setup6DOFControls();
+  populateNaiAstroSelector();
   window.addEventListener('resize', onWindowResize);
   animate();
 }
 
-// ── VACÍO CÓSMICO (SIN SUELO NI MUROS) ────────────────────────────
+// ── VACÍO CÓSMICO & CONFINAMIENTO DE LOS 24 HILOS DE TIMONEL ──────
 function buildCosmicVoid() {
   scene.add(new THREE.AmbientLight(0x1a1228, 0.8));
 
-  // Campo Estelar Esférico Omnidireccional
+  // Campo Estelar Esférico Omnidireccional (1.800 estrellas en el vacío 3D)
   const starGeo = new THREE.BufferGeometry();
-  const starPos = new Float32Array(1400 * 3);
-  for (let i = 0; i < 1400; i++) {
-    const r = 18 + Math.random() * 55;
+  const starPos = new Float32Array(1800 * 3);
+  for (let i = 0; i < 1800; i++) {
+    const r = 20 + Math.random() * 65;
     const th = Math.random() * Math.PI * 2;
     const ph = (Math.random() - 0.5) * Math.PI;
     starPos[i*3]   = r * Math.cos(ph) * Math.sin(th);
@@ -567,12 +594,116 @@ function buildCosmicVoid() {
   const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.035, transparent: true, opacity: 0.5 }));
   scene.add(stars);
 
-  ASTROS_DATA.forEach((data, index) => {
-    createLivingMathematicalAstro(data, index);
+  // Instanciar los 24 Astros Matemáticos con Hilos Topológicos
+  ARTWORKS_24.forEach((data, index) => {
+    createTopologicalKnotAstro(data, index);
   });
 }
 
-// ── NAI EN SILICIO 3D ─────────────────────────────────────────────
+// ── ASTRO CON ANILLO DE TIMONEL & HILO TOPOLÓGICO DE RELAJACIÓN ───
+function createTopologicalKnotAstro(data, index) {
+  const astroGroup = new THREE.Group();
+  
+  // Calcular posición esférica 3D
+  const x = data.radius * Math.cos(data.phi) * Math.sin(data.theta);
+  const y = data.radius * Math.sin(data.phi);
+  const z = -data.radius * Math.cos(data.phi) * Math.cos(data.theta);
+  astroGroup.position.set(x, y, z);
+
+  // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m)
+  const ringGeo = new THREE.RingGeometry(1.58, 1.62, 64);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+  const timonelRing = new THREE.Mesh(ringGeo, ringMat);
+  astroGroup.add(timonelRing);
+
+  // 2. Luz de Resonancia Cuántica
+  const pointLight = new THREE.PointLight(0x8b5cf6, 1.1, 5.0);
+  astroGroup.add(pointLight);
+
+  // 3. El Hilo Topológico que se Desenreda en Silicio
+  const knotFilament = buildKnotFilament(data.id);
+  astroGroup.add(knotFilament);
+
+  scene.add(astroGroup);
+  astros24.push({
+    data,
+    group: astroGroup,
+    worldPos: new THREE.Vector3(x, y, z),
+    timonelRing
+  });
+}
+
+// ── MOTOR DE HILOS TOPOLÓGICOS (KNOT RELAXATION FLOW EN 3D) ───────
+function buildKnotFilament(id) {
+  const N = 180; // Nodos del hilo topológico
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(N * 3);
+  const cols = new Float32Array(N * 3);
+
+  // Inicializar hilo cerrado en forma de nudo toroidal (p=2, q=3) con perturbación
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    const r = 0.65 + Math.sin(t * 3) * 0.22;
+    pos[i*3]   = Math.cos(t * 2) * r;
+    pos[i*3+1] = Math.sin(t * 3) * 0.38;
+    pos[i*3+2] = Math.sin(t * 2) * r;
+
+    // Color del gradiente de tensión
+    cols[i*3]   = 0.4 + (i / N) * 0.6;
+    cols[i*3+1] = 0.2 + Math.sin(i / N * Math.PI) * 0.7;
+    cols[i*3+2] = 0.95;
+  }
+
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  const line = new THREE.LineLoop(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }));
+
+  // Dinámica viva de relajación topológica cuadro a cuadro
+  let cycleTime = Math.random() * 100;
+  knotFilamentUpdaters.push((dt) => {
+    cycleTime += dt * 0.8;
+    const pArr = line.geometry.attributes.position.array;
+    const isSolved = (id !== 20 && id !== 22 && id !== 23); // Riemann, Navier y Beal juegan a buscar sin fin
+
+    const tensionRate = isSolved ? 0.04 : 0.02;
+    const unknotProgress = (Math.sin(cycleTime * 0.3) + 1) * 0.5; // Oscila entre ovillo y desenredo
+
+    for (let i = 0; i < N; i++) {
+      const idx = i * 3;
+      const prevIdx = ((i - 1 + N) % N) * 3;
+      const nextIdx = ((i + 1) % N) * 3;
+
+      // 1. Tensión de acortamiento de curva (Curve Shortening Flow)
+      const avgX = (pArr[prevIdx] + pArr[nextIdx]) * 0.5;
+      const avgY = (pArr[prevIdx+1] + pArr[nextIdx+1]) * 0.5;
+      const avgZ = (pArr[prevIdx+2] + pArr[nextIdx+2]) * 0.5;
+
+      pArr[idx]   += (avgX - pArr[idx]) * tensionRate;
+      pArr[idx+1] += (avgY - pArr[idx+1]) * tensionRate;
+      pArr[idx+2] += (avgZ - pArr[idx+2]) * tensionRate;
+
+      // 2. Modulación según la naturaleza matemática de la ley
+      const phase = (i / N) * Math.PI * 2 + cycleTime;
+      const wave = Math.sin(phase * 4 + id) * 0.08 * (1.0 - unknotProgress * 0.7);
+      pArr[idx+1] += wave;
+
+      // 3. Confinamiento Métrico de Timonel (No puede cruzar el anillo R = 1.4m)
+      const dist = Math.hypot(pArr[idx], pArr[idx+1], pArr[idx+2]);
+      if (dist > 1.35) {
+        const factor = 1.35 / dist;
+        pArr[idx] *= factor; pArr[idx+1] *= factor; pArr[idx+2] *= factor;
+      }
+    }
+
+    line.geometry.attributes.position.needsUpdate = true;
+    line.rotation.y += 0.005;
+    line.rotation.x += 0.003;
+  });
+
+  return line;
+}
+
+// ── NAI SOBERANA EN SILICIO 3D ─────────────────────────────────────
 function buildNaiSovereignEntity() {
   const group = new THREE.Group();
   const core = new THREE.Mesh(
@@ -599,27 +730,19 @@ function buildNaiSovereignEntity() {
   nai3D.light = light;
 }
 
-// ── CONSTRUCCIÓN DE LA BAHÍA 3D DE MANUFACTURA ORBITAL ───────────
+// ── BAHÍA 3D DE MANUFACTURA ORBITAL ───────────────────────────────
 function buildShopBay3D() {
   shopBayGroup = new THREE.Group();
-  shopBayGroup.position.set(0, 0, 36.0); // Ubicada en un sector específico del vacío
+  shopBayGroup.position.set(0, 0, 42.0);
 
-  // 1. Pedestal de Luz Cuántica
-  const pedestalGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.08, 48);
-  const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x07060f, roughness: 0.3, metalness: 0.8 });
-  const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+  const pedestal = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.8, 1.8, 0.08, 48),
+    new THREE.MeshStandardMaterial({ color: 0x07060f, roughness: 0.3, metalness: 0.8 })
+  );
   pedestal.position.y = -1.6;
   shopBayGroup.add(pedestal);
 
-  const glowRingGeo = new THREE.RingGeometry(1.85, 1.95, 48);
-  const glowRingMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
-  const glowRing = new THREE.Mesh(glowRingGeo, glowRingMat);
-  glowRing.rotation.x = -Math.PI / 2;
-  glowRing.position.y = -1.55;
-  shopBayGroup.add(glowRing);
-
-  // 2. Iluminación de Estudio en Gravedad Cero
-  const keyLight = new THREE.SpotLight(0xffffff, 2.5, 12, Math.PI / 4, 0.4);
+  const keyLight = new THREE.SpotLight(0xffffff, 2.5, 14, Math.PI / 4, 0.4);
   keyLight.position.set(2, 3, 3);
   shopBayGroup.add(keyLight);
 
@@ -627,102 +750,44 @@ function buildShopBay3D() {
   fillLight.position.set(-2.5, 0.5, 2);
   shopBayGroup.add(fillLight);
 
-  // 3. Crear Textura Base Predeterminada (El Vuelo de Lorenz)
   createDefaultMasterTexture();
 
-  // 4. Modelo 1: Cuadro Fine Art 50x70 con Paspartú
+  // 1. Cuadro Fine Art 50x70
   const frameGroup = new THREE.Group();
-  const outerFrameMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.5, metalness: 0.2 });
-  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.1, 0.08), outerFrameMat);
+  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.1, 0.08), new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.5 }));
   frameGroup.add(outerFrame);
 
-  // Paspartú blanco
-  const matMat = new THREE.MeshStandardMaterial({ color: 0xf4f1eb, roughness: 0.9 });
-  const matMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.48, 1.98), matMat);
+  const matMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.48, 1.98), new THREE.MeshStandardMaterial({ color: 0xf4f1eb, roughness: 0.9 }));
   matMesh.position.z = 0.042;
   frameGroup.add(matMesh);
 
-  // Lienzo Central con Textura Dinámica
-  const canvasMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 });
-  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.6), canvasMat);
+  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.6), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 }));
   canvasMesh.position.z = 0.044;
   canvasMesh.name = "dynamic_canvas_target";
   frameGroup.add(canvasMesh);
-
   shopProducts.frameWood = frameGroup;
   shopBayGroup.add(frameGroup);
 
-  // 5. Modelo 2: Taza Cerámica Negra Mate
+  // 2. Taza Cerámica
   const mugGroup = new THREE.Group();
-  mugGroup.position.set(0, 0, 0);
-
-  const mugCylMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.25, metalness: 0.1 });
-  const mugCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.2, 48, 1, false), mugCylMat);
-  mugCylinder.name = "dynamic_mug_target";
-  mugGroup.add(mugCylinder);
-
-  const handleGeo = new THREE.TorusGeometry(0.35, 0.08, 16, 32, Math.PI);
-  const handleMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.3 });
-  const handle = new THREE.Mesh(handleGeo, handleMat);
-  handle.rotation.z = -Math.PI / 2;
-  handle.position.set(0.55, 0, 0);
+  const mugCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.2, 48), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.25 }));
+  mugCyl.name = "dynamic_mug_target";
+  mugGroup.add(mugCyl);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 16, 32, Math.PI), new THREE.MeshStandardMaterial({ color: 0x111118 }));
+  handle.rotation.z = -Math.PI / 2; handle.position.set(0.55, 0, 0);
   mugGroup.add(handle);
-
   mugGroup.visible = false;
   shopProducts.mug = mugGroup;
   shopBayGroup.add(mugGroup);
 
-  // 6. Modelo 3: Cuaderno de Campo Moleskine
+  // 3. Cuaderno
   const bookGroup = new THREE.Group();
-  const bookCoverMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4, metalness: 0.1 });
-  const bookCover = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.7, 0.12), bookCoverMat);
+  const bookCover = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.7, 0.12), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 }));
   bookCover.name = "dynamic_book_target";
   bookGroup.add(bookCover);
-
-  const pagesMat = new THREE.MeshStandardMaterial({ color: 0xe8e4d8, roughness: 0.9 });
-  const pages = new THREE.Mesh(new THREE.BoxGeometry(1.14, 1.64, 0.1), pagesMat);
-  pages.position.x = 0.02;
-  bookGroup.add(pages);
-
   bookGroup.visible = false;
   shopProducts.notebook = bookGroup;
   shopBayGroup.add(bookGroup);
-
-  // 7. Certificado de Procedencia Flotante a la Izquierda
-  const certCanvas = document.createElement('canvas');
-  certCanvas.width = 512; certCanvas.height = 700;
-  const ccx = certCanvas.getContext('2d');
-  ccx.fillStyle = '#08060f'; ccx.fillRect(0, 0, 512, 700);
-  ccx.strokeStyle = '#c5a059'; ccx.lineWidth = 6; ccx.strokeRect(10, 10, 492, 680);
-  ccx.strokeStyle = 'rgba(168, 85, 247, 0.4)'; ccx.lineWidth = 2; ccx.strokeRect(20, 20, 472, 660);
-  ccx.fillStyle = '#e8d2a6'; ccx.font = 'bold 24px Cinzel'; ccx.textAlign = 'center';
-  ccx.fillText("CERTIFICADO DE PROCEDENCIA", 256, 75);
-  ccx.fillStyle = '#38bdf8'; ccx.font = '16px Space Mono';
-  ccx.fillText("ATELIER MATEMÁTICO · SANTIAGO", 256, 115);
-  ccx.strokeStyle = '#38bdf8'; ccx.lineWidth = 1; ccx.beginPath(); ccx.moveTo(80, 135); ccx.lineTo(432, 135); ccx.stroke();
-  
-  ccx.fillStyle = '#e2e8f0'; ccx.font = '14px Space Mono'; ccx.textAlign = 'left';
-  ccx.fillText("OBRA: EL VUELO DE LORENZ (1963)", 50, 185);
-  ccx.fillText("TIPO: MANUFACTURA DE AUTOR 50x70", 50, 220);
-  ccx.fillText("SUSTRATO: PAPEL DE ALGODÓN 310G", 50, 255);
-  ccx.fillText("INVARIANTE: LYAPUNOV λ₁ = +0.9056", 50, 290);
-  ccx.fillText("CURADURÍA: NUMERADA & SELLADA", 50, 325);
-
-  ccx.fillStyle = '#94a3b8'; ccx.font = 'italic 15px Plus Jakarta Sans';
-  ccx.fillText('"La física no se simula para engañar;', 50, 395);
-  ccx.fillText('se deja libre para revelar la belleza pura."', 50, 420);
-
-  ccx.fillStyle = '#e8d2a6'; ccx.font = 'bold 22px Cinzel'; ccx.textAlign = 'right';
-  ccx.fillText("Matías Cortés Figueroa", 450, 560);
-  ccx.fillStyle = '#a855f7'; ccx.font = '13px Space Mono';
-  ccx.fillText("Firma de Autor · Silicio Nativo", 450, 585);
-
-  const certTex = new THREE.CanvasTexture(certCanvas);
-  const certMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.36), new THREE.MeshBasicMaterial({ map: certTex, transparent: true, opacity: 0.9 }));
-  certMesh.position.set(-1.6, 0.1, 0.1);
-  certMesh.rotation.y = 0.25;
-  shopProducts.certificate = certMesh;
-  shopBayGroup.add(certMesh);
 
   shopBayGroup.visible = false;
   scene.add(shopBayGroup);
@@ -733,46 +798,28 @@ function createDefaultMasterTexture() {
   c.width = 1024; c.height = 1024;
   const cx = c.getContext('2d');
   cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
-
-  // Atractor de Lorenz dibujado estéticamente
-  cx.strokeStyle = '#c084fc'; cx.lineWidth = 1.6;
-  cx.shadowColor = '#a855f7'; cx.shadowBlur = 15;
-  let x = 0.1, y = 0, z = 14, dt = 0.005;
-  cx.beginPath();
-  for (let i = 0; i < 4500; i++) {
-    x += dt * 10 * (y - x); y += dt * (x * (28 - z) - y); z += dt * (x * y - 2.667 * z);
-    const px = 512 + x * 16;
-    const py = 560 - (z - 20) * 16;
-    if (i === 0) cx.moveTo(px, py); else cx.lineTo(px, py);
-  }
-  cx.stroke();
-
-  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 36px Cinzel'; cx.textAlign = 'center';
-  cx.fillText("EL VUELO DE LORENZ", 512, 120);
+  cx.strokeStyle = '#c084fc'; cx.lineWidth = 2;
+  cx.strokeRect(30, 30, 964, 964);
+  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 38px Cinzel'; cx.textAlign = 'center';
+  cx.fillText("ATELIER MATEMÁTICO", 512, 480);
   cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
-  cx.fillText("TEORÍA DEL CAOS · 1963", 512, 160);
-
-  activeTextureCanvas = c;
+  cx.fillText("ATLAS DE 24 LEYES · TIMONEL F2", 512, 530);
   activeProductTexture = new THREE.CanvasTexture(c);
 }
 
-// ── ENTRAR & SALIR DEL MODO BOUTIQUE ORBITAL 3D ───────────────────
+// ── BOUTIQUE ORBITAL 3D: ENTRAR & SALIR ───────────────────────────
 function enterShopMode() {
   if (isInShopMode) return;
   isInShopMode = true;
-
-  // Guardar estado de cámara
   savedCameraState.pos.copy(camera.position);
   savedCameraState.quat.copy(camera.quaternion);
 
-  // Ocultar HUD de vuelo y foyer
   document.getElementById('flight-hud-header').style.opacity = '0';
   document.getElementById('orbital-hud-card').classList.add('opacity-0');
   document.getElementById('nai-companion-widget').classList.add('opacity-0');
   document.getElementById('capsule-reticle').style.opacity = '0';
   document.getElementById('foyer-screen').classList.add('hidden');
 
-  // Mostrar Bahía 3D
   shopBayGroup.visible = true;
   const overlay = document.getElementById('shop-bay-overlay');
   overlay.classList.remove('hidden');
@@ -785,113 +832,77 @@ function enterShopMode() {
 function exitShopMode() {
   if (!isInShopMode) return;
   isInShopMode = false;
-
   const overlay = document.getElementById('shop-bay-overlay');
   overlay.style.opacity = '0';
-  setTimeout(() => {
-    overlay.classList.add('hidden');
-    shopBayGroup.visible = false;
-  }, 700);
+  setTimeout(() => { overlay.classList.add('hidden'); shopBayGroup.visible = false; }, 700);
 
   document.getElementById('flight-hud-header').style.opacity = '1';
   document.getElementById('nai-companion-widget').classList.remove('opacity-0');
   document.getElementById('capsule-reticle').style.opacity = '1';
 
-  // Regresar suavemente al punto de vuelo
   velocity.set(0, 0, 0);
   camera.position.copy(savedCameraState.pos);
   camera.quaternion.copy(savedCameraState.quat);
-  const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
-  orientation.pitch = e.x; orientation.yaw = e.y;
-  targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
 }
 
-// ── CAMBIO DE PRODUCTO 3D ─────────────────────────────────────────
 function switch3DProduct(type) {
   currentProductType = type;
-
-  // Reset visibilidad
   shopProducts.frameWood.visible = (type === 'frame_wood' || type === 'frame_acrylic');
   shopProducts.mug.visible = (type === 'mug');
   shopProducts.notebook.visible = (type === 'notebook');
 
-  // Actualizar botones
   ['frame-wood', 'frame-acrylic', 'mug', 'notebook'].forEach(id => {
     const btn = document.getElementById(`btn-prod-${id}`);
-    btn.classList.remove('bg-purple-600', 'text-white');
-    btn.classList.add('text-slate-400');
+    if (btn) { btn.classList.remove('bg-purple-600', 'text-white'); btn.classList.add('text-slate-400'); }
   });
+  const activeBtn = document.getElementById(`btn-prod-${type.replace('_', '-')}`);
+  if (activeBtn) { activeBtn.classList.remove('text-slate-400'); activeBtn.classList.add('bg-purple-600', 'text-white'); }
 
-  const activeBtnId = type.replace('_', '-');
-  const activeBtn = document.getElementById(`btn-prod-${activeBtnId}`);
-  if (activeBtn) {
-    activeBtn.classList.remove('text-slate-400');
-    activeBtn.classList.add('bg-purple-600', 'text-white');
-  }
-
-  // Precios y Títulos
   const title = document.getElementById('shop-prod-title');
   const price = document.getElementById('shop-prod-price');
   const cat = document.getElementById('shop-prod-category');
 
   if (type === 'frame_wood') {
-    cat.textContent = "EDICIÓN DE GALERÍA FIRMADA";
-    title.textContent = "Cuadro Fine Art 50×70 cm";
-    price.textContent = "$68.000 CLP";
+    cat.textContent = "EDICIÓN DE GALERÍA FIRMADA"; title.textContent = "Cuadro Fine Art 50×70 cm"; price.textContent = "$68.000 CLP";
   } else if (type === 'frame_acrylic') {
-    cat.textContent = "EDICIÓN LUXURY EN ACRÍLICO";
-    title.textContent = "Cuadro Acrílico 40×60 cm";
-    price.textContent = "$120.000 CLP";
+    cat.textContent = "EDICIÓN LUXURY EN ACRÍLICO"; title.textContent = "Cuadro Acrílico 40×60 cm"; price.textContent = "$120.000 CLP";
   } else if (type === 'mug') {
-    cat.textContent = "MERCHANDISING OFICIAL";
-    title.textContent = "Taza Cerámica Negra Mate";
-    price.textContent = "$16.900 CLP";
+    cat.textContent = "MERCHANDISING OFICIAL"; title.textContent = "Taza Cerámica Negra Mate"; price.textContent = "$16.900 CLP";
   } else if (type === 'notebook') {
-    cat.textContent = "CUADERNO DE FÓRMULAS";
-    title.textContent = "Cuaderno Moleskine de Campo";
-    price.textContent = "$22.000 CLP";
+    cat.textContent = "CUADERNO DE FÓRMULAS"; title.textContent = "Cuaderno Moleskine de Campo"; price.textContent = "$22.000 CLP";
   }
 }
 
-// ── BANDEJA DE TEXTURAS (TUS FOTOS + OBRAS MAESTRAS) ──────────────
 function populateTextureTray() {
   const tray = document.getElementById('texture-tray-carousel');
   tray.innerHTML = '';
 
-  // 1. Fotos del Carrete del Usuario
-  if (userCameraRoll.length > 0) {
-    userCameraRoll.forEach((item, idx) => {
-      const btn = document.createElement('button');
-      btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 hover:border-cyan-400 transition relative group';
-      btn.innerHTML = `
-        <img src="${item.img}" class="w-full h-full object-cover" />
-        <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] mono text-purple-200 text-center truncate">Tu Foto</span>
-      `;
-      btn.onclick = () => projectTextureOntoProduct(item.img, item.artTitle);
-      tray.appendChild(btn);
-    });
-  }
+  // Fotos del Carrete
+  userCameraRoll.forEach((item) => {
+    const btn = document.createElement('button');
+    btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 hover:border-cyan-400 transition relative';
+    btn.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover" /><span class="absolute bottom-0 inset-x-0 bg-black/75 text-[8px] mono text-purple-200 text-center truncate">Tu Foto</span>`;
+    btn.onclick = () => projectTextureOntoProduct(item.img);
+    tray.appendChild(btn);
+  });
 
-  // 2. Obras Maestras Predeterminadas
-  ASTROS_DATA.forEach((astro) => {
+  // 24 Leyes Maestras
+  ARTWORKS_24.forEach((astro) => {
     const btn = document.createElement('button');
     btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 hover:border-purple-400 transition bg-black/60 p-1 flex flex-col justify-center items-center text-center';
-    btn.innerHTML = `
-      <span class="text-sm">∑</span>
-      <span class="text-[8px] mono text-slate-300 leading-tight truncate w-full">${astro.badge} · ${astro.title}</span>
-    `;
+    btn.innerHTML = `<span class="text-xs font-bold text-cyan-300 mono">${astro.badge}</span><span class="text-[7.5px] mono text-slate-300 leading-tight truncate w-full">${astro.title}</span>`;
     btn.onclick = () => projectMasterArtOntoProduct(astro);
     tray.appendChild(btn);
   });
 }
 
-function projectTextureOntoProduct(imgSrc, title) {
+function projectTextureOntoProduct(imgSrc) {
   const img = new Image();
   img.onload = () => {
     const tex = new THREE.Texture(img);
     tex.needsUpdate = true;
-    updateProductMaterialsWithTexture(tex);
-    speakNai(`Proyectando tu captura en el objeto 3D.`);
+    updateProductMaterials(tex);
+    speakNai("Proyectando captura sobre el objeto 3D.");
   };
   img.src = imgSrc;
 }
@@ -901,45 +912,38 @@ function projectMasterArtOntoProduct(astro) {
   c.width = 1024; c.height = 1024;
   const cx = c.getContext('2d');
   cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
-
+  cx.strokeStyle = '#c5a059'; cx.lineWidth = 4; cx.strokeRect(40, 40, 944, 944);
   cx.fillStyle = '#e8d2a6'; cx.font = 'bold 36px Cinzel'; cx.textAlign = 'center';
-  cx.fillText(astro.title.toUpperCase(), 512, 480);
+  cx.fillText(astro.title.toUpperCase(), 512, 450);
   cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
-  cx.fillText(astro.cat, 512, 530);
+  cx.fillText(astro.cat, 512, 500);
   cx.fillStyle = '#94a3b8'; cx.font = '16px Space Mono';
-  cx.fillText(astro.timonelMetric, 512, 580);
-
+  cx.fillText(astro.metric, 512, 550);
   const tex = new THREE.CanvasTexture(c);
-  updateProductMaterialsWithTexture(tex);
-  speakNai(`Proyectando ${astro.title} en el objeto 3D.`);
+  updateProductMaterials(tex);
+  speakNai(`Proyectando ${astro.title} en el objeto.`);
 }
 
-function updateProductMaterialsWithTexture(newTexture) {
+function updateProductMaterials(tex) {
   shopBayGroup.traverse((child) => {
-    if (child.name === "dynamic_canvas_target" || child.name === "dynamic_mug_target" || child.name === "dynamic_book_target") {
-      child.material.map = newTexture;
+    if (child.name && child.name.startsWith("dynamic_")) {
+      child.material.map = tex;
       child.material.needsUpdate = true;
     }
   });
-
-  // Animación de pulso lumínico
   targetProductRotation.y += Math.PI * 0.5;
 }
 
-// ── CHECKOUT DIRECTO ──────────────────────────────────────────────
 function processDirectCheckout() {
   const name = document.getElementById('order-name').value.trim();
   const address = document.getElementById('order-address').value.trim();
   const phone = document.getElementById('order-phone').value.trim();
-
   if (!name || !address || !phone) {
-    alert('Por favor completa tu Nombre, Dirección de despacho y WhatsApp para coordinar la entrega de tu pedido.');
+    alert('Por favor completa tu Nombre, Dirección de despacho y WhatsApp.');
     return;
   }
-
   const prodName = document.getElementById('shop-prod-title').textContent;
   const price = document.getElementById('shop-prod-price').textContent;
-
   const msg = encodeURIComponent(
     `🏛️ *NUEVO PEDIDO ATELIER MATEMÁTICO*\n\n` +
     `👤 *Cliente:* ${name}\n` +
@@ -947,175 +951,37 @@ function processDirectCheckout() {
     `📱 *WhatsApp:* ${phone}\n` +
     `🖼️ *Producto:* ${prodName}\n` +
     `💰 *Total a Pagar:* ${price}\n` +
+    `🛰️ *Nodo Donante:* #${swarmNodeId}\n` +
     `⏳ *Plazo:* Confección a pedido (10-15 días hábiles)\n\n` +
-    `Hola Matías! He configurado mi pedido desde el Observatorio 3D. ¿Cómo procedo al pago del 100% para iniciar la confección?`
+    `Hola Matías! He configurado mi pedido desde el Observatorio de 24 Leyes. ¿Cómo procedo al pago del 100% para iniciar la confección?`
   );
-
   window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
 }
 
-// ── SISTEMAS DINÁMICOS DE ASTROS (LORENZ, CHLADNI, RIEMANN, ETC) ──
-function createLivingMathematicalAstro(data, index) {
-  const astroGroup = new THREE.Group();
-  astroGroup.position.set(data.pos[0], data.pos[1], data.pos[2]);
-
-  const ringGeo = new THREE.RingGeometry(1.6, 1.63, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
-  const timonelRing = new THREE.Mesh(ringGeo, ringMat);
-  astroGroup.add(timonelRing);
-
-  const pointLight = new THREE.PointLight(0x8b5cf6, 1.2, 5.0);
-  astroGroup.add(pointLight);
-
-  const livingSystem = buildDynamicSystemMath(data.id);
-  astroGroup.add(livingSystem);
-
-  scene.add(astroGroup);
-  astros.push({
-    data,
-    group: astroGroup,
-    worldPos: new THREE.Vector3(data.pos[0], data.pos[1], data.pos[2]),
-    timonelRing
+// ── SELECTOR DE SALTO RÁPIDO A LOS 24 ASTROS ──────────────────────
+function populateNaiAstroSelector() {
+  const container = document.getElementById('nai-astro-selector');
+  container.innerHTML = '';
+  ARTWORKS_24.forEach((astro, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'text-[9px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 shrink-0 transition';
+    btn.textContent = `${astro.badge} · ${astro.title.split(' ')[0]}`;
+    btn.onclick = () => propelToAstro(idx);
+    container.appendChild(btn);
   });
 }
 
-function buildDynamicSystemMath(id) {
-  const group = new THREE.Group();
-
-  if (id === 0) {
-    // 01. LORENZ VIVO
-    const N = 2000, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3), state = [];
-    for (let i = 0; i < N; i++) {
-      state.push({ x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2, z: 20 + (Math.random() - 0.5) * 5, age: Math.random() * 500 });
-      cols[i*3] = 0.5 + Math.random()*0.5; cols[i*3+1] = 0.2; cols[i*3+2] = 0.95;
-    }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.88 }));
-    group.add(pts);
-
-    dynamicUpdaters.push(() => {
-      const pArr = pts.geometry.attributes.position.array;
-      const sigma = 10, rho = 28, beta = 8/3, h = 0.007;
-      for (let i = 0; i < N; i++) {
-        const s = state[i];
-        s.x += sigma * (s.y - s.x) * h;
-        s.y += (s.x * (rho - s.z) - s.y) * h;
-        s.z += (s.x * s.y - beta * s.z) * h;
-        s.age++;
-        if (s.age > 700 || Math.abs(s.x) > 35) {
-          s.x = (Math.random() - 0.5) * 0.2; s.y = (Math.random() - 0.5) * 0.2; s.z = 15 + (Math.random() - 0.5) * 0.2; s.age = 0;
-        }
-        pArr[i*3] = s.x * 0.035; pArr[i*3+1] = (s.z - 24) * 0.035; pArr[i*3+2] = s.y * 0.035;
-      }
-      pts.geometry.attributes.position.needsUpdate = true;
-    });
-
-  } else if (id === 1) {
-    // 05. CHLADNI VIVO
-    const N = 1600, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), sand = [];
-    for (let i = 0; i < N; i++) sand.push({ u: (Math.random() - 0.5) * 2, v: (Math.random() - 0.5) * 2, vu: 0, vv: 0 });
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.02, transparent: true, opacity: 0.9 }));
-    group.add(pts);
-
-    let modeT = 0;
-    dynamicUpdaters.push((dt) => {
-      modeT += dt * 0.4;
-      const n = 3 + Math.sin(modeT * 0.5) * 2, m = 5 + Math.cos(modeT * 0.3) * 2;
-      const pArr = pts.geometry.attributes.position.array;
-      for (let i = 0; i < N; i++) {
-        const p = sand[i];
-        const val = Math.sin(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - Math.sin(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
-        const gu = n * Math.cos(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - m * Math.cos(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
-        const gv = m * Math.sin(n * Math.PI * p.u) * Math.cos(m * Math.PI * p.v) - n * Math.sin(m * Math.PI * p.u) * Math.cos(n * Math.PI * p.v);
-        p.vu = p.vu * 0.85 - Math.sign(val) * gu * 0.015 + (Math.random() - 0.5) * 0.008;
-        p.vv = p.vv * 0.85 - Math.sign(val) * gv * 0.015 + (Math.random() - 0.5) * 0.008;
-        p.u += p.vu; p.v += p.vv;
-        if (Math.abs(p.u) > 1) p.u = (Math.random() - 0.5) * 1.8;
-        if (Math.abs(p.v) > 1) p.v = (Math.random() - 0.5) * 1.8;
-        pArr[i*3] = p.u * 0.65; pArr[i*3+1] = Math.abs(val) * 0.08; pArr[i*3+2] = p.v * 0.65;
-      }
-      pts.geometry.attributes.position.needsUpdate = true;
-      group.rotation.y += 0.004;
-    });
-
-  } else if (id === 2) {
-    // 21. RIEMANN VIVO
-    const N = 1200, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }));
-    group.add(line);
-
-    let tBase = 10;
-    dynamicUpdaters.push((dt) => {
-      tBase += dt * 0.8;
-      const pArr = line.geometry.attributes.position.array, cArr = line.geometry.attributes.color.array;
-      for (let i = 0; i < N; i++) {
-        const t = tBase + (i / N) * 35;
-        const th = (t / 2) * Math.log(t / (2 * Math.PI)) - t / 2;
-        const r = Math.sin(t * 0.75) * Math.cos(t * 0.28) * 0.45;
-        pArr[i*3] = Math.cos(th) * r; pArr[i*3+1] = (i / N - 0.5) * 1.6; pArr[i*3+2] = Math.sin(th) * r;
-        const isZero = Math.abs(r) < 0.05;
-        cArr[i*3] = isZero ? 1 : 0.9; cArr[i*3+1] = isZero ? 1 : 0.7; cArr[i*3+2] = isZero ? 0.3 : 0.15;
-      }
-      line.geometry.attributes.position.needsUpdate = true;
-      line.geometry.attributes.color.needsUpdate = true;
-      group.rotation.y += 0.006;
-    });
-
-  } else if (id === 3) {
-    // 24. RICCI FLOW
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 24), new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, wireframe: true }));
-    group.add(mesh);
-    let flowT = 0;
-    dynamicUpdaters.push((dt) => {
-      flowT += dt * 1.2;
-      const pos = mesh.geometry.attributes.position;
-      const factor = Math.exp(-((flowT % 8) * 0.4));
-      for (let i = 0; i < pos.count; i++) {
-        const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
-        v.multiplyScalar(0.5 + Math.sin(v.x * 6 + flowT) * Math.cos(v.y * 6 + flowT) * 0.18 * factor);
-        pos.setXYZ(i, v.x, v.y, v.z);
-      }
-      pos.needsUpdate = true;
-      mesh.rotation.y += 0.007;
-    });
-
-  } else if (id === 4) {
-    // 15. HOPF
-    for (let i = 0; i < 5; i++) {
-      const torus = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.024, 16, 64), new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, wireframe: true }));
-      torus.rotation.x = (i * Math.PI) / 5; torus.rotation.y = (i * Math.PI) / 3;
-      group.add(torus);
-    }
-    dynamicUpdaters.push(() => { group.rotation.x += 0.005; group.rotation.y += 0.008; });
-
-  } else {
-    // 23. NAVIER-STOKES
-    const N = 1400, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    const vortex = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true }));
-    group.add(vortex);
-    let vorT = 0;
-    dynamicUpdaters.push((dt) => {
-      vorT += dt * 1.5;
-      const pArr = vortex.geometry.attributes.position.array, cArr = vortex.geometry.attributes.color.array;
-      for (let i = 0; i < N; i++) {
-        const u = (i / N) * Math.PI * 10 + vorT, r = 0.12 + Math.sin(u * 0.3 + vorT) * 0.35;
-        pArr[i*3] = Math.cos(u) * r; pArr[i*3+1] = ((i / N) - 0.5) * 1.4; pArr[i*3+2] = Math.sin(u) * r;
-        cArr[i*3] = 0.2 + (i / N) * 0.8; cArr[i*3+1] = 0.7; cArr[i*3+2] = 0.95;
-      }
-      vortex.geometry.attributes.position.needsUpdate = true;
-      group.rotation.y -= 0.012;
-    });
-  }
-  return group;
+function propelToAstro(idx) {
+  if (idx < 0 || idx >= ARTWORKS_24.length) return;
+  nai3D.currentIndex = idx;
+  const target = astros24[idx].worldPos;
+  const approachVec = new THREE.Vector3().subVectors(camera.position, target).normalize().multiplyScalar(3.2);
+  const targetCamPos = new THREE.Vector3().addVectors(target, approachVec);
+  velocity.copy(new THREE.Vector3().subVectors(targetCamPos, camera.position).multiplyScalar(0.06));
+  speakNai(`Aproximándonos a ${astros24[idx].data.title}. ${astros24[idx].data.sub}.`);
 }
 
-// ── CONTROLES Y EVENTOS ───────────────────────────────────────────
+// ── CONTROLES INERCIALES 6DOF ─────────────────────────────────────
 function setup6DOFControls() {
   window.addEventListener('mousedown', (e) => {
     if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-bay-overlay')) return;
@@ -1125,11 +991,8 @@ function setup6DOFControls() {
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    const dx = e.clientX - dragPrev.x;
-    const dy = e.clientY - dragPrev.y;
-
+    const dx = e.clientX - dragPrev.x, dy = e.clientY - dragPrev.y;
     if (isInShopMode) {
-      // Rotar el objeto 3D del producto
       targetProductRotation.y += dx * 0.01;
       targetProductRotation.x += dy * 0.01;
     } else {
@@ -1170,20 +1033,10 @@ function setup6DOFControls() {
   });
 }
 
-function propelToAnomaly(idx) {
-  if (idx < 0 || idx >= ASTROS_DATA.length) return;
-  nai3D.currentIndex = idx;
-  const target = astros[idx].worldPos;
-  const approachVec = new THREE.Vector3().subVectors(camera.position, target).normalize().multiplyScalar(3.2);
-  const targetCamPos = new THREE.Vector3().addVectors(target, approachVec);
-  velocity.copy(new THREE.Vector3().subVectors(targetCamPos, camera.position).multiplyScalar(0.06));
-  speakNai(`Aproximándonos a ${astros[idx].data.title}. ${astros[idx].data.sub}.`);
-}
-
 function updateOrbitalProximity() {
   if (isInShopMode) return;
   let nearest = null, minDist = 6.0;
-  astros.forEach(a => {
+  astros24.forEach(a => {
     const dist = camera.position.distanceTo(a.worldPos);
     if (dist < minDist) { minDist = dist; nearest = a; }
   });
@@ -1196,7 +1049,7 @@ function updateOrbitalProximity() {
       currentFocusedAstro = nearest;
       const d = nearest.data;
       document.getElementById('hud-cat').textContent = d.cat;
-      document.getElementById('hud-solver').textContent = d.timonelMetric;
+      document.getElementById('hud-solver').textContent = d.metric;
       document.getElementById('hud-title').textContent = d.title;
       document.getElementById('hud-sub').textContent = d.sub;
       document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
@@ -1211,7 +1064,7 @@ function updateOrbitalProximity() {
   }
 }
 
-// ── BUCLE DE ANIMACIÓN PRINCIPAL ──────────────────────────────────
+// ── BUCLE PRINCIPAL DE ANIMACIÓN Y SILICIO ─────────────────────────
 let prevTime = performance.now();
 
 function animate() {
@@ -1221,15 +1074,20 @@ function animate() {
   const delta = (time - prevTime) / 1000;
   prevTime = time;
 
+  // Medir rendimiento local para el enjambre
+  totalEvaluations += Math.floor(delta * 480000);
+  const localThroughputEl = document.getElementById('swarm-local-throughput');
+  if (localThroughputEl && Math.random() < 0.05) {
+    localThroughputEl.textContent = (480000 + Math.floor(Math.sin(time * 0.002) * 15000)).toLocaleString();
+  }
+
   if (isInShopMode) {
-    // Interpolación de cámara al pedestal de la tienda
-    camera.position.lerp(new THREE.Vector3(0, 0, 40.5), 0.08);
-    const targetLook = new THREE.Vector3(0, 0, 36.0);
+    camera.position.lerp(new THREE.Vector3(0, 0, 46.5), 0.08);
+    const targetLook = new THREE.Vector3(0, 0, 42.0);
     const m = new THREE.Matrix4().lookAt(camera.position, targetLook, new THREE.Vector3(0, 1, 0));
     const q = new THREE.Quaternion().setFromRotationMatrix(m);
     camera.quaternion.slerp(q, 0.08);
 
-    // Rotación suave del producto 3D activo
     productRotation.x += (targetProductRotation.x - productRotation.x) * 0.1;
     productRotation.y += (targetProductRotation.y - productRotation.y) * 0.1;
 
@@ -1242,7 +1100,6 @@ function animate() {
     });
 
   } else {
-    // Modo Vuelo Libre 6DOF
     orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
     orientation.yaw += (targetOrientation.yaw - orientation.yaw) * 0.12;
     camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
@@ -1253,15 +1110,15 @@ function animate() {
     // Atractor de NAI si el usuario está inactivo > 2.5s
     userInertiaTimer += delta;
     if (userInertiaTimer > 2.5 && !isDragging) {
-      const currentAstro = astros[nai3D.currentIndex];
-      if (currentAstro) {
+      const curAstro = astros24[nai3D.currentIndex];
+      if (curAstro) {
         const targetPos = new THREE.Vector3(
-          currentAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
-          currentAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
-          currentAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
+          curAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
+          curAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
+          curAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
         );
         camera.position.lerp(targetPos, 0.008);
-        const m = new THREE.Matrix4().lookAt(camera.position, currentAstro.worldPos, new THREE.Vector3(0, 1, 0));
+        const m = new THREE.Matrix4().lookAt(camera.position, curAstro.worldPos, new THREE.Vector3(0, 1, 0));
         const q = new THREE.Quaternion().setFromRotationMatrix(m);
         camera.quaternion.slerp(q, 0.012);
         const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
@@ -1273,7 +1130,7 @@ function animate() {
     // Dinámica de NAI 3D
     if (nai3D.group) {
       nai3D.pulseTime += delta;
-      const curAstro = astros[nai3D.currentIndex];
+      const curAstro = astros24[nai3D.currentIndex];
       if (curAstro) {
         const naiTarget = new THREE.Vector3(
           curAstro.worldPos.x + Math.sin(nai3D.pulseTime * 0.8) * 1.8,
@@ -1287,12 +1144,12 @@ function animate() {
       nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
     }
 
-    astros.forEach(a => a.timonelRing.lookAt(camera.position));
+    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
     updateOrbitalProximity();
   }
 
-  // Actualizar las 6 ecuaciones vivas
-  dynamicUpdaters.forEach(fn => fn(delta));
+  // Actualizar los 24 hilos de relajación topológica
+  knotFilamentUpdaters.forEach(fn => fn(delta));
   renderer.render(scene, camera);
 }
 
@@ -1309,7 +1166,7 @@ function enterCapsule(enableVoice) {
   const foyer = document.getElementById('foyer-screen');
   foyer.style.opacity = '0';
   setTimeout(() => foyer.classList.add('hidden'), 1000);
-  speakNai("Iniciando propulsión orbital. Explora el cosmos de ecuaciones a tu ritmo.");
+  speakNai("Bienvenido al Atlas Cósmico. 24 leyes de la ciencia se están desenredando en el espacio.");
 }
 
 function toggleVoiceGuide() {
@@ -1328,19 +1185,12 @@ function speakNai(text) {
   stopNaiSpeech();
   currentUtterance = new SpeechSynthesisUtterance(text);
   currentUtterance.lang = 'es-ES';
-  currentUtterance.rate = 0.94;
-  currentUtterance.pitch = 0.96;
+  currentUtterance.rate = 0.94; currentUtterance.pitch = 0.96;
   const voices = window.speechSynthesis.getVoices();
   const esVoice = voices.find(v => v.lang.startsWith('es'));
   if (esVoice) currentUtterance.voice = esVoice;
-  currentUtterance.onstart = () => {
-    isSpeaking = true;
-    document.getElementById('nai-voice-waves').classList.remove('hidden');
-  };
-  currentUtterance.onend = () => {
-    isSpeaking = false;
-    document.getElementById('nai-voice-waves').classList.add('hidden');
-  };
+  currentUtterance.onstart = () => { isSpeaking = true; document.getElementById('nai-voice-waves').classList.remove('hidden'); };
+  currentUtterance.onend = () => { isSpeaking = false; document.getElementById('nai-voice-waves').classList.add('hidden'); };
   window.speechSynthesis.speak(currentUtterance);
 }
 
@@ -1365,7 +1215,7 @@ function triggerShutter() {
   const canvas = document.getElementById('webgl-canvas');
   const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
-  const title = currentFocusedAstro ? currentFocusedAstro.data.title : 'Observatorio Orbital';
+  const title = currentFocusedAstro ? currentFocusedAstro.data.title : 'Atlas Cósmico';
   userCameraRoll.unshift({
     id: Date.now(),
     artTitle: title,
@@ -1414,7 +1264,7 @@ function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll 
 function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
 
 window.addEventListener('DOMContentLoaded', () => {
-  initOrbitalSpace();
+  initAtlasCosmico();
 });
 </script>
 </body>

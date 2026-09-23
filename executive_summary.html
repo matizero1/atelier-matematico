@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Atelier Matemático — Resumen Ejecutivo & Plan Maestro</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #030208; --card: rgba(12, 10, 24, 0.82); --border: rgba(168, 85, 247, 0.22); --cyan: #38bdf8; }
+  body { background: var(--bg); color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .serif { font-family: 'Cinzel', serif; }
+  .mono  { font-family: 'Space Mono', monospace; }
+  .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid var(--border); }
+  .glow-card:hover { border-color: rgba(56, 189, 248, 0.45); box-shadow: 0 0 25px rgba(139, 92, 246, 0.2); }
+</style>
+</head>
+<body class="p-6 md:p-12 max-w-6xl mx-auto space-y-12 selection:bg-purple-900 selection:text-white">
+
+  <!-- HEADER EDITORIAL -->
+  <header class="border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
+        Documento Ejecutivo & Estratégico · v4.2
+      </div>
+      <h1 class="text-3xl md:text-5xl serif font-bold text-white tracking-tight">
+        ATELIER MATEMÁTICO
+      </h1>
+      <p class="text-sm md:text-base text-slate-300 font-light mt-2 max-w-2xl">
+        Observatorio Orbital en Gravedad Cero, Ecuaciones Vivas en Silicio y Modelo Comercial de Cuadros Físicos de Autor.
+      </p>
+    </div>
+    <div class="text-left md:text-right mono text-xs text-slate-400 space-y-1 bg-white/5 p-4 rounded-xl border border-white/10">
+      <div><span class="text-slate-500">Fundador:</span> <strong class="text-white">Matías Cortés Figueroa</strong></div>
+      <div><span class="text-slate-500">Motor:</span> <span class="text-cyan-400">Three.js + Timonel F2 (Apple Silicon)</span></div>
+      <div><span class="text-slate-500">Estado:</span> <span class="text-emerald-400">En Producción (Live GitHub Pages)</span></div>
+    </div>
+  </header>
+
+  <!-- 1. QUÉ ES LO QUE ESTAMOS CREANDO (PROPUESTA DE VALOR) -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-2 text-cyan-400 mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 01 · Tesis & Propuesta de Valor
+    </div>
+    <div class="glass p-6 md:p-8 rounded-2xl space-y-4">
+      <h2 class="text-xl md:text-2xl serif font-bold text-white">
+        El Santuario Orbital donde las Ecuaciones Viven Libres en el Silicio
+      </h2>
+      <p class="text-sm text-slate-300 leading-relaxed font-light">
+        El proyecto fusiona **computación científica real en silicio**, **arte generativo determinista sin prompts de IA** y un **modelo comercial de venta de cuadros físicos fine-art**. No reproduce un museo terrestre con paredes ni vitrinas; sitúa al usuario dentro de una cápsula en gravedad cero donde 6 de las mayores ecuaciones de la física (Lorenz, Chladni, Riemann, Ricci, Hopf, Navier-Stokes) se calculan en tiempo real como astros vivos.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-white/10 text-xs">
+        <div class="p-3 bg-black/40 rounded-xl border border-white/5">
+          <div class="text-purple-400 font-bold mb-1">Cero Enlatados</div>
+          <p class="text-slate-400">Cada frame integra Ecuaciones Diferenciales (RK4, EDPs de Helmholtz, Flujo de Ricci) en vivo.</p>
+        </div>
+        <div class="p-3 bg-black/40 rounded-xl border border-white/5">
+          <div class="text-cyan-400 font-bold mb-1">Presencia Incorpórea (6DOF)</div>
+          <p class="text-slate-400">Cero suelo. Vuelo orbital inercial con fricción viscosa y atractor cinético guiado por NAI.</p>
+        </div>
+        <div class="p-3 bg-black/40 rounded-xl border border-white/5">
+          <div class="text-amber-400 font-bold mb-1">Monetización Dual</div>
+          <p class="text-slate-400">Captura de carrete digital 4K ($5–$10 USD) + Cuadros físicos de autor en Santiago ($68k–$120k CLP).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. ESPECIFICACIÓN COMPUTACIONAL: CÓMO SE LOGRA EL CONTROL TOTAL -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-2 text-purple-400 mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-purple-400"></span> 02 · Especificación Técnica de Control Total en Silicio
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Bloque 1: Manipulación de Parámetros en Vivo -->
+      <div class="glass p-6 rounded-2xl space-y-3 glow-card transition">
+        <div class="text-xs mono text-cyan-300 font-bold flex items-center gap-2">
+          <span>⚙️</span> DIALES DE PARÁMETROS EN VIVO
+        </div>
+        <h3 class="text-base serif font-bold text-white">Alterar las Leyes Físicas en Tiempo Real</h3>
+        <p class="text-xs text-slate-300 leading-relaxed font-light">
+          Permite al usuario modular las constantes fundamentales en pantalla y ver el colapso/bifurcación instantánea:
+        </p>
+        <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside font-mono">
+          <li><strong>Lorenz:</strong> Slider de Rayleigh $\rho \in [0.5, 35.0]$ (de laminar a caos salvaje).</li>
+          <li><strong>Chladni:</strong> Diales armónicos $(n,m) \in [1, 8]$ para tejer nuevos mandalas.</li>
+          <li><strong>Ricci:</strong> Inyección de perturbación de arruga métrica para ver el alisamiento.</li>
+        </ul>
+      </div>
+
+      <!-- Bloque 2: Freno y Deformación Temporal -->
+      <div class="glass p-6 rounded-2xl space-y-3 glow-card transition">
+        <div class="text-xs mono text-amber-300 font-bold flex items-center gap-2">
+          <span>⏳</span> FRENO & DILATACIÓN TEMPORAL (TIME WARP)
+        </div>
+        <h3 class="text-base serif font-bold text-white">Control del Paso de Integración $dt$</h3>
+        <p class="text-xs text-slate-300 leading-relaxed font-light">
+          Manipulación directa del integrador numérico para contemplación táctil:
+        </p>
+        <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside font-mono">
+          <li><strong>Pausa ($dt = 0$):</strong> Congela el cosmos para orbitar la escultura estática.</li>
+          <li><strong>Cámara Lenta ($dt \times 0.1$):</strong> Inspección microscópica de trayectorias.</li>
+          <li><strong>Tiempo Inverso ($dt < 0$):</strong> Rebobinado determinista de la física.</li>
+        </ul>
+      </div>
+
+      <!-- Bloque 3: Sondas Interactivas de Partículas -->
+      <div class="glass p-6 rounded-2xl space-y-3 glow-card transition">
+        <div class="text-xs mono text-emerald-300 font-bold flex items-center gap-2">
+          <span>🎯</span> INYECCIÓN DE SONDAS & TRAZADORES
+        </div>
+        <h3 class="text-base serif font-bold text-white">Disparo de Partículas en Campos Vectoriales</h3>
+        <p class="text-xs text-slate-300 leading-relaxed font-light">
+          Al hacer clic o tocar la pantalla, la cápsula dispara una ráfaga de 100 partículas trazadoras iluminadas para ver los flujos y cuencas de atracción del astro enfocado.
+        </p>
+      </div>
+
+      <!-- Bloque 4: Grabador Nativo de Video 60 FPS -->
+      <div class="glass p-6 rounded-2xl space-y-3 glow-card transition">
+        <div class="text-xs mono text-pink-300 font-bold flex items-center gap-2">
+          <span>📹</span> GRABADOR NATIVO 15s / 30s PARA REELS/TIKTOK
+        </div>
+        <h3 class="text-base serif font-bold text-white">Exportación de Video a 60 FPS con un Clic</h3>
+        <p class="text-xs text-slate-300 leading-relaxed font-light">
+          Implementación de `canvas.captureStream(60)` + `MediaRecorder` directamente en el visor 3D para descargar clips listos en formato vertical/horizontal para redes sociales.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. MODELO COMERCIAL & ECONOMÍA UNITARIA (SANTIAGO) -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-2 text-emerald-400 mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 03 · Economía Unitaria & Plan Comercial
+    </div>
+    <div class="glass p-6 md:p-8 rounded-2xl space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-xl serif font-bold text-white">Estrategia de Venta Print-on-Demand (Santiago de Chile)</h2>
+          <p class="text-xs text-slate-400">Modelo a costo cero de bolsillo: se financia la producción con el 50% de anticipo del cliente.</p>
+        </div>
+        <div class="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs mono text-emerald-300">
+          Meta Inmediata: 5 a 6 Cuadros = Cubre deuda de $235 USD
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr class="border-b border-white/10 text-slate-400 mono">
+              <th class="py-2.5">Obra & Formato</th>
+              <th class="py-2.5">Especificación Física</th>
+              <th class="py-2.5">Costo Prod.</th>
+              <th class="py-2.5">Precio Venta</th>
+              <th class="py-2.5 text-emerald-300">Margen Neto</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 font-mono">
+            <tr>
+              <td class="py-3 font-bold text-white font-sans">Los Cantos de Chladni</td>
+              <td class="text-slate-400">50×70 cm Fine Art · Paspartú libre de ácido · Madera negra</td>
+              <td>~$26.000 CLP</td>
+              <td class="text-amber-300 font-bold">$68.000 CLP</td>
+              <td class="text-emerald-400 font-bold">+$42.000 CLP (61.7%)</td>
+            </tr>
+            <tr>
+              <td class="py-3 font-bold text-white font-sans">El Vuelo de Lorenz</td>
+              <td class="text-slate-400">50×70 cm Fine Art · Paspartú libre de ácido · Madera negra</td>
+              <td>~$26.000 CLP</td>
+              <td class="text-amber-300 font-bold">$68.000 CLP</td>
+              <td class="text-emerald-400 font-bold">+$42.000 CLP (61.7%)</td>
+            </tr>
+            <tr>
+              <td class="py-3 font-bold text-white font-sans">Los Ceros de Riemann</td>
+              <td class="text-slate-400">40×60 cm Acrílico Luxury pulido 4mm con bastidor flotante</td>
+              <td>~$45.000 CLP</td>
+              <td class="text-amber-300 font-bold">$120.000 CLP</td>
+              <td class="text-emerald-400 font-bold">+$75.000 CLP (62.5%)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. EMBUDO VIRAL: TIKTOK & REELS A WHATSAPP -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-2 text-pink-400 mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-pink-400"></span> 04 · Embudo de Adquisición Viral (Reels / TikTok)
+    </div>
+    <div class="glass p-6 md:p-8 rounded-2xl space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+        <div class="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2">
+          <div class="text-purple-400 font-bold mono">PASO 1: Grabación</div>
+          <p class="text-slate-400">Entras a la web, pulsas <strong>Reel 15s</strong> y realizas un vuelo orbital alrededor de Lorenz o Chladni a 60 FPS.</p>
+        </div>
+        <div class="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2">
+          <div class="text-pink-400 font-bold mono">PASO 2: Publicación</div>
+          <p class="text-slate-400">Subes el clip con un audio atmosférico en tendencia y el copy de la historia real (el aleteo de Lorenz o el violín de Chladni).</p>
+        </div>
+        <div class="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2">
+          <div class="text-cyan-400 font-bold mono">PASO 3: Tráfico a la Web</div>
+          <p class="text-slate-400">El link en bio lleva a <code class="text-cyan-300">matizero1.github.io/atelier-matematico</code>. Los usuarios entran a cazar fotos.</p>
+        </div>
+        <div class="p-4 bg-black/40 rounded-xl border border-white/5 space-y-2">
+          <div class="text-emerald-400 font-bold mono">PASO 4: Cierre WhatsApp</div>
+          <p class="text-slate-400">Los clientes pulsan "Encargar Cuadro" y abren chat pre-redactado contigo con 50% de anticipo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. HOJA DE RUTA & QUÉ DEBES HACER TÚ (INSTRUCCIONES EXACTAS) -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-2 text-amber-400 mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span> 05 · Hoja de Ruta & Tus Instrucciones
+    </div>
+    <div class="glass p-6 md:p-8 rounded-2xl space-y-4">
+      <h2 class="text-xl serif font-bold text-white">Plan de Acción Inmediato para Matías</h2>
+      
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="flex items-start gap-3 p-3 bg-white/5 rounded-xl">
+          <span class="mono px-2 py-0.5 rounded bg-purple-600/40 text-purple-200 font-bold">1</span>
+          <div>
+            <strong class="text-white">Generar el Primer Archivo de Impresión a 300 DPI:</strong>
+            <p class="text-slate-400 mt-0.5">Dime: <code class="text-cyan-300 font-mono">"Genera la lámina de 300 DPI para Chladni y Lorenz"</code> para exportar las imágenes maestras en 5906×8268 px listas para enviar a la imprenta.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-3 bg-white/5 rounded-xl">
+          <span class="mono px-2 py-0.5 rounded bg-purple-600/40 text-purple-200 font-bold">2</span>
+          <div>
+            <strong class="text-white">Integrar los Diales Táctiles & Grabador en el Observatorio 3D:</strong>
+            <p class="text-slate-400 mt-0.5">Dime: <code class="text-cyan-300 font-mono">"Agrega los diales de parámetros en vivo y el grabador de Reels al observatorio 3D"</code> para programar los sliders de física y botones de captura en <code class="text-slate-400">museum.html</code>.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-3 bg-white/5 rounded-xl">
+          <span class="mono px-2 py-0.5 rounded bg-purple-600/40 text-purple-200 font-bold">3</span>
+          <div>
+            <strong class="text-white">Publicar el Primer Video en Instagram/TikTok:</strong>
+            <p class="text-slate-400 mt-0.5">Grabar 15s de Chladni desde la web, pegar el copy preparado y subirlo con tu cuenta <code class="text-purple-300 font-mono">@atelier.matematico</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="pt-6 border-t border-white/10 text-center mono text-xs text-slate-500">
+    Atelier Matemático · Desarrollado por Matías Cortés Figueroa · Silicio Nativo & Timonel F2
+  </footer>
+
+</body>
+</html>

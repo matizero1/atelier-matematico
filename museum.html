@@ -2,252 +2,186 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Museo del Infinito — Atelier Matemático</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Atelier Matemático — Museo 3D en Penumbra</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<script src="js/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #030308;
-    --card: rgba(10, 10, 24, 0.85);
-    --border: rgba(140, 120, 255, 0.15);
-    --accent: #8b5cf6;
+    --bg: #050508;
+    --card: rgba(12, 12, 20, 0.88);
+    --border: rgba(180, 140, 255, 0.15);
   }
-  body {
-    background-color: var(--bg);
-    color: #e2e8f0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    overflow-x: hidden;
-    user-select: none;
+  body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background-color: var(--bg); color: #e2e8f0;
+    overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif;
+    user-select: none; -webkit-user-select: none;
   }
   .serif { font-family: 'Cinzel', serif; }
   .mono  { font-family: 'Space Mono', monospace; }
   .glass {
     background: var(--card);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border);
   }
-  .glow:hover {
-    border-color: rgba(168, 85, 247, 0.5);
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
-  }
   
-  /* PERSPECTIVA ESPACIAL DEL PASILLO 3D */
-  #corridor-viewport {
-    perspective: 1000px;
-    perspective-origin: 50% 50%;
-    transform-style: preserve-3d;
-  }
-  #corridor-track {
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .museum-station {
-    transform-style: preserve-3d;
-  }
-  .wall-left {
-    transform: rotateY(55deg) translateZ(80px);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .wall-right {
-    transform: rotateY(-55deg) translateZ(80px);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .wall-left:hover {
-    transform: rotateY(40deg) translateZ(120px) scale(1.04);
-  }
-  .wall-right:hover {
-    transform: rotateY(-40deg) translateZ(120px) scale(1.04);
+  /* Canvas WebGL 3D a pantalla completa */
+  #webgl-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: block; z-index: 1; outline: none;
   }
 
   /* Flash de cámara fotográfica */
   #camera-flash {
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s ease-out;
+    position: fixed; inset: 0; background: white; z-index: 100;
+    pointer-events: none; opacity: 0; transition: opacity 0.4s ease-out;
   }
-  .flashing {
-    opacity: 0.85 !important;
-    transition: opacity 0.05s ease-in !important;
+  .flashing { opacity: 0.9 !important; transition: opacity 0.04s ease-in !important; }
+
+  /* Mira o puntero sutil en el centro */
+  #reticle {
+    position: fixed; top: 50%; left: 50%; width: 6px; height: 6px;
+    background: rgba(255,255,255,0.4); border-radius: 50%;
+    transform: translate(-50%, -50%); z-index: 20; pointer-events: none;
+    transition: all 0.2s ease;
+  }
+  #reticle.active {
+    width: 32px; height: 32px; background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.7);
   }
 
   /* Scrollbar */
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 2px; }
 </style>
 </head>
-<body class="selection:bg-purple-900 selection:text-purple-100">
+<body>
 
-<!-- FLASH DE CÁMARA (EFECTO OBTURADOR) -->
-<div id="camera-flash" class="fixed inset-0 bg-white z-[100]"></div>
+<!-- FLASH DE CÁMARA -->
+<div id="camera-flash"></div>
 
-<!-- HEADER / NAVEGACIÓN SUPERIOR DEL MUSEO -->
-<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center transition-all">
-  <div class="flex items-center gap-3">
-    <button onclick="exitFocusMode()" class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20 group">
-      <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono group-hover:scale-110 transition">🏛️</div>
-    </button>
+<!-- RETÍCULA DE APUNTADO EN PRIMERA PERSONA -->
+<div id="reticle"></div>
+
+<!-- CANVAS WEBGL PRINCIPAL -->
+<canvas id="webgl-canvas"></canvas>
+
+<!-- ========================================================================= -->
+<!-- HUD SUPERIOR PERMANENTE                                                   -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-0 right-0 z-30 py-4 px-6 md:px-10 flex justify-between items-center pointer-events-none">
+  <div class="flex items-center gap-3 pointer-events-auto">
+    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
+      <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">🏛️</div>
+    </div>
     <div>
-      <span class="serif tracking-[.2em] text-white text-xs md:text-sm font-semibold block">MUSEO DEL INFINITO</span>
-      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">Atelier Matemático · Caza de Fórmulas</span>
+      <span class="serif tracking-[.25em] text-white text-xs md:text-sm font-semibold block">ATELIER MATEMÁTICO</span>
+      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Museo en Penumbra · Vitrinas Holográficas</span>
     </div>
   </div>
 
-  <!-- HUD CENTRAL: MODO PASILLO O MODO CONTEMPLACIÓN -->
-  <div class="hidden md:flex items-center gap-2 glass px-4 py-1.5 rounded-full border-white/10 text-xs mono text-slate-300">
-    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-    <span id="nav-mode-indicator">Pasillo Principal · Desliza para caminar</span>
+  <!-- HUD CENTRAL: GUÍA DE MOVIMIENTO -->
+  <div id="controls-hint" class="hidden md:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-white/10 text-[11px] mono text-slate-300 pointer-events-auto">
+    <span class="text-cyan-400 font-bold">W, A, S, D</span> o <span class="text-cyan-400 font-bold">Flechas</span> para caminar · Arrastra para mirar
   </div>
 
-  <!-- DERECHA: BOTONES DE CARRETE & TIENDA -->
-  <div class="flex items-center gap-2.5">
-    <!-- Botón Volver al Pasillo (visible solo en contemplación) -->
-    <button id="btn-back-corridor" onclick="exitFocusMode()" class="hidden glass hover:bg-white/10 text-slate-200 text-xs px-3.5 py-1.5 rounded-full mono transition items-center gap-1.5">
-      <span>← Volver al Pasillo</span>
-    </button>
-
-    <!-- Botón Carrete Fotográfico del Usuario -->
+  <!-- DERECHA: CARRETE & TIENDA -->
+  <div class="flex items-center gap-2.5 pointer-events-auto">
+    <!-- Botón Carrete Fotográfico -->
     <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2 group">
       <span>📷</span>
-      <span>Mi Carrete</span>
+      <span class="hidden sm:inline">Mi Carrete</span>
       <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
     </button>
 
-    <!-- Botón Tienda de Cuadros Físicos -->
+    <!-- Botón Tienda -->
     <button onclick="toggleShop()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
       <span>🖼️</span>
-      <span class="hidden sm:inline">Tienda de Cuadros</span>
+      <span class="hidden sm:inline">Cuadros de Autor</span>
     </button>
   </div>
 </header>
 
 <!-- ========================================================================= -->
-<!-- VISTA 1: EL PASILLO 3D DEL MUSEO (CORRIDOR WALKTHROUGH)                   -->
+<!-- PROMPT DE INTERACCIÓN AL ACERCARSE A UNA VITRINA                           -->
 <!-- ========================================================================= -->
-<section id="corridor-view" class="pt-24 min-h-screen relative overflow-hidden flex flex-col justify-center items-center">
+<div id="approach-prompt" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 transition-opacity duration-300">
+  <div class="glass px-6 py-2.5 rounded-full border-purple-500/40 shadow-2xl flex items-center gap-3 text-xs mono">
+    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+    <span id="approach-title" class="font-bold text-white uppercase tracking-wider">OBRA ENFOCADA</span>
+    <span class="text-slate-400">·</span>
+    <span class="text-purple-300">Presiona <kbd class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">ESPACIO</kbd> o Haz Clic para Contemplar</span>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODO CONTEMPLACIÓN EN PRIMER PLANO (DETALLE EDITORIAL + DISPARADOR)        -->
+<!-- ========================================================================= -->
+<div id="contemplation-modal" class="fixed inset-0 z-40 bg-black/85 backdrop-blur-md p-6 md:p-12 flex justify-end items-center hidden transition-opacity duration-500">
   
-  <!-- Guía de navegación sutil -->
-  <div class="text-center z-10 mb-4 pointer-events-none">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-2">
-      Usa la rueda del mouse o las flechas para caminar por el pasillo
+  <!-- Tarjeta Editorial Flotante a la Derecha -->
+  <div class="w-full max-w-lg glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/15 relative overflow-hidden shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+    <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div>
+      <div class="flex justify-between items-center text-xs text-purple-400 mono mb-2">
+        <span id="modal-cat">TEORÍA DEL CAOS · 1963</span>
+        <span id="modal-solver">Runge-Kutta 4</span>
+      </div>
+
+      <h2 id="modal-title" class="text-2xl md:text-3xl serif font-bold text-white mb-1">El Vuelo de Lorenz</h2>
+      <p id="modal-sub" class="text-xs text-purple-300/70 mono mb-5">El aleteo que gobierna el infinito</p>
+
+      <!-- Ecuación -->
+      <div class="bg-black/50 rounded-xl p-3.5 border border-white/10 mb-5">
+        <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
+        <div id="modal-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
+      </div>
+
+      <!-- Origen Histórico -->
+      <div class="mb-5">
+        <h3 class="text-xs uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
+        </h3>
+        <p id="modal-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
+      </div>
+
+      <!-- Interpretación Poética -->
+      <div class="mb-6">
+        <h3 class="text-xs uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
+        </h3>
+        <p id="modal-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
+      </div>
     </div>
-    <p class="text-xs text-slate-400 font-light">Haz clic en cualquier cuadro a la izquierda o derecha para contemplarlo de frente</p>
-  </div>
 
-  <!-- Viewport 3D -->
-  <div id="corridor-viewport" class="w-full max-w-6xl h-[620px] relative flex justify-center items-center">
-    
-    <!-- Pistas del pasillo (avanza en Z con scroll) -->
-    <div id="corridor-track" class="w-full h-full relative flex items-center justify-center">
-      <!-- Las estaciones del pasillo se generan dinámicamente en JS -->
+    <!-- OBTURADOR RITUAL CON TEMPORIZADOR OBLIGATORIO -->
+    <div class="pt-4 border-t border-white/10 flex flex-col gap-3">
+      <div id="shutter-timer-badge" class="glass px-3 py-1 rounded-full text-[10px] mono text-purple-300/80 flex items-center justify-center gap-2">
+        <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+        <span id="shutter-countdown-text">Contempla la obra... (10s para calibrar obturador)</span>
+      </div>
+
+      <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white py-3 rounded-xl font-mono text-xs flex items-center justify-center gap-2.5 transition-all transform border border-purple-400/30">
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-white flex items-center justify-center p-[1px]">
+          <div class="w-full h-full bg-red-500 rounded-full"></div>
+        </div>
+        <span id="btn-shutter-label">Obturador Bloqueado</span>
+      </button>
+
+      <button onclick="exitContemplation()" class="text-center text-xs mono text-slate-400 hover:text-white transition py-1">
+        ← Volver a caminar por el museo
+      </button>
     </div>
 
   </div>
-
-  <!-- Controles de navegación en el pasillo -->
-  <div class="flex items-center gap-4 z-20 mt-4 mb-8">
-    <button onclick="navigateCorridor(-1)" class="glass hover:bg-white/15 text-white w-10 h-10 rounded-full flex items-center justify-center mono transition">←</button>
-    <div class="text-xs mono text-purple-300/80 glass px-4 py-1.5 rounded-full" id="corridor-index-label">Sala 1 de 8</div>
-    <button onclick="navigateCorridor(1)" class="glass hover:bg-white/15 text-white w-10 h-10 rounded-full flex items-center justify-center mono transition">→</button>
-  </div>
-
-</section>
+</div>
 
 <!-- ========================================================================= -->
-<!-- VISTA 2: MODO CONTEMPLACIÓN DE FRENTE (FOCUS MODE FULLSCREEN)              -->
-<!-- ========================================================================= -->
-<section id="focus-view" class="fixed inset-0 z-40 bg-[#04020c] pt-20 px-4 md:px-10 pb-8 flex flex-col hidden overflow-y-auto">
-  <div class="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch my-auto">
-    
-    <!-- Canvas de la Fórmula en Vivo (8 Cols) -->
-    <div class="lg:col-span-8 glass rounded-2xl p-2 relative flex flex-col min-h-[500px] md:min-h-[620px] shadow-2xl overflow-hidden group">
-      <canvas id="focus-canvas" class="w-full h-full rounded-xl cursor-grab active:cursor-grabbing bg-[#04020c] block flex-1"></canvas>
-      
-      <!-- Barra superior flotante sobre el canvas -->
-      <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
-        <div class="glass px-3.5 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto border-white/10">
-          <span class="text-xs text-purple-300 mono" id="focus-badge">OBRA 21</span>
-          <span class="text-slate-500 text-xs">•</span>
-          <span class="text-xs text-white/90 font-medium" id="focus-title-mini">Los Ceros de Riemann</span>
-        </div>
-
-        <div class="flex gap-2 pointer-events-auto items-center">
-          <button onclick="togglePalette()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">
-            <span class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-amber-400"></span>Paleta
-          </button>
-          <button onclick="restartArtwork()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">↻ Reiniciar</button>
-        </div>
-      </div>
-
-      <!-- BOTÓN DEL OBTURADOR / CÁMARA (CON TEMPORIZADOR DE CONTEMPLACIÓN) -->
-      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-auto">
-        
-        <!-- Estado del Obturador (Calibrando / Desbloqueado) -->
-        <div id="shutter-timer-badge" class="glass px-3.5 py-1 rounded-full text-[10px] mono text-purple-300/80 border-purple-500/20 flex items-center gap-2">
-          <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          <span id="shutter-countdown-text">Contempla la obra... (10s para calibrar obturador)</span>
-        </div>
-
-        <!-- Botón Disparador estilo Cámara Clásica -->
-        <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white px-6 py-2.5 rounded-full font-mono text-xs flex items-center gap-2.5 shadow-xl transition-all transform hover:scale-105 active:scale-95 border border-purple-400/30">
-          <div class="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center p-[1px]">
-            <div class="w-full h-full bg-red-500 rounded-full"></div>
-          </div>
-          <span id="btn-shutter-label">Obturador Bloqueado</span>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- Editorial Card a la derecha (4 Cols) -->
-    <div class="lg:col-span-4 glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/10 relative overflow-hidden">
-      <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div>
-        <div class="flex justify-between text-xs text-purple-400 mono mb-2">
-          <span id="focus-cat">PROBLEMA DEL MILENIO · 1859</span>
-          <span id="focus-solver">Riemann-Siegel Formula</span>
-        </div>
-        <h2 id="focus-title" class="text-2xl md:text-3xl serif font-bold text-white mb-1">Los Ceros de Riemann</h2>
-        <p id="focus-sub" class="text-xs text-purple-300/70 mono mb-5">El enigma de un millón de dólares en la línea crítica</p>
-
-        <!-- Ecuación -->
-        <div class="bg-black/40 rounded-xl p-3.5 border border-white/5 mb-5">
-          <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
-          <div id="focus-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
-        </div>
-
-        <!-- Historia -->
-        <div class="mb-5">
-          <h3 class="text-xs uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
-          </h3>
-          <p id="focus-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
-        </div>
-
-        <!-- Poema -->
-        <div class="mb-5">
-          <h3 class="text-xs uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
-          </h3>
-          <p id="focus-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
-        </div>
-      </div>
-
-      <!-- Pie de la tarjeta editorial -->
-      <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs mono text-slate-400">
-        <span>Girar: Arrastra el mouse</span>
-        <button onclick="exitFocusMode()" class="text-purple-300 hover:text-white underline">Salir a sala</button>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
-<!-- ========================================================================= -->
-<!-- DRAWER 1: CARRETE DE FOTOS DEL USUARIO (MI CARRETE)                       -->
+<!-- DRAWER: CARRETE DE FOTOS (FOTOGRAFÍAS CAPTURADAS POR EL USUARIO)           -->
 <!-- ========================================================================= -->
 <div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
   <div>
@@ -256,36 +190,32 @@
         <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
           <span>📷</span> Tu Carrete Fotográfico
         </h3>
-        <p class="text-xs text-slate-400 mono">Instantes capturados en el cosmos vivo</p>
+        <p class="text-xs text-slate-400 mono">Instantes cazados en las vitrinas</p>
       </div>
       <button onclick="toggleCameraRoll()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
     </div>
 
-    <!-- Indicador de límite de 30 fotos -->
     <div class="glass p-3 rounded-xl mb-4 flex items-center justify-between text-xs mono text-purple-300">
       <span>Capacidad gratuita de memoria:</span>
       <span id="roll-capacity-text" class="font-bold text-white">0 / 30 fotos</span>
     </div>
 
-    <!-- Grilla de fotos capturadas -->
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
-      <!-- Fotos se agregan aquí dinámicamente -->
       <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
-        Aún no has tomado fotos.<br>
-        Entra a cualquier obra, contempla y dispara el obturador cuando el instante sea perfecto.
+        Aún no has tomado fotografías.<br>
+        Camina hasta una vitrina, contempla de cerca y dispara el obturador cuando el instante sea perfecto.
       </div>
     </div>
   </div>
 
-  <!-- Pie del Carrete: Paquetes Digitales -->
   <div class="pt-4 border-t border-white/10 space-y-2">
-    <div class="text-[11px] mono text-slate-400 text-center mb-1">Descarga tus capturas en Ultra HD (4K):</div>
+    <div class="text-[11px] mono text-slate-400 text-center mb-1">Descarga tus fotos en Ultra HD (4K):</div>
     <div class="grid grid-cols-2 gap-2">
-      <button onclick="checkoutDigitalPack(10, 5)" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+      <button onclick="alert('Redirigiendo a checkout seguro de $5 USD por 10 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
         <div class="font-bold text-sm text-cyan-300">$5 USD</div>
         <div class="text-[10px] mono text-slate-300">Pack 10 Fotos 4K</div>
       </button>
-      <button onclick="checkoutDigitalPack(25, 10)" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+      <button onclick="alert('Redirigiendo a checkout seguro de $10 USD por 25 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
         <div class="font-bold text-sm text-amber-300">$10 USD</div>
         <div class="text-[10px] mono text-slate-300">Pack 25 Fotos 4K</div>
       </button>
@@ -297,21 +227,20 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- DRAWER 2: TIENDA DE CUADROS FÍSICOS (EDICIÓN DEL AUTOR)                    -->
+<!-- DRAWER: TIENDA DE CUADROS FÍSICOS (EDICIÓN DEL AUTOR)                    -->
 <!-- ========================================================================= -->
 <div id="shop-drawer" class="fixed inset-y-0 right-0 w-full max-w-lg bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl overflow-y-auto">
   <div>
     <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
       <div>
         <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
-          <span>🖼️</span> Tienda de Cuadros Físicos
+          <span>🖼️</span> Cuadros Físicos de Autor
         </h3>
-        <p class="text-xs text-slate-400 mono">Edición de Autor Firmada · Santiago de Chile</p>
+        <p class="text-xs text-slate-400 mono">Edición de Galería Firmada · Santiago de Chile</p>
       </div>
       <button onclick="toggleShop()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
     </div>
 
-    <!-- Garantía y Confianza -->
     <div class="glass p-3.5 rounded-xl mb-4 text-xs text-slate-300 space-y-1">
       <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
         <span>🛡️</span> Garantía de Galería Atelier
@@ -320,52 +249,45 @@
         Impresión Fine Art pigmentada sobre papel de algodón de 310g. Moldura de madera negra con paspartú libre de ácido y vidrio. Cada pieza incluye certificado con la ecuación y firma a mano.
       </p>
       <div class="text-[10px] mono text-cyan-300 pt-1">
-        📦 Plazo de fabricación y entrega: 3 a 5 días hábiles en Santiago · Envíos a todo Chile.
+        📦 Plazo de entrega: 3 a 5 días hábiles en Santiago · Envíos a todo Chile.
       </div>
     </div>
 
-    <!-- Catálogo de Obras Físicas Disponibles -->
+    <!-- Lista de Obras Físicas -->
     <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-1">
-      
-      <!-- Obra Física 1: Chladni -->
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-16 h-16 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
+        <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
         <div class="flex-1 min-w-0">
           <div class="text-xs serif font-bold text-white truncate">Los Cantos de Chladni</div>
           <div class="text-[10px] text-slate-400 mono">Resonancia Acústica (1787)</div>
           <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
         </div>
-        <button onclick="orderArtworkPhysical('Los Cantos de Chladni', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+        <button onclick="orderPhysical('Los Cantos de Chladni', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
       </div>
 
-      <!-- Obra Física 2: Lorenz -->
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-16 h-16 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🦋</div>
+        <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🦋</div>
         <div class="flex-1 min-w-0">
           <div class="text-xs serif font-bold text-white truncate">El Vuelo de Lorenz</div>
           <div class="text-[10px] text-slate-400 mono">Efecto Mariposa & Caos (1963)</div>
           <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
         </div>
-        <button onclick="orderArtworkPhysical('El Vuelo de Lorenz', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+        <button onclick="orderPhysical('El Vuelo de Lorenz', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
       </div>
 
-      <!-- Obra Física 3: Riemann -->
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-16 h-16 rounded-lg bg-black border border-amber-500/30 flex items-center justify-center text-xl shrink-0">🌌</div>
+        <div class="w-14 h-14 rounded-lg bg-black border border-amber-500/30 flex items-center justify-center text-xl shrink-0">🌌</div>
         <div class="flex-1 min-w-0">
           <div class="text-xs serif font-bold text-white truncate">Los Ceros de Riemann</div>
           <div class="text-[10px] text-slate-400 mono">Problema del Milenio (1859)</div>
           <div class="text-xs font-mono font-bold text-amber-300 mt-1">$120.000 CLP <span class="text-[9px] text-slate-400 font-normal">· Acrílico 40×60 cm</span></div>
         </div>
-        <button onclick="orderArtworkPhysical('Los Ceros de Riemann', 120000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+        <button onclick="orderPhysical('Los Ceros de Riemann', 120000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
       </div>
-
     </div>
   </div>
 
-  <!-- Contacto / Dudas de Encargo -->
   <div class="pt-4 border-t border-white/10 text-center">
-    <p class="text-[11px] text-slate-400 mb-2">¿Quieres un formato a medida o cotizar acrílico?</p>
     <a href="https://wa.me/56900000000?text=Hola,%20quisiera%20consultar%20por%20un%20cuadro%20de%20Atelier%20Matemático" target="_blank" class="glass hover:bg-white/10 text-white text-xs py-2 px-4 rounded-xl mono inline-flex items-center gap-2 border-white/15">
       <span>💬</span> Hablar con Matías (Fundador)
     </a>
@@ -373,151 +295,657 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT: MOTOR 3D DEL MUSEO, OBTURADOR RITUAL & CARRETE               -->
+<!-- MOTOR 3D PROCEDURAL EN THREE.JS (MUSEO, ILUMINACIÓN & HOLOGRAMAS)          -->
 <!-- ========================================================================= -->
 <script>
-// ── CATÁLOGO CURADO DE SALAS DEL MUSEO ─────────────────────────────
-const STATIONS = [
+// Metadatos de las 6 Vitrinas Principales
+const EXHIBITS_DATA = [
   {
-    left:  { id: 20, badge: "21", title: "Los Ceros de Riemann", cat: "PROBLEMA DEL MILENIO · 1859", icon: "🌌" },
-    right: { id: 4,  badge: "05", title: "Los Cantos de Chladni", cat: "CIMÁTICA · 1787", icon: "🎵" }
+    id: 0,
+    badge: "01",
+    title: "El Vuelo de Lorenz",
+    sub: "El aleteo que gobierna el infinito",
+    cat: "TEORÍA DEL CAOS · 1963",
+    solver: "Runge-Kutta 4",
+    eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
+    hist: "En el invierno de 1963, Edward Lorenz introdujo doce ecuaciones climáticas en su computadora y redondeó tres decimales para ir por un café. Aquella millonésima de diferencia desató un tornado y demostró que sistemas perfectamente deterministas pueden ser eternamente impredecibles.",
+    poem: '"Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el tejido del universo."'
   },
   {
-    left:  { id: 0,  badge: "01", title: "El Vuelo de Lorenz", cat: "TEORÍA DEL CAOS · 1963", icon: "🦋" },
-    right: { id: 21, badge: "22", title: "El Desierto de Beal", cat: "CONJETURA DE BEAL · 1993", icon: "🏜️" }
+    id: 1,
+    badge: "05",
+    title: "Los Cantos de Chladni",
+    sub: "La arquitectura que el sonido dibuja en el silencio",
+    cat: "CIMÁTICA ACÚSTICA · 1787",
+    solver: "Helmholtz Nodal Wave",
+    eq: "w(x,y) = sin(nπx/L)sin(mπy/L) - sin(mπx/L)sin(nπy/L) = 0",
+    hist: "En 1787, Ernst Chladni pasó un arco de violín por el borde de una placa de bronce con arena fina. El sonido expulsó violentamente los granos de las zonas en vibración hacia las líneas nodales de reposo, revelando mandalas simétricos sagrados.",
+    poem: '"El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la materia del mundo descanse en geometría sagrada."'
   },
   {
-    left:  { id: 22, badge: "23", title: "Navier-Stokes", cat: "PROBLEMA DEL MILENIO · 1845", icon: "🌊" },
-    right: { id: 23, badge: "24", title: "Flujo de Ricci", cat: "PROBLEMA DEL MILENIO · 2002", icon: "🔮" }
+    id: 2,
+    badge: "21",
+    title: "Los Ceros de Riemann",
+    sub: "El enigma de un millón de dólares en la línea crítica",
+    cat: "PROBLEMA DEL MILENIO · 1859",
+    solver: "Riemann-Siegel Critical Spiral",
+    eq: "ζ(s) = ∑ 1/nˢ = 0  ⇒  Re(s) = 1/2\nZ(t) cruza el origen exactamente en t₁, t₂, t₃...",
+    hist: "En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales de su función Zeta yacen sobre la línea crítica Re(s)=1/2. Es el problema de un millón de dólares más codiciado del planeta: de su verdad depende el secreto íntimo de los números primos.",
+    poem: '"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."'
   },
   {
-    left:  { id: 5,  badge: "06", title: "El Telar de Turing", cat: "MORFOGÉNESIS · 1952", icon: "🐆" },
-    right: { id: 2,  badge: "03", title: "Danza de Yoshida", cat: "HAMILTONIANO · 1990", icon: "⏳" }
+    id: 3,
+    badge: "24",
+    title: "El Flujo de Ricci de Poincaré",
+    sub: "La redondez cósmica que resolvió Grigori Perelman",
+    cat: "PROBLEMA DEL MILENIO · 2002",
+    solver: "Perelman Metric Smoothing S³",
+    eq: "∂g_ij/∂t = -2 R_ij\nDeformación métrica continua hacia la esfera S³",
+    hist: "Henri Poincaré planteó en 1904 su conjetura sobre la esfera tridimensional. En 2002, el ermitaño ruso Grigori Perelman la resolvió usando el Flujo de Ricci para alisar las arrugas del espacio, y luego rechazó la Medalla Fields y el millón de dólares.",
+    poem: '"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."'
+  },
+  {
+    id: 4,
+    badge: "15",
+    title: "La Fibración de Hopf",
+    sub: "La esfera de cuatro dimensiones proyectada en luz",
+    cat: "TOPOLOGÍA 4D · 1931",
+    solver: "Stereographic S³→R³ Projection",
+    eq: "π: S³ → S²\nFibras: círculos entrelazados en R³",
+    hist: "Heinz Hopf demostró en 1931 que la esfera de cuatro dimensiones puede descomponerse en infinitos círculos que se entrelazan sin cortarse jamás, proyectando sobre nuestra realidad una flor geométrica imposible en 3D.",
+    poem: '"Hay dimensiones que no podemos ver pero cuya sombra, cuando cae sobre nuestra realidad, es la forma más hermosa que jamás imaginamos."'
+  },
+  {
+    id: 5,
+    badge: "23",
+    title: "Vórtices de Navier-Stokes",
+    sub: "El misterio de la turbulencia y las velocidades infinitas",
+    cat: "PROBLEMA DEL MILENIO · 1845",
+    solver: "Vortex Filament Stretching",
+    eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u\n¿Puede la vorticidad ω explotar a infinito?",
+    hist: "Las ecuaciones de Navier y Stokes gobiernan el agua y el aire. El Instituto Clay ofrece $1.000.000 USD a quien demuestre si un fluido en calma puede concentrar tanta energía que su velocidad explote a infinito.",
+    poem: '"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."'
   }
 ];
 
-let currentStationIndex = 0;
-let isFocusMode = false;
-let shutterUnlocked = false;
-let shutterTimerInterval = null;
-let contemplationTimeLeft = 10;
+// ── VARIABLES PRINCIPALES THREE.JS ────────────────────────────────
+let scene, camera, renderer;
+let vitrines = [];
+let hologramUpdaters = [];
+
+// Control de cámara en primera persona
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+let cameraVelocity = new THREE.Vector3();
+let cameraDirection = new THREE.Vector3();
+let isPointerLocked = false;
+let euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+// Estado de contemplación y enfoque
+let currentFocusedVitrine = null;
+let isContemplating = false;
+let targetCameraPos = new THREE.Vector3();
+let targetCameraLook = new THREE.Vector3();
+
+// Carrete y ritual
 let userCameraRoll = [];
+let shutterUnlocked = false;
+let contemplationTimeLeft = 10;
+let shutterTimerInterval = null;
 
-// ── GENERAR EL PASILLO 3D EN EL DOM ────────────────────────────────
-function buildCorridorDOM() {
-  const track = document.getElementById('corridor-track');
-  track.innerHTML = '';
+// ── GENERADOR DE TEXTURA PROCEDURAL: SUELO DE MADERA DE MUSEO ──────
+function createMuseumWoodTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const cx = c.getContext('2d');
   
-  STATIONS.forEach((st, idx) => {
-    const stationEl = document.createElement('div');
-    stationEl.className = 'museum-station absolute inset-0 flex justify-between items-center px-4 md:px-12';
-    // Colocar cada estación a una distancia Z distinta
-    const zOffset = -idx * 750;
-    stationEl.style.transform = `translateZ(${zOffset}px)`;
-    
-    stationEl.innerHTML = `
-      <!-- Cuadro Muro Izquierdo -->
-      <div onclick="enterFocusMode(${st.left.id})" class="wall-left glass glow w-48 md:w-72 h-64 md:h-96 rounded-2xl p-4 cursor-pointer flex flex-col justify-between border-purple-500/20 group">
-        <div class="flex justify-between text-[10px] mono text-purple-300">
-          <span>SALA ${st.left.badge}</span>
-          <span class="text-cyan-400 group-hover:scale-125 transition">🔍 Entrar</span>
-        </div>
-        <div class="my-auto text-center">
-          <div class="text-4xl md:text-5xl mb-2">${st.left.icon}</div>
-          <h4 class="serif font-bold text-white text-base md:text-lg group-hover:text-purple-300 transition">${st.left.title}</h4>
-          <p class="text-[10px] text-slate-400 mono mt-1">${st.left.cat.split('·')[0].trim()}</p>
-        </div>
-        <div class="text-[9px] mono text-slate-500 text-center">Haz clic para mirar de frente</div>
-      </div>
+  // Fondo madera cálida oscura (como la foto de referencia)
+  cx.fillStyle = '#1c130c';
+  cx.fillRect(0, 0, 1024, 1024);
 
-      <!-- Cuadro Muro Derecho -->
-      <div onclick="enterFocusMode(${st.right.id})" class="wall-right glass glow w-48 md:w-72 h-64 md:h-96 rounded-2xl p-4 cursor-pointer flex flex-col justify-between border-purple-500/20 group">
-        <div class="flex justify-between text-[10px] mono text-purple-300">
-          <span>SALA ${st.right.badge}</span>
-          <span class="text-cyan-400 group-hover:scale-125 transition">🔍 Entrar</span>
-        </div>
-        <div class="my-auto text-center">
-          <div class="text-4xl md:text-5xl mb-2">${st.right.icon}</div>
-          <h4 class="serif font-bold text-white text-base md:text-lg group-hover:text-purple-300 transition">${st.right.title}</h4>
-          <p class="text-[10px] text-slate-400 mono mt-1">${st.right.cat.split('·')[0].trim()}</p>
-        </div>
-        <div class="text-[9px] mono text-slate-500 text-center">Haz clic para mirar de frente</div>
-      </div>
-    `;
-    track.appendChild(stationEl);
+  // Tablones de parquet con vetas
+  const numPlanks = 16;
+  const plankH = 1024 / numPlanks;
+  for (let i = 0; i < numPlanks; i++) {
+    const y = i * plankH;
+    const tone = 20 + Math.random() * 15;
+    cx.fillStyle = `rgb(${tone * 1.5 | 0}, ${tone | 0}, ${tone * 0.6 | 0})`;
+    cx.fillRect(0, y, 1024, plankH - 3);
+
+    // Vetas sutiles
+    cx.strokeStyle = 'rgba(0,0,0,0.18)';
+    cx.lineWidth = 1;
+    for (let k = 0; k < 6; k++) {
+      cx.beginPath();
+      cx.moveTo(0, y + Math.random() * plankH);
+      cx.bezierCurveTo(340, y + Math.random() * plankH, 680, y + Math.random() * plankH, 1024, y + Math.random() * plankH);
+      cx.stroke();
+    }
+
+    // Separación entre tablones
+    cx.fillStyle = '#060402';
+    cx.fillRect(0, y + plankH - 3, 1024, 3);
+  }
+
+  const texture = new THREE.CanvasTexture(c);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(4, 12);
+  return texture;
+}
+
+// ── INICIALIZACIÓN DE LA ESCENA 3D ────────────────────────────────
+function init3D() {
+  const canvas = document.getElementById('webgl-canvas');
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x06060a);
+  scene.fog = new THREE.FogExp2(0x06060a, 0.04);
+
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 1.7, 12); // Ojos del visitante a 1.7m de altura
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  buildMuseumArchitecture();
+  setupControls();
+  window.addEventListener('resize', onWindowResize);
+  animate();
+}
+
+// ── CONSTRUCCIÓN DE LA ARQUITECTURA DEL MUSEO ──────────────────────
+function buildMuseumArchitecture() {
+  // 1. Suelo de madera de galería
+  const woodTexture = createMuseumWoodTexture();
+  const floorGeo = new THREE.PlaneGeometry(12, 60);
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: woodTexture,
+    roughness: 0.35,
+    metalness: 0.1
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // 2. Techo con iluminación perimetral cálida (como en la foto del museo)
+  const ceilingGeo = new THREE.PlaneGeometry(12, 60);
+  const ceilingMat = new THREE.MeshStandardMaterial({
+    color: 0x1f120c, // Terracota oscuro arquitectónico
+    roughness: 0.8,
+    metalness: 0.05
+  });
+  const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+  ceiling.position.y = 4.2;
+  ceiling.rotation.x = Math.PI / 2;
+  scene.add(ceiling);
+
+  // Luz ambiente muy tenue para mantener la penumbra
+  const ambientLight = new THREE.AmbientLight(0x221a28, 0.6);
+  scene.add(ambientLight);
+
+  // Tira de luz LED cálida escondida en el cielo
+  const coveLight = new THREE.DirectionalLight(0xff7733, 0.4);
+  coveLight.position.set(0, 4.0, 0);
+  scene.add(coveLight);
+
+  // 3. Muros arquitectónicos laterales negros mate con nichos empotrados
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x0c0c12, // Carbón negro mate profundo
+    roughness: 0.9,
+    metalness: 0.1
+  });
+
+  // Muro izquierdo y derecho
+  const wallGeo = new THREE.BoxGeometry(0.8, 4.5, 60);
+  const leftWall = new THREE.Mesh(wallGeo, wallMat);
+  leftWall.position.set(-4.5, 2.1, 0);
+  scene.add(leftWall);
+
+  const rightWall = new THREE.Mesh(wallGeo, wallMat);
+  rightWall.position.set(4.5, 2.1, 0);
+  scene.add(rightWall);
+
+  // Pared del fondo
+  const backWallGeo = new THREE.BoxGeometry(12, 4.5, 0.8);
+  const backWall = new THREE.Mesh(backWallGeo, wallMat);
+  backWall.position.set(0, 2.1, -29);
+  scene.add(backWall);
+
+  // 4. Construir las 6 Vitrinas Empotradas con Iluminación Focalizada
+  // Se colocan a lo largo del pasillo en Z: 6, 0, -6, -12, -18, -24
+  const vitrineZCoords = [6, 0, -6, -12, -18, -24];
+
+  EXHIBITS_DATA.forEach((data, index) => {
+    const isLeft = index % 2 === 0;
+    const posX = isLeft ? -3.8 : 3.8;
+    const posZ = vitrineZCoords[index];
+
+    createMuseumVitrine(data, posX, 1.8, posZ, isLeft);
   });
 }
 
-// ── NAVEGACIÓN EN EL PASILLO (SCROLL / FLECHAS) ────────────────────
-function navigateCorridor(dir) {
-  currentStationIndex = Math.max(0, Math.min(STATIONS.length - 1, currentStationIndex + dir));
-  updateCorridorTransform();
+// ── CREAR UNA VITRINA INDIVIDUAL EMPOTRADA CON HOLOGRAMA ───────────
+function createMuseumVitrine(data, x, y, z, isLeft) {
+  const vitrineGroup = new THREE.Group();
+  vitrineGroup.position.set(x, y, z);
+
+  // Pedestal negro mate
+  const pedestalGeo = new THREE.BoxGeometry(1.6, 0.9, 1.4);
+  const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x08080c, roughness: 0.8 });
+  const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+  pedestal.position.y = -0.45;
+  vitrineGroup.add(pedestal);
+
+  // Cubo de cristal de museo con reflejos sutiles
+  const glassGeo = new THREE.BoxGeometry(1.5, 1.5, 1.3);
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.18,
+    roughness: 0.1,
+    metalness: 0.1,
+    transmission: 0.8,
+    ior: 1.5
+  });
+  const glass = new THREE.Mesh(glassGeo, glassMat);
+  glass.position.y = 0.45;
+  vitrineGroup.add(glass);
+
+  // Placa de bronce iluminada en la pared bajo la vitrina
+  const plaqueCanvas = document.createElement('canvas');
+  plaqueCanvas.width = 512; plaqueCanvas.height = 160;
+  const pcx = plaqueCanvas.getContext('2d');
+  pcx.fillStyle = '#14100c'; pcx.fillRect(0,0,512,160);
+  pcx.strokeStyle = '#c5a059'; pcx.lineWidth = 4; pcx.strokeRect(4,4,504,152);
+  pcx.fillStyle = '#e8d2a6'; pcx.font = 'bold 26px Cinzel'; pcx.textAlign = 'center';
+  pcx.fillText(`${data.badge} · ${data.title.toUpperCase()}`, 256, 65);
+  pcx.fillStyle = '#9e8c72'; pcx.font = '18px Space Mono';
+  pcx.fillText(data.cat, 256, 115);
+
+  const plaqueTexture = new THREE.CanvasTexture(plaqueCanvas);
+  const plaqueGeo = new THREE.PlaneGeometry(0.8, 0.25);
+  const plaqueMat = new THREE.MeshBasicMaterial({ map: plaqueTexture });
+  const plaque = new THREE.Mesh(plaqueGeo, plaqueMat);
+  plaque.position.set(0, -0.7, 0.71);
+  if (!isLeft) plaque.rotation.y = Math.PI;
+  vitrineGroup.add(plaque);
+
+  // Spotlight cenital cálido cayendo desde el techo sobre la vitrina
+  const spotLight = new THREE.SpotLight(0xffdfb3, 2.5, 8, Math.PI / 6, 0.4, 1);
+  spotLight.position.set(x, 4.0, z);
+  spotLight.target = glass;
+  spotLight.castShadow = true;
+  scene.add(spotLight);
+
+  // Luz de halo interna del holograma
+  const holoPointLight = new THREE.PointLight(0xa855f7, 0.8, 3);
+  holoPointLight.position.set(x, y + 0.45, z);
+  scene.add(holoPointLight);
+
+  // Crear el holograma 3D específico dentro de la vitrina
+  const holoObject = createMathematicalHologram(data.id);
+  holoObject.position.set(0, 0.45, 0);
+  vitrineGroup.add(holoObject);
+
+  scene.add(vitrineGroup);
+
+  // Guardar referencia para detección de proximidad
+  vitrines.push({
+    data: data,
+    group: vitrineGroup,
+    worldPos: new THREE.Vector3(x, y, z),
+    spotLight: spotLight,
+    isLeft: isLeft
+  });
 }
 
-function updateCorridorTransform() {
-  const track = document.getElementById('corridor-track');
-  const targetZ = currentStationIndex * 750;
-  track.style.transform = `translateZ(${targetZ}px)`;
-  document.getElementById('corridor-index-label').textContent = `Sala ${currentStationIndex + 1} de ${STATIONS.length}`;
+// ── FÁBRICA DE HOLOGRAMAS MATEMÁTICOS EN 3D ────────────────────────
+function createMathematicalHologram(id) {
+  const group = new THREE.Group();
+
+  if (id === 0) {
+    // 1. Atractor de Lorenz 3D (Cinta de partículas en RK4)
+    const count = 1800;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    let x = 0.1, y = 0, z = 14;
+    const dt = 0.005;
+    for (let i = 0; i < count; i++) {
+      const dx = 10 * (y - x);
+      const dy = x * (28 - z) - y;
+      const dz = x * y - (8/3) * z;
+      x += dt * dx; y += dt * dy; z += dt * dz;
+
+      positions[i * 3]     = (x) * 0.022;
+      positions[i * 3 + 1] = (z - 25) * 0.022;
+      positions[i * 3 + 2] = (y) * 0.022;
+
+      const frac = i / count;
+      colors[i * 3]     = 0.4 + frac * 0.6;
+      colors[i * 3 + 1] = 0.2 + (1 - frac) * 0.5;
+      colors[i * 3 + 2] = 0.9;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const mat = new THREE.PointsMaterial({ size: 0.02, vertexColors: true, transparent: true, opacity: 0.85 });
+    const points = new THREE.Points(geo, mat);
+    group.add(points);
+
+    hologramUpdaters.push((delta) => {
+      points.rotation.y += 0.008;
+    });
+
+  } else if (id === 2) {
+    // 2. Los Ceros de Riemann 3D (Espiral crítica Z(t) con anillos de ceros)
+    const count = 1200;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      const t = 10 + (i / count) * 35;
+      const theta = (t/2) * Math.log(t/(2*Math.PI)) - t/2;
+      const zVal = Math.sin(t * 0.8) * Math.cos(t * 0.3) * 0.3; // Aproximación oscilatoria
+
+      positions[i * 3]     = Math.cos(theta) * zVal;
+      positions[i * 3 + 1] = (t - 27) * 0.028;
+      positions[i * 3 + 2] = Math.sin(theta) * zVal;
+
+      colors[i * 3]     = 0.9;
+      colors[i * 3 + 1] = 0.7;
+      colors[i * 3 + 2] = 0.2;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.85 });
+    const line = new THREE.Line(geo, lineMat);
+    group.add(line);
+
+    hologramUpdaters.push((delta) => {
+      line.rotation.y += 0.006;
+    });
+
+  } else if (id === 1) {
+    // 3. Los Cantos de Chladni 3D (Disco de arena suspendida con nodos)
+    const diskGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.02, 48);
+    const diskMat = new THREE.MeshStandardMaterial({ color: 0x181410, roughness: 0.4, metalness: 0.8 });
+    const disk = new THREE.Mesh(diskGeo, diskMat);
+    group.add(disk);
+
+    // Partículas de arena dorada
+    const count = 1500;
+    const sandGeo = new THREE.BufferGeometry();
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const r = Math.sqrt(Math.random()) * 0.46;
+      const th = Math.random() * Math.PI * 2;
+      pos[i * 3] = r * Math.cos(th);
+      pos[i * 3 + 1] = 0.02;
+      pos[i * 3 + 2] = r * Math.sin(th);
+    }
+    sandGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const sandMat = new THREE.PointsMaterial({ color: 0xf5d061, size: 0.015 });
+    const sand = new THREE.Points(sandGeo, sandMat);
+    group.add(sand);
+
+    let chAngle = 0;
+    hologramUpdaters.push((delta) => {
+      chAngle += 0.01;
+      const arr = sand.geometry.attributes.position.array;
+      for (let i = 0; i < count; i++) {
+        const u = arr[i * 3], v = arr[i * 3 + 2];
+        const val = Math.sin(5 * Math.atan2(v, u) + chAngle) * Math.cos(4 * Math.hypot(u, v) * 8);
+        arr[i * 3 + 1] = 0.02 + Math.abs(val) * 0.03;
+      }
+      sand.geometry.attributes.position.needsUpdate = true;
+      group.rotation.y += 0.004;
+    });
+
+  } else if (id === 3) {
+    // 4. El Flujo de Ricci (Toro deforme alisándose a esfera)
+    const geo = new THREE.SphereGeometry(0.38, 32, 24);
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: 0x9333ea,
+      emissive: 0x4c1d95,
+      roughness: 0.2,
+      transmission: 0.6,
+      wireframe: true
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    group.add(mesh);
+
+    let ricciT = 0;
+    hologramUpdaters.push((delta) => {
+      ricciT += 0.02;
+      const pos = mesh.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const v = new THREE.Vector3().fromBufferAttribute(pos, i);
+        v.normalize();
+        const deformation = Math.sin(v.x * 6 + ricciT) * Math.cos(v.y * 6 + ricciT) * 0.08;
+        v.multiplyScalar(0.38 + deformation);
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      pos.needsUpdate = true;
+      mesh.rotation.y += 0.007;
+      mesh.rotation.x += 0.004;
+    });
+
+  } else {
+    // 5. Fibración de Hopf / Vórtices (Anillos toroidales entrelazados)
+    const count = 4;
+    for (let i = 0; i < count; i++) {
+      const ringGeo = new THREE.TorusGeometry(0.35, 0.03, 16, 64);
+      const ringMat = new THREE.MeshStandardMaterial({
+        color: i % 2 === 0 ? 0x06b6d4 : 0xec4899,
+        emissive: 0x111122,
+        roughness: 0.3
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = (i * Math.PI) / count;
+      ring.rotation.y = (i * Math.PI) / 3;
+      group.add(ring);
+    }
+    hologramUpdaters.push((delta) => {
+      group.rotation.x += 0.005;
+      group.rotation.y += 0.008;
+    });
+  }
+
+  return group;
 }
 
-window.addEventListener('wheel', (e) => {
-  if (isFocusMode) return;
-  if (Math.abs(e.deltaY) > 25) {
-    navigateCorridor(e.deltaY > 0 ? 1 : -1);
-  }
-}, { passive: true });
+// ── CONTROLES EN PRIMERA PERSONA & RATÓN ───────────────────────────
+function setupControls() {
+  const canvas = document.getElementById('webgl-canvas');
 
-window.addEventListener('keydown', (e) => {
-  if (isFocusMode) {
-    if (e.key === 'Escape') exitFocusMode();
-    return;
-  }
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') navigateCorridor(1);
-  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') navigateCorridor(-1);
-});
+  // Drag para mirar alrededor
+  let isDragging = false;
+  let previousMousePosition = { x: 0, y: 0 };
 
-// ── MODO CONTEMPLACIÓN (ENTRAR / SALIR) ────────────────────────────
-function enterFocusMode(artId) {
-  isFocusMode = true;
-  document.getElementById('focus-view').classList.remove('hidden');
-  document.getElementById('btn-back-corridor').classList.remove('hidden');
-  document.getElementById('nav-mode-indicator').textContent = 'Modo Contemplación · Disparador en calibración';
-  
-  selectArtworkFocus(artId);
+  window.addEventListener('mousedown', (e) => {
+    if (isContemplating) return;
+    if (e.target.closest('header, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (isContemplating) return;
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    euler.y -= deltaX * 0.0028;
+    euler.x -= deltaY * 0.0028;
+    euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
+
+    camera.quaternion.setFromEuler(euler);
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  // Touch support para móviles/tablets
+  window.addEventListener('touchstart', (e) => {
+    if (isContemplating) return;
+    if (e.target.closest('header, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
+    isDragging = true;
+    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (isContemplating) return;
+    if (!isDragging) return;
+    const deltaX = e.touches[0].clientX - previousMousePosition.x;
+    const deltaY = e.touches[0].clientY - previousMousePosition.y;
+    euler.y -= deltaX * 0.004;
+    euler.x -= deltaY * 0.004;
+    euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
+    camera.quaternion.setFromEuler(euler);
+    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => { isDragging = false; });
+
+  // Teclado WASD / Flechas
+  window.addEventListener('keydown', (e) => {
+    if (isContemplating) {
+      if (e.key === 'Escape') exitContemplation();
+      return;
+    }
+    switch (e.code) {
+      case 'KeyW': case 'ArrowUp': moveForward = true; break;
+      case 'KeyS': case 'ArrowDown': moveBackward = true; break;
+      case 'KeyA': case 'ArrowLeft': moveLeft = true; break;
+      case 'KeyD': case 'ArrowRight': moveRight = true; break;
+      case 'Space':
+        if (currentFocusedVitrine) enterContemplation(currentFocusedVitrine);
+        break;
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    switch (e.code) {
+      case 'KeyW': case 'ArrowUp': moveForward = false; break;
+      case 'KeyS': case 'ArrowDown': moveBackward = false; break;
+      case 'KeyA': case 'ArrowLeft': moveLeft = false; break;
+      case 'KeyD': case 'ArrowRight': moveRight = false; break;
+    }
+  });
+
+  // Rueda del ratón para avanzar o retroceder suavemente
+  window.addEventListener('wheel', (e) => {
+    if (isContemplating) return;
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    forward.y = 0; forward.normalize();
+    camera.position.addScaledVector(forward, -e.deltaY * 0.005);
+    clampCameraPosition();
+  }, { passive: true });
+}
+
+// Limitar el movimiento dentro de los muros del museo
+function clampCameraPosition() {
+  camera.position.x = Math.max(-3.2, Math.min(3.2, camera.position.x));
+  camera.position.z = Math.max(-27, Math.min(15, camera.position.z));
+  camera.position.y = 1.7; // Altura fija de los ojos
+}
+
+// ── DETECCIÓN DE VITRINAS CERCANAS (PROXIMIDAD) ───────────────────
+function checkVitrineProximity() {
+  if (isContemplating) return;
+
+  let nearest = null;
+  let minDist = 4.2;
+
+  vitrines.forEach(v => {
+    const dist = camera.position.distanceTo(v.worldPos);
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = v;
+    }
+  });
+
+  const prompt = document.getElementById('approach-prompt');
+  const reticle = document.getElementById('reticle');
+
+  if (nearest) {
+    currentFocusedVitrine = nearest;
+    document.getElementById('approach-title').textContent = `${nearest.data.badge} · ${nearest.data.title}`;
+    prompt.style.opacity = '1';
+    reticle.classList.add('active');
+  } else {
+    currentFocusedVitrine = null;
+    prompt.style.opacity = '0';
+    reticle.classList.remove('active');
+  }
+}
+
+// ── ENTRAR EN MODO CONTEMPLACIÓN ──────────────────────────────────
+function enterContemplation(vitrine) {
+  isContemplating = true;
+  currentFocusedVitrine = vitrine;
+
+  // Llenar datos de la tarjeta editorial
+  const d = vitrine.data;
+  document.getElementById('modal-cat').textContent = d.cat;
+  document.getElementById('modal-solver').textContent = d.solver;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-sub').textContent = d.sub;
+  document.getElementById('modal-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
+  document.getElementById('modal-hist').textContent = d.hist;
+  document.getElementById('modal-poem').textContent = d.poem;
+
+  document.getElementById('approach-prompt').style.opacity = '0';
+  document.getElementById('contemplation-modal').classList.remove('hidden');
+
+  // Posicionar cámara suavemente justo frente al cristal
+  const standPos = vitrine.worldPos.clone();
+  if (vitrine.isLeft) {
+    standPos.x += 1.8;
+  } else {
+    standPos.x -= 1.8;
+  }
+  standPos.y = 1.8;
+
+  camera.position.copy(standPos);
+  camera.lookAt(vitrine.worldPos.x, 1.8, vitrine.worldPos.z);
+  euler.setFromQuaternion(camera.quaternion, 'YXZ');
+
   startShutterRitual();
 }
 
-function exitFocusMode() {
-  isFocusMode = false;
-  document.getElementById('focus-view').classList.add('hidden');
-  document.getElementById('btn-back-corridor').classList.add('hidden');
-  document.getElementById('nav-mode-indicator').textContent = 'Pasillo Principal · Desliza para caminar';
+function exitContemplation() {
+  isContemplating = false;
+  document.getElementById('contemplation-modal').classList.add('hidden');
   clearInterval(shutterTimerInterval);
-  cancelAnimationFrame(animId);
 }
 
-// ── EL RITUAL DEL OBTURADOR (DESBLOQUEO TRAS CONTEMPLACIÓN) ────────
+// ── RITUAL DEL OBTURADOR DE CÁMARA ────────────────────────────────
 function startShutterRitual() {
   shutterUnlocked = false;
-  contemplationTimeLeft = 10; // 10 segundos obligatorios para contemplar y leer
+  contemplationTimeLeft = 10;
   clearInterval(shutterTimerInterval);
 
-  const btnShutter = document.getElementById('btn-shutter');
-  const timerBadge = document.getElementById('shutter-timer-badge');
-  const countdownText = document.getElementById('shutter-countdown-text');
-  const shutterLabel = document.getElementById('btn-shutter-label');
+  const btn = document.getElementById('btn-shutter');
+  const badge = document.getElementById('shutter-timer-badge');
+  const text = document.getElementById('shutter-countdown-text');
+  const label = document.getElementById('btn-shutter-label');
 
-  btnShutter.disabled = true;
-  btnShutter.classList.add('opacity-40', 'cursor-not-allowed');
-  btnShutter.classList.remove('opacity-100', 'cursor-pointer', 'animate-bounce');
-  timerBadge.classList.remove('hidden');
-  shutterLabel.textContent = 'Obturador Bloqueado';
+  btn.disabled = true;
+  btn.classList.add('opacity-40', 'cursor-not-allowed');
+  badge.classList.remove('hidden');
+  label.textContent = 'Obturador Bloqueado';
 
   shutterTimerInterval = setInterval(() => {
     contemplationTimeLeft--;
     if (contemplationTimeLeft > 0) {
-      countdownText.textContent = `Contempla la obra... (${contemplationTimeLeft}s para calibrar obturador)`;
+      text.textContent = `Contempla la obra... (${contemplationTimeLeft}s para calibrar obturador)`;
     } else {
       clearInterval(shutterTimerInterval);
       unlockShutter();
@@ -527,23 +955,20 @@ function startShutterRitual() {
 
 function unlockShutter() {
   shutterUnlocked = true;
-  const btnShutter = document.getElementById('btn-shutter');
-  const timerBadge = document.getElementById('shutter-timer-badge');
-  const shutterLabel = document.getElementById('btn-shutter-label');
+  const btn = document.getElementById('btn-shutter');
+  const badge = document.getElementById('shutter-timer-badge');
+  const label = document.getElementById('btn-shutter-label');
 
-  timerBadge.classList.add('hidden');
-  btnShutter.disabled = false;
-  btnShutter.classList.remove('opacity-40', 'cursor-not-allowed');
-  btnShutter.classList.add('opacity-100', 'cursor-pointer', 'shadow-purple-500/50');
-  shutterLabel.textContent = '📸 Capturar Instante';
-  document.getElementById('nav-mode-indicator').textContent = 'Obturador Listo · Captura tu instante';
+  badge.classList.add('hidden');
+  btn.disabled = false;
+  btn.classList.remove('opacity-40', 'cursor-not-allowed');
+  btn.classList.add('opacity-100', 'cursor-pointer', 'shadow-purple-500/50');
+  label.textContent = '📸 Disparar Obturador';
 }
 
-// ── SONIDO DE OBTURADOR CLÁSICO CON WEB AUDIO API ─────────────────
 function playShutterSound() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Ruido mecánico sutil del espejo y obturador
     const bufferSize = audioCtx.sampleRate * 0.08;
     const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -553,17 +978,12 @@ function playShutterSound() {
     const noise = audioCtx.createBufferSource();
     noise.buffer = buffer;
     const filter = audioCtx.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 1200;
-    noise.connect(filter);
-    filter.connect(audioCtx.destination);
+    filter.type = 'highpass'; filter.frequency.value = 1400;
+    noise.connect(filter); filter.connect(audioCtx.destination);
     noise.start();
-  } catch (e) {
-    // Si el navegador bloquea audio, continuar silenciosamente
-  }
+  } catch (e) {}
 }
 
-// ── DISPARAR OBTURADOR Y GUARDAR EN CARRETE ───────────────────────
 function triggerShutter() {
   if (!shutterUnlocked) return;
   if (userCameraRoll.length >= 30) {
@@ -572,33 +992,25 @@ function triggerShutter() {
     return;
   }
 
-  // Sonido y Flash
   playShutterSound();
   const flash = document.getElementById('camera-flash');
   flash.classList.add('flashing');
-  setTimeout(() => flash.classList.remove('flashing'), 120);
+  setTimeout(() => flash.classList.remove('flashing'), 100);
 
-  // Capturar imagen exacta del canvas
-  const canvas = document.getElementById('focus-canvas');
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  // Capturar frame exacto del canvas WebGL
+  const canvas = document.getElementById('webgl-canvas');
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
-  const capture = {
+  userCameraRoll.unshift({
     id: Date.now(),
-    artTitle: ARTWORKS[currentArt].title,
+    artTitle: currentFocusedVitrine.data.title,
     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     img: dataUrl
-  };
+  });
 
-  userCameraRoll.unshift(capture);
   updateRollUI();
-
-  // Animación del botón carrete
-  const badge = document.getElementById('roll-counter-badge');
-  badge.classList.add('bg-cyan-500', 'text-white', 'scale-125');
-  setTimeout(() => badge.classList.remove('bg-cyan-500', 'text-white', 'scale-125'), 400);
 }
 
-// ── ACTUALIZAR UI DEL CARRETE ─────────────────────────────────────
 function updateRollUI() {
   const grid = document.getElementById('roll-grid');
   const counterBadge = document.getElementById('roll-counter-badge');
@@ -618,7 +1030,7 @@ function updateRollUI() {
   emptyState.classList.add('hidden');
   grid.innerHTML = '';
 
-  userCameraRoll.forEach((item, index) => {
+  userCameraRoll.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'glass rounded-xl p-2 relative group overflow-hidden border-white/10';
     card.innerHTML = `
@@ -645,292 +1057,69 @@ function clearCameraRoll() {
   }
 }
 
-function toggleCameraRoll() {
-  const drawer = document.getElementById('roll-drawer');
-  drawer.classList.toggle('translate-x-full');
-}
+function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
+function toggleShop() { document.getElementById('shop-drawer').classList.toggle('translate-x-full'); }
 
-function toggleShop() {
-  const drawer = document.getElementById('shop-drawer');
-  drawer.classList.toggle('translate-x-full');
-}
-
-function checkoutDigitalPack(photos, price) {
-  if (userCameraRoll.length === 0) {
-    alert('Primero captura fotos en el museo para incluirlas en tu pack.');
-    return;
-  }
-  alert(`Redirigiendo a checkout seguro de $${price} USD por tus ${Math.min(userCameraRoll.length, photos)} capturas en 4K... (Integración lista con Stripe/PayPal).`);
-}
-
-function orderArtworkPhysical(title, price) {
+function orderPhysical(title, price) {
   const msg = encodeURIComponent(`Hola Matías! Quiero encargar el cuadro físico de "${title}" ($${price.toLocaleString()} CLP). ¿Cómo coordinamos el abono del 50% y la entrega?`);
   window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
 }
 
-// ── SINCRONIZAR MOTOR FÍSICO CON EL CANVAS DE ENFOQUE ──────────────
-const focusCanvas = document.getElementById('focus-canvas');
-const ctx = focusCanvas.getContext('2d');
-let W, H, currentArt = 20, currentPal = 0, animId;
-let isDrag = false, dragX = 0, dragY = 0;
-let mouseX = -9999, mouseY = -9999, mouseDown = false;
+// ── BUCLE DE ANIMACIÓN PRINCIPAL ──────────────────────────────────
+let prevTime = performance.now();
 
-function resizeFocusCanvas() {
-  const r = focusCanvas.parentElement.getBoundingClientRect();
-  W = focusCanvas.width  = r.width  | 0;
-  H = focusCanvas.height = (r.height - 8) | 0;
-}
+function animate() {
+  requestAnimationFrame(animate);
 
-function selectArtworkFocus(idx) {
-  currentArt = idx;
-  const d = ARTWORKS[idx];
-  document.getElementById('focus-badge').textContent = 'OBRA ' + d.badge;
-  document.getElementById('focus-title-mini').textContent = d.mini;
-  document.getElementById('focus-cat').textContent = d.cat;
-  document.getElementById('focus-solver').textContent = d.solver;
-  document.getElementById('focus-title').textContent = d.title;
-  document.getElementById('focus-sub').textContent = d.sub;
-  document.getElementById('focus-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
-  document.getElementById('focus-hist').textContent = d.hist;
-  document.getElementById('focus-poem').textContent = d.poem;
+  const time = performance.now();
+  const delta = (time - prevTime) / 1000;
+  prevTime = time;
 
-  resizeFocusCanvas();
-  restartArtwork();
-}
+  // Actualizar movimiento de cámara si no estamos contemplando
+  if (!isContemplating) {
+    cameraVelocity.x -= cameraVelocity.x * 10.0 * delta;
+    cameraVelocity.z -= cameraVelocity.z * 10.0 * delta;
 
-function togglePalette() { currentPal = (currentPal + 1) % 4; restartArtwork(); }
-function restartArtwork() {
-  cancelAnimationFrame(animId);
-  ctx.fillStyle = '#04020c'; ctx.fillRect(0, 0, W, H);
-  INITS[currentArt]();
-  loop();
-}
-function loop() {
-  STEPS[currentArt]();
-  animId = requestAnimationFrame(loop);
-}
+    cameraDirection.z = Number(moveForward) - Number(moveBackward);
+    cameraDirection.x = Number(moveRight) - Number(moveLeft);
+    cameraDirection.normalize();
 
-// ── IMPORTAR LOS MOTORES Y METADATOS MATEMÁTICOS DE ATELIER ────────
-// Paletas de color
-const PALS_CSS = [
-  f => `hsla(${250-f*210},90%,${45+f*35}%,${.08+f*.7})`,
-  f => `rgba(${f*40|0},${120+f*135|0},${Math.max(0,200-f*50)|0},${.08+f*.7})`,
-  f => `rgba(${Math.min(255,60+f*220)|0},${Math.min(255,f>.6?(f-.6)*450:20)|0},${f<.3?180:20},${.08+f*.75})`,
-  f => `rgba(${220+f*35|0},${180+f*70|0},${120+f*135|0},${.08+f*.65})`,
-];
+    if (moveForward || moveBackward) cameraVelocity.z -= cameraDirection.z * 22.0 * delta;
+    if (moveLeft || moveRight) cameraVelocity.x -= cameraDirection.x * 22.0 * delta;
 
-// Obras maestras (Lorenz, Chladni, Riemann, Beal, Navier-Stokes, Ricci, etc.)
-// 01 Lorenz
-let lTrajs=[], lRotZ=.5, lRotX=.3;
-function init01(){ lTrajs=[]; for(let i=0;i<12;i++){ let x=.1+i*.04,y=i*.02,z=14+i*.03; for(let k=0;k<400;k++){x+=.005*(10*(y-x));y+=.005*(x*(28-z)-y);z+=.005*(x*y-2.667*z);} lTrajs.push({x,y,z,pts:[],max:700}); } }
-function step01(){
-  ctx.fillStyle='rgba(4,2,12,.035)'; ctx.fillRect(0,0,W,H); lRotZ+=.0008; const sc=Math.min(W,H)*.015;
-  for(const tr of lTrajs){
-    for(let s=0;s<6;s++){
-      const dt=.004, f=(x,y,z)=>[10*(y-x),x*(28-z)-y,x*y-2.667*z];
-      const [k1x,k1y,k1z]=f(tr.x,tr.y,tr.z); const [k2x,k2y,k2z]=f(tr.x+dt/2*k1x,tr.y+dt/2*k1y,tr.z+dt/2*k1z);
-      const [k3x,k3y,k3z]=f(tr.x+dt/2*k2x,tr.y+dt/2*k2y,tr.z+dt/2*k2z); const [k4x,k4y,k4z]=f(tr.x+dt*k3x,tr.y+dt*k3y,tr.z+dt*k3z);
-      tr.x+=dt/6*(k1x+2*k2x+2*k3x+k4x); tr.y+=dt/6*(k1y+2*k2y+2*k3y+k4y); tr.z+=dt/6*(k1z+2*k2z+2*k3z+k4z);
-      const cz=tr.z-25, rx=tr.x*Math.cos(lRotZ)-tr.y*Math.sin(lRotZ), ry=tr.x*Math.sin(lRotZ)+tr.y*Math.cos(lRotZ), rz=ry*Math.sin(lRotX)+cz*Math.cos(lRotX);
-      tr.pts.push([W/2+rx*sc, H/2-rz*sc]); if(tr.pts.length>tr.max)tr.pts.shift();
-    }
-    const n=tr.pts.length; if(n<2)continue;
-    for(let j=1;j<n;j++){ ctx.strokeStyle=PALS_CSS[currentPal](j/n); ctx.lineWidth=.5+(j/n)*1.5; ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke(); }
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    forward.y = 0; forward.normalize();
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    right.y = 0; right.normalize();
+
+    camera.position.addScaledVector(forward, -cameraVelocity.z * delta);
+    camera.position.addScaledVector(right, cameraVelocity.x * delta);
+    clampCameraPosition();
+
+    checkVitrineProximity();
   }
+
+  // Actualizar todos los hologramas dentro de las vitrinas
+  hologramUpdaters.forEach(updater => updater(delta));
+
+  renderer.render(scene, camera);
 }
 
-// 03 Yoshida
-let yTrails=[];
-function init03(){ yTrails=[]; const L=Math.min(W,H)*.22; for(let i=0;i<16;i++) yTrails.push({th1:Math.PI*(.4+i*.03),th2:Math.PI*(.8+i*.02),w1:0,w2:0,pts:[],max:550,cx:W/2,cy:H*.42,L}); }
-function step03(){
-  ctx.fillStyle='rgba(4,2,12,.03)'; ctx.fillRect(0,0,W,H); const c1=.6756,c0=-.1756,d1=1.3512,d0=-1.7024,g=9.8,dt=.03;
-  for(const tr of yTrails){
-    for(let s=0;s<5;s++)for(const [c,d] of [[c1,d1],[c0,d0],[c1,d1]]){
-      tr.th1+=c*dt*tr.w1; tr.th2+=c*dt*tr.w2; const dth=tr.th1-tr.th2, den=2-Math.cos(2*dth);
-      const dw1=(-g*(2*Math.sin(tr.th1)-Math.cos(dth)*Math.sin(tr.th2))-Math.sin(dth)*(tr.w2*tr.w2+tr.w1*tr.w1*Math.cos(dth)))/den;
-      const dw2=(g*(2*Math.cos(dth)*Math.sin(tr.th1)-2*Math.sin(tr.th2))+Math.sin(dth)*(2*tr.w1*tr.w1+tr.w2*tr.w2*Math.cos(dth)))/den;
-      tr.w1+=d*dt*dw1; tr.w2+=d*dt*dw2;
-    }
-    const x1=tr.cx+tr.L*Math.sin(tr.th1),y1=tr.cy+tr.L*Math.cos(tr.th1);
-    tr.pts.push([x1+tr.L*Math.sin(tr.th2),y1+tr.L*Math.cos(tr.th2)]); if(tr.pts.length>tr.max)tr.pts.shift();
-    const n=tr.pts.length; if(n<2)continue;
-    for(let j=1;j<n;j++){ ctx.strokeStyle=PALS_CSS[currentPal](j/n); ctx.lineWidth=.5+(j/n)*1.4; ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke(); }
-  }
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// 05 Chladni
-let chSand=[], chM=3, chN=5;
-function init05(){ chSand=[]; for(let i=0;i<5500;i++) chSand.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:0}); }
-function step05(){
-  ctx.fillStyle='rgba(4,2,12,.12)'; ctx.fillRect(0,0,W,H); const L=Math.min(W,H)*.85, ox=(W-L)/2, oy=(H-L)/2;
-  for(const p of chSand){
-    const u=(p.x-ox)/L,v=(p.y-oy)/L;
-    if(u>=0&&u<=1&&v>=0&&v<=1){
-      const val=Math.sin(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-Math.sin(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
-      const gx=chN*Math.PI*Math.cos(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-chM*Math.PI*Math.cos(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
-      const gy=chM*Math.PI*Math.sin(chN*Math.PI*u)*Math.cos(chM*Math.PI*v)-chN*Math.PI*Math.sin(chM*Math.PI*u)*Math.cos(chN*Math.PI*v);
-      p.vx=p.vx*.82-Math.sign(val)*gx*.08+(Math.random()-.5)*.4; p.vy=p.vy*.82-Math.sign(val)*gy*.08+(Math.random()-.5)*.4;
-      p.x+=p.vx; p.y+=p.vy;
-      ctx.fillStyle=PALS_CSS[currentPal](Math.exp(-Math.abs(val)*6)); ctx.fillRect(p.x,p.y,1.2,1.2);
-    } else { p.x=ox+Math.random()*L; p.y=oy+Math.random()*L; p.vx=p.vy=0; }
-  }
-}
-
-// 06 Turing
-let tAgents=[];
-function init06(){ tAgents=[]; for(let i=0;i<280;i++) tAgents.push({x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,angle:Math.random()*Math.PI*2,sp:i%2,pts:[]}); }
-function step06(){
-  ctx.fillStyle='rgba(4,2,12,.025)'; ctx.fillRect(0,0,W,H);
-  for(let i=0;i<tAgents.length;i++){
-    const ag=tAgents[i]; let repX=0,repY=0;
-    for(let j=0;j<30;j++){ const o=tAgents[(i+j*7)%tAgents.length],dx=o.x-ag.x,dy=o.y-ag.y,dist=Math.hypot(dx,dy)||1; if(dist<45){const f=(ag.sp===o.sp?-1:1.4)*(45-dist)/dist; repX+=f*dx;repY+=f*dy;} }
-    ag.angle+=(Math.atan2(repY,repX)-ag.angle)*.08+(Math.random()-.5)*.2; ag.x+=Math.cos(ag.angle)*1.8; ag.y+=Math.sin(ag.angle)*1.8;
-    if(ag.x<0)ag.x=W; if(ag.x>W)ag.x=0; if(ag.y<0)ag.y=H; if(ag.y>H)ag.y=0;
-    ag.pts.push([ag.x,ag.y]); if(ag.pts.length>70)ag.pts.shift();
-    if(ag.pts.length>2){ ctx.strokeStyle=PALS_CSS[currentPal](ag.sp===0?.85:.2); ctx.lineWidth=ag.sp===0?2.2:1.2; ctx.beginPath(); ctx.moveTo(ag.pts[ag.pts.length-2][0],ag.pts[ag.pts.length-2][1]); ctx.lineTo(ag.pts[ag.pts.length-1][0],ag.pts[ag.pts.length-1][1]); ctx.stroke(); }
-  }
-}
-
-// 21 Riemann
-let rieT = 0, riePts = [], rieZerosHit = [], rieRot = 0.4;
-const RIEMANN_ZEROS = [14.1347, 21.0220, 25.0108, 30.4248, 32.9350, 37.5861, 40.9187];
-function init21() { rieT = 0; riePts = []; rieZerosHit = []; rieRot = 0.4; }
-function riemannZ(t) {
-  if (t < 0.1) return 1.0;
-  const theta = (t/2)*Math.log(t/(2*Math.PI)) - (t/2) - (Math.PI/8), N = Math.floor(Math.sqrt(t/(2*Math.PI))) || 1;
-  let sum = 0; for (let n = 1; n <= N; n++) sum += Math.cos(theta - t*Math.log(n)) / Math.sqrt(n);
-  return 2 * sum;
-}
-function step21() {
-  ctx.fillStyle = 'rgba(4,2,12,0.035)'; ctx.fillRect(0,0,W,H); rieRot += 0.001;
-  for (let s = 0; s < 4; s++) {
-    rieT += 0.04; if (rieT > 45) { rieT = 0; riePts = []; }
-    const zVal = riemannZ(rieT), theta = (rieT/2)*Math.log(Math.max(1,rieT)/(2*Math.PI)) - (rieT/2);
-    const rx = zVal * Math.cos(theta), ry = zVal * Math.sin(theta), rz = (rieT - 22.5) * 8;
-    for (const z0 of RIEMANN_ZEROS) if (Math.abs(rieT - z0) < 0.03) rieZerosHit.push({ x: W/2, y: H/2, r: 1, maxR: 60 });
-    const cosR = Math.cos(rieRot), sinR = Math.sin(rieRot);
-    const px = rx * cosR - rz * sinR * 0.1, pz = rx * sinR + rz * cosR, py = ry - pz * 0.2;
-    riePts.push([W/2 + px * (Math.min(W,H)*0.045), H/2 - py * (Math.min(W,H)*0.045), Math.abs(zVal)]);
-    if (riePts.length > 550) riePts.shift();
-  }
-  ctx.strokeStyle = 'rgba(120, 100, 255, 0.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.stroke();
-  const n = riePts.length;
-  if (n > 1) {
-    for (let j = 1; j < n; j++) {
-      const nearZero = Math.exp(-riePts[j][2] * 1.5);
-      ctx.strokeStyle = PALS_CSS[currentPal](nearZero * 0.8 + (j/n) * 0.2);
-      ctx.lineWidth = 0.6 + nearZero * 2.5; ctx.beginPath(); ctx.moveTo(riePts[j-1][0], riePts[j-1][1]); ctx.lineTo(riePts[j][0], riePts[j][1]); ctx.stroke();
-    }
-  }
-  for (let k = rieZerosHit.length - 1; k >= 0; k--) {
-    const o = rieZerosHit[k]; o.r += 1.8;
-    if (o.r >= o.maxR) { rieZerosHit.splice(k, 1); continue; }
-    ctx.strokeStyle = PALS_CSS[currentPal](1.0); ctx.globalAlpha = 1.0 - o.r / o.maxR; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
-  }
-}
-
-// 22 Beal
-let bealStars = [], bealAngle = 0;
-function init22() {
-  bealStars = []; bealAngle = 0;
-  for (let A = 2; A <= 8; A++) for (let B = 2; B <= 8; B++) for (let x = 3; x <= 5; x++) for (let y = 3; y <= 5; y++) {
-    const sum = Math.pow(A, x) + Math.pow(B, y);
-    for (let C = 2; C <= 25; C++) for (let z = 3; z <= 5; z++) {
-      const cz = Math.pow(C, z), err = Math.abs(sum - cz) / sum;
-      const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-      if (err < 0.08 || gcd(A, gcd(B, C)) > 1) bealStars.push({ hasCommonFactor: gcd(A, gcd(B, C)) > 1, th: Math.log(sum)*1.8, rad: Math.log(cz)*12 });
-    }
-  }
-}
-function step22() {
-  ctx.fillStyle = 'rgba(4,2,12,0.04)'; ctx.fillRect(0,0,W,H); bealAngle += 0.002; const cx = W/2, cy = H/2;
-  ctx.strokeStyle = 'rgba(255, 50, 100, 0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, Math.min(W,H)*0.28, 0, Math.PI*2); ctx.stroke();
-  for (const s of bealStars) {
-    const a = s.th + bealAngle * (s.hasCommonFactor ? 1 : -0.7), r = s.rad * (Math.min(W,H)*0.0035);
-    ctx.fillStyle = s.hasCommonFactor ? PALS_CSS[currentPal](0.85) : 'rgba(255, 80, 80, 0.5)';
-    ctx.beginPath(); ctx.arc(cx + r*Math.cos(a), cy + r*Math.sin(a), s.hasCommonFactor ? 2.5 : 1.2, 0, Math.PI*2); ctx.fill();
-  }
-}
-
-// 23 Navier Stokes
-let nsVortices = [], nsRot = 0;
-function init23() {
-  nsVortices = []; nsRot = 0;
-  for (let ring = 0; ring < 3; ring++) {
-    const pts = [], R = Math.min(W, H) * (0.16 + ring * 0.05);
-    for (let i = 0; i < 48; i++) pts.push({ x: R * Math.cos(i/48*Math.PI*2), y: R * Math.sin(i/48*Math.PI*2), z: (ring-1)*35 });
-    nsVortices.push({ pts, ring });
-  }
-}
-function step23() {
-  ctx.fillStyle = 'rgba(4,2,12,0.05)'; ctx.fillRect(0,0,W,H); nsRot += 0.003; const cx = W/2, cy = H/2;
-  for (const v of nsVortices) {
-    const proj = v.pts.map(p => {
-      p.x += Math.sin(p.z * 0.03 + nsRot * 2) * 1.2; p.y += Math.cos(p.z * 0.03 + nsRot * 2) * 1.2;
-      const rx = p.x * Math.cos(nsRot) - p.z * Math.sin(nsRot); return [cx + rx, cy - p.y];
-    });
-    ctx.strokeStyle = PALS_CSS[currentPal](0.4 + v.ring * 0.25); ctx.lineWidth = 1.8;
-    ctx.beginPath(); ctx.moveTo(proj[0][0], proj[0][1]); for (let i = 1; i < proj.length; i++) ctx.lineTo(proj[i][0], proj[i][1]); ctx.closePath(); ctx.stroke();
-  }
-}
-
-// 24 Ricci
-let ricciAngle = 0, ricciT = 0;
-function init24() { ricciAngle = 0; ricciT = 0; }
-function step24() {
-  ctx.fillStyle = 'rgba(4,2,12,0.06)'; ctx.fillRect(0,0,W,H); ricciAngle += 0.004; ricciT += 0.008;
-  const smoothing = Math.min(1.0, ricciT * 0.08), baseR = Math.min(W, H) * 0.26, cx = W/2, cy = H/2;
-  if (ricciT > 25) ricciT = 0;
-  for (let lat = -Math.PI/2 + 0.15; lat <= Math.PI/2 - 0.15; lat += 0.25) {
-    ctx.beginPath(); let first = true;
-    for (let lon = 0; lon <= Math.PI * 2; lon += 0.14) {
-      const deformation = (Math.sin(lon * 4 + lat * 3) * Math.cos(lat * 5)) * (1.0 - smoothing);
-      const r = baseR * (1.0 + deformation * 0.4);
-      const px = cx + r * Math.cos(lat) * Math.sin(lon + ricciAngle);
-      const py = cy - r * Math.sin(lat) + r * Math.cos(lat) * Math.cos(lon + ricciAngle) * 0.25;
-      if (first) { ctx.moveTo(px, py); first = false; } else { ctx.lineTo(px, py); }
-    }
-    ctx.strokeStyle = PALS_CSS[currentPal](0.3 + (1.0 - smoothing) * 0.6); ctx.lineWidth = 0.8; ctx.stroke();
-  }
-}
-
-// Mapas de orquestación
-const INITS = { 0: init01, 2: init03, 4: init05, 5: init06, 20: init21, 21: init22, 22: init23, 23: init24 };
-const STEPS = { 0: step01, 2: step03, 4: step05, 5: step06, 20: step21, 21: step22, 22: step23, 23: step24 };
-
-const ARTWORKS = {
-  0: { badge: "01", mini: "Lorenz", title: "El Vuelo de Lorenz", sub: "El aleteo que gobierna el infinito", cat: "TEORÍA DEL CAOS · 1963", solver: "RK4 Integrator", eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z", hist: "En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora. Aquella millonésima demostró que el universo es matemáticamente determinista pero humanamente impredecible.", poem: '"Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el cosmos."' },
-  2: { badge: "03", mini: "Yoshida", title: "La Danza de Yoshida", sub: "La memoria que el tiempo jamás disuelve", cat: "HAMILTONIANO · 1990", solver: "Symplectic 4th Order", eq: "z_{n+1}=exp(c_i Δt D_A) exp(d_i Δt D_B) z_n", hist: "En 1990, Haruo Yoshida descubrió coeficientes analíticos de 4º orden que conservan la energía exacta de un sistema por la eternidad sin perder un solo julio.", poem: '"Dos cuerpos bailan al borde del abismo, sin motor ni fricción. Es la música pura de la conservación."' },
-  4: { badge: "05", mini: "Chladni", title: "Los Cantos de Chladni", sub: "La arquitectura que el sonido dibuja en el silencio", cat: "CIMÁTICA · 1787", solver: "Helmholtz Nodal Wave", eq: "w(x,y)=sin(nπx/L)sin(mπy/L) - sin(mπx/L)sin(nπy/L)=0", hist: "Ernst Chladni pasó un arco de violín por una placa de bronce con arena en 1787. El sonido expulsó los granos hacia las líneas nodales de reposo, revelando mandalas sagrados.", poem: '"El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la arena del mundo descanse en geometría sagrada."' },
-  5: { badge: "06", mini: "Turing", title: "El Telar de Turing", sub: "Cómo el leopardo tejió sus manchas en el caos", cat: "MORFOGÉNESIS · 1952", solver: "Reaction-Diffusion PDE", eq: "∂u/∂t = D_u ∇²u - uv² + F(1-u)", hist: "Alan Turing demostró en 1952 que dos sustancias químicas compitiendo bastan para crear todas las manchas de los leopardos y arrecifes de coral.", poem: '"La vida no necesitó un pincel: solo dos moléculas jugando a perseguirse a través de las edades."' },
-  20: { badge: "21", mini: "Riemann", title: "Los Ceros de Riemann", sub: "El enigma de un millón de dólares en la línea crítica", cat: "PROBLEMA DEL MILENIO · 1859", solver: "Riemann-Siegel Critical Spiral", eq: "ζ(s) = ∑ 1/nˢ = 0 ⇒ Re(s) = 1/2", hist: "En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales yacen en la línea crítica Re(s)=1/2. Es el problema de un millón de dólares que gobierna todos los números primos.", poem: '"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."' },
-  21: { badge: "22", mini: "Beal", title: "El Desierto de Beal", sub: "La repulsión matemática entre potencias coprimas", cat: "CONJETURA DE BEAL · 1993", solver: "Logarithmic Power Lattice", eq: "Aˣ + Bʸ = Cᶻ con x,y,z > 2 ⇒ mcd(A,B,C) > 1", hist: "Andrew Beal ofreció $1.000.000 USD a quien demuestre que Aˣ+Bʸ=Cᶻ exige factor común. Si buscas soluciones coprimas, se forma un desierto de exclusión absoluto.", poem: '"En el desierto de las potencias puras, los números solitarios jamás logran sumarse. Solo aquellos que comparten la misma sangre prima pueden abrazarse en la geometría."' },
-  22: { badge: "23", mini: "Navier-Stokes", title: "Vórtices de Navier-Stokes", sub: "El misterio de la turbulencia y las velocidades infinitas", cat: "PROBLEMA DEL MILENIO · 1845", solver: "3D Vortex Filament Stretching", eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u", hist: "El Instituto Clay ofrece $1.000.000 USD por demostrar si un fluido suave puede concentrar tanta energía que su velocidad explote a infinito.", poem: '"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."' },
-  23: { badge: "24", mini: "Ricci", title: "El Flujo de Ricci de Poincaré", sub: "La redondez cósmica que resolvió Grigori Perelman", cat: "PROBLEMA DEL MILENIO · 2002", solver: "Perelman Metric Smoothing S³", eq: "∂g_ij/∂t = -2 R_ij", hist: "Henri Poincaré conjeturó la esfera 3D en 1904. En 2002, Grigori Perelman la resolvió alisando el espacio con el Flujo de Ricci y rechazó el millón de dólares.", poem: '"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."' }
-};
-
-// ── INTERACCIÓN EN CANVAS DE ENFOQUE ──────────────────────────────
-focusCanvas.addEventListener('mousedown', e => {
-  isDrag = true; dragX = e.clientX; dragY = e.clientY; mouseDown = true;
-});
-window.addEventListener('mousemove', e => {
-  if (!isDrag) return;
-  const dx = e.clientX - dragX;
-  if (currentArt === 0) { lRotZ += dx * 0.005; lRotX += (e.clientY - dragY) * 0.005; }
-  if (currentArt === 20) { rieRot += dx * 0.005; }
-  if (currentArt === 22) { nsRot += dx * 0.005; }
-  if (currentArt === 23) { ricciAngle += dx * 0.005; }
-  dragX = e.clientX; dragY = e.clientY;
-});
-window.addEventListener('mouseup', () => { isDrag = false; mouseDown = false; });
-
-// ── INICIALIZACIÓN GENERAL ────────────────────────────────────────
-window.addEventListener('resize', () => {
-  if (isFocusMode) resizeFocusCanvas();
+// Click para entrar a contemplar si estamos mirando una vitrina
+window.addEventListener('click', (e) => {
+  if (isContemplating) return;
+  if (e.target.closest('header, #roll-drawer, #shop-drawer')) return;
+  if (currentFocusedVitrine) enterContemplation(currentFocusedVitrine);
 });
 
-buildCorridorDOM();
-updateRollUI();
+// Arrancar motor
+init3D();
 </script>
 </body>
 </html>

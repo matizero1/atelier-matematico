@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Atelier Matemático — Observatorio Orbital & Timonel</title>
+<title>Atelier Matemático — Observatorio Orbital & Boutique 3D</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #010004;
-    --card: rgba(6, 4, 14, 0.85);
+    --card: rgba(6, 4, 14, 0.88);
     --border: rgba(168, 85, 247, 0.25);
     --cyan: #38bdf8;
     --accent: #8b5cf6;
@@ -101,7 +101,7 @@
       </div>
       <div>
         <span class="serif tracking-[.25em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Observatorio Orbital · Silicio Nativo</span>
+        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Observatorio Orbital & Taller 3D · Silicio Nativo</span>
       </div>
     </div>
     <div class="glass px-3.5 py-1 rounded-full text-xs mono text-cyan-300 border-cyan-500/30">
@@ -124,11 +124,11 @@
         Santuario de Ecuaciones Vivas
       </div>
       <h1 class="text-3xl md:text-4xl serif font-bold text-white mb-4 leading-tight">
-        "Las fórmulas no están enlatadas.<br>
-        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Viven y se desenredan en el vacío."</span>
+        "No eres un espectador pasivo.<br>
+        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Caza tu instante y materialízalo en la materia."</span>
       </h1>
       <p class="text-sm text-slate-300 font-light leading-relaxed mb-6">
-        Aquí no hay piso ni paredes. Las grandes leyes matemáticas existen como astros vivos calculándose en tiempo real. Timonel audita sus residuos formales mientras NAI y tú flotan en gravedad cero en el cosmos.
+        Aquí las ecuaciones viven y se calculan en el vacío cósmico. Puedes orbitarlas libremente, disparar tu cámara y luego ingresar a la <strong>Boutique Orbital en 3D</strong> para proyectar tus propias capturas sobre cuadros de autor, tazas de cerámica o cuadernos antes de encargar su manufactura.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
@@ -136,22 +136,23 @@
           <span>🌌</span>
           <span>Iniciar Vuelo Orbital en la Cápsula</span>
         </button>
-        <button onclick="enterCapsule(false)" class="glass hover:bg-white/10 text-slate-300 text-xs px-5 py-3 rounded-full mono transition">
-          🔇 Vuelo en Silencio
+        <button onclick="enterShopMode()" class="glass hover:bg-white/10 text-cyan-300 text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 border-cyan-500/30">
+          <span>🛍️</span>
+          <span>Ir Directo a la Boutique 3D</span>
         </button>
       </div>
     </div>
   </div>
 
   <div class="text-center text-[11px] mono text-slate-500 max-w-xl mx-auto">
-    Matías Cortés Figueroa · Timonel F2 · Física de Medios Continuos & Dinámica de Atractores
+    Matías Cortés Figueroa · Timonel F2 · Física de Medios Continuos & Manufactura de Autor
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- HUD DE LA CÁPSULA (MINIMALISTA & PERMANENTE)                               -->
+<!-- HUD DE LA CÁPSULA (MODO VUELO LIBRE)                                      -->
 <!-- ========================================================================= -->
-<header class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex justify-between items-center pointer-events-none">
+<header id="flight-hud-header" class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex justify-between items-center pointer-events-none transition-opacity duration-500">
   <div class="flex items-center gap-3 pointer-events-auto">
     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
       <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
@@ -167,7 +168,7 @@
     <span class="text-cyan-300">Arrastra para girar · Rueda / W-S para propulsión 3D · Suelta para guía NAI</span>
   </div>
 
-  <!-- DERECHA: VOZ, CARRETE & TIENDA -->
+  <!-- DERECHA: VOZ, CARRETE & BOUTIQUE 3D -->
   <div class="flex items-center gap-2.5 pointer-events-auto">
     <button id="btn-global-voice-toggle" onclick="toggleVoiceGuide()" class="glass hover:bg-white/10 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 border-purple-500/20">
       <span id="voice-status-icon">🔊</span>
@@ -178,9 +179,10 @@
       <span class="hidden sm:inline">Carrete</span>
       <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
     </button>
-    <button onclick="toggleShop()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
-      <span>🖼️</span>
-      <span class="hidden sm:inline">Cuadros de Autor</span>
+    <!-- BOTÓN ACCESO A LA BOUTIQUE ORBITAL 3D -->
+    <button onclick="enterShopMode()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
+      <span>🛍️</span>
+      <span class="hidden sm:inline">Boutique 3D</span>
     </button>
   </div>
 </header>
@@ -248,7 +250,111 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- DRAWERS: CARRETE DE FOTOS & TIENDA FÍSICA                                 -->
+<!-- MODO BOUTIQUE ORBITAL 3D: INTERFAZ DE PERSONALIZACIÓN & CHECKOUT          -->
+<!-- ========================================================================= -->
+<div id="shop-bay-overlay" class="fixed inset-0 z-40 pointer-events-none hidden transition-opacity duration-700 opacity-0">
+  
+  <!-- Barra Superior: Salir & Selector de Producto -->
+  <div class="fixed top-6 left-6 right-6 flex flex-wrap justify-between items-center gap-4 pointer-events-auto">
+    <button onclick="exitShopMode()" class="glass hover:bg-white/10 text-white text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2 border-purple-500/30 shadow-2xl">
+      <span>←</span>
+      <span>Volver al Vuelo Orbital</span>
+    </button>
+
+    <!-- Selector de Productos 3D -->
+    <div class="glass px-3 py-1.5 rounded-full border-white/15 flex items-center gap-2 shadow-2xl">
+      <button onclick="switch3DProduct('frame_wood')" id="btn-prod-frame-wood" class="px-3 py-1 rounded-full text-xs mono font-bold bg-purple-600 text-white transition">
+        🖼️ Cuadro Madera 50×70
+      </button>
+      <button onclick="switch3DProduct('frame_acrylic')" id="btn-prod-frame-acrylic" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
+        ✨ Acrílico Luxury 40×60
+      </button>
+      <button onclick="switch3DProduct('mug')" id="btn-prod-mug" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
+        ☕ Taza Cerámica Mate
+      </button>
+      <button onclick="switch3DProduct('notebook')" id="btn-prod-notebook" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
+        📓 Cuaderno de Campo
+      </button>
+    </div>
+
+    <!-- Indicador de Rotación 3D -->
+    <div class="glass px-3.5 py-1.5 rounded-full text-[11px] mono text-cyan-300 border-cyan-500/30 hidden lg:block">
+      Arrastra el ratón para rotar el objeto 360° en gravedad cero
+    </div>
+  </div>
+
+  <!-- Panel Lateral Derecho: Checkout & Manufactura de Autor -->
+  <div class="fixed top-24 right-6 w-full max-w-sm glass rounded-2xl p-5 border-purple-500/30 shadow-2xl space-y-4 pointer-events-auto max-h-[82vh] overflow-y-auto">
+    <div class="flex justify-between items-start pb-3 border-b border-white/10">
+      <div>
+        <span id="shop-prod-category" class="text-[10px] mono text-purple-400 block">EDICIÓN DE GALERÍA FIRMADA</span>
+        <h3 id="shop-prod-title" class="text-base serif font-bold text-white">Cuadro Fine Art 50×70 cm</h3>
+      </div>
+      <div id="shop-prod-price" class="text-right font-mono font-bold text-base text-amber-300">
+        $68.000 CLP
+      </div>
+    </div>
+
+    <!-- Aviso de Confección & Despacho de 15 a 20 Días -->
+    <div class="bg-black/50 p-3 rounded-xl border border-white/10 text-[11px] space-y-1.5 font-light">
+      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
+        <span>🛡️</span> Confección Artesanal a Pedido
+      </div>
+      <p class="text-slate-300 leading-snug">
+        Impresión fine art pigmentada sobre papel de algodón de 310g con paspartú libre de ácido y marco de madera. Certificado oficial sellado y firmado por Matías Cortés.
+      </p>
+      <div class="text-[10px] mono text-cyan-300 pt-1 flex items-center gap-1">
+        <span>📦</span> Plazo de manufactura y despacho: <strong>10 a 15 días hábiles</strong> (máximo 20 días garantizado).
+      </div>
+    </div>
+
+    <!-- Formulario de Despacho Inmediato -->
+    <div class="space-y-2.5 pt-1">
+      <div>
+        <label class="text-[10px] mono text-slate-400 block mb-1">Nombre Completo:</label>
+        <input type="text" id="order-name" placeholder="Tu nombre" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+      </div>
+      <div>
+        <label class="text-[10px] mono text-slate-400 block mb-1">Dirección de Despacho (Chile o Internacional):</label>
+        <input type="text" id="order-address" placeholder="Calle, Número, Comuna, Ciudad" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+      </div>
+      <div>
+        <label class="text-[10px] mono text-slate-400 block mb-1">WhatsApp de Notificación:</label>
+        <input type="tel" id="order-phone" placeholder="+56 9 1234 5678" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+      </div>
+    </div>
+
+    <!-- Botón de Pago con 100% de Abono Anticipado -->
+    <div class="pt-2">
+      <button onclick="processDirectCheckout()" class="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-mono text-xs py-3 rounded-xl font-bold transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2">
+        <span>💳</span>
+        <span>Confirmar Pedido & Pagar con Tarjeta</span>
+      </button>
+      <p class="text-[9px] mono text-slate-500 text-center mt-2">
+        Pago 100% asegurado. Recibirás tu comprobante y seguimiento de manufactura vía WhatsApp.
+      </p>
+    </div>
+  </div>
+
+  <!-- Bandeja Inferior Flotante: Proyector de Texturas UV (Fotos del Carrete + Obras Maestras) -->
+  <div class="fixed bottom-6 left-6 right-6 md:right-auto md:max-w-2xl glass rounded-2xl p-3 border-purple-500/30 shadow-2xl pointer-events-auto space-y-2">
+    <div class="flex justify-between items-center text-[11px] mono">
+      <span class="text-white font-bold flex items-center gap-1.5">
+        <span>🪄</span> Proyectar Textura en el Objeto 3D:
+      </span>
+      <span class="text-slate-400 text-[10px]">Haz clic en cualquier imagen para mapearla</span>
+    </div>
+
+    <!-- Carrusel de Miniaturas -->
+    <div id="texture-tray-carousel" class="flex gap-2.5 overflow-x-auto pb-1 pt-0.5">
+      <!-- Generado dinámicamente con las fotos del usuario + obras maestras -->
+    </div>
+  </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- DRAWERS: CARRETE DE FOTOS                                                 -->
 <!-- ========================================================================= -->
 <div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#05030b]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
   <div>
@@ -287,58 +393,8 @@
   </div>
 </div>
 
-<div id="shop-drawer" class="fixed inset-y-0 right-0 w-full max-w-lg bg-[#05030b]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl overflow-y-auto">
-  <div>
-    <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
-      <div>
-        <h3 class="serif text-lg font-bold text-white flex items-center gap-2"><span>🖼️</span> Cuadros Físicos de Autor</h3>
-        <p class="text-xs text-slate-400 mono">Edición de Galería Firmada · Santiago de Chile</p>
-      </div>
-      <button onclick="toggleShop()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
-    </div>
-    <div class="glass p-3.5 rounded-xl mb-4 text-xs text-slate-300 space-y-1">
-      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300"><span>🛡️</span> Garantía de Galería Atelier</div>
-      <p class="text-[11px] text-slate-400">Impresión Fine Art pigmentada sobre papel de algodón 310g con paspartú y certificado de ecuación firmado por Matías.</p>
-    </div>
-    <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-1">
-      <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs serif font-bold text-white truncate">Los Cantos de Chladni</div>
-          <div class="text-[10px] text-slate-400 mono">Resonancia Acústica (1787)</div>
-          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
-        </div>
-        <button onclick="orderPhysical('Los Cantos de Chladni', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
-      </div>
-      <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🦋</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs serif font-bold text-white truncate">El Vuelo de Lorenz</div>
-          <div class="text-[10px] text-slate-400 mono">Efecto Mariposa & Caos (1963)</div>
-          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
-        </div>
-        <button onclick="orderPhysical('El Vuelo de Lorenz', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
-      </div>
-      <div class="glass p-3 rounded-xl flex gap-3 items-center">
-        <div class="w-14 h-14 rounded-lg bg-black border border-amber-500/30 flex items-center justify-center text-xl shrink-0">🌌</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs serif font-bold text-white truncate">Los Ceros de Riemann</div>
-          <div class="text-[10px] text-slate-400 mono">Problema del Milenio (1859)</div>
-          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$120.000 CLP <span class="text-[9px] text-slate-400 font-normal">· Acrílico 40×60 cm</span></div>
-        </div>
-        <button onclick="orderPhysical('Los Ceros de Riemann', 120000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
-      </div>
-    </div>
-  </div>
-  <div class="pt-4 border-t border-white/10 text-center">
-    <a href="https://wa.me/56900000000?text=Hola,%20quisiera%20consultar%20por%20un%20cuadro%20de%20Atelier%20Matemático" target="_blank" class="glass hover:bg-white/10 text-white text-xs py-2 px-4 rounded-xl mono inline-flex items-center gap-2 border-white/15">
-      <span>💬</span> Hablar con Matías
-    </a>
-  </div>
-</div>
-
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT: OBSERVATORIO ORBITAL EN SILICIO NATIVO                        -->
+<!-- JAVASCRIPT: MOTOR COMPLETO 3D CON BOUTIQUE INTERACTIVA                     -->
 <!-- ========================================================================= -->
 <script>
 // Metadatos y Posiciones Esféricas de las 6 Fórmulas Vivas
@@ -439,7 +495,7 @@ let orientation = { pitch: 0, yaw: 0 };
 let targetOrientation = { pitch: 0, yaw: 0 };
 let isDragging = false;
 let dragPrev = { x: 0, y: 0 };
-let userInertiaTimer = 0; // Tiempo sin input para acoplar con NAI
+let userInertiaTimer = 0;
 let currentFocusedAstro = null;
 
 // Audio Espacial Web Audio
@@ -447,14 +503,31 @@ let audioCtx = null, droneGain = null, resonanceGain = null, resonanceOsc = null
 let voiceGuideEnabled = true, isSpeaking = false, currentUtterance = null;
 let userCameraRoll = [];
 
-// ── INICIALIZACIÓN THREE.JS (GRAVEDAD CERO) ───────────────────────
+// ── VARIABLES DE LA BOUTIQUE ORBITAL 3D ───────────────────────────
+let isInShopMode = false;
+let savedCameraState = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+let shopBayGroup = null;
+let shopProducts = {
+  frameWood: null,
+  frameAcrylic: null,
+  mug: null,
+  notebook: null,
+  certificate: null
+};
+let currentProductType = 'frame_wood';
+let activeTextureCanvas = null;
+let activeProductTexture = null;
+let productRotation = { x: 0, y: 0 };
+let targetProductRotation = { x: 0, y: 0 };
+
+// ── INICIALIZACIÓN THREE.JS ───────────────────────────────────────
 function initOrbitalSpace() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x010004);
-  scene.fog = new THREE.FogExp2(0x010004, 0.018);
+  scene.fog = new THREE.FogExp2(0x010004, 0.016);
 
-  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 160);
   camera.position.set(0, 0, 4);
 
   renderer = new THREE.WebGLRenderer({
@@ -464,26 +537,26 @@ function initOrbitalSpace() {
     preserveDrawingBuffer: true
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(1.0); // Silicio frío
+  renderer.setPixelRatio(1.0);
   renderer.shadowMap.enabled = false;
 
   buildCosmicVoid();
   buildNaiSovereignEntity();
+  buildShopBay3D();
   setup6DOFControls();
   window.addEventListener('resize', onWindowResize);
   animate();
 }
 
-// ── VACÍO CÓSMICO PURO (SIN SUELO NI MUROS) ───────────────────────
+// ── VACÍO CÓSMICO (SIN SUELO NI MUROS) ────────────────────────────
 function buildCosmicVoid() {
-  // Luz Ambiente Tenue
   scene.add(new THREE.AmbientLight(0x1a1228, 0.8));
 
-  // Campo Estelar Esférico Omnidireccional (1.400 partículas en el vacío 3D)
+  // Campo Estelar Esférico Omnidireccional
   const starGeo = new THREE.BufferGeometry();
   const starPos = new Float32Array(1400 * 3);
   for (let i = 0; i < 1400; i++) {
-    const r = 18 + Math.random() * 50;
+    const r = 18 + Math.random() * 55;
     const th = Math.random() * Math.PI * 2;
     const ph = (Math.random() - 0.5) * Math.PI;
     starPos[i*3]   = r * Math.cos(ph) * Math.sin(th);
@@ -494,31 +567,26 @@ function buildCosmicVoid() {
   const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.035, transparent: true, opacity: 0.5 }));
   scene.add(stars);
 
-  // Instanciar los 6 Astros Matemáticos Vivos
   ASTROS_DATA.forEach((data, index) => {
     createLivingMathematicalAstro(data, index);
   });
 }
 
-// ── NAI EN SILICIO 3D (GUÍA SOBERANA) ─────────────────────────────
+// ── NAI EN SILICIO 3D ─────────────────────────────────────────────
 function buildNaiSovereignEntity() {
   const group = new THREE.Group();
-  
-  // Núcleo cuántico icosaédrico
   const core = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.25, 1),
     new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.85 })
   );
   group.add(core);
 
-  // Halo exterior
   const halo = new THREE.Mesh(
     new THREE.OctahedronGeometry(0.4, 0),
     new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.45 })
   );
   group.add(halo);
 
-  // Luz puntual propia
   const light = new THREE.PointLight(0xa855f7, 2.0, 9.0);
   group.add(light);
 
@@ -531,22 +599,374 @@ function buildNaiSovereignEntity() {
   nai3D.light = light;
 }
 
-// ── ASTROS MATEMÁTICOS VIVOS (SISTEMAS DINÁMICOS DESENREDÁNDOSE) ───
+// ── CONSTRUCCIÓN DE LA BAHÍA 3D DE MANUFACTURA ORBITAL ───────────
+function buildShopBay3D() {
+  shopBayGroup = new THREE.Group();
+  shopBayGroup.position.set(0, 0, 36.0); // Ubicada en un sector específico del vacío
+
+  // 1. Pedestal de Luz Cuántica
+  const pedestalGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.08, 48);
+  const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x07060f, roughness: 0.3, metalness: 0.8 });
+  const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+  pedestal.position.y = -1.6;
+  shopBayGroup.add(pedestal);
+
+  const glowRingGeo = new THREE.RingGeometry(1.85, 1.95, 48);
+  const glowRingMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+  const glowRing = new THREE.Mesh(glowRingGeo, glowRingMat);
+  glowRing.rotation.x = -Math.PI / 2;
+  glowRing.position.y = -1.55;
+  shopBayGroup.add(glowRing);
+
+  // 2. Iluminación de Estudio en Gravedad Cero
+  const keyLight = new THREE.SpotLight(0xffffff, 2.5, 12, Math.PI / 4, 0.4);
+  keyLight.position.set(2, 3, 3);
+  shopBayGroup.add(keyLight);
+
+  const fillLight = new THREE.PointLight(0x8b5cf6, 1.8, 8);
+  fillLight.position.set(-2.5, 0.5, 2);
+  shopBayGroup.add(fillLight);
+
+  // 3. Crear Textura Base Predeterminada (El Vuelo de Lorenz)
+  createDefaultMasterTexture();
+
+  // 4. Modelo 1: Cuadro Fine Art 50x70 con Paspartú
+  const frameGroup = new THREE.Group();
+  const outerFrameMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.5, metalness: 0.2 });
+  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.1, 0.08), outerFrameMat);
+  frameGroup.add(outerFrame);
+
+  // Paspartú blanco
+  const matMat = new THREE.MeshStandardMaterial({ color: 0xf4f1eb, roughness: 0.9 });
+  const matMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.48, 1.98), matMat);
+  matMesh.position.z = 0.042;
+  frameGroup.add(matMesh);
+
+  // Lienzo Central con Textura Dinámica
+  const canvasMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 });
+  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.6), canvasMat);
+  canvasMesh.position.z = 0.044;
+  canvasMesh.name = "dynamic_canvas_target";
+  frameGroup.add(canvasMesh);
+
+  shopProducts.frameWood = frameGroup;
+  shopBayGroup.add(frameGroup);
+
+  // 5. Modelo 2: Taza Cerámica Negra Mate
+  const mugGroup = new THREE.Group();
+  mugGroup.position.set(0, 0, 0);
+
+  const mugCylMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.25, metalness: 0.1 });
+  const mugCylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.2, 48, 1, false), mugCylMat);
+  mugCylinder.name = "dynamic_mug_target";
+  mugGroup.add(mugCylinder);
+
+  const handleGeo = new THREE.TorusGeometry(0.35, 0.08, 16, 32, Math.PI);
+  const handleMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.3 });
+  const handle = new THREE.Mesh(handleGeo, handleMat);
+  handle.rotation.z = -Math.PI / 2;
+  handle.position.set(0.55, 0, 0);
+  mugGroup.add(handle);
+
+  mugGroup.visible = false;
+  shopProducts.mug = mugGroup;
+  shopBayGroup.add(mugGroup);
+
+  // 6. Modelo 3: Cuaderno de Campo Moleskine
+  const bookGroup = new THREE.Group();
+  const bookCoverMat = new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4, metalness: 0.1 });
+  const bookCover = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.7, 0.12), bookCoverMat);
+  bookCover.name = "dynamic_book_target";
+  bookGroup.add(bookCover);
+
+  const pagesMat = new THREE.MeshStandardMaterial({ color: 0xe8e4d8, roughness: 0.9 });
+  const pages = new THREE.Mesh(new THREE.BoxGeometry(1.14, 1.64, 0.1), pagesMat);
+  pages.position.x = 0.02;
+  bookGroup.add(pages);
+
+  bookGroup.visible = false;
+  shopProducts.notebook = bookGroup;
+  shopBayGroup.add(bookGroup);
+
+  // 7. Certificado de Procedencia Flotante a la Izquierda
+  const certCanvas = document.createElement('canvas');
+  certCanvas.width = 512; certCanvas.height = 700;
+  const ccx = certCanvas.getContext('2d');
+  ccx.fillStyle = '#08060f'; ccx.fillRect(0, 0, 512, 700);
+  ccx.strokeStyle = '#c5a059'; ccx.lineWidth = 6; ccx.strokeRect(10, 10, 492, 680);
+  ccx.strokeStyle = 'rgba(168, 85, 247, 0.4)'; ccx.lineWidth = 2; ccx.strokeRect(20, 20, 472, 660);
+  ccx.fillStyle = '#e8d2a6'; ccx.font = 'bold 24px Cinzel'; ccx.textAlign = 'center';
+  ccx.fillText("CERTIFICADO DE PROCEDENCIA", 256, 75);
+  ccx.fillStyle = '#38bdf8'; ccx.font = '16px Space Mono';
+  ccx.fillText("ATELIER MATEMÁTICO · SANTIAGO", 256, 115);
+  ccx.strokeStyle = '#38bdf8'; ccx.lineWidth = 1; ccx.beginPath(); ccx.moveTo(80, 135); ccx.lineTo(432, 135); ccx.stroke();
+  
+  ccx.fillStyle = '#e2e8f0'; ccx.font = '14px Space Mono'; ccx.textAlign = 'left';
+  ccx.fillText("OBRA: EL VUELO DE LORENZ (1963)", 50, 185);
+  ccx.fillText("TIPO: MANUFACTURA DE AUTOR 50x70", 50, 220);
+  ccx.fillText("SUSTRATO: PAPEL DE ALGODÓN 310G", 50, 255);
+  ccx.fillText("INVARIANTE: LYAPUNOV λ₁ = +0.9056", 50, 290);
+  ccx.fillText("CURADURÍA: NUMERADA & SELLADA", 50, 325);
+
+  ccx.fillStyle = '#94a3b8'; ccx.font = 'italic 15px Plus Jakarta Sans';
+  ccx.fillText('"La física no se simula para engañar;', 50, 395);
+  ccx.fillText('se deja libre para revelar la belleza pura."', 50, 420);
+
+  ccx.fillStyle = '#e8d2a6'; ccx.font = 'bold 22px Cinzel'; ccx.textAlign = 'right';
+  ccx.fillText("Matías Cortés Figueroa", 450, 560);
+  ccx.fillStyle = '#a855f7'; ccx.font = '13px Space Mono';
+  ccx.fillText("Firma de Autor · Silicio Nativo", 450, 585);
+
+  const certTex = new THREE.CanvasTexture(certCanvas);
+  const certMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.36), new THREE.MeshBasicMaterial({ map: certTex, transparent: true, opacity: 0.9 }));
+  certMesh.position.set(-1.6, 0.1, 0.1);
+  certMesh.rotation.y = 0.25;
+  shopProducts.certificate = certMesh;
+  shopBayGroup.add(certMesh);
+
+  shopBayGroup.visible = false;
+  scene.add(shopBayGroup);
+}
+
+function createDefaultMasterTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
+
+  // Atractor de Lorenz dibujado estéticamente
+  cx.strokeStyle = '#c084fc'; cx.lineWidth = 1.6;
+  cx.shadowColor = '#a855f7'; cx.shadowBlur = 15;
+  let x = 0.1, y = 0, z = 14, dt = 0.005;
+  cx.beginPath();
+  for (let i = 0; i < 4500; i++) {
+    x += dt * 10 * (y - x); y += dt * (x * (28 - z) - y); z += dt * (x * y - 2.667 * z);
+    const px = 512 + x * 16;
+    const py = 560 - (z - 20) * 16;
+    if (i === 0) cx.moveTo(px, py); else cx.lineTo(px, py);
+  }
+  cx.stroke();
+
+  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 36px Cinzel'; cx.textAlign = 'center';
+  cx.fillText("EL VUELO DE LORENZ", 512, 120);
+  cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
+  cx.fillText("TEORÍA DEL CAOS · 1963", 512, 160);
+
+  activeTextureCanvas = c;
+  activeProductTexture = new THREE.CanvasTexture(c);
+}
+
+// ── ENTRAR & SALIR DEL MODO BOUTIQUE ORBITAL 3D ───────────────────
+function enterShopMode() {
+  if (isInShopMode) return;
+  isInShopMode = true;
+
+  // Guardar estado de cámara
+  savedCameraState.pos.copy(camera.position);
+  savedCameraState.quat.copy(camera.quaternion);
+
+  // Ocultar HUD de vuelo y foyer
+  document.getElementById('flight-hud-header').style.opacity = '0';
+  document.getElementById('orbital-hud-card').classList.add('opacity-0');
+  document.getElementById('nai-companion-widget').classList.add('opacity-0');
+  document.getElementById('capsule-reticle').style.opacity = '0';
+  document.getElementById('foyer-screen').classList.add('hidden');
+
+  // Mostrar Bahía 3D
+  shopBayGroup.visible = true;
+  const overlay = document.getElementById('shop-bay-overlay');
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.style.opacity = '1', 50);
+
+  populateTextureTray();
+  speakNai("Entrando a la Bahía de Manufactura 3D. Elige un producto e inspecciónalo en 360 grados.");
+}
+
+function exitShopMode() {
+  if (!isInShopMode) return;
+  isInShopMode = false;
+
+  const overlay = document.getElementById('shop-bay-overlay');
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    shopBayGroup.visible = false;
+  }, 700);
+
+  document.getElementById('flight-hud-header').style.opacity = '1';
+  document.getElementById('nai-companion-widget').classList.remove('opacity-0');
+  document.getElementById('capsule-reticle').style.opacity = '1';
+
+  // Regresar suavemente al punto de vuelo
+  velocity.set(0, 0, 0);
+  camera.position.copy(savedCameraState.pos);
+  camera.quaternion.copy(savedCameraState.quat);
+  const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+  orientation.pitch = e.x; orientation.yaw = e.y;
+  targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
+}
+
+// ── CAMBIO DE PRODUCTO 3D ─────────────────────────────────────────
+function switch3DProduct(type) {
+  currentProductType = type;
+
+  // Reset visibilidad
+  shopProducts.frameWood.visible = (type === 'frame_wood' || type === 'frame_acrylic');
+  shopProducts.mug.visible = (type === 'mug');
+  shopProducts.notebook.visible = (type === 'notebook');
+
+  // Actualizar botones
+  ['frame-wood', 'frame-acrylic', 'mug', 'notebook'].forEach(id => {
+    const btn = document.getElementById(`btn-prod-${id}`);
+    btn.classList.remove('bg-purple-600', 'text-white');
+    btn.classList.add('text-slate-400');
+  });
+
+  const activeBtnId = type.replace('_', '-');
+  const activeBtn = document.getElementById(`btn-prod-${activeBtnId}`);
+  if (activeBtn) {
+    activeBtn.classList.remove('text-slate-400');
+    activeBtn.classList.add('bg-purple-600', 'text-white');
+  }
+
+  // Precios y Títulos
+  const title = document.getElementById('shop-prod-title');
+  const price = document.getElementById('shop-prod-price');
+  const cat = document.getElementById('shop-prod-category');
+
+  if (type === 'frame_wood') {
+    cat.textContent = "EDICIÓN DE GALERÍA FIRMADA";
+    title.textContent = "Cuadro Fine Art 50×70 cm";
+    price.textContent = "$68.000 CLP";
+  } else if (type === 'frame_acrylic') {
+    cat.textContent = "EDICIÓN LUXURY EN ACRÍLICO";
+    title.textContent = "Cuadro Acrílico 40×60 cm";
+    price.textContent = "$120.000 CLP";
+  } else if (type === 'mug') {
+    cat.textContent = "MERCHANDISING OFICIAL";
+    title.textContent = "Taza Cerámica Negra Mate";
+    price.textContent = "$16.900 CLP";
+  } else if (type === 'notebook') {
+    cat.textContent = "CUADERNO DE FÓRMULAS";
+    title.textContent = "Cuaderno Moleskine de Campo";
+    price.textContent = "$22.000 CLP";
+  }
+}
+
+// ── BANDEJA DE TEXTURAS (TUS FOTOS + OBRAS MAESTRAS) ──────────────
+function populateTextureTray() {
+  const tray = document.getElementById('texture-tray-carousel');
+  tray.innerHTML = '';
+
+  // 1. Fotos del Carrete del Usuario
+  if (userCameraRoll.length > 0) {
+    userCameraRoll.forEach((item, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 hover:border-cyan-400 transition relative group';
+      btn.innerHTML = `
+        <img src="${item.img}" class="w-full h-full object-cover" />
+        <span class="absolute bottom-0 inset-x-0 bg-black/70 text-[8px] mono text-purple-200 text-center truncate">Tu Foto</span>
+      `;
+      btn.onclick = () => projectTextureOntoProduct(item.img, item.artTitle);
+      tray.appendChild(btn);
+    });
+  }
+
+  // 2. Obras Maestras Predeterminadas
+  ASTROS_DATA.forEach((astro) => {
+    const btn = document.createElement('button');
+    btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 hover:border-purple-400 transition bg-black/60 p-1 flex flex-col justify-center items-center text-center';
+    btn.innerHTML = `
+      <span class="text-sm">∑</span>
+      <span class="text-[8px] mono text-slate-300 leading-tight truncate w-full">${astro.badge} · ${astro.title}</span>
+    `;
+    btn.onclick = () => projectMasterArtOntoProduct(astro);
+    tray.appendChild(btn);
+  });
+}
+
+function projectTextureOntoProduct(imgSrc, title) {
+  const img = new Image();
+  img.onload = () => {
+    const tex = new THREE.Texture(img);
+    tex.needsUpdate = true;
+    updateProductMaterialsWithTexture(tex);
+    speakNai(`Proyectando tu captura en el objeto 3D.`);
+  };
+  img.src = imgSrc;
+}
+
+function projectMasterArtOntoProduct(astro) {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
+
+  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 36px Cinzel'; cx.textAlign = 'center';
+  cx.fillText(astro.title.toUpperCase(), 512, 480);
+  cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
+  cx.fillText(astro.cat, 512, 530);
+  cx.fillStyle = '#94a3b8'; cx.font = '16px Space Mono';
+  cx.fillText(astro.timonelMetric, 512, 580);
+
+  const tex = new THREE.CanvasTexture(c);
+  updateProductMaterialsWithTexture(tex);
+  speakNai(`Proyectando ${astro.title} en el objeto 3D.`);
+}
+
+function updateProductMaterialsWithTexture(newTexture) {
+  shopBayGroup.traverse((child) => {
+    if (child.name === "dynamic_canvas_target" || child.name === "dynamic_mug_target" || child.name === "dynamic_book_target") {
+      child.material.map = newTexture;
+      child.material.needsUpdate = true;
+    }
+  });
+
+  // Animación de pulso lumínico
+  targetProductRotation.y += Math.PI * 0.5;
+}
+
+// ── CHECKOUT DIRECTO ──────────────────────────────────────────────
+function processDirectCheckout() {
+  const name = document.getElementById('order-name').value.trim();
+  const address = document.getElementById('order-address').value.trim();
+  const phone = document.getElementById('order-phone').value.trim();
+
+  if (!name || !address || !phone) {
+    alert('Por favor completa tu Nombre, Dirección de despacho y WhatsApp para coordinar la entrega de tu pedido.');
+    return;
+  }
+
+  const prodName = document.getElementById('shop-prod-title').textContent;
+  const price = document.getElementById('shop-prod-price').textContent;
+
+  const msg = encodeURIComponent(
+    `🏛️ *NUEVO PEDIDO ATELIER MATEMÁTICO*\n\n` +
+    `👤 *Cliente:* ${name}\n` +
+    `📍 *Despacho:* ${address}\n` +
+    `📱 *WhatsApp:* ${phone}\n` +
+    `🖼️ *Producto:* ${prodName}\n` +
+    `💰 *Total a Pagar:* ${price}\n` +
+    `⏳ *Plazo:* Confección a pedido (10-15 días hábiles)\n\n` +
+    `Hola Matías! He configurado mi pedido desde el Observatorio 3D. ¿Cómo procedo al pago del 100% para iniciar la confección?`
+  );
+
+  window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
+}
+
+// ── SISTEMAS DINÁMICOS DE ASTROS (LORENZ, CHLADNI, RIEMANN, ETC) ──
 function createLivingMathematicalAstro(data, index) {
   const astroGroup = new THREE.Group();
   astroGroup.position.set(data.pos[0], data.pos[1], data.pos[2]);
 
-  // 1. Anillo de Telemetría de Timonel (Giroscopio cuántico flotante)
   const ringGeo = new THREE.RingGeometry(1.6, 1.63, 64);
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
   const timonelRing = new THREE.Mesh(ringGeo, ringMat);
   astroGroup.add(timonelRing);
 
-  // 2. Luz de Resonancia
   const pointLight = new THREE.PointLight(0x8b5cf6, 1.2, 5.0);
   astroGroup.add(pointLight);
 
-  // 3. Sistema Dinámico en Silicio según su Ecuación
   const livingSystem = buildDynamicSystemMath(data.id);
   astroGroup.add(livingSystem);
 
@@ -559,25 +979,14 @@ function createLivingMathematicalAstro(data, index) {
   });
 }
 
-// ── INTEGRACIÓN NUMÉRICA VIVA DE CADA FÓRMULA ─────────────────────
 function buildDynamicSystemMath(id) {
   const group = new THREE.Group();
 
   if (id === 0) {
-    // 01. LORENZ VIVO: Partículas calculando RK4 en tiempo real
-    const N = 2000;
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(N * 3);
-    const cols = new Float32Array(N * 3);
-    const state = [];
-
+    // 01. LORENZ VIVO
+    const N = 2000, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3), state = [];
     for (let i = 0; i < N; i++) {
-      state.push({
-        x: (Math.random() - 0.5) * 2.0,
-        y: (Math.random() - 0.5) * 2.0,
-        z: 20 + (Math.random() - 0.5) * 5.0,
-        age: Math.random() * 500
-      });
+      state.push({ x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2, z: 20 + (Math.random() - 0.5) * 5, age: Math.random() * 500 });
       cols[i*3] = 0.5 + Math.random()*0.5; cols[i*3+1] = 0.2; cols[i*3+2] = 0.95;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -585,52 +994,27 @@ function buildDynamicSystemMath(id) {
     const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.88 }));
     group.add(pts);
 
-    // Integrador RK4 vivo cuadro a cuadro
-    dynamicUpdaters.push((dt) => {
+    dynamicUpdaters.push(() => {
       const pArr = pts.geometry.attributes.position.array;
-      const sigma = 10.0, rho = 28.0, beta = 8.0 / 3.0;
-      const h = 0.007;
-
+      const sigma = 10, rho = 28, beta = 8/3, h = 0.007;
       for (let i = 0; i < N; i++) {
         const s = state[i];
-        // RK4 Step
-        const dx = sigma * (s.y - s.x);
-        const dy = s.x * (rho - s.z) - s.y;
-        const dz = s.x * s.y - beta * s.z;
-
-        s.x += dx * h; s.y += dy * h; s.z += dz * h;
+        s.x += sigma * (s.y - s.x) * h;
+        s.y += (s.x * (rho - s.z) - s.y) * h;
+        s.z += (s.x * s.y - beta * s.z) * h;
         s.age++;
-
-        // Si se disipa o envejece, resembrar con perturbación delta (caos aperiódico continuo)
         if (s.age > 700 || Math.abs(s.x) > 35) {
-          s.x = (Math.random() - 0.5) * 0.2;
-          s.y = (Math.random() - 0.5) * 0.2;
-          s.z = 15.0 + (Math.random() - 0.5) * 0.2;
-          s.age = 0;
+          s.x = (Math.random() - 0.5) * 0.2; s.y = (Math.random() - 0.5) * 0.2; s.z = 15 + (Math.random() - 0.5) * 0.2; s.age = 0;
         }
-
-        pArr[i*3]   = s.x * 0.035;
-        pArr[i*3+1] = (s.z - 24.0) * 0.035;
-        pArr[i*3+2] = s.y * 0.035;
+        pArr[i*3] = s.x * 0.035; pArr[i*3+1] = (s.z - 24) * 0.035; pArr[i*3+2] = s.y * 0.035;
       }
       pts.geometry.attributes.position.needsUpdate = true;
     });
 
   } else if (id === 1) {
-    // 05. CHLADNI VIVO: Partículas migrando por gradiente acústico -∇|ψ|²
-    const N = 1600;
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(N * 3);
-    const sand = [];
-
-    for (let i = 0; i < N; i++) {
-      sand.push({
-        u: (Math.random() - 0.5) * 2.0,
-        v: (Math.random() - 0.5) * 2.0,
-        w: (Math.random() - 0.5) * 0.2,
-        vu: 0, vv: 0
-      });
-    }
+    // 05. CHLADNI VIVO
+    const N = 1600, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), sand = [];
+    for (let i = 0; i < N; i++) sand.push({ u: (Math.random() - 0.5) * 2, v: (Math.random() - 0.5) * 2, vu: 0, vv: 0 });
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.02, transparent: true, opacity: 0.9 }));
     group.add(pts);
@@ -638,62 +1022,43 @@ function buildDynamicSystemMath(id) {
     let modeT = 0;
     dynamicUpdaters.push((dt) => {
       modeT += dt * 0.4;
-      const n = 3 + Math.sin(modeT * 0.5) * 2;
-      const m = 5 + Math.cos(modeT * 0.3) * 2;
+      const n = 3 + Math.sin(modeT * 0.5) * 2, m = 5 + Math.cos(modeT * 0.3) * 2;
       const pArr = pts.geometry.attributes.position.array;
-
       for (let i = 0; i < N; i++) {
         const p = sand[i];
         const val = Math.sin(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - Math.sin(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
         const gu = n * Math.cos(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - m * Math.cos(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
         const gv = m * Math.sin(n * Math.PI * p.u) * Math.cos(m * Math.PI * p.v) - n * Math.sin(m * Math.PI * p.u) * Math.cos(n * Math.PI * p.v);
-
         p.vu = p.vu * 0.85 - Math.sign(val) * gu * 0.015 + (Math.random() - 0.5) * 0.008;
         p.vv = p.vv * 0.85 - Math.sign(val) * gv * 0.015 + (Math.random() - 0.5) * 0.008;
         p.u += p.vu; p.v += p.vv;
-
-        if (Math.abs(p.u) > 1.0) p.u = (Math.random() - 0.5) * 1.8;
-        if (Math.abs(p.v) > 1.0) p.v = (Math.random() - 0.5) * 1.8;
-
-        pArr[i*3]   = p.u * 0.65;
-        pArr[i*3+1] = Math.abs(val) * 0.08;
-        pArr[i*3+2] = p.v * 0.65;
+        if (Math.abs(p.u) > 1) p.u = (Math.random() - 0.5) * 1.8;
+        if (Math.abs(p.v) > 1) p.v = (Math.random() - 0.5) * 1.8;
+        pArr[i*3] = p.u * 0.65; pArr[i*3+1] = Math.abs(val) * 0.08; pArr[i*3+2] = p.v * 0.65;
       }
       pts.geometry.attributes.position.needsUpdate = true;
       group.rotation.y += 0.004;
     });
 
   } else if (id === 2) {
-    // 21. RIEMANN VIVO: Marcha continua en la línea crítica
-    const N = 1200;
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(N * 3);
-    const cols = new Float32Array(N * 3);
-
+    // 21. RIEMANN VIVO
+    const N = 1200, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
     const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }));
     group.add(line);
 
-    let tBase = 10.0;
+    let tBase = 10;
     dynamicUpdaters.push((dt) => {
       tBase += dt * 0.8;
-      const pArr = line.geometry.attributes.position.array;
-      const cArr = line.geometry.attributes.color.array;
-
+      const pArr = line.geometry.attributes.position.array, cArr = line.geometry.attributes.color.array;
       for (let i = 0; i < N; i++) {
-        const t = tBase + (i / N) * 35.0;
-        const theta = (t / 2.0) * Math.log(t / (2.0 * Math.PI)) - t / 2.0;
+        const t = tBase + (i / N) * 35;
+        const th = (t / 2) * Math.log(t / (2 * Math.PI)) - t / 2;
         const r = Math.sin(t * 0.75) * Math.cos(t * 0.28) * 0.45;
-
-        pArr[i*3]   = Math.cos(theta) * r;
-        pArr[i*3+1] = (i / N - 0.5) * 1.6;
-        pArr[i*3+2] = Math.sin(theta) * r;
-
+        pArr[i*3] = Math.cos(th) * r; pArr[i*3+1] = (i / N - 0.5) * 1.6; pArr[i*3+2] = Math.sin(th) * r;
         const isZero = Math.abs(r) < 0.05;
-        cArr[i*3]   = isZero ? 1.0 : 0.9;
-        cArr[i*3+1] = isZero ? 1.0 : 0.7;
-        cArr[i*3+2] = isZero ? 0.3 : 0.15;
+        cArr[i*3] = isZero ? 1 : 0.9; cArr[i*3+1] = isZero ? 1 : 0.7; cArr[i*3+2] = isZero ? 0.3 : 0.15;
       }
       line.geometry.attributes.position.needsUpdate = true;
       line.geometry.attributes.color.needsUpdate = true;
@@ -701,23 +1066,17 @@ function buildDynamicSystemMath(id) {
     });
 
   } else if (id === 3) {
-    // 24. RICCI FLOW VIVO: Alisamiento y deformación continua de curvatura
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.5, 32, 24),
-      new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, wireframe: true, roughness: 0.2 })
-    );
+    // 24. RICCI FLOW
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 24), new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, wireframe: true }));
     group.add(mesh);
-
     let flowT = 0;
     dynamicUpdaters.push((dt) => {
       flowT += dt * 1.2;
       const pos = mesh.geometry.attributes.position;
-      const smoothFactor = Math.exp(-((flowT % 8.0) * 0.4)); // Se arruga y se alisa periódicamente
-
+      const factor = Math.exp(-((flowT % 8) * 0.4));
       for (let i = 0; i < pos.count; i++) {
         const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
-        const wrinkle = Math.sin(v.x * 6 + flowT) * Math.cos(v.y * 6 + flowT) * 0.18 * smoothFactor;
-        v.multiplyScalar(0.5 + wrinkle);
+        v.multiplyScalar(0.5 + Math.sin(v.x * 6 + flowT) * Math.cos(v.y * 6 + flowT) * 0.18 * factor);
         pos.setXYZ(i, v.x, v.y, v.z);
       }
       pos.needsUpdate = true;
@@ -725,112 +1084,77 @@ function buildDynamicSystemMath(id) {
     });
 
   } else if (id === 4) {
-    // 15. HOPF VIVO: Fibración girando en 4D
+    // 15. HOPF
     for (let i = 0; i < 5; i++) {
-      const torus = new THREE.Mesh(
-        new THREE.TorusGeometry(0.48, 0.024, 16, 64),
-        new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, wireframe: true })
-      );
-      torus.rotation.x = (i * Math.PI) / 5;
-      torus.rotation.y = (i * Math.PI) / 3;
+      const torus = new THREE.Mesh(new THREE.TorusGeometry(0.48, 0.024, 16, 64), new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, wireframe: true }));
+      torus.rotation.x = (i * Math.PI) / 5; torus.rotation.y = (i * Math.PI) / 3;
       group.add(torus);
     }
-    dynamicUpdaters.push((dt) => {
-      group.rotation.x += 0.005;
-      group.rotation.y += 0.008;
-      group.rotation.z += 0.003;
-    });
+    dynamicUpdaters.push(() => { group.rotation.x += 0.005; group.rotation.y += 0.008; });
 
   } else {
-    // 23. NAVIER-STOKES VIVO: Filamentos de vorticidad trenzándose
-    const N = 1400;
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(N * 3);
-    const cols = new Float32Array(N * 3);
+    // 23. NAVIER-STOKES
+    const N = 1400, geo = new THREE.BufferGeometry(), pos = new Float32Array(N * 3), cols = new Float32Array(N * 3);
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
     const vortex = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true }));
     group.add(vortex);
-
     let vorT = 0;
     dynamicUpdaters.push((dt) => {
       vorT += dt * 1.5;
-      const pArr = vortex.geometry.attributes.position.array;
-      const cArr = vortex.geometry.attributes.color.array;
-
+      const pArr = vortex.geometry.attributes.position.array, cArr = vortex.geometry.attributes.color.array;
       for (let i = 0; i < N; i++) {
-        const u = (i / N) * Math.PI * 10 + vorT;
-        const r = 0.12 + Math.sin(u * 0.3 + vorT) * 0.35;
-        pArr[i*3]   = Math.cos(u) * r;
-        pArr[i*3+1] = ((i / N) - 0.5) * 1.4 + Math.sin(vorT + i) * 0.05;
-        pArr[i*3+2] = Math.sin(u) * r;
-
-        cArr[i*3]   = 0.2 + (i / N) * 0.8;
-        cArr[i*3+1] = 0.7;
-        cArr[i*3+2] = 0.95;
+        const u = (i / N) * Math.PI * 10 + vorT, r = 0.12 + Math.sin(u * 0.3 + vorT) * 0.35;
+        pArr[i*3] = Math.cos(u) * r; pArr[i*3+1] = ((i / N) - 0.5) * 1.4; pArr[i*3+2] = Math.sin(u) * r;
+        cArr[i*3] = 0.2 + (i / N) * 0.8; cArr[i*3+1] = 0.7; cArr[i*3+2] = 0.95;
       }
       vortex.geometry.attributes.position.needsUpdate = true;
       group.rotation.y -= 0.012;
     });
   }
-
   return group;
 }
 
-// ── CONTROLES INERCIALES 6DOF DE LA CÁPSULA (GRAVEDAD CERO) ───────
+// ── CONTROLES Y EVENTOS ───────────────────────────────────────────
 function setup6DOFControls() {
   window.addEventListener('mousedown', (e) => {
-    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-drawer')) return;
+    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-bay-overlay')) return;
     isDragging = true;
-    userInertiaTimer = 0; // Rompe el atractor de NAI inmediatamente
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    userInertiaTimer = 0;
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
 
-    targetOrientation.yaw -= dx * 0.0024;
-    targetOrientation.pitch -= dy * 0.0024;
-    targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
-
+    if (isInShopMode) {
+      // Rotar el objeto 3D del producto
+      targetProductRotation.y += dx * 0.01;
+      targetProductRotation.x += dy * 0.01;
+    } else {
+      userInertiaTimer = 0;
+      targetOrientation.yaw -= dx * 0.0024;
+      targetOrientation.pitch -= dy * 0.0024;
+      targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
+    }
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
   window.addEventListener('mouseup', () => { isDragging = false; });
 
-  // Touch
-  window.addEventListener('touchstart', (e) => {
-    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-drawer')) return;
-    isDragging = true;
-    userInertiaTimer = 0;
-    dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, { passive: true });
-
-  window.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    userInertiaTimer = 0;
-    const dx = e.touches[0].clientX - dragPrev.x;
-    const dy = e.touches[0].clientY - dragPrev.y;
-    targetOrientation.yaw -= dx * 0.0035;
-    targetOrientation.pitch -= dy * 0.0035;
-    targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
-    dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, { passive: true });
-
-  window.addEventListener('touchend', () => { isDragging = false; });
-
-  // Propulsión Inercial en 3D (Rueda del ratón)
   window.addEventListener('wheel', (e) => {
+    if (isInShopMode) return;
     userInertiaTimer = 0;
     const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     velocity.addScaledVector(dir, -e.deltaY * 0.004);
   }, { passive: true });
 
-  // Teclado W/S/A/D/Q/E
   window.addEventListener('keydown', (e) => {
+    if (isInShopMode) {
+      if (e.key === 'Escape') exitShopMode();
+      return;
+    }
     userInertiaTimer = 0;
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
@@ -850,17 +1174,14 @@ function propelToAnomaly(idx) {
   if (idx < 0 || idx >= ASTROS_DATA.length) return;
   nai3D.currentIndex = idx;
   const target = astros[idx].worldPos;
-  
-  // Vector hacia el astro dejando 3 metros de distancia de aproximación
   const approachVec = new THREE.Vector3().subVectors(camera.position, target).normalize().multiplyScalar(3.2);
   const targetCamPos = new THREE.Vector3().addVectors(target, approachVec);
-
   velocity.copy(new THREE.Vector3().subVectors(targetCamPos, camera.position).multiplyScalar(0.06));
   speakNai(`Aproximándonos a ${astros[idx].data.title}. ${astros[idx].data.sub}.`);
 }
 
-// ── PROXIMIDAD & HUD DE LA CÁPSULA ────────────────────────────────
 function updateOrbitalProximity() {
+  if (isInShopMode) return;
   let nearest = null, minDist = 6.0;
   astros.forEach(a => {
     const dist = camera.position.distanceTo(a.worldPos);
@@ -890,7 +1211,7 @@ function updateOrbitalProximity() {
   }
 }
 
-// ── BUCLE PRINCIPAL DE NAVEGACIÓN Y SILICIO ───────────────────────
+// ── BUCLE DE ANIMACIÓN PRINCIPAL ──────────────────────────────────
 let prevTime = performance.now();
 
 function animate() {
@@ -900,64 +1221,78 @@ function animate() {
   const delta = (time - prevTime) / 1000;
   prevTime = time;
 
-  // 1. Orientación esférica de la cápsula
-  orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
-  orientation.yaw += (targetOrientation.yaw - orientation.yaw) * 0.12;
-  camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
+  if (isInShopMode) {
+    // Interpolación de cámara al pedestal de la tienda
+    camera.position.lerp(new THREE.Vector3(0, 0, 40.5), 0.08);
+    const targetLook = new THREE.Vector3(0, 0, 36.0);
+    const m = new THREE.Matrix4().lookAt(camera.position, targetLook, new THREE.Vector3(0, 1, 0));
+    const q = new THREE.Quaternion().setFromRotationMatrix(m);
+    camera.quaternion.slerp(q, 0.08);
 
-  // 2. Propulsión Inercial en Gravedad Cero (Viscosidad pura)
-  camera.position.addScaledVector(velocity, delta * 20.0);
-  velocity.multiplyScalar(0.92); // Fricción espacial suave
+    // Rotación suave del producto 3D activo
+    productRotation.x += (targetProductRotation.x - productRotation.x) * 0.1;
+    productRotation.y += (targetProductRotation.y - productRotation.y) * 0.1;
 
-  // 3. Atractor Cinético de NAI (Si el usuario no toca nada por > 2.5s)
-  userInertiaTimer += delta;
-  if (userInertiaTimer > 2.5 && !isDragging) {
-    const currentAstro = astros[nai3D.currentIndex];
-    if (currentAstro) {
-      // NAI guía la cápsula suavemente a orbitar alrededor del astro
-      const targetPos = new THREE.Vector3(
-        currentAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
-        currentAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
-        currentAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
-      );
-      camera.position.lerp(targetPos, 0.008);
+    ['frameWood', 'mug', 'notebook'].forEach(key => {
+      const obj = shopProducts[key];
+      if (obj && obj.visible) {
+        obj.rotation.x = productRotation.x;
+        obj.rotation.y = productRotation.y + Math.sin(time * 0.001) * 0.05;
+      }
+    });
 
-      // Mirar al centro del astro
-      const m = new THREE.Matrix4().lookAt(camera.position, currentAstro.worldPos, new THREE.Vector3(0, 1, 0));
-      const q = new THREE.Quaternion().setFromRotationMatrix(m);
-      camera.quaternion.slerp(q, 0.012);
-      const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
-      orientation.pitch = e.x; orientation.yaw = e.y;
-      targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
+  } else {
+    // Modo Vuelo Libre 6DOF
+    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
+    orientation.yaw += (targetOrientation.yaw - orientation.yaw) * 0.12;
+    camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
+
+    camera.position.addScaledVector(velocity, delta * 20.0);
+    velocity.multiplyScalar(0.92);
+
+    // Atractor de NAI si el usuario está inactivo > 2.5s
+    userInertiaTimer += delta;
+    if (userInertiaTimer > 2.5 && !isDragging) {
+      const currentAstro = astros[nai3D.currentIndex];
+      if (currentAstro) {
+        const targetPos = new THREE.Vector3(
+          currentAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
+          currentAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
+          currentAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
+        );
+        camera.position.lerp(targetPos, 0.008);
+        const m = new THREE.Matrix4().lookAt(camera.position, currentAstro.worldPos, new THREE.Vector3(0, 1, 0));
+        const q = new THREE.Quaternion().setFromRotationMatrix(m);
+        camera.quaternion.slerp(q, 0.012);
+        const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+        orientation.pitch = e.x; orientation.yaw = e.y;
+        targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
+      }
     }
+
+    // Dinámica de NAI 3D
+    if (nai3D.group) {
+      nai3D.pulseTime += delta;
+      const curAstro = astros[nai3D.currentIndex];
+      if (curAstro) {
+        const naiTarget = new THREE.Vector3(
+          curAstro.worldPos.x + Math.sin(nai3D.pulseTime * 0.8) * 1.8,
+          curAstro.worldPos.y + Math.cos(nai3D.pulseTime * 1.0) * 0.8,
+          curAstro.worldPos.z + 1.2
+        );
+        nai3D.group.position.lerp(naiTarget, 0.04);
+      }
+      nai3D.core.rotation.y += 0.02;
+      nai3D.outerHalo.rotation.y -= 0.025;
+      nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
+    }
+
+    astros.forEach(a => a.timonelRing.lookAt(camera.position));
+    updateOrbitalProximity();
   }
 
-  // 4. Dinámica de NAI 3D
-  if (nai3D.group) {
-    nai3D.pulseTime += delta;
-    const curAstro = astros[nai3D.currentIndex];
-    if (curAstro) {
-      const naiTarget = new THREE.Vector3(
-        curAstro.worldPos.x + Math.sin(nai3D.pulseTime * 0.8) * 1.8,
-        curAstro.worldPos.y + Math.cos(nai3D.pulseTime * 1.0) * 0.8,
-        curAstro.worldPos.z + 1.2
-      );
-      nai3D.group.position.lerp(naiTarget, 0.04);
-    }
-    nai3D.core.rotation.y += 0.02;
-    nai3D.outerHalo.rotation.y -= 0.025;
-    nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
-  }
-
-  // 5. Orientar anillos de Timonel hacia la cámara
-  astros.forEach(a => {
-    a.timonelRing.lookAt(camera.position);
-  });
-
-  // 6. Actualizar las 6 ecuaciones vivas en el silicio
+  // Actualizar las 6 ecuaciones vivas
   dynamicUpdaters.forEach(fn => fn(delta));
-
-  updateOrbitalProximity();
   renderer.render(scene, camera);
 }
 
@@ -1077,12 +1412,6 @@ function updateRollUI() {
 function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => item.id !== id); updateRollUI(); }
 function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll = []; updateRollUI(); } }
 function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
-function toggleShop() { document.getElementById('shop-drawer').classList.toggle('translate-x-full'); }
-
-function orderPhysical(title, price) {
-  const msg = encodeURIComponent(`Hola Matías! Quiero encargar el cuadro físico de "${title}" ($${price.toLocaleString()} CLP). ¿Cómo coordinamos el abono y la entrega?`);
-  window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
-}
 
 window.addEventListener('DOMContentLoaded', () => {
   initOrbitalSpace();

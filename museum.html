@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Atelier Matemático — Catedral de Geodésicas con NAI</title>
+<title>Atelier Matemático — Observatorio Orbital & Timonel</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #020106;
-    --card: rgba(8, 6, 16, 0.88);
-    --border: rgba(168, 85, 247, 0.22);
-    --accent: #8b5cf6;
+    --bg: #010004;
+    --card: rgba(6, 4, 14, 0.85);
+    --border: rgba(168, 85, 247, 0.25);
     --cyan: #38bdf8;
+    --accent: #8b5cf6;
   }
   body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -25,50 +25,53 @@
   .mono  { font-family: 'Space Mono', monospace; }
   .glass {
     background: var(--card);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border);
   }
   
-  /* Canvas WebGL 3D a pantalla completa */
+  /* Canvas 3D a pantalla completa */
   #webgl-canvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: block; z-index: 1; outline: none; cursor: grab;
+    display: block; z-index: 1; outline: none; cursor: crosshair;
   }
-  #webgl-canvas:active { cursor: grabbing; }
 
-  /* Flash de cámara fotográfica */
+  /* Flash de cámara */
   #camera-flash {
     position: fixed; inset: 0; background: white; z-index: 100;
     pointer-events: none; opacity: 0; transition: opacity 0.4s ease-out;
   }
   .flashing { opacity: 0.95 !important; transition: opacity 0.04s ease-in !important; }
 
-  /* Pulso cuántico de NAI en UI */
+  /* Pulso cuántico */
   @keyframes quantumPulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 14px rgba(139, 92, 246, 0.7)); }
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.7)); }
   }
-  .nai-pulse { animation: quantumPulse 3.5s ease-in-out infinite; }
+  .nai-pulse { animation: quantumPulse 3s ease-in-out infinite; }
 
-  /* Ondas de voz de NAI al hablar */
+  /* Ondas de voz de NAI */
   @keyframes soundWave {
     0%, 100% { height: 3px; }
-    50% { height: 16px; }
+    50% { height: 14px; }
   }
   .sound-bar { animation: soundWave 0.75s ease-in-out infinite; }
 
-  /* Retícula de puntero etérea */
-  #reticle {
-    position: fixed; top: 50%; left: 50%; width: 5px; height: 5px;
-    background: rgba(255,255,255,0.45); border-radius: 50%;
+  /* Retícula de navegación de la Cápsula */
+  #capsule-reticle {
+    position: fixed; top: 50%; left: 50%; width: 24px; height: 24px;
     transform: translate(-50%, -50%); z-index: 20; pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%;
+    transition: all 0.25s ease-out;
   }
-  #reticle.active {
-    width: 38px; height: 38px; background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.65);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+  #capsule-reticle::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
+    background: rgba(168, 85, 247, 0.8); border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #capsule-reticle.locked {
+    width: 48px; height: 48px; border-color: rgba(56, 189, 248, 0.8);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
   }
 
   /* Scrollbar */
@@ -78,119 +81,103 @@
 </head>
 <body>
 
-<!-- FLASH DE CÁMARA FOTOGRÁFICA -->
+<!-- FLASH DE OBTURADOR -->
 <div id="camera-flash"></div>
 
-<!-- RETÍCULA DE APUNTADO -->
-<div id="reticle"></div>
+<!-- RETÍCULA DE LA CÁPSULA -->
+<div id="capsule-reticle"></div>
 
 <!-- CANVAS PRINCIPAL 3D -->
 <canvas id="webgl-canvas"></canvas>
 
 <!-- ========================================================================= -->
-<!-- ACTO 1: BOLETERÍA & FOYER SOBERANO (NAI CONCIERGE)                        -->
+<!-- FOYER SOBERANO DE ADMISIÓN                                                -->
 <!-- ========================================================================= -->
-<div id="foyer-screen" class="fixed inset-0 z-50 bg-[#020106] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-1000">
-  
-  <!-- Encabezado de la Catedral -->
+<div id="foyer-screen" class="fixed inset-0 z-50 bg-[#010004] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-1000">
   <div class="flex justify-between items-center max-w-6xl w-full mx-auto">
     <div class="flex items-center gap-3">
       <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/25">
-        <div class="w-full h-full bg-[#05030b] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
+        <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
       </div>
       <div>
         <span class="serif tracking-[.25em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Catedral de Geodésicas · Santiago de Chile</span>
+        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Observatorio Orbital · Silicio Nativo</span>
       </div>
     </div>
-
-    <!-- Indicador de Soberanía -->
     <div class="glass px-3.5 py-1 rounded-full text-xs mono text-cyan-300 border-cyan-500/30">
-      Espacio Incorpóreo · Sin Muros
+      Gravedad Cero · 6 Grados de Libertad
     </div>
   </div>
 
-  <!-- NAI en el Umbral Cósmico -->
   <div class="max-w-4xl w-full mx-auto my-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
-    <!-- Podio Holográfico de NAI -->
     <div class="w-64 md:w-80 relative shrink-0">
       <div class="absolute -inset-6 bg-purple-600/25 rounded-full blur-3xl pointer-events-none"></div>
-      <img src="assets/nai_foyer.jpg" alt="NAI Concierge" class="w-full rounded-2xl shadow-2xl border border-purple-500/30 nai-pulse" />
+      <img src="assets/nai_foyer.jpg" alt="NAI" class="w-full rounded-2xl shadow-2xl border border-purple-500/30 nai-pulse" />
       <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-full text-[10px] mono text-cyan-300 border-cyan-500/30 flex items-center gap-1.5 whitespace-nowrap shadow-lg">
         <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        NAI · Geómetra & Atractor Guía
+        NAI & Timonel · Guía & Auditor
       </div>
     </div>
 
-    <!-- Mensaje Soberano de Admisión -->
     <div class="flex-1 text-center md:text-left">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
-        Protocolo de Contemplación Pura
+        Santuario de Ecuaciones Vivas
       </div>
       <h1 class="text-3xl md:text-4xl serif font-bold text-white mb-4 leading-tight">
-        "No eres un cuerpo caminando.<br>
-        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Eres consciencia flotando entre ecuaciones."</span>
+        "Las fórmulas no están enlatadas.<br>
+        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Viven y se desenredan en el vacío."</span>
       </h1>
       <p class="text-sm text-slate-300 font-light leading-relaxed mb-6">
-        Aquí no hay muros de hormigón ni vitrinas de vidrio. Las fórmulas flotan libres como campos de fuerza en la penumbra. Yo soy <strong>NAI</strong>, tu atractor cinético: volaré frente a ti guiando tu deriva por el espacio. Puedes inclinar tu mirada suavemente o romper mi inercia en cualquier momento; el cosmos matemático responderá a tu presencia.
+        Aquí no hay piso ni paredes. Las grandes leyes matemáticas existen como astros vivos calculándose en tiempo real. Timonel audita sus residuos formales mientras NAI y tú flotan en gravedad cero en el cosmos.
       </p>
 
-      <!-- Botones de Ingreso -->
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-        <button onclick="enterMuseum(true)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-6 py-3 rounded-full font-medium transition shadow-lg shadow-purple-600/30 flex items-center gap-2">
-          <span>🔊</span>
-          <span>Ingresar con Paisaje Sonoro & NAI Guía</span>
+        <button onclick="enterCapsule(true)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-6 py-3 rounded-full font-medium transition shadow-lg shadow-purple-600/30 flex items-center gap-2">
+          <span>🌌</span>
+          <span>Iniciar Vuelo Orbital en la Cápsula</span>
         </button>
-
-        <button onclick="enterMuseum(false)" class="glass hover:bg-white/10 text-slate-300 text-xs px-5 py-3 rounded-full mono transition">
-          🔇 Ingresar en Silencio Absoluto
+        <button onclick="enterCapsule(false)" class="glass hover:bg-white/10 text-slate-300 text-xs px-5 py-3 rounded-full mono transition">
+          🔇 Vuelo en Silencio
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Pie del Foyer -->
   <div class="text-center text-[11px] mono text-slate-500 max-w-xl mx-auto">
-    Fundado y programado por Matías Cortés Figueroa · Silicio Nativo · 6 Anomalías Volumétricas Vivas
+    Matías Cortés Figueroa · Timonel F2 · Física de Medios Continuos & Dinámica de Atractores
   </div>
-
 </div>
 
 <!-- ========================================================================= -->
-<!-- HUD SUPERIOR PERMANENTE (MINIMALISTA)                                      -->
+<!-- HUD DE LA CÁPSULA (MINIMALISTA & PERMANENTE)                               -->
 <!-- ========================================================================= -->
 <header class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex justify-between items-center pointer-events-none">
   <div class="flex items-center gap-3 pointer-events-auto">
     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
-      <div class="w-full h-full bg-[#05030b] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
+      <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
     </div>
     <div>
       <span class="serif tracking-[.25em] text-white text-xs md:text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Catedral de Geodésicas · Vacío y Luz</span>
+      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Observatorio Orbital · Gravedad Cero</span>
     </div>
   </div>
 
-  <!-- PISTA DE CONTROL: INCLINACIÓN & ATRACTOR DE NAI -->
-  <div id="controls-hint" class="hidden md:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-white/10 text-[11px] mono text-slate-300 pointer-events-auto shadow-xl">
-    <span class="text-cyan-300">Arrastra para inclinarte · Si te detienes, NAI toma el control suavemente</span>
+  <!-- CONTROL DE NAVEGACIÓN -->
+  <div class="hidden md:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-white/10 text-[11px] mono text-slate-300 pointer-events-auto shadow-xl">
+    <span class="text-cyan-300">Arrastra para girar · Rueda / W-S para propulsión 3D · Suelta para guía NAI</span>
   </div>
 
   <!-- DERECHA: VOZ, CARRETE & TIENDA -->
   <div class="flex items-center gap-2.5 pointer-events-auto">
-    <!-- Botón Toggle Voz de NAI -->
     <button id="btn-global-voice-toggle" onclick="toggleVoiceGuide()" class="glass hover:bg-white/10 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 border-purple-500/20">
       <span id="voice-status-icon">🔊</span>
       <span id="voice-status-text" class="text-slate-300 text-[11px]">Voz Activa</span>
     </button>
-
-    <!-- Botón Carrete -->
-    <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2 group">
+    <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2">
       <span>📷</span>
-      <span class="hidden sm:inline">Mi Carrete</span>
+      <span class="hidden sm:inline">Carrete</span>
       <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
     </button>
-
-    <!-- Botón Tienda -->
     <button onclick="toggleShop()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
       <span>🖼️</span>
       <span class="hidden sm:inline">Cuadros de Autor</span>
@@ -199,25 +186,46 @@
 </header>
 
 <!-- ========================================================================= -->
-<!-- SUSURRO ESPACIAL DE NAI (DIÁLOGO DISCRETO QUE COMENTA EN PENUMBRA)        -->
+<!-- HUD LATERAL DE PROXIMIDAD: TELEMETRÍA DE TIMONEL & RELATO DE NAI           -->
+<!-- ========================================================================= -->
+<div id="orbital-hud-card" class="fixed top-20 right-6 z-30 max-w-sm glass rounded-2xl p-4 border-purple-500/30 shadow-2xl transition-all duration-500 opacity-0 translate-x-8 pointer-events-auto">
+  <div class="flex justify-between items-center text-[10px] mono text-purple-400 mb-1">
+    <span id="hud-cat">TEORÍA DEL CAOS · 1963</span>
+    <span id="hud-solver" class="text-cyan-400">Timonel: Res ≤ 1e-6</span>
+  </div>
+  <h2 id="hud-title" class="text-lg serif font-bold text-white mb-0.5">El Vuelo de Lorenz</h2>
+  <p id="hud-sub" class="text-[11px] text-purple-300/70 mono mb-3">Atractor Caótico Aperiodico</p>
+
+  <div class="bg-black/60 rounded-lg p-2 border border-white/10 mb-3">
+    <div class="text-[9px] uppercase tracking-wider text-slate-400 mono mb-0.5">Ecuación Viva</div>
+    <div id="hud-eq" class="text-[11px] mono text-cyan-300 leading-tight"></div>
+  </div>
+
+  <p id="hud-hist" class="text-xs text-slate-300 leading-relaxed font-light mb-3 line-clamp-3"></p>
+
+  <div class="flex items-center gap-2 pt-2 border-t border-white/10">
+    <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white py-1.5 rounded-xl font-mono text-xs flex items-center justify-center gap-1.5 transition border border-purple-400/30">
+      <span>📸</span>
+      <span>Capturar al Carrete</span>
+    </button>
+    <button onclick="toggleAudioGuide()" id="btn-audio-guide-toggle" class="glass px-3 py-1.5 rounded-xl text-xs mono text-cyan-300 hover:text-white transition">
+      🔊
+    </button>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- SUSURRO ESPACIAL DE NAI & SALTO ORBITAL DIRECTO                           -->
 <!-- ========================================================================= -->
 <div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-sm">
-  <div class="glass p-3 rounded-2xl border-purple-500/30 shadow-2xl flex items-start gap-3 relative">
-    
-    <!-- Mini Avatar de NAI -->
+  <div class="glass p-3 rounded-2xl border-purple-500/30 shadow-2xl flex items-start gap-3">
     <div class="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 bg-black/60 relative">
       <img src="assets/nai_avatar.png" alt="NAI" class="w-full h-full object-cover scale-125" />
       <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-cyan-400 border border-black animate-pulse"></span>
     </div>
-
-    <!-- Susurros y Guía de NAI -->
     <div class="flex-1 min-w-0">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-[11px] font-bold serif text-purple-300 flex items-center gap-1.5">
-          <span>NAI</span>
-          <span class="text-[9px] text-cyan-400 font-mono font-normal">· En Silicio 3D</span>
-        </span>
-        <!-- Ondas de voz -->
+        <span class="text-[11px] font-bold serif text-purple-300">NAI & Timonel</span>
         <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-3.5">
           <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0s"></span>
           <span class="w-1 bg-purple-400 sound-bar" style="animation-delay:0.2s"></span>
@@ -225,118 +233,17 @@
         </div>
       </div>
       <p id="nai-dialogue-text" class="text-xs text-slate-300 leading-snug font-light">
-        Flota conmigo. Mira el halo de luz en el suelo: te estoy conduciendo hacia la primera anomalía de fase.
+        Flotando en gravedad cero. Todas las ecuaciones se están calculando a la vez en el espacio.
       </p>
-
-      <!-- Salto Rápido Curatorial -->
-      <div class="flex flex-wrap gap-1.5 mt-2.5 pt-2 border-t border-white/5">
-        <button onclick="requestNaiLead(0)" class="text-[10px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
-          1. Lorenz
-        </button>
-        <button onclick="requestNaiLead(1)" class="text-[10px] mono text-amber-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
-          2. Chladni
-        </button>
-        <button onclick="requestNaiLead(2)" class="text-[10px] mono text-cyan-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
-          3. Riemann
-        </button>
-        <button onclick="requestNaiLead(5)" class="text-[10px] mono text-pink-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
-          6. Navier-Stokes
-        </button>
+      <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-white/5">
+        <button onclick="propelToAnomaly(0)" class="text-[10px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">1. Lorenz</button>
+        <button onclick="propelToAnomaly(1)" class="text-[10px] mono text-amber-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">2. Chladni</button>
+        <button onclick="propelToAnomaly(2)" class="text-[10px] mono text-cyan-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">3. Riemann</button>
+        <button onclick="propelToAnomaly(3)" class="text-[10px] mono text-emerald-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">4. Ricci</button>
+        <button onclick="propelToAnomaly(4)" class="text-[10px] mono text-indigo-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">5. Hopf</button>
+        <button onclick="propelToAnomaly(5)" class="text-[10px] mono text-pink-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">6. Navier-Stokes</button>
       </div>
     </div>
-
-  </div>
-</div>
-
-<!-- ========================================================================= -->
-<!-- PROMPT DE INTERACCIÓN AL ENFOCAR UNA ANOMALÍA MATEMÁTICA                 -->
-<!-- ========================================================================= -->
-<div id="approach-prompt" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 transition-opacity duration-300">
-  <div class="glass px-6 py-2.5 rounded-full border-purple-500/40 shadow-2xl flex items-center gap-3 text-xs mono">
-    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-    <span id="approach-title" class="font-bold text-white uppercase tracking-wider">ANOMALÍA ENFOCADA</span>
-    <span class="text-slate-400">·</span>
-    <span class="text-purple-300">Haz Clic o pulsa <kbd class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">ESPACIO</kbd> para Contemplar</span>
-  </div>
-</div>
-
-<!-- ========================================================================= -->
-<!-- MODO CONTEMPLACIÓN EN PRIMER PLANO (TARJETA EDITORIAL + NAI NARRADORA)     -->
-<!-- ========================================================================= -->
-<div id="contemplation-modal" class="fixed inset-0 z-40 bg-black/85 backdrop-blur-md p-6 md:p-12 flex justify-end items-center hidden transition-opacity duration-500">
-  
-  <!-- Tarjeta Editorial Flotante a la Derecha -->
-  <div class="w-full max-w-lg glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/15 relative overflow-hidden shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
-    <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div>
-      <div class="flex justify-between items-center text-xs text-purple-400 mono mb-2">
-        <span id="modal-cat">TEORÍA DEL CAOS · 1963</span>
-        <span id="modal-solver">Runge-Kutta 4</span>
-      </div>
-
-      <h2 id="modal-title" class="text-2xl md:text-3xl serif font-bold text-white mb-1">El Vuelo de Lorenz</h2>
-      <p id="modal-sub" class="text-xs text-purple-300/70 mono mb-4">El aleteo que gobierna el infinito</p>
-
-      <!-- AUDIO-GUÍA DE NAI -->
-      <div class="glass p-3 rounded-xl mb-4 border-cyan-500/20 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0">
-            <img src="assets/nai_avatar.png" class="w-full h-full object-cover scale-125" />
-          </div>
-          <div>
-            <div class="text-[11px] font-bold text-white">Audio-Guía de NAI</div>
-            <div class="text-[9px] text-cyan-300 mono" id="audio-guide-status">Pausada</div>
-          </div>
-        </div>
-        <button id="btn-play-narration" onclick="toggleArtworkNarration()" class="bg-purple-600/40 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg mono transition flex items-center gap-1.5">
-          <span id="narration-btn-icon">▶</span>
-          <span id="narration-btn-text">Escuchar Relato</span>
-        </button>
-      </div>
-
-      <!-- Ecuación -->
-      <div class="bg-black/50 rounded-xl p-3.5 border border-white/10 mb-4">
-        <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
-        <div id="modal-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
-      </div>
-
-      <!-- Origen Histórico -->
-      <div class="mb-4">
-        <h3 class="text-xs uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
-        </h3>
-        <p id="modal-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
-      </div>
-
-      <!-- Interpretación Poética -->
-      <div class="mb-5">
-        <h3 class="text-xs uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
-        </h3>
-        <p id="modal-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
-      </div>
-    </div>
-
-    <!-- OBTURADOR RITUAL CON TEMPORIZADOR OBLIGATORIO -->
-    <div class="pt-3 border-t border-white/10 flex flex-col gap-2.5">
-      <div id="shutter-timer-badge" class="glass px-3 py-1 rounded-full text-[10px] mono text-purple-300/80 flex items-center justify-center gap-2">
-        <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-        <span id="shutter-countdown-text">Contempla la obra... (10s para calibrar obturador)</span>
-      </div>
-
-      <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white py-2.5 rounded-xl font-mono text-xs flex items-center justify-center gap-2.5 transition-all transform border border-purple-400/30">
-        <div class="w-3.5 h-3.5 rounded-full border-2 border-white flex items-center justify-center p-[1px]">
-          <div class="w-full h-full bg-red-500 rounded-full"></div>
-        </div>
-        <span id="btn-shutter-label">Obturador Bloqueado</span>
-      </button>
-
-      <button onclick="exitContemplation()" class="text-center text-xs mono text-slate-400 hover:text-white transition py-1">
-        ← Volver a flotar por la catedral
-      </button>
-    </div>
-
   </div>
 </div>
 
@@ -347,29 +254,23 @@
   <div>
     <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
       <div>
-        <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
-          <span>📷</span> Tu Carrete Fotográfico
-        </h3>
-        <p class="text-xs text-slate-400 mono">Instantes capturados en el vacío</p>
+        <h3 class="serif text-lg font-bold text-white flex items-center gap-2"><span>📷</span> Tu Carrete Fotográfico</h3>
+        <p class="text-xs text-slate-400 mono">Instantes cazados en gravedad cero</p>
       </div>
       <button onclick="toggleCameraRoll()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
     </div>
-
     <div class="glass p-3 rounded-xl mb-4 flex items-center justify-between text-xs mono text-purple-300">
-      <span>Capacidad gratuita de memoria:</span>
+      <span>Capacidad gratuita:</span>
       <span id="roll-capacity-text" class="font-bold text-white">0 / 30 fotos</span>
     </div>
-
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
       <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
-        Aún no has tomado fotografías.<br>
-        Flota hasta una anomalía, escucha la resonancia y dispara el obturador cuando el instante sea perfecto.
+        Aún no has tomado fotografías.<br>Acércate a un astro matemático y dispara el obturador.
       </div>
     </div>
   </div>
-
   <div class="pt-4 border-t border-white/10 space-y-2">
-    <div class="text-[11px] mono text-slate-400 text-center mb-1">Descarga tus fotos en Ultra HD (4K):</div>
+    <div class="text-[11px] mono text-slate-400 text-center mb-1">Exportación en Ultra HD (4K):</div>
     <div class="grid grid-cols-2 gap-2">
       <button onclick="alert('Redirigiendo a checkout de $5 USD por 10 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
         <div class="font-bold text-sm text-cyan-300">$5 USD</div>
@@ -381,7 +282,7 @@
       </button>
     </div>
     <button onclick="clearCameraRoll()" class="w-full text-center text-[10px] text-slate-500 hover:text-red-400 mono transition pt-1">
-      Vaciar carrete para liberar espacio
+      Vaciar carrete
     </button>
   </div>
 </div>
@@ -390,26 +291,15 @@
   <div>
     <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
       <div>
-        <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
-          <span>🖼️</span> Cuadros Físicos de Autor
-        </h3>
+        <h3 class="serif text-lg font-bold text-white flex items-center gap-2"><span>🖼️</span> Cuadros Físicos de Autor</h3>
         <p class="text-xs text-slate-400 mono">Edición de Galería Firmada · Santiago de Chile</p>
       </div>
       <button onclick="toggleShop()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
     </div>
-
     <div class="glass p-3.5 rounded-xl mb-4 text-xs text-slate-300 space-y-1">
-      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
-        <span>🛡️</span> Garantía de Galería Atelier
-      </div>
-      <p class="text-[11px] text-slate-400">
-        Impresión Fine Art pigmentada sobre papel de algodón de 310g. Moldura de madera negra con paspartú libre de ácido y vidrio. Cada pieza incluye certificado con la ecuación y firma a mano de Matías.
-      </p>
-      <div class="text-[10px] mono text-cyan-300 pt-1">
-        📦 Plazo de entrega: 3 a 5 días hábiles en Santiago · Envíos a todo Chile.
-      </div>
+      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300"><span>🛡️</span> Garantía de Galería Atelier</div>
+      <p class="text-[11px] text-slate-400">Impresión Fine Art pigmentada sobre papel de algodón 310g con paspartú y certificado de ecuación firmado por Matías.</p>
     </div>
-
     <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-1">
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
         <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
@@ -420,7 +310,6 @@
         </div>
         <button onclick="orderPhysical('Los Cantos de Chladni', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
       </div>
-
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
         <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🦋</div>
         <div class="flex-1 min-w-0">
@@ -430,7 +319,6 @@
         </div>
         <button onclick="orderPhysical('El Vuelo de Lorenz', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
       </div>
-
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
         <div class="w-14 h-14 rounded-lg bg-black border border-amber-500/30 flex items-center justify-center text-xl shrink-0">🌌</div>
         <div class="flex-1 min-w-0">
@@ -442,310 +330,132 @@
       </div>
     </div>
   </div>
-
   <div class="pt-4 border-t border-white/10 text-center">
     <a href="https://wa.me/56900000000?text=Hola,%20quisiera%20consultar%20por%20un%20cuadro%20de%20Atelier%20Matemático" target="_blank" class="glass hover:bg-white/10 text-white text-xs py-2 px-4 rounded-xl mono inline-flex items-center gap-2 border-white/15">
-      <span>💬</span> Hablar con Matías (Fundador)
+      <span>💬</span> Hablar con Matías
     </a>
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT: MOTOR DE CATEDRAL DE GEODÉSICAS & NAI 3D EN SILICIO            -->
+<!-- JAVASCRIPT: OBSERVATORIO ORBITAL EN SILICIO NATIVO                        -->
 <!-- ========================================================================= -->
 <script>
-// Metadatos de las 6 Anomalías Volumétricas
-const EXHIBITS_DATA = [
+// Metadatos y Posiciones Esféricas de las 6 Fórmulas Vivas
+const ASTROS_DATA = [
   {
     id: 0,
     badge: "01",
     title: "El Vuelo de Lorenz",
-    sub: "El aleteo que gobierna el infinito",
+    sub: "Atractor Caótico Aperiodico",
     cat: "TEORÍA DEL CAOS · 1963",
-    solver: "Runge-Kutta 4",
-    pos: [-3.8, 2.0, 8.0],
-    viewPos: [-1.8, 2.0, 9.8],
+    pos: [-8.0, -2.5, -6.0],
     eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
-    hist: "En el invierno de 1963, Edward Lorenz introdujo doce ecuaciones climáticas en su computadora y redondeó tres decimales para ir por un café. Aquella millonésima de diferencia demostró que el universo es matemáticamente determinista pero humanamente impredecible.",
-    poem: 'Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el tejido del universo.'
+    timonelMetric: "Lyapunov: λ₁ = +0.9056",
+    hist: "Edward Lorenz demostró que una millonésima de redondeo numérico desata órbitas infinitamente distintas en sistemas deterministas.",
+    poem: 'Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás.'
   },
   {
     id: 1,
     badge: "05",
     title: "Los Cantos de Chladni",
-    sub: "La arquitectura que el sonido dibuja en el silencio",
+    sub: "Relajación Nodal Cimática",
     cat: "CIMÁTICA ACÚSTICA · 1787",
-    solver: "Helmholtz Nodal Wave",
-    pos: [3.8, 2.0, 1.0],
-    viewPos: [1.8, 2.0, 2.8],
-    eq: "w(x,y) = sin(nπx/L)sin(mπy/L) - sin(mπx/L)sin(nπy/L) = 0",
-    hist: "En 1787, Ernst Chladni pasó un arco de violín por el borde de una placa de bronce con arena fina. El sonido expulsó violentamente los granos de las zonas en vibración hacia las líneas nodales de reposo, revelando mandalas simétricos sagrados.",
-    poem: 'El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la materia del mundo descanse en geometría sagrada.'
+    pos: [8.5, 1.5, -4.0],
+    eq: "w(x,y) = sin(nπx)sin(mπy) - sin(mπx)sin(nπy) = 0",
+    timonelMetric: "Residuo Nodal: ‖F(x)‖ ≤ 2.4e-5",
+    hist: "Las partículas de materia son expulsadas por el sonido hasta descansar en las líneas nodales de reposo absoluto.",
+    poem: 'El silencio es el punto exacto donde las ondas se anulan y la materia descansa en geometría sagrada.'
   },
   {
     id: 2,
     badge: "21",
     title: "Los Ceros de Riemann",
-    sub: "El enigma de un millón de dólares en la línea crítica",
+    sub: "Espiral Crítica en s = 1/2 + it",
     cat: "PROBLEMA DEL MILENIO · 1859",
-    solver: "Riemann-Siegel Critical Spiral",
-    pos: [-4.2, 2.2, -6.0],
-    viewPos: [-2.0, 2.2, -4.2],
-    eq: "ζ(s) = ∑ 1/nˢ = 0  ⇒  Re(s) = 1/2\nZ(t) cruza el origen exactamente en t₁, t₂, t₃...",
-    hist: "En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales de su función Zeta yacen sobre la línea crítica Re(s)=1/2. Es el problema de un millón de dólares más codiciado del planeta: de su verdad depende el secreto íntimo de los números primos.",
-    poem: 'Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo.'
+    pos: [0.0, 7.5, -16.0],
+    eq: "ζ(1/2 + it) = 0  ⇒  γ₁ ≈ 14.134, γ₂ ≈ 21.022...",
+    timonelMetric: "Línea Crítica: Re(s) = 0.500000",
+    hist: "Todos los ceros no triviales de la función Zeta yacen en la línea crítica, gobernando la distribución íntima de los números primos.",
+    poem: 'Una cuerda de luz tensada a través de la nada que besa el cero absoluto en cada primo del universo.'
   },
   {
     id: 3,
     badge: "24",
     title: "El Flujo de Ricci de Poincaré",
-    sub: "La redondez cósmica que resolvió Grigori Perelman",
+    sub: "Alisamiento Métrico a 3-Esfera",
     cat: "PROBLEMA DEL MILENIO · 2002",
-    solver: "Perelman Metric Smoothing S³",
-    pos: [4.0, 2.1, -13.0],
-    viewPos: [2.0, 2.1, -11.2],
-    eq: "∂g_ij/∂t = -2 R_ij\nDeformación métrica continua hacia la esfera S³",
-    hist: "Henri Poincaré planteó en 1904 su conjetura sobre la esfera tridimensional. En 2002, el ermitaño ruso Grigori Perelman la resolvió usando el Flujo de Ricci para alisar las arrugas del espacio, y luego rechazó la Medalla Fields y el millón de dólares.",
-    poem: 'El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera.'
+    pos: [-9.0, 4.5, -18.0],
+    eq: "∂g_ij/∂t = -2 R_ij  ⇒  M³ → S³",
+    timonelMetric: "Curvatura Escalar: R(t) → 1.000",
+    hist: "Grigori Perelman usó el flujo de calor geométrico para alisar las arrugas del espacio tridimensional.",
+    poem: 'El calor geométrico plancha cada arruga hasta devolver la materia a la pureza de la primera esfera.'
   },
   {
     id: 4,
     badge: "15",
     title: "La Fibración de Hopf",
-    sub: "La esfera de cuatro dimensiones proyectada en luz",
+    sub: "Proyección Cuadridimensional S³ → R³",
     cat: "TOPOLOGÍA 4D · 1931",
-    solver: "Stereographic S³→R³ Projection",
-    pos: [-3.8, 2.3, -20.0],
-    viewPos: [-1.8, 2.3, -18.2],
-    eq: "π: S³ → S²\nFibras: círculos entrelazados en R³",
-    hist: "Heinz Hopf demostró en 1931 que la esfera de cuatro dimensiones puede descomponerse en infinitos círculos que se entrelazan sin cortarse jamás, proyectando sobre nuestra realidad una flor geométrica imposible en 3D.",
-    poem: 'Hay dimensiones que no podemos ver pero cuya sombra, cuando cae sobre nuestra realidad, es la forma más hermosa que jamás imaginamos.'
+    pos: [7.5, -5.0, -14.0],
+    eq: "π: S³ → S²  (Fibras: Toros entrelazados)",
+    timonelMetric: "Invariante de Hopf: H(f) = 1",
+    hist: "La 4ª dimensión proyecta sobre nuestro espacio tridimensional infinitos círculos entrelazados sin tocarse jamás.",
+    poem: 'La sombra de cuatro dimensiones cayendo como una flor geométrica sobre nuestra realidad.'
   },
   {
     id: 5,
     badge: "23",
     title: "Vórtices de Navier-Stokes",
-    sub: "El misterio de la turbulencia y las velocidades infinitas",
+    sub: "Turbulencia & Estiramiento de Filamentos",
     cat: "PROBLEMA DEL MILENIO · 1845",
-    solver: "Vortex Filament Stretching",
-    pos: [0.0, 2.5, -28.0],
-    viewPos: [0.0, 2.5, -25.2],
-    eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u\n¿Puede la vorticidad ω explotar a infinito?",
-    hist: "Las ecuaciones de Navier y Stokes gobiernan el agua y el aire. El Instituto Clay ofrece $1.000.000 USD a quien demuestre si un fluido en calma puede concentrar tanta energía que su velocidad explote a infinito.",
-    poem: 'Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares.'
+    pos: [0.0, -6.5, -8.0],
+    eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u",
+    timonelMetric: "Enstrofía: Ω(t) < ∞ (Conservada)",
+    hist: "¿Puede la velocidad del agua explotar a infinito? El enigma de $1.000.000 USD de la física de fluidos.",
+    poem: 'Tubos de remolinos microscópicos que se trenzan como músculos de luz en la furia del océano.'
   }
 ];
 
-// Variables Principales Three.js
+// Variables Three.js & Silicio
 let scene, camera, renderer;
-let anomalies = [];
-let hologramUpdaters = [];
+let astros = [];
+let dynamicUpdaters = [];
 
-// Entidad 3D de NAI (Geómetra Soberana)
+// Entidad 3D de NAI
 let nai3D = {
   group: null,
   core: null,
   outerHalo: null,
-  orbitingPhotons: null,
   light: null,
+  targetPos: new THREE.Vector3(0, 0, -8),
   currentIndex: 0,
-  targetPos: new THREE.Vector3(0, 2.0, 10.0),
   pulseTime: 0
 };
 
-// Polvo estocástico en suspensión
-let dustSystem, dustPosArray;
-const DUST_COUNT = 900;
+// Navegación Inercial 6DOF de la Cápsula
+let velocity = new THREE.Vector3(0, 0, 0);
+let orientation = { pitch: 0, yaw: 0 };
+let targetOrientation = { pitch: 0, yaw: 0 };
+let isDragging = false;
+let dragPrev = { x: 0, y: 0 };
+let userInertiaTimer = 0; // Tiempo sin input para acoplar con NAI
+let currentFocusedAstro = null;
 
-// Geodésicas de luz
-let geodesicLines = [];
-
-// Cinemática Incorpórea & Lean Parallax
-let lean = {
-  targetX: 0,
-  targetY: 0,
-  currentX: 0,
-  currentY: 0,
-  roll: 0
-};
-let isInteracting = false;
-let userIdleTimer = 0; // Temporizador para acoplar con el atractor de NAI
-let dragStart = { x: 0, y: 0 };
-let currentEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-let targetEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-
-// Estado de Contemplación & Carrete
-let currentFocusedAnomaly = null;
-let isContemplating = false;
+// Audio Espacial Web Audio
+let audioCtx = null, droneGain = null, resonanceGain = null, resonanceOsc = null;
+let voiceGuideEnabled = true, isSpeaking = false, currentUtterance = null;
 let userCameraRoll = [];
-let voiceGuideEnabled = true;
-let isSpeaking = false;
-let currentUtterance = null;
-let shutterUnlocked = false;
-let contemplationTimeLeft = 10;
-let shutterTimerInterval = null;
 
-// Paisaje Sonoro Web Audio
-let audioCtx = null;
-let droneGain = null;
-let resonanceGain = null;
-let resonanceOsc = null;
-
-// ── MOTOR ACÚSTICO PROCEDURAL SUB-GRAVE ───────────────────────────
-function initWebAudioAtmosphere() {
-  if (audioCtx) return;
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioCtx = new AudioContext();
-
-    // Pedal armónico sub-grave: 108 Hz (Resonancia arquitectónica)
-    const osc1 = audioCtx.createOscillator();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(108, audioCtx.currentTime);
-
-    // Armónico de quinta: 162 Hz muy suave
-    const osc2 = audioCtx.createOscillator();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(162, audioCtx.currentTime);
-
-    droneGain = audioCtx.createGain();
-    droneGain.gain.setValueAtTime(0.045, audioCtx.currentTime); // Sutil, no invasivo
-
-    // Filtro pasa-bajos cálido
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(280, audioCtx.currentTime);
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(droneGain);
-    droneGain.connect(audioCtx.destination);
-
-    osc1.start();
-    osc2.start();
-
-    // Oscilador de resonancia armónica de proximidad
-    resonanceOsc = audioCtx.createOscillator();
-    resonanceOsc.type = 'sine';
-    resonanceOsc.frequency.setValueAtTime(432, audioCtx.currentTime);
-    resonanceGain = audioCtx.createGain();
-    resonanceGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
-    resonanceOsc.connect(resonanceGain);
-    resonanceGain.connect(audioCtx.destination);
-    resonanceOsc.start();
-  } catch (e) {
-    console.log("Web Audio no disponible:", e);
-  }
-}
-
-function updateProximitySound(distToClosest) {
-  if (!resonanceGain || !audioCtx) return;
-  // Aumenta el armónico al acercarse a menos de 4 metros
-  if (distToClosest < 4.5) {
-    const intensity = Math.max(0, (4.5 - distToClosest) / 4.5);
-    resonanceGain.gain.setTargetAtTime(intensity * 0.035, audioCtx.currentTime, 0.1);
-  } else {
-    resonanceGain.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.2);
-  }
-}
-
-// ── BOLETERÍA & INGRESO AL MUSEO ──────────────────────────────────
-function enterMuseum(enableVoice) {
-  voiceGuideEnabled = enableVoice;
-  updateVoiceStatusUI();
-
-  if (enableVoice) {
-    initWebAudioAtmosphere();
-  }
-
-  const foyer = document.getElementById('foyer-screen');
-  foyer.style.opacity = '0';
-  setTimeout(() => foyer.classList.add('hidden'), 1000);
-
-  // Mensaje inaugural de NAI
-  speakNai("Bienvenido a la Catedral de Geodésicas. Suelta el control cuando quieras: yo te guiaré a través del vacío.");
-}
-
-function toggleVoiceGuide() {
-  voiceGuideEnabled = !voiceGuideEnabled;
-  if (!voiceGuideEnabled) {
-    stopNaiSpeech();
-    if (droneGain) droneGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
-  } else {
-    initWebAudioAtmosphere();
-    if (droneGain) droneGain.gain.setTargetAtTime(0.045, audioCtx.currentTime, 0.2);
-  }
-  updateVoiceStatusUI();
-}
-
-function updateVoiceStatusUI() {
-  document.getElementById('voice-status-icon').textContent = voiceGuideEnabled ? '🔊' : '🔇';
-  document.getElementById('voice-status-text').textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
-}
-
-// ── SÍNTESIS DE VOZ DE NAI (WEB SPEECH NATIVA) ─────────────────────
-function speakNai(text, onEndCallback) {
-  if (!voiceGuideEnabled || !('speechSynthesis' in window)) return;
-  stopNaiSpeech();
-
-  currentUtterance = new SpeechSynthesisUtterance(text);
-  currentUtterance.lang = 'es-ES';
-  currentUtterance.rate = 0.92;
-  currentUtterance.pitch = 0.96;
-
-  const voices = window.speechSynthesis.getVoices();
-  const esVoice = voices.find(v => v.lang.startsWith('es') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Monica') || v.name.includes('Paulina')));
-  if (esVoice) currentUtterance.voice = esVoice;
-
-  currentUtterance.onstart = () => {
-    isSpeaking = true;
-    document.getElementById('nai-voice-waves').classList.remove('hidden');
-  };
-
-  currentUtterance.onend = () => {
-    isSpeaking = false;
-    document.getElementById('nai-voice-waves').classList.add('hidden');
-    if (onEndCallback) onEndCallback();
-  };
-
-  currentUtterance.onerror = () => {
-    isSpeaking = false;
-    document.getElementById('nai-voice-waves').classList.add('hidden');
-  };
-
-  window.speechSynthesis.speak(currentUtterance);
-}
-
-function stopNaiSpeech() {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-  isSpeaking = false;
-  document.getElementById('nai-voice-waves').classList.add('hidden');
-}
-
-// ── PETICIÓN DE GUÍA A NAI (SALTO CURATORIAL) ─────────────────────
-function requestNaiLead(idx) {
-  if (idx < 0 || idx >= EXHIBITS_DATA.length) return;
-  nai3D.currentIndex = idx;
-  const d = EXHIBITS_DATA[idx];
-  nai3D.targetPos.set(d.pos[0] + 0.8, d.pos[1] + 0.4, d.pos[2] + 0.8);
-
-  const dialogue = document.getElementById('nai-dialogue-text');
-  dialogue.textContent = `Volemos hacia ${d.title}. Siente la curvatura del espacio a nuestro paso.`;
-  speakNai(`Te guío hacia ${d.title}. ${d.sub}.`);
-  userIdleTimer = 10.0; // Activa inmediatamente el atractor cinético
-}
-
-// ── INICIALIZACIÓN THREE.JS ───────────────────────────────────────
-function init3D() {
+// ── INICIALIZACIÓN THREE.JS (GRAVEDAD CERO) ───────────────────────
+function initOrbitalSpace() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x020106);
-  scene.fog = new THREE.FogExp2(0x020106, 0.024);
+  scene.background = new THREE.Color(0x010004);
+  scene.fog = new THREE.FogExp2(0x010004, 0.018);
 
-  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 120);
-  camera.position.set(0, 2.0, 14);
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 150);
+  camera.position.set(0, 0, 4);
 
   renderer = new THREE.WebGLRenderer({
     canvas,
@@ -754,550 +464,565 @@ function init3D() {
     preserveDrawingBuffer: true
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(1.0); // Silicio frío a 60 FPS
+  renderer.setPixelRatio(1.0); // Silicio frío
   renderer.shadowMap.enabled = false;
 
-  buildCathedralArchitecture();
-  buildNai3DEntity();
-  setupLeanParallaxControls();
+  buildCosmicVoid();
+  buildNaiSovereignEntity();
+  setup6DOFControls();
   window.addEventListener('resize', onWindowResize);
   animate();
 }
 
-// ── CONSTRUCCIÓN DE LA CATEDRAL DE GEODÉSICAS ─────────────────────
-function buildCathedralArchitecture() {
-  // 1. Horizonte Reflectante de Ébano Líquido
-  const floorGeo = new THREE.PlaneGeometry(160, 160, 32, 32);
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x07060d,
-    roughness: 0.15,
-    metalness: 0.88
-  });
-  const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  scene.add(floor);
+// ── VACÍO CÓSMICO PURO (SIN SUELO NI MUROS) ───────────────────────
+function buildCosmicVoid() {
+  // Luz Ambiente Tenue
+  scene.add(new THREE.AmbientLight(0x1a1228, 0.8));
 
-  // 2. Anillos Concéntricos de Poincaré Grabados en el Suelo
-  for (let r = 8; r <= 56; r += 12) {
-    const ringGeo = new THREE.RingGeometry(r - 0.05, r + 0.05, 96);
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x6366f1,
-      transparent: true,
-      opacity: 0.07,
-      side: THREE.DoubleSide
-    });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.02;
-    scene.add(ring);
+  // Campo Estelar Esférico Omnidireccional (1.400 partículas en el vacío 3D)
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(1400 * 3);
+  for (let i = 0; i < 1400; i++) {
+    const r = 18 + Math.random() * 50;
+    const th = Math.random() * Math.PI * 2;
+    const ph = (Math.random() - 0.5) * Math.PI;
+    starPos[i*3]   = r * Math.cos(ph) * Math.sin(th);
+    starPos[i*3+1] = r * Math.sin(ph);
+    starPos[i*3+2] = r * Math.cos(ph) * Math.cos(th);
   }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.035, transparent: true, opacity: 0.5 }));
+  scene.add(stars);
 
-  // 3. Luz Ambiente Soberana en Penumbra
-  const ambientLight = new THREE.AmbientLight(0x181224, 0.65);
-  scene.add(ambientLight);
-
-  // 4. Polvo Estocástico en Suspensión (Brownian Dust Motes)
-  const dustGeo = new THREE.BufferGeometry();
-  dustPosArray = new Float32Array(DUST_COUNT * 3);
-  for (let i = 0; i < DUST_COUNT; i++) {
-    dustPosArray[i * 3]     = (Math.random() - 0.5) * 35;
-    dustPosArray[i * 3 + 1] = Math.random() * 6.0 + 0.2;
-    dustPosArray[i * 3 + 2] = (Math.random() - 0.5) * 65 - 8;
-  }
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPosArray, 3));
-  const dustMat = new THREE.PointsMaterial({
-    color: 0xe2d4b7,
-    size: 0.035,
-    transparent: true,
-    opacity: 0.45
-  });
-  dustSystem = new THREE.Points(dustGeo, dustMat);
-  scene.add(dustSystem);
-
-  // 5. Geodésicas de Luz Conectando las Anomalías
-  const curvePoints = EXHIBITS_DATA.map(d => new THREE.Vector3(d.pos[0], d.pos[1] * 0.5, d.pos[2]));
-  const spline = new THREE.CatmullRomCurve3(curvePoints);
-  const splinePoints = spline.getPoints(120);
-  const splineGeo = new THREE.BufferGeometry().setFromPoints(splinePoints);
-  const splineMat = new THREE.LineBasicMaterial({
-    color: 0x8b5cf6,
-    transparent: true,
-    opacity: 0.28
-  });
-  const geodesicTrack = new THREE.Line(splineGeo, splineMat);
-  scene.add(geodesicTrack);
-
-  // 6. Instanciación de las 6 Anomalías Volumétricas
-  EXHIBITS_DATA.forEach((data, index) => {
-    createVolumetricAnomaly(data, index);
+  // Instanciar los 6 Astros Matemáticos Vivos
+  ASTROS_DATA.forEach((data, index) => {
+    createLivingMathematicalAstro(data, index);
   });
 }
 
-// ── ENTIDAD VOLUMÉTRICA DE NAI (EN SILICIO 3D) ────────────────────
-function buildNai3DEntity() {
+// ── NAI EN SILICIO 3D (GUÍA SOBERANA) ─────────────────────────────
+function buildNaiSovereignEntity() {
   const group = new THREE.Group();
-
-  // Núcleo cuántico (Icosaedro de luz pulsante)
-  const coreGeo = new THREE.IcosahedronGeometry(0.24, 1);
-  const coreMat = new THREE.MeshBasicMaterial({
-    color: 0xa855f7,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.85
-  });
-  const core = new THREE.Mesh(coreGeo, coreMat);
+  
+  // Núcleo cuántico icosaédrico
+  const core = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.25, 1),
+    new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.85 })
+  );
   group.add(core);
 
-  // Halo exterior cuántico
-  const haloGeo = new THREE.OctahedronGeometry(0.38, 0);
-  const haloMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.4
-  });
-  const outerHalo = new THREE.Mesh(haloGeo, haloMat);
-  group.add(outerHalo);
+  // Halo exterior
+  const halo = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.4, 0),
+    new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.45 })
+  );
+  group.add(halo);
 
-  // Luz puntual soberana de NAI (ilumina suelo y alrededores)
-  const naiLight = new THREE.PointLight(0xa855f7, 1.8, 7.5);
-  group.add(naiLight);
+  // Luz puntual propia
+  const light = new THREE.PointLight(0xa855f7, 2.0, 9.0);
+  group.add(light);
 
-  // Partículas orbitales (Fotones)
-  const photonGeo = new THREE.BufferGeometry();
-  const photonPos = new Float32Array(18); // 6 fotones
-  photonGeo.setAttribute('position', new THREE.BufferAttribute(photonPos, 3));
-  const photonMat = new THREE.PointsMaterial({
-    color: 0x38bdf8,
-    size: 0.05,
-    transparent: true,
-    opacity: 0.9
-  });
-  const photons = new THREE.Points(photonGeo, photonMat);
-  group.add(photons);
-
-  group.position.set(0, 2.0, 10.0);
+  group.position.set(0, 0, 0);
   scene.add(group);
 
   nai3D.group = group;
   nai3D.core = core;
-  nai3D.outerHalo = outerHalo;
-  nai3D.light = naiLight;
-  nai3D.orbitingPhotons = photons;
+  nai3D.outerHalo = halo;
+  nai3D.light = light;
 }
 
-// ── ANOMALÍA VOLUMÉTRICA FLOTANTE (SIN VITRINA NI VIDRIO) ─────────
-function createVolumetricAnomaly(data, index) {
-  const anomalyGroup = new THREE.Group();
-  anomalyGroup.position.set(data.pos[0], data.pos[1], data.pos[2]);
+// ── ASTROS MATEMÁTICOS VIVOS (SISTEMAS DINÁMICOS DESENREDÁNDOSE) ───
+function createLivingMathematicalAstro(data, index) {
+  const astroGroup = new THREE.Group();
+  astroGroup.position.set(data.pos[0], data.pos[1], data.pos[2]);
 
-  // 1. Halo de Resonancia en el Suelo
-  const groundRingGeo = new THREE.RingGeometry(1.2, 1.35, 48);
-  const groundRingMat = new THREE.MeshBasicMaterial({
-    color: 0xa855f7,
-    transparent: true,
-    opacity: 0.35,
-    side: THREE.DoubleSide
-  });
-  const groundRing = new THREE.Mesh(groundRingGeo, groundRingMat);
-  groundRing.rotation.x = -Math.PI / 2;
-  groundRing.position.set(0, -data.pos[1] + 0.03, 0);
-  anomalyGroup.add(groundRing);
+  // 1. Anillo de Telemetría de Timonel (Giroscopio cuántico flotante)
+  const ringGeo = new THREE.RingGeometry(1.6, 1.63, 64);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.25, side: THREE.DoubleSide });
+  const timonelRing = new THREE.Mesh(ringGeo, ringMat);
+  astroGroup.add(timonelRing);
 
-  // 2. Foco Cenital Soberano
-  const spotLight = new THREE.SpotLight(0xffecd1, 2.2, 9, Math.PI / 6.5, 0.45, 1);
-  spotLight.position.set(data.pos[0], 5.5, data.pos[2]);
-  spotLight.target = anomalyGroup;
-  scene.add(spotLight);
+  // 2. Luz de Resonancia
+  const pointLight = new THREE.PointLight(0x8b5cf6, 1.2, 5.0);
+  astroGroup.add(pointLight);
 
-  // 3. Cartela Holográfica Suspendida en el Espacio
-  const plaqueCanvas = document.createElement('canvas');
-  plaqueCanvas.width = 512; plaqueCanvas.height = 140;
-  const pcx = plaqueCanvas.getContext('2d');
-  pcx.fillStyle = 'rgba(7, 5, 15, 0.85)'; pcx.fillRect(0, 0, 512, 140);
-  pcx.strokeStyle = 'rgba(168, 85, 247, 0.5)'; pcx.lineWidth = 3; pcx.strokeRect(4, 4, 504, 132);
-  pcx.fillStyle = '#e8d2a6'; pcx.font = 'bold 26px Cinzel'; pcx.textAlign = 'center';
-  pcx.fillText(`${data.badge} · ${data.title.toUpperCase()}`, 256, 55);
-  pcx.fillStyle = '#38bdf8'; pcx.font = '17px Space Mono';
-  pcx.fillText(data.cat, 256, 98);
+  // 3. Sistema Dinámico en Silicio según su Ecuación
+  const livingSystem = buildDynamicSystemMath(data.id);
+  astroGroup.add(livingSystem);
 
-  const plaqueTex = new THREE.CanvasTexture(plaqueCanvas);
-  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.28), new THREE.MeshBasicMaterial({ map: plaqueTex, transparent: true }));
-  plaque.position.set(0, -0.9, 0.8);
-  anomalyGroup.add(plaque);
-
-  // 4. Holograma Matemático Puro
-  const holoObject = createMathematicalHologram(data.id);
-  anomalyGroup.add(holoObject);
-
-  scene.add(anomalyGroup);
-  anomalies.push({
+  scene.add(astroGroup);
+  astros.push({
     data,
-    group: anomalyGroup,
+    group: astroGroup,
     worldPos: new THREE.Vector3(data.pos[0], data.pos[1], data.pos[2]),
-    viewPos: new THREE.Vector3(data.viewPos[0], data.viewPos[1], data.viewPos[2]),
-    plaque
+    timonelRing
   });
 }
 
-// ── HOLOGRAMAS MATEMÁTICOS DE FASE Y DINÁMICA ─────────────────────
-function createMathematicalHologram(id) {
+// ── INTEGRACIÓN NUMÉRICA VIVA DE CADA FÓRMULA ─────────────────────
+function buildDynamicSystemMath(id) {
   const group = new THREE.Group();
+
   if (id === 0) {
-    // 01 Lorenz 3D
-    const count = 2200, geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
-    let x = 0.1, y = 0, z = 14, dt = 0.005;
-    for (let i = 0; i < count; i++) {
-      x += dt * 10 * (y - x); y += dt * (x * (28 - z) - y); z += dt * (x * y - 2.667 * z);
-      pos[i*3] = x*0.026; pos[i*3+1] = (z-25)*0.026; pos[i*3+2] = y*0.026;
-      cols[i*3] = 0.5 + (i/count)*0.5; cols[i*3+1] = 0.3 + (1-i/count)*0.5; cols[i*3+2] = 0.95;
+    // 01. LORENZ VIVO: Partículas calculando RK4 en tiempo real
+    const N = 2000;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(N * 3);
+    const cols = new Float32Array(N * 3);
+    const state = [];
+
+    for (let i = 0; i < N; i++) {
+      state.push({
+        x: (Math.random() - 0.5) * 2.0,
+        y: (Math.random() - 0.5) * 2.0,
+        z: 20 + (Math.random() - 0.5) * 5.0,
+        age: Math.random() * 500
+      });
+      cols[i*3] = 0.5 + Math.random()*0.5; cols[i*3+1] = 0.2; cols[i*3+2] = 0.95;
     }
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.024, vertexColors: true, transparent: true, opacity: 0.9 }));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.88 }));
     group.add(pts);
-    hologramUpdaters.push((delta) => { pts.rotation.y += 0.008; pts.rotation.x = Math.sin(performance.now()*0.0006)*0.1; });
-  } else if (id === 1) {
-    // 05 Chladni 3D Nodal
-    const count = 1800, sandGeo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = Math.sqrt(Math.random()) * 0.52, th = Math.random() * Math.PI * 2;
-      pos[i*3] = r*Math.cos(th); pos[i*3+1] = 0.0; pos[i*3+2] = r*Math.sin(th);
-    }
-    sandGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const sand = new THREE.Points(sandGeo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.018 }));
-    group.add(sand);
-    let chAngle = 0;
-    hologramUpdaters.push(() => {
-      chAngle += 0.012; const arr = sand.geometry.attributes.position.array;
-      for (let i = 0; i < count; i++) {
-        const u = arr[i*3], v = arr[i*3+2];
-        arr[i*3+1] = Math.abs(Math.sin(5*Math.atan2(v,u)+chAngle)*Math.cos(4*Math.hypot(u,v)*8))*0.045;
+
+    // Integrador RK4 vivo cuadro a cuadro
+    dynamicUpdaters.push((dt) => {
+      const pArr = pts.geometry.attributes.position.array;
+      const sigma = 10.0, rho = 28.0, beta = 8.0 / 3.0;
+      const h = 0.007;
+
+      for (let i = 0; i < N; i++) {
+        const s = state[i];
+        // RK4 Step
+        const dx = sigma * (s.y - s.x);
+        const dy = s.x * (rho - s.z) - s.y;
+        const dz = s.x * s.y - beta * s.z;
+
+        s.x += dx * h; s.y += dy * h; s.z += dz * h;
+        s.age++;
+
+        // Si se disipa o envejece, resembrar con perturbación delta (caos aperiódico continuo)
+        if (s.age > 700 || Math.abs(s.x) > 35) {
+          s.x = (Math.random() - 0.5) * 0.2;
+          s.y = (Math.random() - 0.5) * 0.2;
+          s.z = 15.0 + (Math.random() - 0.5) * 0.2;
+          s.age = 0;
+        }
+
+        pArr[i*3]   = s.x * 0.035;
+        pArr[i*3+1] = (s.z - 24.0) * 0.035;
+        pArr[i*3+2] = s.y * 0.035;
       }
-      sand.geometry.attributes.position.needsUpdate = true;
-      group.rotation.y += 0.005;
+      pts.geometry.attributes.position.needsUpdate = true;
     });
-  } else if (id === 2) {
-    // 21 Riemann 3D Critical Spiral
-    const count = 1500, geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const t = 10 + (i/count)*38, th = (t/2)*Math.log(t/(2*Math.PI)) - t/2, zv = Math.sin(t*0.8)*Math.cos(t*0.3)*0.36;
-      pos[i*3] = Math.cos(th)*zv; pos[i*3+1] = (t-28)*0.032; pos[i*3+2] = Math.sin(th)*zv;
-      cols[i*3] = 0.95; cols[i*3+1] = 0.75; cols[i*3+2] = 0.2;
+
+  } else if (id === 1) {
+    // 05. CHLADNI VIVO: Partículas migrando por gradiente acústico -∇|ψ|²
+    const N = 1600;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(N * 3);
+    const sand = [];
+
+    for (let i = 0; i < N; i++) {
+      sand.push({
+        u: (Math.random() - 0.5) * 2.0,
+        v: (Math.random() - 0.5) * 2.0,
+        w: (Math.random() - 0.5) * 0.2,
+        vu: 0, vv: 0
+      });
     }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.02, transparent: true, opacity: 0.9 }));
+    group.add(pts);
+
+    let modeT = 0;
+    dynamicUpdaters.push((dt) => {
+      modeT += dt * 0.4;
+      const n = 3 + Math.sin(modeT * 0.5) * 2;
+      const m = 5 + Math.cos(modeT * 0.3) * 2;
+      const pArr = pts.geometry.attributes.position.array;
+
+      for (let i = 0; i < N; i++) {
+        const p = sand[i];
+        const val = Math.sin(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - Math.sin(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
+        const gu = n * Math.cos(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - m * Math.cos(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
+        const gv = m * Math.sin(n * Math.PI * p.u) * Math.cos(m * Math.PI * p.v) - n * Math.sin(m * Math.PI * p.u) * Math.cos(n * Math.PI * p.v);
+
+        p.vu = p.vu * 0.85 - Math.sign(val) * gu * 0.015 + (Math.random() - 0.5) * 0.008;
+        p.vv = p.vv * 0.85 - Math.sign(val) * gv * 0.015 + (Math.random() - 0.5) * 0.008;
+        p.u += p.vu; p.v += p.vv;
+
+        if (Math.abs(p.u) > 1.0) p.u = (Math.random() - 0.5) * 1.8;
+        if (Math.abs(p.v) > 1.0) p.v = (Math.random() - 0.5) * 1.8;
+
+        pArr[i*3]   = p.u * 0.65;
+        pArr[i*3+1] = Math.abs(val) * 0.08;
+        pArr[i*3+2] = p.v * 0.65;
+      }
+      pts.geometry.attributes.position.needsUpdate = true;
+      group.rotation.y += 0.004;
+    });
+
+  } else if (id === 2) {
+    // 21. RIEMANN VIVO: Marcha continua en la línea crítica
+    const N = 1200;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(N * 3);
+    const cols = new Float32Array(N * 3);
+
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
     const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }));
     group.add(line);
-    hologramUpdaters.push(() => { line.rotation.y += 0.007; });
+
+    let tBase = 10.0;
+    dynamicUpdaters.push((dt) => {
+      tBase += dt * 0.8;
+      const pArr = line.geometry.attributes.position.array;
+      const cArr = line.geometry.attributes.color.array;
+
+      for (let i = 0; i < N; i++) {
+        const t = tBase + (i / N) * 35.0;
+        const theta = (t / 2.0) * Math.log(t / (2.0 * Math.PI)) - t / 2.0;
+        const r = Math.sin(t * 0.75) * Math.cos(t * 0.28) * 0.45;
+
+        pArr[i*3]   = Math.cos(theta) * r;
+        pArr[i*3+1] = (i / N - 0.5) * 1.6;
+        pArr[i*3+2] = Math.sin(theta) * r;
+
+        const isZero = Math.abs(r) < 0.05;
+        cArr[i*3]   = isZero ? 1.0 : 0.9;
+        cArr[i*3+1] = isZero ? 1.0 : 0.7;
+        cArr[i*3+2] = isZero ? 0.3 : 0.15;
+      }
+      line.geometry.attributes.position.needsUpdate = true;
+      line.geometry.attributes.color.needsUpdate = true;
+      group.rotation.y += 0.006;
+    });
+
   } else if (id === 3) {
-    // 24 Ricci 3D Poincaré
+    // 24. RICCI FLOW VIVO: Alisamiento y deformación continua de curvatura
     const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.44, 32, 24),
-      new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, roughness: 0.2, wireframe: true })
+      new THREE.SphereGeometry(0.5, 32, 24),
+      new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, wireframe: true, roughness: 0.2 })
     );
     group.add(mesh);
-    let ricciT = 0;
-    hologramUpdaters.push(() => {
-      ricciT += 0.022; const pos = mesh.geometry.attributes.position;
+
+    let flowT = 0;
+    dynamicUpdaters.push((dt) => {
+      flowT += dt * 1.2;
+      const pos = mesh.geometry.attributes.position;
+      const smoothFactor = Math.exp(-((flowT % 8.0) * 0.4)); // Se arruga y se alisa periódicamente
+
       for (let i = 0; i < pos.count; i++) {
         const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
-        v.multiplyScalar(0.44 + Math.sin(v.x*6 + ricciT)*Math.cos(v.y*6 + ricciT)*0.1);
+        const wrinkle = Math.sin(v.x * 6 + flowT) * Math.cos(v.y * 6 + flowT) * 0.18 * smoothFactor;
+        v.multiplyScalar(0.5 + wrinkle);
         pos.setXYZ(i, v.x, v.y, v.z);
       }
-      pos.needsUpdate = true; mesh.rotation.y += 0.006;
+      pos.needsUpdate = true;
+      mesh.rotation.y += 0.007;
     });
+
   } else if (id === 4) {
-    // 15 Hopf Fibration
+    // 15. HOPF VIVO: Fibración girando en 4D
     for (let i = 0; i < 5; i++) {
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(0.42, 0.026, 16, 64),
-        new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, roughness: 0.2, wireframe: true })
+      const torus = new THREE.Mesh(
+        new THREE.TorusGeometry(0.48, 0.024, 16, 64),
+        new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, wireframe: true })
       );
-      ring.rotation.x = (i * Math.PI) / 5;
-      ring.rotation.y = (i * Math.PI) / 3;
-      group.add(ring);
+      torus.rotation.x = (i * Math.PI) / 5;
+      torus.rotation.y = (i * Math.PI) / 3;
+      group.add(torus);
     }
-    hologramUpdaters.push(() => { group.rotation.x += 0.006; group.rotation.y += 0.009; });
+    dynamicUpdaters.push((dt) => {
+      group.rotation.x += 0.005;
+      group.rotation.y += 0.008;
+      group.rotation.z += 0.003;
+    });
+
   } else {
-    // 23 Navier-Stokes Vórtices
-    const count = 1200, geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const u = (i / count) * Math.PI * 8;
-      const r = 0.15 + (i / count) * 0.4;
-      pos[i*3] = Math.cos(u) * r;
-      pos[i*3+1] = ((i / count) - 0.5) * 1.1;
-      pos[i*3+2] = Math.sin(u) * r;
-      cols[i*3] = 0.2 + (i/count)*0.8; cols[i*3+1] = 0.7; cols[i*3+2] = 0.95;
-    }
+    // 23. NAVIER-STOKES VIVO: Filamentos de vorticidad trenzándose
+    const N = 1400;
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array(N * 3);
+    const cols = new Float32Array(N * 3);
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-    const vortex = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true }));
+    const vortex = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true }));
     group.add(vortex);
-    hologramUpdaters.push(() => { vortex.rotation.y -= 0.015; });
+
+    let vorT = 0;
+    dynamicUpdaters.push((dt) => {
+      vorT += dt * 1.5;
+      const pArr = vortex.geometry.attributes.position.array;
+      const cArr = vortex.geometry.attributes.color.array;
+
+      for (let i = 0; i < N; i++) {
+        const u = (i / N) * Math.PI * 10 + vorT;
+        const r = 0.12 + Math.sin(u * 0.3 + vorT) * 0.35;
+        pArr[i*3]   = Math.cos(u) * r;
+        pArr[i*3+1] = ((i / N) - 0.5) * 1.4 + Math.sin(vorT + i) * 0.05;
+        pArr[i*3+2] = Math.sin(u) * r;
+
+        cArr[i*3]   = 0.2 + (i / N) * 0.8;
+        cArr[i*3+1] = 0.7;
+        cArr[i*3+2] = 0.95;
+      }
+      vortex.geometry.attributes.position.needsUpdate = true;
+      group.rotation.y -= 0.012;
+    });
   }
+
   return group;
 }
 
-// ── CONTROL DE INCLINACIÓN ORGÁNICA (LEAN PARALLAX & FLUIDEZ) ─────
-function setupLeanParallaxControls() {
+// ── CONTROLES INERCIALES 6DOF DE LA CÁPSULA (GRAVEDAD CERO) ───────
+function setup6DOFControls() {
   window.addEventListener('mousedown', (e) => {
-    if (isContemplating || e.target.closest('header, #foyer-screen, #nai-companion-widget, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
-    isInteracting = true;
-    userIdleTimer = 0; // El usuario toma el control absoluto
-    dragStart = { x: e.clientX, y: e.clientY };
+    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-drawer')) return;
+    isDragging = true;
+    userInertiaTimer = 0; // Rompe el atractor de NAI inmediatamente
+    dragPrev = { x: e.clientX, y: e.clientY };
   });
 
   window.addEventListener('mousemove', (e) => {
-    // Lean suave siempre activo con la posición del cursor en pantalla
-    const normX = (e.clientX / window.innerWidth) * 2 - 1;
-    const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-    lean.targetX = normX;
-    lean.targetY = normY;
+    if (!isDragging) return;
+    userInertiaTimer = 0;
+    const dx = e.clientX - dragPrev.x;
+    const dy = e.clientY - dragPrev.y;
 
-    if (!isInteracting || isContemplating) return;
-    userIdleTimer = 0;
-    const deltaX = e.clientX - dragStart.x;
-    const deltaY = e.clientY - dragStart.y;
+    targetOrientation.yaw -= dx * 0.0024;
+    targetOrientation.pitch -= dy * 0.0024;
+    targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
 
-    targetEuler.y -= deltaX * 0.0022;
-    targetEuler.x -= deltaY * 0.0020;
-    targetEuler.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetEuler.x));
-
-    dragStart = { x: e.clientX, y: e.clientY };
+    dragPrev = { x: e.clientX, y: e.clientY };
   });
 
-  window.addEventListener('mouseup', () => { isInteracting = false; });
+  window.addEventListener('mouseup', () => { isDragging = false; });
 
-  // Touch en dispositivos móviles
+  // Touch
   window.addEventListener('touchstart', (e) => {
-    if (isContemplating || e.target.closest('header, #foyer-screen, #nai-companion-widget, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
-    isInteracting = true;
-    userIdleTimer = 0;
-    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-drawer')) return;
+    isDragging = true;
+    userInertiaTimer = 0;
+    dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: true });
 
   window.addEventListener('touchmove', (e) => {
-    if (!isInteracting || isContemplating) return;
-    userIdleTimer = 0;
-    const deltaX = e.touches[0].clientX - dragStart.x;
-    const deltaY = e.touches[0].clientY - dragStart.y;
-    targetEuler.y -= deltaX * 0.003;
-    targetEuler.x -= deltaY * 0.003;
-    targetEuler.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetEuler.x));
-    dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (!isDragging) return;
+    userInertiaTimer = 0;
+    const dx = e.touches[0].clientX - dragPrev.x;
+    const dy = e.touches[0].clientY - dragPrev.y;
+    targetOrientation.yaw -= dx * 0.0035;
+    targetOrientation.pitch -= dy * 0.0035;
+    targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
+    dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: true });
 
-  window.addEventListener('touchend', () => { isInteracting = false; });
+  window.addEventListener('touchend', () => { isDragging = false; });
 
-  // Rueda para flotar hacia adelante/atrás
+  // Propulsión Inercial en 3D (Rueda del ratón)
   window.addEventListener('wheel', (e) => {
-    if (isContemplating) return;
-    userIdleTimer = 0; // Rompe inercia de NAI
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    forward.y = 0; forward.normalize();
-    camera.position.addScaledVector(forward, -e.deltaY * 0.012);
-    clampCameraBounds();
+    userInertiaTimer = 0;
+    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    velocity.addScaledVector(dir, -e.deltaY * 0.004);
   }, { passive: true });
 
-  // Teclado Espacio para contemplar
+  // Teclado W/S/A/D/Q/E
   window.addEventListener('keydown', (e) => {
-    if (isContemplating) {
-      if (e.key === 'Escape') exitContemplation();
-      return;
-    }
-    if (e.code === 'Space' && currentFocusedAnomaly) enterContemplation(currentFocusedAnomaly);
-    if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-      userIdleTimer = 0;
-      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-      forward.y = 0; forward.normalize();
-      camera.position.addScaledVector(forward, 0.6);
-      clampCameraBounds();
-    }
-    if (e.code === 'KeyS' || e.code === 'ArrowDown') {
-      userIdleTimer = 0;
-      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-      forward.y = 0; forward.normalize();
-      camera.position.addScaledVector(forward, -0.6);
-      clampCameraBounds();
-    }
+    userInertiaTimer = 0;
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') velocity.addScaledVector(forward, 0.45);
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') velocity.addScaledVector(forward, -0.45);
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') velocity.addScaledVector(right, -0.35);
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') velocity.addScaledVector(right, 0.35);
+    if (e.code === 'KeyQ') velocity.addScaledVector(up, 0.35);
+    if (e.code === 'KeyE') velocity.addScaledVector(up, -0.35);
+    if (e.code === 'Space') triggerShutter();
   });
 }
 
-function clampCameraBounds() {
-  camera.position.x = Math.max(-8, Math.min(8, camera.position.x));
-  camera.position.z = Math.max(-34, Math.min(16, camera.position.z));
-  camera.position.y = 2.0;
+function propelToAnomaly(idx) {
+  if (idx < 0 || idx >= ASTROS_DATA.length) return;
+  nai3D.currentIndex = idx;
+  const target = astros[idx].worldPos;
+  
+  // Vector hacia el astro dejando 3 metros de distancia de aproximación
+  const approachVec = new THREE.Vector3().subVectors(camera.position, target).normalize().multiplyScalar(3.2);
+  const targetCamPos = new THREE.Vector3().addVectors(target, approachVec);
+
+  velocity.copy(new THREE.Vector3().subVectors(targetCamPos, camera.position).multiplyScalar(0.06));
+  speakNai(`Aproximándonos a ${astros[idx].data.title}. ${astros[idx].data.sub}.`);
 }
 
-// ── PROXIMIDAD Y ENFOQUE DE ANOMALÍAS ──────────────────────────────
-function checkAnomalyProximity() {
-  if (isContemplating) return;
-  let nearest = null, minDist = 4.8;
-  anomalies.forEach(a => {
+// ── PROXIMIDAD & HUD DE LA CÁPSULA ────────────────────────────────
+function updateOrbitalProximity() {
+  let nearest = null, minDist = 6.0;
+  astros.forEach(a => {
     const dist = camera.position.distanceTo(a.worldPos);
     if (dist < minDist) { minDist = dist; nearest = a; }
   });
 
-  updateProximitySound(minDist);
-
-  const prompt = document.getElementById('approach-prompt');
-  const reticle = document.getElementById('reticle');
+  const card = document.getElementById('orbital-hud-card');
+  const reticle = document.getElementById('capsule-reticle');
 
   if (nearest) {
-    currentFocusedAnomaly = nearest;
-    document.getElementById('approach-title').textContent = `${nearest.data.badge} · ${nearest.data.title}`;
-    prompt.style.opacity = '1';
-    reticle.classList.add('active');
-  } else {
-    currentFocusedAnomaly = null;
-    prompt.style.opacity = '0';
-    reticle.classList.remove('active');
-  }
-}
-
-// ── MODO CONTEMPLACIÓN PURA ───────────────────────────────────────
-function enterContemplation(anomaly) {
-  isContemplating = true;
-  currentFocusedAnomaly = anomaly;
-
-  const d = anomaly.data;
-  document.getElementById('modal-cat').textContent = d.cat;
-  document.getElementById('modal-solver').textContent = d.solver;
-  document.getElementById('modal-title').textContent = d.title;
-  document.getElementById('modal-sub').textContent = d.sub;
-  document.getElementById('modal-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
-  document.getElementById('modal-hist').textContent = d.hist;
-  document.getElementById('modal-poem').textContent = d.poem;
-
-  document.getElementById('approach-prompt').style.opacity = '0';
-  document.getElementById('contemplation-modal').classList.remove('hidden');
-
-  // Posicionar cámara frente a la anomalía con suavidad
-  camera.position.copy(anomaly.viewPos);
-  camera.lookAt(anomaly.worldPos.x, anomaly.worldPos.y, anomaly.worldPos.z);
-  currentEuler.setFromQuaternion(camera.quaternion, 'YXZ');
-  targetEuler.copy(currentEuler);
-
-  // NAI se posiciona a flotar al costado de la obra
-  nai3D.group.position.set(anomaly.worldPos.x + 1.2, anomaly.worldPos.y + 0.3, anomaly.worldPos.z);
-
-  startArtworkAudioGuide();
-  startShutterRitual();
-}
-
-function exitContemplation() {
-  isContemplating = false;
-  document.getElementById('contemplation-modal').classList.add('hidden');
-  stopNaiSpeech();
-  clearInterval(shutterTimerInterval);
-}
-
-// ── NARRACIÓN POR VOZ DE LA OBRA ──────────────────────────────────
-let isNarrationPlaying = false;
-
-function startArtworkAudioGuide() {
-  if (!voiceGuideEnabled) {
-    document.getElementById('audio-guide-status').textContent = 'Silenciado (Modo Lectura)';
-    document.getElementById('narration-btn-icon').textContent = '▶';
-    document.getElementById('narration-btn-text').textContent = 'Escuchar Relato';
-    return;
-  }
-  const d = currentFocusedAnomaly.data;
-  const speechText = `Anomalía ${d.badge}. ${d.title}. ${d.hist} ${d.poem}`;
-  
-  document.getElementById('audio-guide-status').textContent = 'Narrando obra...';
-  document.getElementById('narration-btn-icon').textContent = '⏸';
-  document.getElementById('narration-btn-text').textContent = 'Pausar';
-  isNarrationPlaying = true;
-
-  speakNai(speechText, () => {
-    document.getElementById('audio-guide-status').textContent = 'Relato completado';
-    document.getElementById('narration-btn-icon').textContent = '↻';
-    document.getElementById('narration-btn-text').textContent = 'Repetir';
-    isNarrationPlaying = false;
-  });
-}
-
-function toggleArtworkNarration() {
-  if (isNarrationPlaying) {
-    stopNaiSpeech();
-    isNarrationPlaying = false;
-    document.getElementById('audio-guide-status').textContent = 'Pausada';
-    document.getElementById('narration-btn-icon').textContent = '▶';
-    document.getElementById('narration-btn-text').textContent = 'Continuar';
-  } else {
-    voiceGuideEnabled = true;
-    updateVoiceStatusUI();
-    startArtworkAudioGuide();
-  }
-}
-
-// ── RITUAL DEL OBTURADOR ──────────────────────────────────────────
-function startShutterRitual() {
-  shutterUnlocked = false;
-  contemplationTimeLeft = 10;
-  clearInterval(shutterTimerInterval);
-
-  const btn = document.getElementById('btn-shutter');
-  const badge = document.getElementById('shutter-timer-badge');
-  const text = document.getElementById('shutter-countdown-text');
-  const label = document.getElementById('btn-shutter-label');
-
-  btn.disabled = true;
-  btn.classList.add('opacity-40', 'cursor-not-allowed');
-  badge.classList.remove('hidden');
-  label.textContent = 'Obturador Bloqueado';
-
-  shutterTimerInterval = setInterval(() => {
-    contemplationTimeLeft--;
-    if (contemplationTimeLeft > 0) {
-      text.textContent = `Contempla la obra... (${contemplationTimeLeft}s para calibrar obturador)`;
-    } else {
-      clearInterval(shutterTimerInterval);
-      unlockShutter();
+    if (currentFocusedAstro !== nearest) {
+      currentFocusedAstro = nearest;
+      const d = nearest.data;
+      document.getElementById('hud-cat').textContent = d.cat;
+      document.getElementById('hud-solver').textContent = d.timonelMetric;
+      document.getElementById('hud-title').textContent = d.title;
+      document.getElementById('hud-sub').textContent = d.sub;
+      document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
+      document.getElementById('hud-hist').textContent = d.hist;
     }
-  }, 1000);
-}
-
-function unlockShutter() {
-  shutterUnlocked = true;
-  const btn = document.getElementById('btn-shutter');
-  const badge = document.getElementById('shutter-timer-badge');
-  const label = document.getElementById('btn-shutter-label');
-
-  badge.classList.add('hidden');
-  btn.disabled = false;
-  btn.classList.remove('opacity-40', 'cursor-not-allowed');
-  btn.classList.add('opacity-100', 'cursor-pointer', 'shadow-purple-500/50');
-  label.textContent = '📸 Disparar Obturador';
-
-  if (voiceGuideEnabled && !isSpeaking) {
-    speakNai("El obturador se ha calibrado. Dispara tu cámara cuando desees capturar este instante.");
+    card.classList.remove('opacity-0', 'translate-x-8');
+    reticle.classList.add('locked');
+  } else {
+    currentFocusedAstro = null;
+    card.classList.add('opacity-0', 'translate-x-8');
+    reticle.classList.remove('locked');
   }
 }
 
-function playShutterSound() {
-  try {
-    const actx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = actx.sampleRate * 0.08, buffer = actx.createBuffer(1, bufferSize, actx.sampleRate), data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
-    const noise = actx.createBufferSource(); noise.buffer = buffer;
-    const filter = actx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 1400;
-    noise.connect(filter); filter.connect(actx.destination);
-    noise.start();
-  } catch (e) {}
+// ── BUCLE PRINCIPAL DE NAVEGACIÓN Y SILICIO ───────────────────────
+let prevTime = performance.now();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const time = performance.now();
+  const delta = (time - prevTime) / 1000;
+  prevTime = time;
+
+  // 1. Orientación esférica de la cápsula
+  orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
+  orientation.yaw += (targetOrientation.yaw - orientation.yaw) * 0.12;
+  camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
+
+  // 2. Propulsión Inercial en Gravedad Cero (Viscosidad pura)
+  camera.position.addScaledVector(velocity, delta * 20.0);
+  velocity.multiplyScalar(0.92); // Fricción espacial suave
+
+  // 3. Atractor Cinético de NAI (Si el usuario no toca nada por > 2.5s)
+  userInertiaTimer += delta;
+  if (userInertiaTimer > 2.5 && !isDragging) {
+    const currentAstro = astros[nai3D.currentIndex];
+    if (currentAstro) {
+      // NAI guía la cápsula suavemente a orbitar alrededor del astro
+      const targetPos = new THREE.Vector3(
+        currentAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
+        currentAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
+        currentAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
+      );
+      camera.position.lerp(targetPos, 0.008);
+
+      // Mirar al centro del astro
+      const m = new THREE.Matrix4().lookAt(camera.position, currentAstro.worldPos, new THREE.Vector3(0, 1, 0));
+      const q = new THREE.Quaternion().setFromRotationMatrix(m);
+      camera.quaternion.slerp(q, 0.012);
+      const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+      orientation.pitch = e.x; orientation.yaw = e.y;
+      targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
+    }
+  }
+
+  // 4. Dinámica de NAI 3D
+  if (nai3D.group) {
+    nai3D.pulseTime += delta;
+    const curAstro = astros[nai3D.currentIndex];
+    if (curAstro) {
+      const naiTarget = new THREE.Vector3(
+        curAstro.worldPos.x + Math.sin(nai3D.pulseTime * 0.8) * 1.8,
+        curAstro.worldPos.y + Math.cos(nai3D.pulseTime * 1.0) * 0.8,
+        curAstro.worldPos.z + 1.2
+      );
+      nai3D.group.position.lerp(naiTarget, 0.04);
+    }
+    nai3D.core.rotation.y += 0.02;
+    nai3D.outerHalo.rotation.y -= 0.025;
+    nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
+  }
+
+  // 5. Orientar anillos de Timonel hacia la cámara
+  astros.forEach(a => {
+    a.timonelRing.lookAt(camera.position);
+  });
+
+  // 6. Actualizar las 6 ecuaciones vivas en el silicio
+  dynamicUpdaters.forEach(fn => fn(delta));
+
+  updateOrbitalProximity();
+  renderer.render(scene, camera);
 }
 
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ── SÍNTESIS DE VOZ Y AUDIO ───────────────────────────────────────
+function enterCapsule(enableVoice) {
+  voiceGuideEnabled = enableVoice;
+  updateVoiceStatusUI();
+  const foyer = document.getElementById('foyer-screen');
+  foyer.style.opacity = '0';
+  setTimeout(() => foyer.classList.add('hidden'), 1000);
+  speakNai("Iniciando propulsión orbital. Explora el cosmos de ecuaciones a tu ritmo.");
+}
+
+function toggleVoiceGuide() {
+  voiceGuideEnabled = !voiceGuideEnabled;
+  if (!voiceGuideEnabled) stopNaiSpeech();
+  updateVoiceStatusUI();
+}
+
+function updateVoiceStatusUI() {
+  document.getElementById('voice-status-icon').textContent = voiceGuideEnabled ? '🔊' : '🔇';
+  document.getElementById('voice-status-text').textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
+}
+
+function speakNai(text) {
+  if (!voiceGuideEnabled || !('speechSynthesis' in window)) return;
+  stopNaiSpeech();
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'es-ES';
+  currentUtterance.rate = 0.94;
+  currentUtterance.pitch = 0.96;
+  const voices = window.speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es'));
+  if (esVoice) currentUtterance.voice = esVoice;
+  currentUtterance.onstart = () => {
+    isSpeaking = true;
+    document.getElementById('nai-voice-waves').classList.remove('hidden');
+  };
+  currentUtterance.onend = () => {
+    isSpeaking = false;
+    document.getElementById('nai-voice-waves').classList.add('hidden');
+  };
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopNaiSpeech() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  isSpeaking = false;
+  document.getElementById('nai-voice-waves').classList.add('hidden');
+}
+
+function toggleAudioGuide() {
+  if (currentFocusedAstro) {
+    speakNai(`Obra ${currentFocusedAstro.data.badge}. ${currentFocusedAstro.data.title}. ${currentFocusedAstro.data.hist} ${currentFocusedAstro.data.poem}`);
+  }
+}
+
+// ── OBTURADOR & CARRETE ───────────────────────────────────────────
 function triggerShutter() {
-  if (!shutterUnlocked) return;
-  if (userCameraRoll.length >= 30) {
-    alert('Has alcanzado el límite de 30 capturas gratuitas. Abre tu carrete para descargar el pack o liberar espacio.');
-    toggleCameraRoll();
-    return;
-  }
-
-  playShutterSound();
   const flash = document.getElementById('camera-flash');
   flash.classList.add('flashing');
   setTimeout(() => flash.classList.remove('flashing'), 100);
@@ -1305,13 +1030,13 @@ function triggerShutter() {
   const canvas = document.getElementById('webgl-canvas');
   const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
+  const title = currentFocusedAstro ? currentFocusedAstro.data.title : 'Observatorio Orbital';
   userCameraRoll.unshift({
     id: Date.now(),
-    artTitle: currentFocusedAnomaly.data.title,
+    artTitle: title,
     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     img: dataUrl
   });
-
   updateRollUI();
 }
 
@@ -1350,135 +1075,17 @@ function updateRollUI() {
 }
 
 function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => item.id !== id); updateRollUI(); }
-function clearCameraRoll() { if (confirm('¿Vaciar todas las fotos de tu carrete?')) { userCameraRoll = []; updateRollUI(); } }
+function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll = []; updateRollUI(); } }
 function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
 function toggleShop() { document.getElementById('shop-drawer').classList.toggle('translate-x-full'); }
 
 function orderPhysical(title, price) {
-  const msg = encodeURIComponent(`Hola Matías! Quiero encargar el cuadro físico de "${title}" ($${price.toLocaleString()} CLP). ¿Cómo coordinamos el abono del 50% y la entrega?`);
+  const msg = encodeURIComponent(`Hola Matías! Quiero encargar el cuadro físico de "${title}" ($${price.toLocaleString()} CLP). ¿Cómo coordinamos el abono y la entrega?`);
   window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
 }
 
-// ── BUCLE DE ANIMACIÓN PRINCIPAL (CATEDRAL DE GEODÉSICAS) ──────────
-let prevTime = performance.now();
-
-function animate() {
-  requestAnimationFrame(animate);
-
-  const time = performance.now();
-  const delta = (time - prevTime) / 1000;
-  prevTime = time;
-
-  // 1. Inclinación Orgánica (Lean Parallax)
-  lean.currentX += (lean.targetX - lean.currentX) * 0.08;
-  lean.currentY += (lean.targetY - lean.currentY) * 0.08;
-  lean.roll = -lean.currentX * 0.018; // Alabeo orgánico de torso (1 grado)
-
-  // 2. Rotación de cabeza con inercia
-  currentEuler.x += (targetEuler.x - currentEuler.x) * 0.10;
-  currentEuler.y += (targetEuler.y - currentEuler.y) * 0.10;
-  camera.quaternion.setFromEuler(currentEuler);
-  camera.rotation.z = lean.roll; // Añadir el roll de inclinación
-
-  // 3. Temporizador de inercia y Atractor Cinético de NAI
-  if (!isContemplating) {
-    userIdleTimer += delta;
-
-    // Si el usuario está inactivo por más de 2.2s, NAI toma suavemente el control
-    if (userIdleTimer > 2.2 && !isInteracting) {
-      const curAnomaly = anomalies[nai3D.currentIndex];
-      if (curAnomaly) {
-        // Desplazamiento cinematográfico continuo hacia la vista óptima
-        camera.position.lerp(curAnomaly.viewPos, 0.012);
-        
-        // Orientación suave hacia la anomalía
-        const targetLook = new THREE.Vector3(curAnomaly.worldPos.x, curAnomaly.worldPos.y, curAnomaly.worldPos.z);
-        const m = new THREE.Matrix4().lookAt(camera.position, targetLook, new THREE.Vector3(0, 1, 0));
-        const q = new THREE.Quaternion().setFromRotationMatrix(m);
-        camera.quaternion.slerp(q, 0.014);
-        currentEuler.setFromQuaternion(camera.quaternion, 'YXZ');
-        targetEuler.copy(currentEuler);
-      }
-    }
-
-    checkAnomalyProximity();
-  }
-
-  // 4. Dinámica de NAI 3D en el Espacio
-  if (nai3D.group) {
-    nai3D.pulseTime += delta;
-
-    // Desplazamiento suave de NAI hacia su objetivo
-    const curAnomaly = anomalies[nai3D.currentIndex];
-    if (curAnomaly) {
-      const targetNaiPos = new THREE.Vector3(
-        curAnomaly.worldPos.x + Math.sin(nai3D.pulseTime * 0.7) * 1.2,
-        curAnomaly.worldPos.y + 0.4 + Math.cos(nai3D.pulseTime * 1.1) * 0.2,
-        curAnomaly.worldPos.z + 0.8
-      );
-      nai3D.group.position.lerp(targetNaiPos, 0.03);
-    }
-
-    // Rotación del núcleo y halo cuántico
-    nai3D.core.rotation.y += 0.015;
-    nai3D.core.rotation.x += 0.01;
-    nai3D.outerHalo.rotation.y -= 0.02;
-    nai3D.outerHalo.rotation.z += 0.012;
-
-    // Pulso lumínico
-    const pulseFactor = 1.0 + Math.sin(nai3D.pulseTime * 3.0) * 0.25;
-    nai3D.light.intensity = 1.8 * pulseFactor;
-
-    // Fotones orbitales
-    if (nai3D.orbitingPhotons) {
-      const pArr = nai3D.orbitingPhotons.geometry.attributes.position.array;
-      for (let p = 0; p < 6; p++) {
-        const ang = nai3D.pulseTime * 2.2 + (p * Math.PI / 3);
-        const rad = 0.55 + Math.sin(ang * 2) * 0.08;
-        pArr[p * 3]     = Math.cos(ang) * rad;
-        pArr[p * 3 + 1] = Math.sin(ang * 1.5) * 0.22;
-        pArr[p * 3 + 2] = Math.sin(ang) * rad;
-      }
-      nai3D.orbitingPhotons.geometry.attributes.position.needsUpdate = true;
-    }
-  }
-
-  // 5. Difusión Browniana de Polvo en Suspensión
-  if (dustSystem) {
-    for (let i = 0; i < DUST_COUNT; i++) {
-      dustPosArray[i * 3 + 1] += Math.sin(time * 0.001 + i) * 0.0015;
-      if (dustPosArray[i * 3 + 1] > 6.0) dustPosArray[i * 3 + 1] = 0.3;
-    }
-    dustSystem.geometry.attributes.position.needsUpdate = true;
-  }
-
-  // 6. Orientar cartelas holográficas hacia la cámara
-  anomalies.forEach(a => {
-    a.plaque.lookAt(camera.position);
-  });
-
-  // 7. Actualizar hologramas 3D
-  hologramUpdaters.forEach(fn => fn(delta));
-
-  renderer.render(scene, camera);
-}
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// Clic para entrar en contemplación al mirar una anomalía
-window.addEventListener('click', (e) => {
-  if (isContemplating) return;
-  if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #roll-drawer, #shop-drawer')) return;
-  if (currentFocusedAnomaly) enterContemplation(currentFocusedAnomaly);
-});
-
-// Inicializar al cargar el DOM
 window.addEventListener('DOMContentLoaded', () => {
-  init3D();
+  initOrbitalSpace();
 });
 </script>
 </body>

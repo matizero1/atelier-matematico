@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Atelier Matemático — Museo 3D en Penumbra</title>
+<title>Atelier Matemático — Museo 3D con NAI Concierge</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #050508;
-    --card: rgba(12, 12, 20, 0.88);
-    --border: rgba(180, 140, 255, 0.15);
+    --card: rgba(12, 12, 22, 0.90);
+    --border: rgba(168, 85, 247, 0.2);
+    --accent: #8b5cf6;
   }
   body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -41,15 +42,29 @@
   }
   .flashing { opacity: 0.9 !important; transition: opacity 0.04s ease-in !important; }
 
-  /* Mira o puntero sutil en el centro */
+  /* Animación de flotación de NAI */
+  @keyframes hoverFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(0.5deg); }
+  }
+  .nai-hover { animation: hoverFloat 4s ease-in-out infinite; }
+
+  /* Ondas de voz de NAI al hablar */
+  @keyframes soundWave {
+    0%, 100% { height: 4px; }
+    50% { height: 16px; }
+  }
+  .sound-bar { animation: soundWave 0.8s ease-in-out infinite; }
+
+  /* Retícula de puntero suave */
   #reticle {
     position: fixed; top: 50%; left: 50%; width: 6px; height: 6px;
     background: rgba(255,255,255,0.4); border-radius: 50%;
     transform: translate(-50%, -50%); z-index: 20; pointer-events: none;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   #reticle.active {
-    width: 32px; height: 32px; background: rgba(139, 92, 246, 0.15);
+    width: 36px; height: 36px; background: rgba(139, 92, 246, 0.15);
     border: 1px solid rgba(168, 85, 247, 0.7);
   }
 
@@ -60,37 +75,112 @@
 </head>
 <body>
 
-<!-- FLASH DE CÁMARA -->
+<!-- FLASH DE CÁMARA FOTOGRÁFICA -->
 <div id="camera-flash"></div>
 
-<!-- RETÍCULA DE APUNTADO EN PRIMERA PERSONA -->
+<!-- RETÍCULA DE APUNTADO -->
 <div id="reticle"></div>
 
-<!-- CANVAS WEBGL PRINCIPAL -->
+<!-- CANVAS PRINCIPAL 3D -->
 <canvas id="webgl-canvas"></canvas>
 
 <!-- ========================================================================= -->
-<!-- HUD SUPERIOR PERMANENTE                                                   -->
+<!-- ACTO 1: BOLETERÍA & FOYER DE BIENVENIDA (NAI CONCIERGE)                   -->
 <!-- ========================================================================= -->
-<header class="fixed top-0 left-0 right-0 z-30 py-4 px-6 md:px-10 flex justify-between items-center pointer-events-none">
+<div id="foyer-screen" class="fixed inset-0 z-50 bg-[#04020c] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-700">
+  
+  <!-- Encabezado de la Boletería -->
+  <div class="flex justify-between items-center max-w-6xl w-full mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/25">
+        <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">🏛️</div>
+      </div>
+      <div>
+        <span class="serif tracking-[.25em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
+        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Boletería Soberana · Santiago de Chile</span>
+      </div>
+    </div>
+
+    <!-- Indicador de Acceso Libre -->
+    <div class="glass px-3.5 py-1 rounded-full text-xs mono text-cyan-300 border-cyan-500/30">
+      Entrada Universal · Libre & Gratuita
+    </div>
+  </div>
+
+  <!-- NAI en el Podio de Entrada -->
+  <div class="max-w-4xl w-full mx-auto my-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
+    <!-- Imagen del Podio de NAI -->
+    <div class="w-64 md:w-80 relative shrink-0">
+      <div class="absolute -inset-4 bg-purple-600/20 rounded-full blur-2xl pointer-events-none"></div>
+      <img src="assets/nai_foyer.jpg" alt="NAI Concierge" class="w-full rounded-2xl shadow-2xl border border-purple-500/30 nai-hover" />
+      <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-full text-[10px] mono text-cyan-300 border-cyan-500/30 flex items-center gap-1.5 whitespace-nowrap">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+        NAI · Curadora Soberana
+      </div>
+    </div>
+
+    <!-- Mensaje de Bienvenida de NAI -->
+    <div class="flex-1 text-center md:text-left">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
+        Protocolo de Admisión
+      </div>
+      <h1 class="text-3xl md:text-4xl serif font-bold text-white mb-4 leading-tight">
+        "Bienvenido al templo donde la física<br>
+        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">se convierte en materia y luz."</span>
+      </h1>
+      <p class="text-sm text-slate-300 font-light leading-relaxed mb-6">
+        Soy <strong>NAI</strong>, tu guía a través de las galerías en penumbra. Aquí dentro, cada vitrina alberga un holograma matemático que late en tiempo real. Camina despacio, contempla en silencio y cuando una fórmula toque una fibra en ti, dispara tu cámara para capturar ese instante irrepetible.
+      </p>
+
+      <!-- Preferencia de Audio-Guía -->
+      <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
+        <button onclick="enterMuseum(true)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-6 py-3 rounded-full font-medium transition shadow-lg shadow-purple-600/30 flex items-center gap-2">
+          <span>🔊</span>
+          <span>Ingresar con NAI como Audio-Guía</span>
+        </button>
+
+        <button onclick="enterMuseum(false)" class="glass hover:bg-white/10 text-slate-300 text-xs px-5 py-3 rounded-full mono transition">
+          🔇 Ingresar en Silencio (Solo Lectura)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de la Boletería -->
+  <div class="text-center text-[11px] mono text-slate-500 max-w-xl mx-auto">
+    Fundado y desarrollado por Matías Cortés Figueroa · Silicio Nativo · 24 Capítulos de la Ciencia
+  </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- HUD SUPERIOR PERMANENTE DEL MUSEO                                         -->
+<!-- ========================================================================= -->
+<header class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex justify-between items-center pointer-events-none">
   <div class="flex items-center gap-3 pointer-events-auto">
     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
       <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">🏛️</div>
     </div>
     <div>
       <span class="serif tracking-[.25em] text-white text-xs md:text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Museo en Penumbra · Vitrinas Holográficas</span>
+      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Galería en Penumbra · Vitrinas Holográficas</span>
     </div>
   </div>
 
-  <!-- HUD CENTRAL: GUÍA DE MOVIMIENTO -->
+  <!-- GUÍA DE DESPLAZAMIENTO FLUIDO -->
   <div id="controls-hint" class="hidden md:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-white/10 text-[11px] mono text-slate-300 pointer-events-auto">
-    <span class="text-cyan-400 font-bold">W, A, S, D</span> o <span class="text-cyan-400 font-bold">Flechas</span> para caminar · Arrastra para mirar
+    <span class="text-cyan-400">Mantén clic o rueda para deslizarte suavemente hacia donde miras</span>
   </div>
 
   <!-- DERECHA: CARRETE & TIENDA -->
   <div class="flex items-center gap-2.5 pointer-events-auto">
-    <!-- Botón Carrete Fotográfico -->
+    <!-- Botón Toggle Voz de NAI -->
+    <button id="btn-global-voice-toggle" onclick="toggleVoiceGuide()" class="glass hover:bg-white/10 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 border-purple-500/20">
+      <span id="voice-status-icon">🔊</span>
+      <span id="voice-status-text" class="text-slate-300 text-[11px]">Voz Activa</span>
+    </button>
+
+    <!-- Botón Carrete -->
     <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2 group">
       <span>📷</span>
       <span class="hidden sm:inline">Mi Carrete</span>
@@ -106,24 +196,68 @@
 </header>
 
 <!-- ========================================================================= -->
-<!-- PROMPT DE INTERACCIÓN AL ACERCARSE A UNA VITRINA                           -->
+<!-- COMPAÑERA FLOTANTE DE NAI (CONCIERGE WIDGET EN PANTALLA)                  -->
 <!-- ========================================================================= -->
-<div id="approach-prompt" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 transition-opacity duration-300">
-  <div class="glass px-6 py-2.5 rounded-full border-purple-500/40 shadow-2xl flex items-center gap-3 text-xs mono">
-    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-    <span id="approach-title" class="font-bold text-white uppercase tracking-wider">OBRA ENFOCADA</span>
-    <span class="text-slate-400">·</span>
-    <span class="text-purple-300">Presiona <kbd class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">ESPACIO</kbd> o Haz Clic para Contemplar</span>
+<div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-sm">
+  <div class="glass p-3 rounded-2xl border-purple-500/30 shadow-2xl flex items-start gap-3 relative">
+    
+    <!-- Mini Avatar Flotante de NAI -->
+    <div class="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 bg-black/60 relative">
+      <img src="assets/nai_avatar.png" alt="NAI" class="w-full h-full object-cover scale-125" />
+      <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-cyan-400 border border-black animate-pulse"></span>
+    </div>
+
+    <!-- Diálogo Dinámico de NAI -->
+    <div class="flex-1 min-w-0">
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-[11px] font-bold serif text-purple-300">NAI · Audio-Guía</span>
+        <!-- Ondas de voz si está hablando -->
+        <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-4">
+          <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0s"></span>
+          <span class="w-1 bg-purple-400 sound-bar" style="animation-delay:0.2s"></span>
+          <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0.4s"></span>
+        </div>
+      </div>
+      <p id="nai-dialogue-text" class="text-xs text-slate-300 leading-snug font-light">
+        Camina hacia cualquier vitrina en penumbra. Me acercaré contigo para contarte la verdad tras cada ecuación.
+      </p>
+
+      <!-- Chips de Preguntas Rápidas a NAI -->
+      <div class="flex flex-wrap gap-1.5 mt-2.5 pt-2 border-t border-white/5">
+        <button onclick="askNai('tienda')" class="text-[10px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
+          ¿Dónde está la tienda?
+        </button>
+        <button onclick="askNai('riemann')" class="text-[10px] mono text-cyan-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
+          Guíame a Riemann
+        </button>
+        <button onclick="askNai('lorenz')" class="text-[10px] mono text-amber-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 transition">
+          Guíame a Lorenz
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- MODO CONTEMPLACIÓN EN PRIMER PLANO (DETALLE EDITORIAL + DISPARADOR)        -->
+<!-- PROMPT DE INTERACCIÓN AL ENFOCAR UNA VITRINA                              -->
+<!-- ========================================================================= -->
+<div id="approach-prompt" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 pointer-events-none opacity-0 transition-opacity duration-300">
+  <div class="glass px-6 py-2.5 rounded-full border-purple-500/40 shadow-2xl flex items-center gap-3 text-xs mono">
+    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+    <span id="approach-title" class="font-bold text-white uppercase tracking-wider">OBRA ENFOCADA</span>
+    <span class="text-slate-400">·</span>
+    <span class="text-purple-300">Haz Clic o presiona <kbd class="px-2 py-0.5 rounded bg-white/10 text-white font-bold">ESPACIO</kbd> para Contemplar</span>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODO CONTEMPLACIÓN EN PRIMER PLANO (TARJETA EDITORIAL + NAI NARRADORA)     -->
 <!-- ========================================================================= -->
 <div id="contemplation-modal" class="fixed inset-0 z-40 bg-black/85 backdrop-blur-md p-6 md:p-12 flex justify-end items-center hidden transition-opacity duration-500">
   
   <!-- Tarjeta Editorial Flotante a la Derecha -->
-  <div class="w-full max-w-lg glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/15 relative overflow-hidden shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+  <div class="w-full max-w-lg glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/15 relative overflow-hidden shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
     <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
     <div>
@@ -133,16 +267,33 @@
       </div>
 
       <h2 id="modal-title" class="text-2xl md:text-3xl serif font-bold text-white mb-1">El Vuelo de Lorenz</h2>
-      <p id="modal-sub" class="text-xs text-purple-300/70 mono mb-5">El aleteo que gobierna el infinito</p>
+      <p id="modal-sub" class="text-xs text-purple-300/70 mono mb-4">El aleteo que gobierna el infinito</p>
+
+      <!-- BOTÓN DE AUDIO-GUÍA DE NAI EN LA OBRA -->
+      <div class="glass p-3 rounded-xl mb-4 border-cyan-500/20 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg overflow-hidden border border-cyan-400/40 shrink-0">
+            <img src="assets/nai_avatar.png" class="w-full h-full object-cover scale-125" />
+          </div>
+          <div>
+            <div class="text-[11px] font-bold text-white">Audio-Guía de NAI</div>
+            <div class="text-[9px] text-cyan-300 mono" id="audio-guide-status">Pausada</div>
+          </div>
+        </div>
+        <button id="btn-play-narration" onclick="toggleArtworkNarration()" class="bg-purple-600/40 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg mono transition flex items-center gap-1.5">
+          <span id="narration-btn-icon">▶</span>
+          <span id="narration-btn-text">Escuchar Relato</span>
+        </button>
+      </div>
 
       <!-- Ecuación -->
-      <div class="bg-black/50 rounded-xl p-3.5 border border-white/10 mb-5">
+      <div class="bg-black/50 rounded-xl p-3.5 border border-white/10 mb-4">
         <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
         <div id="modal-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
       </div>
 
       <!-- Origen Histórico -->
-      <div class="mb-5">
+      <div class="mb-4">
         <h3 class="text-xs uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
         </h3>
@@ -150,7 +301,7 @@
       </div>
 
       <!-- Interpretación Poética -->
-      <div class="mb-6">
+      <div class="mb-5">
         <h3 class="text-xs uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
         </h3>
@@ -159,13 +310,13 @@
     </div>
 
     <!-- OBTURADOR RITUAL CON TEMPORIZADOR OBLIGATORIO -->
-    <div class="pt-4 border-t border-white/10 flex flex-col gap-3">
+    <div class="pt-3 border-t border-white/10 flex flex-col gap-2.5">
       <div id="shutter-timer-badge" class="glass px-3 py-1 rounded-full text-[10px] mono text-purple-300/80 flex items-center justify-center gap-2">
         <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
         <span id="shutter-countdown-text">Contempla la obra... (10s para calibrar obturador)</span>
       </div>
 
-      <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white py-3 rounded-xl font-mono text-xs flex items-center justify-center gap-2.5 transition-all transform border border-purple-400/30">
+      <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white py-2.5 rounded-xl font-mono text-xs flex items-center justify-center gap-2.5 transition-all transform border border-purple-400/30">
         <div class="w-3.5 h-3.5 rounded-full border-2 border-white flex items-center justify-center p-[1px]">
           <div class="w-full h-full bg-red-500 rounded-full"></div>
         </div>
@@ -181,7 +332,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- DRAWER: CARRETE DE FOTOS (FOTOGRAFÍAS CAPTURADAS POR EL USUARIO)           -->
+<!-- DRAWERS: CARRETE DE FOTOS & TIENDA FÍSICA                                 -->
 <!-- ========================================================================= -->
 <div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
   <div>
@@ -203,7 +354,7 @@
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
       <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
         Aún no has tomado fotografías.<br>
-        Camina hasta una vitrina, contempla de cerca y dispara el obturador cuando el instante sea perfecto.
+        Camina hasta una vitrina, escucha a NAI y dispara el obturador cuando el instante sea perfecto.
       </div>
     </div>
   </div>
@@ -211,11 +362,11 @@
   <div class="pt-4 border-t border-white/10 space-y-2">
     <div class="text-[11px] mono text-slate-400 text-center mb-1">Descarga tus fotos en Ultra HD (4K):</div>
     <div class="grid grid-cols-2 gap-2">
-      <button onclick="alert('Redirigiendo a checkout seguro de $5 USD por 10 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+      <button onclick="alert('Redirigiendo a checkout de $5 USD por 10 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
         <div class="font-bold text-sm text-cyan-300">$5 USD</div>
         <div class="text-[10px] mono text-slate-300">Pack 10 Fotos 4K</div>
       </button>
-      <button onclick="alert('Redirigiendo a checkout seguro de $10 USD por 25 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+      <button onclick="alert('Redirigiendo a checkout de $10 USD por 25 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
         <div class="font-bold text-sm text-amber-300">$10 USD</div>
         <div class="text-[10px] mono text-slate-300">Pack 25 Fotos 4K</div>
       </button>
@@ -226,9 +377,6 @@
   </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- DRAWER: TIENDA DE CUADROS FÍSICOS (EDICIÓN DEL AUTOR)                    -->
-<!-- ========================================================================= -->
 <div id="shop-drawer" class="fixed inset-y-0 right-0 w-full max-w-lg bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl overflow-y-auto">
   <div>
     <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
@@ -253,7 +401,6 @@
       </div>
     </div>
 
-    <!-- Lista de Obras Físicas -->
     <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-1">
       <div class="glass p-3 rounded-xl flex gap-3 items-center">
         <div class="w-14 h-14 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
@@ -295,10 +442,10 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- MOTOR 3D PROCEDURAL EN THREE.JS (MUSEO, ILUMINACIÓN & HOLOGRAMAS)          -->
+<!-- JAVASCRIPT: MOTOR 3D, NAVEGACIÓN POR MIRADA, AUDIO-GUÍA TTS DE NAI       -->
 <!-- ========================================================================= -->
 <script>
-// Metadatos de las 6 Vitrinas Principales
+// Metadatos de Vitrinas
 const EXHIBITS_DATA = [
   {
     id: 0,
@@ -308,8 +455,8 @@ const EXHIBITS_DATA = [
     cat: "TEORÍA DEL CAOS · 1963",
     solver: "Runge-Kutta 4",
     eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
-    hist: "En el invierno de 1963, Edward Lorenz introdujo doce ecuaciones climáticas en su computadora y redondeó tres decimales para ir por un café. Aquella millonésima de diferencia desató un tornado y demostró que sistemas perfectamente deterministas pueden ser eternamente impredecibles.",
-    poem: '"Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el tejido del universo."'
+    hist: "En el invierno de 1963, Edward Lorenz introdujo doce ecuaciones climáticas en su computadora y redondeó tres decimales para ir por un café. Aquella millonésima de diferencia demostró que el universo es matemáticamente determinista pero humanamente impredecible.",
+    poem: 'Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el tejido del universo.'
   },
   {
     id: 1,
@@ -320,7 +467,7 @@ const EXHIBITS_DATA = [
     solver: "Helmholtz Nodal Wave",
     eq: "w(x,y) = sin(nπx/L)sin(mπy/L) - sin(mπx/L)sin(nπy/L) = 0",
     hist: "En 1787, Ernst Chladni pasó un arco de violín por el borde de una placa de bronce con arena fina. El sonido expulsó violentamente los granos de las zonas en vibración hacia las líneas nodales de reposo, revelando mandalas simétricos sagrados.",
-    poem: '"El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la materia del mundo descanse en geometría sagrada."'
+    poem: 'El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la materia del mundo descanse en geometría sagrada.'
   },
   {
     id: 2,
@@ -331,7 +478,7 @@ const EXHIBITS_DATA = [
     solver: "Riemann-Siegel Critical Spiral",
     eq: "ζ(s) = ∑ 1/nˢ = 0  ⇒  Re(s) = 1/2\nZ(t) cruza el origen exactamente en t₁, t₂, t₃...",
     hist: "En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales de su función Zeta yacen sobre la línea crítica Re(s)=1/2. Es el problema de un millón de dólares más codiciado del planeta: de su verdad depende el secreto íntimo de los números primos.",
-    poem: '"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."'
+    poem: 'Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo.'
   },
   {
     id: 3,
@@ -342,7 +489,7 @@ const EXHIBITS_DATA = [
     solver: "Perelman Metric Smoothing S³",
     eq: "∂g_ij/∂t = -2 R_ij\nDeformación métrica continua hacia la esfera S³",
     hist: "Henri Poincaré planteó en 1904 su conjetura sobre la esfera tridimensional. En 2002, el ermitaño ruso Grigori Perelman la resolvió usando el Flujo de Ricci para alisar las arrugas del espacio, y luego rechazó la Medalla Fields y el millón de dólares.",
-    poem: '"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."'
+    poem: 'El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera.'
   },
   {
     id: 4,
@@ -353,7 +500,7 @@ const EXHIBITS_DATA = [
     solver: "Stereographic S³→R³ Projection",
     eq: "π: S³ → S²\nFibras: círculos entrelazados en R³",
     hist: "Heinz Hopf demostró en 1931 que la esfera de cuatro dimensiones puede descomponerse en infinitos círculos que se entrelazan sin cortarse jamás, proyectando sobre nuestra realidad una flor geométrica imposible en 3D.",
-    poem: '"Hay dimensiones que no podemos ver pero cuya sombra, cuando cae sobre nuestra realidad, es la forma más hermosa que jamás imaginamos."'
+    poem: 'Hay dimensiones que no podemos ver pero cuya sombra, cuando cae sobre nuestra realidad, es la forma más hermosa que jamás imaginamos.'
   },
   {
     id: 5,
@@ -364,76 +511,176 @@ const EXHIBITS_DATA = [
     solver: "Vortex Filament Stretching",
     eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u\n¿Puede la vorticidad ω explotar a infinito?",
     hist: "Las ecuaciones de Navier y Stokes gobiernan el agua y el aire. El Instituto Clay ofrece $1.000.000 USD a quien demuestre si un fluido en calma puede concentrar tanta energía que su velocidad explote a infinito.",
-    poem: '"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."'
+    poem: 'Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares.'
   }
 ];
 
-// ── VARIABLES PRINCIPALES THREE.JS ────────────────────────────────
+// Variables Three.js
 let scene, camera, renderer;
 let vitrines = [];
 let hologramUpdaters = [];
 
-// Control de cámara en primera persona
-let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-let cameraVelocity = new THREE.Vector3();
-let cameraDirection = new THREE.Vector3();
-let isPointerLocked = false;
-let euler = new THREE.Euler(0, 0, 0, 'YXZ');
+// Movimiento orgánico por mirada (Gaze-directed stroll)
+let isGliding = false;
+let glideVelocity = 0;
+let targetLookDirection = new THREE.Vector2();
+let currentLookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+let targetLookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+let isDraggingLook = false;
+let previousMousePos = { x: 0, y: 0 };
 
-// Estado de contemplación y enfoque
+// Estado de interacción
 let currentFocusedVitrine = null;
 let isContemplating = false;
-let targetCameraPos = new THREE.Vector3();
-let targetCameraLook = new THREE.Vector3();
-
-// Carrete y ritual
 let userCameraRoll = [];
+let voiceGuideEnabled = true;
+let isSpeaking = false;
+let currentUtterance = null;
+
+// Ritual del Obturador
 let shutterUnlocked = false;
 let contemplationTimeLeft = 10;
 let shutterTimerInterval = null;
 
-// ── GENERADOR DE TEXTURA PROCEDURAL: SUELO DE MADERA DE MUSEO ──────
+// ── BOLETERÍA & INGRESO AL MUSEO ──────────────────────────────────
+function enterMuseum(enableVoice) {
+  voiceGuideEnabled = enableVoice;
+  updateVoiceStatusUI();
+
+  const foyer = document.getElementById('foyer-screen');
+  foyer.style.opacity = '0';
+  setTimeout(() => foyer.classList.add('hidden'), 700);
+
+  // NAI da la primera indicación
+  speakNai("Entrando a las galerías en penumbra. Mantén presionado el clic o la rueda para deslizarte suavemente hacia donde mires.");
+}
+
+function toggleVoiceGuide() {
+  voiceGuideEnabled = !voiceGuideEnabled;
+  if (!voiceGuideEnabled) {
+    stopNaiSpeech();
+  }
+  updateVoiceStatusUI();
+}
+
+function updateVoiceStatusUI() {
+  document.getElementById('voice-status-icon').textContent = voiceGuideEnabled ? '🔊' : '🔇';
+  document.getElementById('voice-status-text').textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
+}
+
+// ── SÍNTESIS DE VOZ DE NAI (WEB SPEECH API NATIVA) ─────────────────
+function speakNai(text, onEndCallback) {
+  if (!voiceGuideEnabled || !('speechSynthesis' in window)) return;
+  stopNaiSpeech();
+
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'es-ES';
+  currentUtterance.rate = 0.94; // Pacing pausado y sobrio
+  currentUtterance.pitch = 0.95;
+
+  // Buscar voz en español
+  const voices = window.speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Monica') || v.name.includes('Paulina')));
+  if (esVoice) currentUtterance.voice = esVoice;
+
+  currentUtterance.onstart = () => {
+    isSpeaking = true;
+    document.getElementById('nai-voice-waves').classList.remove('hidden');
+  };
+
+  currentUtterance.onend = () => {
+    isSpeaking = false;
+    document.getElementById('nai-voice-waves').classList.add('hidden');
+    if (onEndCallback) onEndCallback();
+  };
+
+  currentUtterance.onerror = () => {
+    isSpeaking = false;
+    document.getElementById('nai-voice-waves').classList.add('hidden');
+  };
+
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopNaiSpeech() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  document.getElementById('nai-voice-waves').classList.add('hidden');
+}
+
+// Diálogo interactivo rápido con NAI
+function askNai(topic) {
+  if (topic === 'tienda') {
+    const txt = "La tienda de cuadros físicos está disponible en cualquier momento en el botón superior. Cada cuadro se fabrica a pedido en Santiago con paspartú y papel de algodón.";
+    document.getElementById('nai-dialogue-text').textContent = txt;
+    speakNai(txt);
+  } else if (topic === 'riemann') {
+    const txt = "Los Ceros de Riemann están en la vitrina 21, al costado izquierdo del pasillo. Es el problema de un millón de dólares sobre los números primos.";
+    document.getElementById('nai-dialogue-text').textContent = txt;
+    speakNai(txt);
+    smoothGlideToVitrine(2);
+  } else if (topic === 'lorenz') {
+    const txt = "El Vuelo de Lorenz está en la vitrina 01. Es la primera sala a tu izquierda, donde nació el efecto mariposa en 1963.";
+    document.getElementById('nai-dialogue-text').textContent = txt;
+    speakNai(txt);
+    smoothGlideToVitrine(0);
+  }
+}
+
+function smoothGlideToVitrine(idx) {
+  const v = vitrines[idx];
+  if (!v) return;
+  const targetZ = v.worldPos.z + 2.0;
+  const targetX = v.isLeft ? -1.8 : 1.8;
+  
+  // Interpolación de posición de cámara
+  let t = 0;
+  const startPos = camera.position.clone();
+  const endPos = new THREE.Vector3(targetX, 1.7, targetZ);
+
+  function glideStep() {
+    t += 0.02;
+    camera.position.lerpVectors(startPos, endPos, t);
+    camera.lookAt(v.worldPos.x, 1.8, v.worldPos.z);
+    currentLookEuler.setFromQuaternion(camera.quaternion, 'YXZ');
+    targetLookEuler.copy(currentLookEuler);
+    if (t < 1) requestAnimationFrame(glideStep);
+  }
+  glideStep();
+}
+
+// ── TEXTURA DE MADERA PROCEDURAL (SUELO DE MUSEO EN PENUMBRA) ──────
 function createMuseumWoodTexture() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 1024;
   const cx = c.getContext('2d');
-  
-  // Fondo madera cálida oscura (como la foto de referencia)
-  cx.fillStyle = '#1c130c';
-  cx.fillRect(0, 0, 1024, 1024);
+  cx.fillStyle = '#1c130c'; cx.fillRect(0, 0, 1024, 1024);
 
-  // Tablones de parquet con vetas
-  const numPlanks = 16;
-  const plankH = 1024 / numPlanks;
+  const numPlanks = 16, plankH = 1024 / numPlanks;
   for (let i = 0; i < numPlanks; i++) {
-    const y = i * plankH;
-    const tone = 20 + Math.random() * 15;
+    const y = i * plankH, tone = 20 + Math.random() * 14;
     cx.fillStyle = `rgb(${tone * 1.5 | 0}, ${tone | 0}, ${tone * 0.6 | 0})`;
     cx.fillRect(0, y, 1024, plankH - 3);
 
-    // Vetas sutiles
-    cx.strokeStyle = 'rgba(0,0,0,0.18)';
-    cx.lineWidth = 1;
+    cx.strokeStyle = 'rgba(0,0,0,0.18)'; cx.lineWidth = 1;
     for (let k = 0; k < 6; k++) {
       cx.beginPath();
       cx.moveTo(0, y + Math.random() * plankH);
       cx.bezierCurveTo(340, y + Math.random() * plankH, 680, y + Math.random() * plankH, 1024, y + Math.random() * plankH);
       cx.stroke();
     }
-
-    // Separación entre tablones
-    cx.fillStyle = '#060402';
-    cx.fillRect(0, y + plankH - 3, 1024, 3);
+    cx.fillStyle = '#060402'; cx.fillRect(0, y + plankH - 3, 1024, 3);
   }
 
   const texture = new THREE.CanvasTexture(c);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
+  texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 12);
   return texture;
 }
 
-// ── INICIALIZACIÓN DE LA ESCENA 3D ────────────────────────────────
+// ── INICIALIZACIÓN THREE.JS ───────────────────────────────────────
 function init3D() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
@@ -441,7 +688,7 @@ function init3D() {
   scene.fog = new THREE.FogExp2(0x06060a, 0.04);
 
   camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 1.7, 12); // Ojos del visitante a 1.7m de altura
+  camera.position.set(0, 1.7, 12);
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -450,111 +697,63 @@ function init3D() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   buildMuseumArchitecture();
-  setupControls();
+  setupGazeStrollControls();
   window.addEventListener('resize', onWindowResize);
   animate();
 }
 
-// ── CONSTRUCCIÓN DE LA ARQUITECTURA DEL MUSEO ──────────────────────
 function buildMuseumArchitecture() {
-  // 1. Suelo de madera de galería
+  // 1. Suelo de madera
   const woodTexture = createMuseumWoodTexture();
   const floorGeo = new THREE.PlaneGeometry(12, 60);
-  const floorMat = new THREE.MeshStandardMaterial({
-    map: woodTexture,
-    roughness: 0.35,
-    metalness: 0.1
-  });
+  const floorMat = new THREE.MeshStandardMaterial({ map: woodTexture, roughness: 0.35, metalness: 0.1 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true;
   scene.add(floor);
 
-  // 2. Techo con iluminación perimetral cálida (como en la foto del museo)
+  // 2. Cielo terracota cálido con iluminación perimetral
   const ceilingGeo = new THREE.PlaneGeometry(12, 60);
-  const ceilingMat = new THREE.MeshStandardMaterial({
-    color: 0x1f120c, // Terracota oscuro arquitectónico
-    roughness: 0.8,
-    metalness: 0.05
-  });
+  const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x1f120c, roughness: 0.8 });
   const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
-  ceiling.position.y = 4.2;
-  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.y = 4.2; ceiling.rotation.x = Math.PI / 2;
   scene.add(ceiling);
 
-  // Luz ambiente muy tenue para mantener la penumbra
   const ambientLight = new THREE.AmbientLight(0x221a28, 0.6);
   scene.add(ambientLight);
 
-  // Tira de luz LED cálida escondida en el cielo
-  const coveLight = new THREE.DirectionalLight(0xff7733, 0.4);
+  const coveLight = new THREE.DirectionalLight(0xff7733, 0.35);
   coveLight.position.set(0, 4.0, 0);
   scene.add(coveLight);
 
-  // 3. Muros arquitectónicos laterales negros mate con nichos empotrados
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: 0x0c0c12, // Carbón negro mate profundo
-    roughness: 0.9,
-    metalness: 0.1
-  });
-
-  // Muro izquierdo y derecho
+  // 3. Muros carbón negro mate
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x0c0c12, roughness: 0.9, metalness: 0.1 });
   const wallGeo = new THREE.BoxGeometry(0.8, 4.5, 60);
-  const leftWall = new THREE.Mesh(wallGeo, wallMat);
-  leftWall.position.set(-4.5, 2.1, 0);
-  scene.add(leftWall);
+  
+  const leftWall = new THREE.Mesh(wallGeo, wallMat); leftWall.position.set(-4.5, 2.1, 0); scene.add(leftWall);
+  const rightWall = new THREE.Mesh(wallGeo, wallMat); rightWall.position.set(4.5, 2.1, 0); scene.add(rightWall);
 
-  const rightWall = new THREE.Mesh(wallGeo, wallMat);
-  rightWall.position.set(4.5, 2.1, 0);
-  scene.add(rightWall);
-
-  // Pared del fondo
   const backWallGeo = new THREE.BoxGeometry(12, 4.5, 0.8);
-  const backWall = new THREE.Mesh(backWallGeo, wallMat);
-  backWall.position.set(0, 2.1, -29);
-  scene.add(backWall);
+  const backWall = new THREE.Mesh(backWallGeo, wallMat); backWall.position.set(0, 2.1, -29); scene.add(backWall);
 
-  // 4. Construir las 6 Vitrinas Empotradas con Iluminación Focalizada
-  // Se colocan a lo largo del pasillo en Z: 6, 0, -6, -12, -18, -24
+  // 4. Vitrinas con Spotlights
   const vitrineZCoords = [6, 0, -6, -12, -18, -24];
-
   EXHIBITS_DATA.forEach((data, index) => {
     const isLeft = index % 2 === 0;
-    const posX = isLeft ? -3.8 : 3.8;
-    const posZ = vitrineZCoords[index];
-
-    createMuseumVitrine(data, posX, 1.8, posZ, isLeft);
+    createMuseumVitrine(data, isLeft ? -3.8 : 3.8, 1.8, vitrineZCoords[index], isLeft);
   });
 }
 
-// ── CREAR UNA VITRINA INDIVIDUAL EMPOTRADA CON HOLOGRAMA ───────────
 function createMuseumVitrine(data, x, y, z, isLeft) {
   const vitrineGroup = new THREE.Group();
   vitrineGroup.position.set(x, y, z);
 
-  // Pedestal negro mate
-  const pedestalGeo = new THREE.BoxGeometry(1.6, 0.9, 1.4);
-  const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x08080c, roughness: 0.8 });
-  const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
-  pedestal.position.y = -0.45;
-  vitrineGroup.add(pedestal);
+  const pedestal = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 1.4), new THREE.MeshStandardMaterial({ color: 0x08080c, roughness: 0.8 }));
+  pedestal.position.y = -0.45; vitrineGroup.add(pedestal);
 
-  // Cubo de cristal de museo con reflejos sutiles
-  const glassGeo = new THREE.BoxGeometry(1.5, 1.5, 1.3);
-  const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.18,
-    roughness: 0.1,
-    metalness: 0.1,
-    transmission: 0.8,
-    ior: 1.5
-  });
-  const glass = new THREE.Mesh(glassGeo, glassMat);
-  glass.position.y = 0.45;
-  vitrineGroup.add(glass);
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.3), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, roughness: 0.1, transmission: 0.8, ior: 1.5 }));
+  glass.position.y = 0.45; vitrineGroup.add(glass);
 
-  // Placa de bronce iluminada en la pared bajo la vitrina
+  // Placa de bronce
   const plaqueCanvas = document.createElement('canvas');
   plaqueCanvas.width = 512; plaqueCanvas.height = 160;
   const pcx = plaqueCanvas.getContext('2d');
@@ -565,310 +764,181 @@ function createMuseumVitrine(data, x, y, z, isLeft) {
   pcx.fillStyle = '#9e8c72'; pcx.font = '18px Space Mono';
   pcx.fillText(data.cat, 256, 115);
 
-  const plaqueTexture = new THREE.CanvasTexture(plaqueCanvas);
-  const plaqueGeo = new THREE.PlaneGeometry(0.8, 0.25);
-  const plaqueMat = new THREE.MeshBasicMaterial({ map: plaqueTexture });
-  const plaque = new THREE.Mesh(plaqueGeo, plaqueMat);
+  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.25), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(plaqueCanvas) }));
   plaque.position.set(0, -0.7, 0.71);
   if (!isLeft) plaque.rotation.y = Math.PI;
   vitrineGroup.add(plaque);
 
-  // Spotlight cenital cálido cayendo desde el techo sobre la vitrina
   const spotLight = new THREE.SpotLight(0xffdfb3, 2.5, 8, Math.PI / 6, 0.4, 1);
-  spotLight.position.set(x, 4.0, z);
-  spotLight.target = glass;
-  spotLight.castShadow = true;
+  spotLight.position.set(x, 4.0, z); spotLight.target = glass; spotLight.castShadow = true;
   scene.add(spotLight);
 
-  // Luz de halo interna del holograma
   const holoPointLight = new THREE.PointLight(0xa855f7, 0.8, 3);
   holoPointLight.position.set(x, y + 0.45, z);
   scene.add(holoPointLight);
 
-  // Crear el holograma 3D específico dentro de la vitrina
   const holoObject = createMathematicalHologram(data.id);
   holoObject.position.set(0, 0.45, 0);
   vitrineGroup.add(holoObject);
 
   scene.add(vitrineGroup);
 
-  // Guardar referencia para detección de proximidad
-  vitrines.push({
-    data: data,
-    group: vitrineGroup,
-    worldPos: new THREE.Vector3(x, y, z),
-    spotLight: spotLight,
-    isLeft: isLeft
-  });
+  vitrines.push({ data, group: vitrineGroup, worldPos: new THREE.Vector3(x, y, z), spotLight, isLeft });
 }
 
-// ── FÁBRICA DE HOLOGRAMAS MATEMÁTICOS EN 3D ────────────────────────
 function createMathematicalHologram(id) {
   const group = new THREE.Group();
-
   if (id === 0) {
-    // 1. Atractor de Lorenz 3D (Cinta de partículas en RK4)
-    const count = 1800;
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
-    let x = 0.1, y = 0, z = 14;
-    const dt = 0.005;
+    // Lorenz 3D
+    const count = 1800, geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
+    let x = 0.1, y = 0, z = 14, dt = 0.005;
     for (let i = 0; i < count; i++) {
-      const dx = 10 * (y - x);
-      const dy = x * (28 - z) - y;
-      const dz = x * y - (8/3) * z;
-      x += dt * dx; y += dt * dy; z += dt * dz;
-
-      positions[i * 3]     = (x) * 0.022;
-      positions[i * 3 + 1] = (z - 25) * 0.022;
-      positions[i * 3 + 2] = (y) * 0.022;
-
-      const frac = i / count;
-      colors[i * 3]     = 0.4 + frac * 0.6;
-      colors[i * 3 + 1] = 0.2 + (1 - frac) * 0.5;
-      colors[i * 3 + 2] = 0.9;
+      x += dt * 10 * (y - x); y += dt * (x * (28 - z) - y); z += dt * (x * y - 2.667 * z);
+      pos[i*3] = x*0.022; pos[i*3+1] = (z-25)*0.022; pos[i*3+2] = y*0.022;
+      cols[i*3] = 0.4 + (i/count)*0.6; cols[i*3+1] = 0.2 + (1-i/count)*0.5; cols[i*3+2] = 0.9;
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    const mat = new THREE.PointsMaterial({ size: 0.02, vertexColors: true, transparent: true, opacity: 0.85 });
-    const points = new THREE.Points(geo, mat);
-    group.add(points);
-
-    hologramUpdaters.push((delta) => {
-      points.rotation.y += 0.008;
-    });
-
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.02, vertexColors: true, transparent: true, opacity: 0.85 }));
+    group.add(pts);
+    hologramUpdaters.push(() => { pts.rotation.y += 0.008; });
   } else if (id === 2) {
-    // 2. Los Ceros de Riemann 3D (Espiral crítica Z(t) con anillos de ceros)
-    const count = 1200;
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
+    // Riemann 3D
+    const count = 1200, geo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3), cols = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const t = 10 + (i / count) * 35;
-      const theta = (t/2) * Math.log(t/(2*Math.PI)) - t/2;
-      const zVal = Math.sin(t * 0.8) * Math.cos(t * 0.3) * 0.3; // Aproximación oscilatoria
-
-      positions[i * 3]     = Math.cos(theta) * zVal;
-      positions[i * 3 + 1] = (t - 27) * 0.028;
-      positions[i * 3 + 2] = Math.sin(theta) * zVal;
-
-      colors[i * 3]     = 0.9;
-      colors[i * 3 + 1] = 0.7;
-      colors[i * 3 + 2] = 0.2;
+      const t = 10 + (i/count)*35, th = (t/2)*Math.log(t/(2*Math.PI)) - t/2, zv = Math.sin(t*0.8)*Math.cos(t*0.3)*0.3;
+      pos[i*3] = Math.cos(th)*zv; pos[i*3+1] = (t-27)*0.028; pos[i*3+2] = Math.sin(th)*zv;
+      cols[i*3] = 0.9; cols[i*3+1] = 0.7; cols[i*3+2] = 0.2;
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    const lineMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.85 });
-    const line = new THREE.Line(geo, lineMat);
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.85 }));
     group.add(line);
-
-    hologramUpdaters.push((delta) => {
-      line.rotation.y += 0.006;
-    });
-
+    hologramUpdaters.push(() => { line.rotation.y += 0.006; });
   } else if (id === 1) {
-    // 3. Los Cantos de Chladni 3D (Disco de arena suspendida con nodos)
-    const diskGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.02, 48);
-    const diskMat = new THREE.MeshStandardMaterial({ color: 0x181410, roughness: 0.4, metalness: 0.8 });
-    const disk = new THREE.Mesh(diskGeo, diskMat);
+    // Chladni 3D
+    const disk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.02, 48), new THREE.MeshStandardMaterial({ color: 0x181410, roughness: 0.4, metalness: 0.8 }));
     group.add(disk);
-
-    // Partículas de arena dorada
-    const count = 1500;
-    const sandGeo = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
+    const count = 1500, sandGeo = new THREE.BufferGeometry(), pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const r = Math.sqrt(Math.random()) * 0.46;
-      const th = Math.random() * Math.PI * 2;
-      pos[i * 3] = r * Math.cos(th);
-      pos[i * 3 + 1] = 0.02;
-      pos[i * 3 + 2] = r * Math.sin(th);
+      const r = Math.sqrt(Math.random()) * 0.46, th = Math.random() * Math.PI * 2;
+      pos[i*3] = r*Math.cos(th); pos[i*3+1] = 0.02; pos[i*3+2] = r*Math.sin(th);
     }
     sandGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const sandMat = new THREE.PointsMaterial({ color: 0xf5d061, size: 0.015 });
-    const sand = new THREE.Points(sandGeo, sandMat);
+    const sand = new THREE.Points(sandGeo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.015 }));
     group.add(sand);
-
     let chAngle = 0;
-    hologramUpdaters.push((delta) => {
-      chAngle += 0.01;
-      const arr = sand.geometry.attributes.position.array;
+    hologramUpdaters.push(() => {
+      chAngle += 0.01; const arr = sand.geometry.attributes.position.array;
       for (let i = 0; i < count; i++) {
-        const u = arr[i * 3], v = arr[i * 3 + 2];
-        const val = Math.sin(5 * Math.atan2(v, u) + chAngle) * Math.cos(4 * Math.hypot(u, v) * 8);
-        arr[i * 3 + 1] = 0.02 + Math.abs(val) * 0.03;
+        const u = arr[i*3], v = arr[i*3+2];
+        arr[i*3+1] = 0.02 + Math.abs(Math.sin(5*Math.atan2(v,u)+chAngle)*Math.cos(4*Math.hypot(u,v)*8))*0.03;
       }
       sand.geometry.attributes.position.needsUpdate = true;
       group.rotation.y += 0.004;
     });
-
   } else if (id === 3) {
-    // 4. El Flujo de Ricci (Toro deforme alisándose a esfera)
-    const geo = new THREE.SphereGeometry(0.38, 32, 24);
-    const mat = new THREE.MeshPhysicalMaterial({
-      color: 0x9333ea,
-      emissive: 0x4c1d95,
-      roughness: 0.2,
-      transmission: 0.6,
-      wireframe: true
-    });
-    const mesh = new THREE.Mesh(geo, mat);
+    // Ricci 3D
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.38, 32, 24), new THREE.MeshPhysicalMaterial({ color: 0x9333ea, emissive: 0x4c1d95, roughness: 0.2, transmission: 0.6, wireframe: true }));
     group.add(mesh);
-
     let ricciT = 0;
-    hologramUpdaters.push((delta) => {
-      ricciT += 0.02;
-      const pos = mesh.geometry.attributes.position;
+    hologramUpdaters.push(() => {
+      ricciT += 0.02; const pos = mesh.geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
-        const v = new THREE.Vector3().fromBufferAttribute(pos, i);
-        v.normalize();
-        const deformation = Math.sin(v.x * 6 + ricciT) * Math.cos(v.y * 6 + ricciT) * 0.08;
-        v.multiplyScalar(0.38 + deformation);
+        const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
+        v.multiplyScalar(0.38 + Math.sin(v.x*6 + ricciT)*Math.cos(v.y*6 + ricciT)*0.08);
         pos.setXYZ(i, v.x, v.y, v.z);
       }
-      pos.needsUpdate = true;
-      mesh.rotation.y += 0.007;
-      mesh.rotation.x += 0.004;
+      pos.needsUpdate = true; mesh.rotation.y += 0.007;
     });
-
   } else {
-    // 5. Fibración de Hopf / Vórtices (Anillos toroidales entrelazados)
-    const count = 4;
-    for (let i = 0; i < count; i++) {
-      const ringGeo = new THREE.TorusGeometry(0.35, 0.03, 16, 64);
-      const ringMat = new THREE.MeshStandardMaterial({
-        color: i % 2 === 0 ? 0x06b6d4 : 0xec4899,
-        emissive: 0x111122,
-        roughness: 0.3
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = (i * Math.PI) / count;
-      ring.rotation.y = (i * Math.PI) / 3;
+    // Hopf / Vórtices 3D
+    for (let i = 0; i < 4; i++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.03, 16, 64), new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, roughness: 0.3 }));
+      ring.rotation.x = (i * Math.PI) / 4; ring.rotation.y = (i * Math.PI) / 3;
       group.add(ring);
     }
-    hologramUpdaters.push((delta) => {
-      group.rotation.x += 0.005;
-      group.rotation.y += 0.008;
-    });
+    hologramUpdaters.push(() => { group.rotation.x += 0.005; group.rotation.y += 0.008; });
   }
-
   return group;
 }
 
-// ── CONTROLES EN PRIMERA PERSONA & RATÓN ───────────────────────────
-function setupControls() {
-  const canvas = document.getElementById('webgl-canvas');
-
-  // Drag para mirar alrededor
-  let isDragging = false;
-  let previousMousePosition = { x: 0, y: 0 };
-
+// ── CONTROL DE CAMINATA ORGÁNICA POR MIRADA (GAZE-DIRECTED STROLL) ─
+function setupGazeStrollControls() {
   window.addEventListener('mousedown', (e) => {
-    if (isContemplating) return;
-    if (e.target.closest('header, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
-    isDragging = true;
-    previousMousePosition = { x: e.clientX, y: e.clientY };
+    if (isContemplating || e.target.closest('header, #foyer-screen, #nai-companion-widget, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
+    isDraggingLook = true;
+    previousMousePos = { x: e.clientX, y: e.clientY };
+    // Clic simple en el suelo activa avance suave hacia adelante
+    isGliding = true;
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (isContemplating) return;
-    if (!isDragging) return;
+    if (isContemplating || !isDraggingLook) return;
+    const deltaX = e.clientX - previousMousePos.x;
+    const deltaY = e.clientY - previousMousePos.y;
 
-    const deltaX = e.clientX - previousMousePosition.x;
-    const deltaY = e.clientY - previousMousePosition.y;
+    targetLookEuler.y -= deltaX * 0.0024;
+    targetLookEuler.x -= deltaY * 0.0024;
+    targetLookEuler.x = Math.max(-Math.PI / 2.6, Math.min(Math.PI / 2.6, targetLookEuler.x));
 
-    euler.y -= deltaX * 0.0028;
-    euler.x -= deltaY * 0.0028;
-    euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
-
-    camera.quaternion.setFromEuler(euler);
-    previousMousePosition = { x: e.clientX, y: e.clientY };
+    previousMousePos = { x: e.clientX, y: e.clientY };
   });
 
-  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mouseup', () => {
+    isDraggingLook = false;
+    isGliding = false;
+  });
 
-  // Touch support para móviles/tablets
+  // Touch en teléfonos
   window.addEventListener('touchstart', (e) => {
-    if (isContemplating) return;
-    if (e.target.closest('header, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
-    isDragging = true;
-    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (isContemplating || e.target.closest('header, #foyer-screen, #nai-companion-widget, #contemplation-modal, #roll-drawer, #shop-drawer')) return;
+    isDraggingLook = true;
+    previousMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    isGliding = true;
   }, { passive: true });
 
   window.addEventListener('touchmove', (e) => {
-    if (isContemplating) return;
-    if (!isDragging) return;
-    const deltaX = e.touches[0].clientX - previousMousePosition.x;
-    const deltaY = e.touches[0].clientY - previousMousePosition.y;
-    euler.y -= deltaX * 0.004;
-    euler.x -= deltaY * 0.004;
-    euler.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, euler.x));
-    camera.quaternion.setFromEuler(euler);
-    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    if (isContemplating || !isDraggingLook) return;
+    const deltaX = e.touches[0].clientX - previousMousePos.x;
+    const deltaY = e.touches[0].clientY - previousMousePos.y;
+    targetLookEuler.y -= deltaX * 0.0035;
+    targetLookEuler.x -= deltaY * 0.0035;
+    targetLookEuler.x = Math.max(-Math.PI / 2.6, Math.min(Math.PI / 2.6, targetLookEuler.x));
+    previousMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: true });
 
-  window.addEventListener('touchend', () => { isDragging = false; });
+  window.addEventListener('touchend', () => { isDraggingLook = false; isGliding = false; });
 
-  // Teclado WASD / Flechas
+  // Rueda para avanzar/retroceder con inercia
+  window.addEventListener('wheel', (e) => {
+    if (isContemplating) return;
+    glideVelocity -= e.deltaY * 0.004;
+  }, { passive: true });
+
+  // Teclado W/S o Espacio
   window.addEventListener('keydown', (e) => {
     if (isContemplating) {
       if (e.key === 'Escape') exitContemplation();
       return;
     }
-    switch (e.code) {
-      case 'KeyW': case 'ArrowUp': moveForward = true; break;
-      case 'KeyS': case 'ArrowDown': moveBackward = true; break;
-      case 'KeyA': case 'ArrowLeft': moveLeft = true; break;
-      case 'KeyD': case 'ArrowRight': moveRight = true; break;
-      case 'Space':
-        if (currentFocusedVitrine) enterContemplation(currentFocusedVitrine);
-        break;
-    }
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') isGliding = true;
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') glideVelocity = -1.2;
+    if (e.code === 'Space' && currentFocusedVitrine) enterContemplation(currentFocusedVitrine);
   });
 
   window.addEventListener('keyup', (e) => {
-    switch (e.code) {
-      case 'KeyW': case 'ArrowUp': moveForward = false; break;
-      case 'KeyS': case 'ArrowDown': moveBackward = false; break;
-      case 'KeyA': case 'ArrowLeft': moveLeft = false; break;
-      case 'KeyD': case 'ArrowRight': moveRight = false; break;
-    }
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') isGliding = false;
   });
-
-  // Rueda del ratón para avanzar o retroceder suavemente
-  window.addEventListener('wheel', (e) => {
-    if (isContemplating) return;
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    forward.y = 0; forward.normalize();
-    camera.position.addScaledVector(forward, -e.deltaY * 0.005);
-    clampCameraPosition();
-  }, { passive: true });
 }
 
-// Limitar el movimiento dentro de los muros del museo
-function clampCameraPosition() {
-  camera.position.x = Math.max(-3.2, Math.min(3.2, camera.position.x));
-  camera.position.z = Math.max(-27, Math.min(15, camera.position.z));
-  camera.position.y = 1.7; // Altura fija de los ojos
-}
-
-// ── DETECCIÓN DE VITRINAS CERCANAS (PROXIMIDAD) ───────────────────
+// ── PROXIMIDAD Y CONTEMPLACIÓN ────────────────────────────────────
 function checkVitrineProximity() {
   if (isContemplating) return;
-
-  let nearest = null;
-  let minDist = 4.2;
-
+  let nearest = null, minDist = 4.2;
   vitrines.forEach(v => {
     const dist = camera.position.distanceTo(v.worldPos);
-    if (dist < minDist) {
-      minDist = dist;
-      nearest = v;
-    }
+    if (dist < minDist) { minDist = dist; nearest = v; }
   });
 
   const prompt = document.getElementById('approach-prompt');
@@ -886,12 +956,10 @@ function checkVitrineProximity() {
   }
 }
 
-// ── ENTRAR EN MODO CONTEMPLACIÓN ──────────────────────────────────
 function enterContemplation(vitrine) {
   isContemplating = true;
   currentFocusedVitrine = vitrine;
 
-  // Llenar datos de la tarjeta editorial
   const d = vitrine.data;
   document.getElementById('modal-cat').textContent = d.cat;
   document.getElementById('modal-solver').textContent = d.solver;
@@ -904,29 +972,68 @@ function enterContemplation(vitrine) {
   document.getElementById('approach-prompt').style.opacity = '0';
   document.getElementById('contemplation-modal').classList.remove('hidden');
 
-  // Posicionar cámara suavemente justo frente al cristal
+  // Posicionar cámara frente a la vitrina
   const standPos = vitrine.worldPos.clone();
-  if (vitrine.isLeft) {
-    standPos.x += 1.8;
-  } else {
-    standPos.x -= 1.8;
-  }
+  standPos.x += vitrine.isLeft ? 1.8 : -1.8;
   standPos.y = 1.8;
-
   camera.position.copy(standPos);
   camera.lookAt(vitrine.worldPos.x, 1.8, vitrine.worldPos.z);
-  euler.setFromQuaternion(camera.quaternion, 'YXZ');
+  currentLookEuler.setFromQuaternion(camera.quaternion, 'YXZ');
+  targetLookEuler.copy(currentLookEuler);
 
+  // Iniciar audio-guía de NAI para esta obra
+  startArtworkAudioGuide();
   startShutterRitual();
 }
 
 function exitContemplation() {
   isContemplating = false;
   document.getElementById('contemplation-modal').classList.add('hidden');
+  stopNaiSpeech();
   clearInterval(shutterTimerInterval);
 }
 
-// ── RITUAL DEL OBTURADOR DE CÁMARA ────────────────────────────────
+// ── NARRACIÓN POR VOZ DE LA OBRA ──────────────────────────────────
+let isNarrationPlaying = false;
+
+function startArtworkAudioGuide() {
+  if (!voiceGuideEnabled) {
+    document.getElementById('audio-guide-status').textContent = 'Silenciado (Modo Lectura)';
+    document.getElementById('narration-btn-icon').textContent = '▶';
+    document.getElementById('narration-btn-text').textContent = 'Escuchar Relato';
+    return;
+  }
+  const d = currentFocusedVitrine.data;
+  const speechText = `Obra ${d.badge}. ${d.title}. ${d.hist} ${d.poem}`;
+  
+  document.getElementById('audio-guide-status').textContent = 'Narrando obra...';
+  document.getElementById('narration-btn-icon').textContent = '⏸';
+  document.getElementById('narration-btn-text').textContent = 'Pausar';
+  isNarrationPlaying = true;
+
+  speakNai(speechText, () => {
+    document.getElementById('audio-guide-status').textContent = 'Relato completado';
+    document.getElementById('narration-btn-icon').textContent = '↻';
+    document.getElementById('narration-btn-text').textContent = 'Repetir';
+    isNarrationPlaying = false;
+  });
+}
+
+function toggleArtworkNarration() {
+  if (isNarrationPlaying) {
+    stopNaiSpeech();
+    isNarrationPlaying = false;
+    document.getElementById('audio-guide-status').textContent = 'Pausada';
+    document.getElementById('narration-btn-icon').textContent = '▶';
+    document.getElementById('narration-btn-text').textContent = 'Continuar';
+  } else {
+    voiceGuideEnabled = true;
+    updateVoiceStatusUI();
+    startArtworkAudioGuide();
+  }
+}
+
+// ── RITUAL DEL OBTURADOR ──────────────────────────────────────────
 function startShutterRitual() {
   shutterUnlocked = false;
   contemplationTimeLeft = 10;
@@ -964,21 +1071,19 @@ function unlockShutter() {
   btn.classList.remove('opacity-40', 'cursor-not-allowed');
   btn.classList.add('opacity-100', 'cursor-pointer', 'shadow-purple-500/50');
   label.textContent = '📸 Disparar Obturador';
+
+  if (voiceGuideEnabled && !isSpeaking) {
+    speakNai("El obturador se ha calibrado. Dispara tu cámara cuando desees capturar este instante.");
+  }
 }
 
 function playShutterSound() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = audioCtx.sampleRate * 0.08;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
-    }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'highpass'; filter.frequency.value = 1400;
+    const bufferSize = audioCtx.sampleRate * 0.08, buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate), data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+    const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 1400;
     noise.connect(filter); filter.connect(audioCtx.destination);
     noise.start();
   } catch (e) {}
@@ -997,7 +1102,6 @@ function triggerShutter() {
   flash.classList.add('flashing');
   setTimeout(() => flash.classList.remove('flashing'), 100);
 
-  // Capturar frame exacto del canvas WebGL
   const canvas = document.getElementById('webgl-canvas');
   const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
@@ -1045,18 +1149,8 @@ function updateRollUI() {
   });
 }
 
-function deleteRollItem(id) {
-  userCameraRoll = userCameraRoll.filter(item => item.id !== id);
-  updateRollUI();
-}
-
-function clearCameraRoll() {
-  if (confirm('¿Vaciar todas las fotos de tu carrete?')) {
-    userCameraRoll = [];
-    updateRollUI();
-  }
-}
-
+function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => item.id !== id); updateRollUI(); }
+function clearCameraRoll() { if (confirm('¿Vaciar todas las fotos de tu carrete?')) { userCameraRoll = []; updateRollUI(); } }
 function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
 function toggleShop() { document.getElementById('shop-drawer').classList.toggle('translate-x-full'); }
 
@@ -1075,32 +1169,36 @@ function animate() {
   const delta = (time - prevTime) / 1000;
   prevTime = time;
 
-  // Actualizar movimiento de cámara si no estamos contemplando
+  // Suavizado cinemático de rotación de cabeza
+  currentLookEuler.x += (targetLookEuler.x - currentLookEuler.x) * 0.12;
+  currentLookEuler.y += (targetLookEuler.y - currentLookEuler.y) * 0.12;
+  camera.quaternion.setFromEuler(currentLookEuler);
+
+  // Marcha orgánica por mirada
   if (!isContemplating) {
-    cameraVelocity.x -= cameraVelocity.x * 10.0 * delta;
-    cameraVelocity.z -= cameraVelocity.z * 10.0 * delta;
+    if (isGliding) {
+      glideVelocity += (2.2 - glideVelocity) * 0.08;
+    } else {
+      glideVelocity *= 0.88; // Fricción suave al soltar
+    }
 
-    cameraDirection.z = Number(moveForward) - Number(moveBackward);
-    cameraDirection.x = Number(moveRight) - Number(moveLeft);
-    cameraDirection.normalize();
+    if (Math.abs(glideVelocity) > 0.01) {
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      forward.y = 0; forward.normalize();
+      camera.position.addScaledVector(forward, glideVelocity * delta);
 
-    if (moveForward || moveBackward) cameraVelocity.z -= cameraDirection.z * 22.0 * delta;
-    if (moveLeft || moveRight) cameraVelocity.x -= cameraDirection.x * 22.0 * delta;
+      // Balanceo sutil de paso humano (head bobbing)
+      camera.position.y = 1.7 + Math.sin(time * 0.006) * 0.015 * Math.abs(glideVelocity);
 
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    forward.y = 0; forward.normalize();
-    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-    right.y = 0; right.normalize();
+      camera.position.x = Math.max(-3.2, Math.min(3.2, camera.position.x));
+      camera.position.z = Math.max(-27, Math.min(15, camera.position.z));
 
-    camera.position.addScaledVector(forward, -cameraVelocity.z * delta);
-    camera.position.addScaledVector(right, cameraVelocity.x * delta);
-    clampCameraPosition();
-
-    checkVitrineProximity();
+      checkVitrineProximity();
+    }
   }
 
-  // Actualizar todos los hologramas dentro de las vitrinas
-  hologramUpdaters.forEach(updater => updater(delta));
+  // Actualizar hologramas 3D dentro de las vitrinas
+  hologramUpdaters.forEach(fn => fn(delta));
 
   renderer.render(scene, camera);
 }
@@ -1111,15 +1209,17 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Click para entrar a contemplar si estamos mirando una vitrina
+// Click para entrar en contemplación al mirar una vitrina
 window.addEventListener('click', (e) => {
   if (isContemplating) return;
-  if (e.target.closest('header, #roll-drawer, #shop-drawer')) return;
+  if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #roll-drawer, #shop-drawer')) return;
   if (currentFocusedVitrine) enterContemplation(currentFocusedVitrine);
 });
 
-// Arrancar motor
-init3D();
+// Inicializar al cargar
+window.addEventListener('DOMContentLoaded', () => {
+  init3D();
+});
 </script>
 </body>
 </html>

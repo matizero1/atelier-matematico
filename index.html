@@ -3,37 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Atelier Matemático — 20 Obras Maestras</title>
+<title>Atelier Matemático — 24 Obras & Problemas del Milenio</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#030308; --card:rgba(10,10,24,0.75); --border:rgba(140,120,255,0.15); }
+  :root { --bg:#030308; --card:rgba(10,10,24,0.78); --border:rgba(140,120,255,0.15); }
   body { background:var(--bg); color:#e2e8f0; font-family:'Plus Jakarta Sans',sans-serif; overflow-x:hidden; }
   .serif  { font-family:'Cinzel',serif; }
   .mono   { font-family:'Space Mono',monospace; }
   .glass  { background:var(--card); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--border); }
-  .glow:hover { border-color:rgba(168,85,247,.4); box-shadow:0 0 25px rgba(139,92,246,.25); }
+  .glow:hover { border-color:rgba(168,85,247,.45); box-shadow:0 0 25px rgba(139,92,246,.25); }
   ::-webkit-scrollbar { width:5px; }
   ::-webkit-scrollbar-thumb { background:rgba(139,92,246,.3); border-radius:3px; }
+  @keyframes recordPulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.3; transform:scale(1.2); } }
+  .recording-indicator { animation: recordPulse 1s infinite ease-in-out; }
 </style>
 </head>
 <body class="selection:bg-purple-900 selection:text-purple-100">
 
-<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center">
+<!-- NAVBAR -->
+<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center transition-all">
   <div class="flex items-center gap-3">
-    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px]">
+    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
       <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
     </div>
     <div>
       <span class="serif tracking-[.2em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">20 Obras · Física & Caos · v3.0</span>
+      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">24 Obras · Problemas del Milenio · v4.0</span>
     </div>
   </div>
-  <div class="flex items-center gap-3">
-    <a href="#cat" class="text-xs text-slate-300 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-white/5 mono">Colección</a>
-    <button onclick="downloadArtwork()" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-2 rounded-full font-medium transition">
+  
+  <!-- ACCIONES DE DESCARGA (HD + REELS 15s / 30s) -->
+  <div class="flex items-center gap-2">
+    <a href="#cat" class="text-xs text-slate-300 hover:text-white transition px-2.5 py-1.5 rounded-lg hover:bg-white/5 mono hidden sm:block">Catálogo</a>
+    
+    <!-- Botón Grabación Reel 15s -->
+    <button onclick="startVideoRecording(15)" id="btn-rec-15" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 text-xs px-3 py-1.5 rounded-full font-mono transition group">
+      <span class="w-2 h-2 rounded-full bg-red-500 group-hover:scale-125 transition"></span>
+      <span>Reel 15s</span>
+    </button>
+
+    <!-- Botón Grabación Reel 30s -->
+    <button onclick="startVideoRecording(30)" id="btn-rec-30" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 text-xs px-3 py-1.5 rounded-full font-mono transition group">
+      <span class="w-2 h-2 rounded-full bg-red-400 group-hover:scale-125 transition"></span>
+      <span>Reel 30s</span>
+    </button>
+
+    <!-- Botón Exportar Imagen HD -->
+    <button onclick="downloadArtwork()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/30">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-      Exportar HD
+      <span class="hidden md:inline">Lámina HD</span>
     </button>
   </div>
 </header>
@@ -41,16 +60,18 @@
 <main class="pt-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col gap-8 pb-16">
 
   <!-- HERO -->
-  <div class="text-center max-w-3xl mx-auto pt-4">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-4">
+  <div class="text-center max-w-3xl mx-auto pt-3">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
       <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-      20 Ecuaciones · Silicio Nativo · Tiempo Real
+      24 Ecuaciones · Problemas del Milenio & Caos Puro
     </div>
-    <h1 class="text-3xl md:text-5xl serif font-bold tracking-tight text-white leading-tight mb-3">
-      Donde las leyes del cosmos<br>
+    <h1 class="text-3xl md:text-5xl serif font-bold tracking-tight text-white leading-tight mb-2.5">
+      Donde los enigmas del cosmos<br>
       <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">se convierten en forma y luz</span>
     </h1>
-    <p class="text-sm text-slate-400 font-light leading-relaxed">Desde Apolonio de Pérgamo (200 a.C.) hasta Yoshida (1990): veinte siglos de matemática convertidos en arte vivo.</p>
+    <p class="text-sm text-slate-400 font-light leading-relaxed">
+      De la Hipótesis de Riemann y la Conjetura de Beal al atractor de Lorenz y Navier-Stokes. Grabación directa en video HD a 60 FPS con un solo clic.
+    </p>
   </div>
 
   <!-- VISOR + TARJETA EDITORIAL -->
@@ -60,13 +81,21 @@
     <div class="lg:col-span-8 glass rounded-2xl p-2 relative flex flex-col min-h-[520px] md:min-h-[640px] shadow-2xl overflow-hidden">
       <canvas id="stage" class="w-full h-full rounded-xl cursor-grab active:cursor-grabbing bg-[#04020c] block flex-1"></canvas>
 
+      <!-- Barra superior flotante del canvas -->
       <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
         <div class="glass px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto border-white/10">
-          <span class="text-xs text-purple-300 mono" id="badge">OBRA 01</span>
+          <span class="text-xs text-purple-300 mono" id="badge">OBRA 21</span>
           <span class="text-slate-500 text-xs">·</span>
-          <span class="text-xs text-white/90 font-medium" id="title-mini">Atractor de Lorenz</span>
+          <span class="text-xs text-white/90 font-medium" id="title-mini">Los Ceros de Riemann</span>
         </div>
-        <div class="flex gap-2 pointer-events-auto">
+
+        <div class="flex gap-2 pointer-events-auto items-center">
+          <!-- Indicador de Grabación Activa -->
+          <div id="rec-banner" class="hidden glass px-3 py-1.5 rounded-full flex items-center gap-2 border-red-500/40 bg-red-950/30 text-red-300 text-xs mono">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500 recording-indicator"></span>
+            <span id="rec-countdown">GRABANDO 15s</span>
+          </div>
+
           <button onclick="togglePalette()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">
             <span class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-amber-400"></span>Paleta
           </button>
@@ -74,9 +103,10 @@
         </div>
       </div>
 
+      <!-- Hint inferior -->
       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass px-4 py-1.5 rounded-full pointer-events-none border-white/10 text-[11px] text-purple-200/70 mono flex items-center gap-2">
         <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-        <span id="hint">Arrastra para rotar en 3D</span>
+        <span id="hint">Arrastra para rotar la espiral crítica en 3D</span>
       </div>
     </div>
 
@@ -85,11 +115,11 @@
       <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
       <div>
         <div class="flex justify-between text-xs text-purple-400 mono mb-2">
-          <span id="category">TEORÍA DEL CAOS · 1963</span>
-          <span id="solver">RK4</span>
+          <span id="category">PROBLEMA DEL MILENIO · 1859</span>
+          <span id="solver">Riemann-Siegel Formula</span>
         </div>
-        <h2 id="art-title" class="text-2xl serif font-bold text-white mb-1">El Vuelo de Lorenz</h2>
-        <p id="art-sub" class="text-xs text-purple-300/70 mono mb-4">El aleteo que gobierna el infinito</p>
+        <h2 id="art-title" class="text-2xl serif font-bold text-white mb-1">Los Ceros de Riemann</h2>
+        <p id="art-sub" class="text-xs text-purple-300/70 mono mb-4">El enigma de un millón de dólares en la línea crítica</p>
 
         <div class="bg-black/40 rounded-xl p-3 border border-white/5 mb-4">
           <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
@@ -110,32 +140,46 @@
           <p id="art-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
         </div>
       </div>
-      <div class="pt-3 border-t border-white/5">
-        <button onclick="downloadArtwork()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 mono">
-          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Exportar Cuadro para Regalo (PNG HD)
+      
+      <!-- Botones de Acción Directa -->
+      <div class="pt-3 border-t border-white/5 flex flex-col gap-2">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="startVideoRecording(15)" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-200 text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 mono">
+            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+            Video 15s (Reel)
+          </button>
+          <button onclick="startVideoRecording(30)" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-200 text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 mono">
+            <span class="w-2 h-2 rounded-full bg-red-400"></span>
+            Video 30s (TikTok)
+          </button>
+        </div>
+        <button onclick="downloadArtwork()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2 mono">
+          <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Exportar Lámina HD (PNG)
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CATÁLOGO 20 OBRAS -->
+  <!-- CATÁLOGO 24 OBRAS -->
   <div id="cat" class="pt-10">
     <div class="flex justify-between items-end mb-6 border-b border-white/5 pb-4">
       <div>
         <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-1">Colección Permanente</span>
-        <h2 class="text-2xl serif font-bold text-white">Veinte Siglos de Matemática Viva</h2>
+        <h2 class="text-2xl serif font-bold text-white">Las 24 Dimensiones de la Materia & Enigmas del Milenio</h2>
       </div>
-      <p class="text-xs text-slate-400 mono hidden md:block">Selecciona una obra para explorarla</p>
+      <p class="text-xs text-slate-400 mono hidden md:block">Haz clic en cualquier obra para cargarla</p>
     </div>
-    <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+    <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
   </div>
 
   <!-- MANIFIESTO -->
   <div class="my-8 glass rounded-2xl p-8 border-white/10 max-w-3xl">
     <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-2">Manifiesto del Atelier</span>
     <h2 class="text-2xl serif font-bold text-white mb-4 leading-snug">"El arte más puro no imita la naturaleza: habla su mismo lenguaje matemático."</h2>
-    <p class="text-sm text-slate-300 font-light leading-relaxed mb-3">Veinte capítulos de la historia de la ciencia, desde el año 200 antes de Cristo hasta 1990, convertidos en luz interactiva calculada en tiempo real en silicio nativo.</p>
+    <p class="text-sm text-slate-300 font-light leading-relaxed mb-3">
+      Veinticuatro capítulos de la historia de la ciencia y la matemática, incluyendo los grandes Enigmas del Milenio: Bernhard Riemann, Grigori Perelman, Claude Navier y Andrew Beal. Cada cuadro es una simulación física real en silicio.
+    </p>
     <p class="text-purple-300 font-medium text-xs mono">Obra desarrollada por Matías Cortés Figueroa · Timonel Suite · Santiago de Chile.</p>
   </div>
 
@@ -147,14 +191,84 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
-// ATELIER MATEMÁTICO v3.0 — 20 MOTORES MATEMÁTICOS EN TIEMPO REAL
+// ATELIER MATEMÁTICO v4.0 — 24 MOTORES MATEMÁTICOS & GRABADOR REELS
 // ═══════════════════════════════════════════════════════════════════
 
 const canvas = document.getElementById('stage');
 const ctx    = canvas.getContext('2d');
-let W, H, currentArt = 0, currentPal = 0, animId;
+let W, H, currentArt = 20, currentPal = 0, animId; // Empieza en la Obra 21 (Riemann)
 let isDrag = false, dragX = 0, dragY = 0;
 let mouseX = -9999, mouseY = -9999, mouseDown = false;
+
+// ── Grabador Nativo de Video a 60 FPS (15s y 30s) ─────────────────
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingTimeout = null;
+let recordingCountdownInterval = null;
+
+function startVideoRecording(seconds) {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    return;
+  }
+  recordedChunks = [];
+  const stream = canvas.captureStream(60);
+  
+  let options = { mimeType: 'video/webm;codecs=vp9' };
+  if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+    options = { mimeType: 'video/webm' };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      options = { mimeType: 'video/mp4' };
+    }
+  }
+
+  try {
+    mediaRecorder = new MediaRecorder(stream, options);
+  } catch (e) {
+    mediaRecorder = new MediaRecorder(stream);
+  }
+
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    clearInterval(recordingCountdownInterval);
+    clearTimeout(recordingTimeout);
+    document.getElementById('rec-banner').classList.add('hidden');
+    document.getElementById('btn-rec-15').classList.remove('border-red-500', 'bg-red-950/40');
+    document.getElementById('btn-rec-30').classList.remove('border-red-500', 'bg-red-950/40');
+
+    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const title = ARTWORKS[currentArt].title.replace(/\s+/g, '_');
+    a.download = `Atelier_${title}_${seconds}s.webm`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 6000);
+  };
+
+  mediaRecorder.start();
+  
+  // UI de grabación
+  document.getElementById('rec-banner').classList.remove('hidden');
+  const btn = seconds === 15 ? document.getElementById('btn-rec-15') : document.getElementById('btn-rec-30');
+  btn.classList.add('border-red-500', 'bg-red-950/40');
+
+  let remaining = seconds;
+  document.getElementById('rec-countdown').textContent = `GRABANDO ${remaining}s...`;
+  recordingCountdownInterval = setInterval(() => {
+    remaining--;
+    if (remaining > 0) {
+      document.getElementById('rec-countdown').textContent = `GRABANDO ${remaining}s...`;
+    }
+  }, 1000);
+
+  recordingTimeout = setTimeout(() => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+  }, seconds * 1000);
+}
 
 // ── Utilidades de color ──────────────────────────────────────────
 function hsl2rgb(h, s, l) {
@@ -176,13 +290,9 @@ function hsl2rgb(h, s, l) {
 }
 
 const PALS_RGB = [
-  // 0 Cósmico
   f => hsl2rgb(250-f*210, 90, 45+f*35),
-  // 1 Neón
   f => [f*40|0, 120+f*135|0, Math.max(0,200-f*50)|0],
-  // 2 Fuego
   f => [Math.min(255,60+f*220)|0, Math.min(255,f>.6?(f-.6)*450:20)|0, f<.3?180:20],
-  // 3 Mármol dorado
   f => [220+f*35|0, 180+f*70|0, 120+f*135|0],
 ];
 const PALS_CSS = [
@@ -192,7 +302,6 @@ const PALS_CSS = [
   f => `rgba(${220+f*35|0},${180+f*70|0},${120+f*135|0},${.08+f*.65})`,
 ];
 
-// ── Resize ───────────────────────────────────────────────────────
 function resize() {
   const r = canvas.parentElement.getBoundingClientRect();
   W = canvas.width  = r.width  | 0;
@@ -200,10 +309,10 @@ function resize() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 20 MOTORES — init + step
+// MOTORES 01 A 20 (LOS EXISTENTES OPTIMIZADOS)
 // ═══════════════════════════════════════════════════════════════════
 
-// ── 01 LORENZ ────────────────────────────────────────────────────
+// 01 Lorenz
 let lTrajs=[], lRotZ=.5, lRotX=.3;
 function init01(){
   lTrajs=[];
@@ -215,8 +324,7 @@ function init01(){
 }
 function step01(){
   ctx.fillStyle='rgba(4,2,12,.035)'; ctx.fillRect(0,0,W,H);
-  lRotZ+=.0008;
-  const sc=Math.min(W,H)*.015;
+  lRotZ+=.0008; const sc=Math.min(W,H)*.015;
   for(const tr of lTrajs){
     for(let s=0;s<6;s++){
       const dt=.004, f=(x,y,z)=>[10*(y-x),x*(28-z)-y,x*y-2.667*z];
@@ -238,7 +346,7 @@ function step01(){
   }
 }
 
-// ── 02 VON MISES ─────────────────────────────────────────────────
+// 02 Von Mises
 let vmPts=[],vmSpr=[]; const VMC=36,VMR=24;
 function init02(){
   vmPts=[]; vmSpr=[];
@@ -276,7 +384,7 @@ function step02(){
   }
 }
 
-// ── 03 YOSHIDA ───────────────────────────────────────────────────
+// 03 Yoshida
 let yTrails=[];
 function init03(){
   yTrails=[]; const L=Math.min(W,H)*.22;
@@ -303,11 +411,9 @@ function step03(){
   }
 }
 
-// ── 04 CLIFFORD ──────────────────────────────────────────────────
+// 04 Clifford
 let cfSeeds=[];
-function init04(){
-  cfSeeds=[]; for(let i=0;i<180;i++) cfSeeds.push({x:Math.random()*W,y:Math.random()*H,pts:[],max:160+(i%80)});
-}
+function init04(){ cfSeeds=[]; for(let i=0;i<180;i++) cfSeeds.push({x:Math.random()*W,y:Math.random()*H,pts:[],max:160+(i%80)}); }
 function step04(){
   ctx.fillStyle='rgba(4,2,12,.04)'; ctx.fillRect(0,0,W,H);
   for(const p of cfSeeds){
@@ -325,11 +431,9 @@ function step04(){
   }
 }
 
-// ── 05 CHLADNI ───────────────────────────────────────────────────
+// 05 Chladni
 let chSand=[], chM=3, chN=5;
-function init05(){
-  chSand=[]; for(let i=0;i<5500;i++) chSand.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:0});
-}
+function init05(){ chSand=[]; for(let i=0;i<5500;i++) chSand.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:0}); }
 function step05(){
   ctx.fillStyle='rgba(4,2,12,.12)'; ctx.fillRect(0,0,W,H);
   const L=Math.min(W,H)*.85, ox=(W-L)/2, oy=(H-L)/2;
@@ -348,11 +452,9 @@ function step05(){
   }
 }
 
-// ── 06 TURING ────────────────────────────────────────────────────
+// 06 Turing
 let tAgents=[];
-function init06(){
-  tAgents=[]; for(let i=0;i<280;i++) tAgents.push({x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,angle:Math.random()*Math.PI*2,sp:i%2,pts:[]});
-}
+function init06(){ tAgents=[]; for(let i=0;i<280;i++) tAgents.push({x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,angle:Math.random()*Math.PI*2,sp:i%2,pts:[]}); }
 function step06(){
   ctx.fillStyle='rgba(4,2,12,.025)'; ctx.fillRect(0,0,W,H);
   for(let i=0;i<tAgents.length;i++){
@@ -366,14 +468,13 @@ function step06(){
     if(ag.x<0)ag.x=W; if(ag.x>W)ag.x=0; if(ag.y<0)ag.y=H; if(ag.y>H)ag.y=0;
     ag.pts.push([ag.x,ag.y]); if(ag.pts.length>70)ag.pts.shift();
     if(ag.pts.length>2){
-      ctx.strokeStyle=PALS_CSS[currentPal](ag.sp===0?.85:.2);
-      ctx.lineWidth=ag.sp===0?2.2:1.2;
+      ctx.strokeStyle=PALS_CSS[currentPal](ag.sp===0?.85:.2); ctx.lineWidth=ag.sp===0?2.2:1.2;
       ctx.beginPath(); ctx.moveTo(ag.pts[ag.pts.length-2][0],ag.pts[ag.pts.length-2][1]); ctx.lineTo(ag.pts[ag.pts.length-1][0],ag.pts[ag.pts.length-1][1]); ctx.stroke();
     }
   }
 }
 
-// ── 07 RÖSSLER ───────────────────────────────────────────────────
+// 07 Rössler
 let rTrajs=[], rRot=0;
 function init07(){
   rTrajs=[];
@@ -404,7 +505,7 @@ function step07(){
   }
 }
 
-// ── 08 APOLONIO ──────────────────────────────────────────────────
+// 08 Apolonio
 let apAngle=0;
 function init08(){ apAngle=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
 function drawCircle(x,y,r,depth){
@@ -422,9 +523,9 @@ function step08(){
   apAngle+=.003; drawCircle(W/2,H/2,Math.min(W,H)*.42,0);
 }
 
-// ── 09 JULIA (Progressive per-pixel) ─────────────────────────────
-let julRow=0, julAngle=0, julImgData=null;
-function init09(){ julRow=0; julAngle=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); julImgData=ctx.createImageData(W,1); }
+// 09 Julia
+let julRow=0, julAngle=0;
+function init09(){ julRow=0; julAngle=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
 function step09(){
   julAngle+=.006;
   const cR=.7885*Math.cos(julAngle), cI=.7885*Math.sin(julAngle);
@@ -445,442 +546,585 @@ function step09(){
       const idx=(dy*W+px)*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=255;
     }
   }
-  ctx.putImageData(id,0,julRow);
-  julRow=(julRow+ROWS)%H;
+  ctx.putImageData(id,0,julRow); julRow=(julRow+ROWS)%H;
 }
 
-// ── 10 LANGTON'S ANT ─────────────────────────────────────────────
+// 10 Langton
 let langGrid=null, langAnts=[], langStep=0, langGW=0, langGH=0, langCellSize=8;
 function init10(){
   langCellSize=8; langGW=W/langCellSize|0; langGH=H/langCellSize|0;
-  langGrid=new Uint8Array(langGW*langGH);
-  langAnts=[]; langStep=0;
-  for(let i=0;i<4;i++){
-    langAnts.push({gx:langGW/2|0,gy:langGH/2|0,dir:i,col:i});
-  }
+  langGrid=new Uint8Array(langGW*langGH); langAnts=[]; langStep=0;
+  for(let i=0;i<4;i++) langAnts.push({gx:langGW/2|0,gy:langGH/2|0,dir:i});
   ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
 }
 function step10(){
-  // Each frame advance the ant many steps for fast visible progress
   for(let s=0;s<600;s++){
     for(const ant of langAnts){
       const idx=ant.gy*langGW+ant.gx;
       if(langGrid[idx]===0){ant.dir=(ant.dir+1)%4; langGrid[idx]=1;}
       else{ant.dir=(ant.dir+3)%4; langGrid[idx]=0;}
       const dx=[0,1,0,-1],dy=[-1,0,1,0];
-      ant.gx=(ant.gx+dx[ant.dir]+langGW)%langGW;
-      ant.gy=(ant.gy+dy[ant.dir]+langGH)%langGH;
+      ant.gx=(ant.gx+dx[ant.dir]+langGW)%langGW; ant.gy=(ant.gy+dy[ant.dir]+langGH)%langGH;
     }
     langStep++;
   }
-  // Redraw grid
   ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
   for(let y=0;y<langGH;y++)for(let x=0;x<langGW;x++){
     if(langGrid[y*langGW+x]){
       const f=(x/langGW*.5+y/langGH*.5);
-      ctx.fillStyle=PALS_CSS[currentPal](f);
-      ctx.fillRect(x*langCellSize,y*langCellSize,langCellSize-1,langCellSize-1);
+      ctx.fillStyle=PALS_CSS[currentPal](f); ctx.fillRect(x*langCellSize,y*langCellSize,langCellSize-1,langCellSize-1);
     }
   }
-  // Draw ants
-  for(const ant of langAnts){
-    ctx.fillStyle='rgba(255,255,255,.9)';
-    ctx.fillRect(ant.gx*langCellSize,ant.gy*langCellSize,langCellSize,langCellSize);
-  }
-  // Show step counter
-  ctx.fillStyle='rgba(180,150,255,.5)'; ctx.font='11px Space Mono';
-  ctx.fillText(`Paso: ${langStep.toLocaleString()}`,12,H-16);
+  for(const ant of langAnts){ ctx.fillStyle='rgba(255,255,255,.9)'; ctx.fillRect(ant.gx*langCellSize,ant.gy*langCellSize,langCellSize,langCellSize); }
+  ctx.fillStyle='rgba(180,150,255,.5)'; ctx.font='11px Space Mono'; ctx.fillText(`Paso: ${langStep.toLocaleString()}`,12,H-16);
 }
 
-// ── 11 KdV SOLITONS ──────────────────────────────────────────────
+// 11 KdV Solitons
 let kdvT=0;
 function init11(){ kdvT=0; }
 function step11(){
   ctx.fillStyle='rgba(4,2,12,.15)'; ctx.fillRect(0,0,W,H);
   kdvT+=.02;
-  // Multiple analytical 1-soliton solutions: u = -2k² sech²(k(x - 4k²t) - x₀)
-  const solitons=[
-    {k:.8, x0:W*.2, col:0.85},
-    {k:.5, x0:W*.1, col:0.5},
-    {k:1.1,x0:W*.4, col:0.65},
-    {k:.35,x0:0,    col:0.3},
-  ];
-  const yBase=H/2;
-  const amp=H*.28;
-
-  // Draw grid lines
-  ctx.strokeStyle='rgba(100,100,180,.12)'; ctx.lineWidth=.5;
-  for(let y=H*.2;y<H*.85;y+=H*.15){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-
-  // Draw solitons
+  const solitons=[{k:.8,x0:W*.2,col:0.85},{k:.5,x0:W*.1,col:0.5},{k:1.1,x0:W*.4,col:0.65},{k:.35,x0:0,col:0.3}];
+  const yBase=H/2, amp=H*.28;
   for(const sol of solitons){
     ctx.beginPath();
     for(let px=0;px<W;px++){
-      const x=(px/W)*20-10; // normalized x
-      const arg=sol.k*(x*3-4*sol.k*sol.k*kdvT)-sol.x0/W*30;
-      const u=-2*sol.k*sol.k/(Math.cosh(arg)**2);
-      const py=yBase-u*amp;
+      const x=(px/W)*20-10; const arg=sol.k*(x*3-4*sol.k*sol.k*kdvT)-sol.x0/W*30;
+      const u=-2*sol.k*sol.k/(Math.cosh(arg)**2); const py=yBase-u*amp;
       px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
     }
     ctx.strokeStyle=PALS_CSS[currentPal](sol.col); ctx.lineWidth=2; ctx.stroke();
-
-    // Glow fill
-    ctx.save();
-    ctx.beginPath();
-    for(let px=0;px<W;px++){
-      const x=(px/W)*20-10;
-      const arg=sol.k*(x*3-4*sol.k*sol.k*kdvT)-sol.x0/W*30;
-      const u=-2*sol.k*sol.k/(Math.cosh(arg)**2);
-      const py=yBase-u*amp;
-      px===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
-    }
-    ctx.lineTo(W,yBase); ctx.lineTo(0,yBase); ctx.closePath();
-    const [r,g,b]=PALS_RGB[currentPal](sol.col);
-    ctx.fillStyle=`rgba(${r},${g},${b},.06)`; ctx.fill();
-    ctx.restore();
   }
-
-  // Reference line
-  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(0,yBase); ctx.lineTo(W,yBase); ctx.stroke();
 }
 
-// ── 12 VORONOI ───────────────────────────────────────────────────
+// 12 Voronoi
 let vorSeeds=[], vorT=0;
 function init12(){
   vorSeeds=[]; vorT=0;
-  const n=12+Math.random()*8|0;
-  for(let i=0;i<n;i++) vorSeeds.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
+  for(let i=0;i<14;i++) vorSeeds.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4});
   ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
 }
 function step12(){
   vorT++;
-  // Move seeds
-  for(const s of vorSeeds){
-    s.x+=s.vx; s.y+=s.vy;
-    if(s.x<0||s.x>W)s.vx*=-1; if(s.y<0||s.y>H)s.vy*=-1;
-  }
-  // Recompute every 2 frames
+  for(const s of vorSeeds){ s.x+=s.vx; s.y+=s.vy; if(s.x<0||s.x>W)s.vx*=-1; if(s.y<0||s.y>H)s.vy*=-1; }
   if(vorT%2===0){
     const id=ctx.createImageData(W,H);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){
       let d1=Infinity,d2=Infinity;
-      for(const s of vorSeeds){
-        const d=Math.hypot(x-s.x,y-s.y);
-        if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;
-      }
-      // Border detection: very thin cells border
-      const border=d2-d1<3;
-      const t=border?1.0:Math.max(0,1-(d1/(Math.min(W,H)*.3)));
-      const [r,g,b]=PALS_RGB[currentPal](t);
-      const alpha=border?220:60+t*120|0;
+      for(const s of vorSeeds){ const d=Math.hypot(x-s.x,y-s.y); if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d; }
+      const border=d2-d1<3, t=border?1.0:Math.max(0,1-(d1/(Math.min(W,H)*.3)));
+      const [r,g,b]=PALS_RGB[currentPal](t); const alpha=border?220:60+t*120|0;
       const idx=(y*W+x)*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=alpha;
     }
-    ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
-    ctx.putImageData(id,0,0);
+    ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); ctx.putImageData(id,0,0);
   }
-  // Draw seed points
-  for(const s of vorSeeds){
-    ctx.fillStyle='rgba(255,255,255,.7)';
-    ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2); ctx.fill();
-  }
+  for(const s of vorSeeds){ ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2); ctx.fill(); }
 }
 
-// ── 13 NEWTON FRACTAL ────────────────────────────────────────────
-let newRow=0;
-const ROOTS=[{r:1,i:0},{r:-.5,i:.866},{r:-.5,i:-.866}];
-const RCOLS=[[.85,.1,.1],[.1,.85,.1],[.1,.1,.85]];
+// 13 Newton
+let newRow=0; const ROOTS=[{r:1,i:0},{r:-.5,i:.866},{r:-.5,i:-.866}]; const RCOLS=[[.85,.1,.1],[.1,.85,.1],[.1,.1,.85]];
 function init13(){ newRow=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
 function step13(){
-  const ROWS=16, maxIt=60, scale=3.0/Math.min(W,H);
-  const id=ctx.createImageData(W,ROWS);
-  const cx=W/2, cy=H/2;
+  const ROWS=16, maxIt=60, scale=3.0/Math.min(W,H), id=ctx.createImageData(W,ROWS), cx=W/2, cy=H/2;
   for(let dy=0;dy<ROWS&&(newRow+dy)<H;dy++){
     const zy=((newRow+dy)-cy)*scale;
     for(let px=0;px<W;px++){
-      let zr=(px-cx)*scale, zi=zy;
-      let whichRoot=-1, n=0;
+      let zr=(px-cx)*scale, zi=zy, whichRoot=-1, n=0;
       for(;n<maxIt;n++){
-        // z → z - (z³-1)/(3z²)  ≡  (2z³+1)/(3z²)
-        const zr2=zr*zr-zi*zi, zi2=2*zr*zi;
-        const zr3=zr2*zr-zi2*zi, zi3=zr2*zi+zi2*zr;
-        const den=9*(zr2*zr2+zi2*zi2)+1e-12;
-        const nr=(2*zr3+1)*(3*(zr2))+2*zi3*(3*zi2);
-        const ni=(2*zi3)*(3*(zr2))-(2*zr3+1)*(3*zi2);
+        const zr2=zr*zr-zi*zi, zi2=2*zr*zi; const zr3=zr2*zr-zi2*zi, zi3=zr2*zi+zi2*zr;
+        const den=9*(zr2*zr2+zi2*zi2)+1e-12; const nr=(2*zr3+1)*(3*(zr2))+2*zi3*(3*zi2); const ni=(2*zi3)*(3*(zr2))-(2*zr3+1)*(3*zi2);
         zr=nr/den; zi=ni/den;
-        // Find closest root
-        for(let ri=0;ri<3;ri++){
-          if(Math.hypot(zr-ROOTS[ri].r,zi-ROOTS[ri].i)<.0001){whichRoot=ri;break;}
-        }
+        for(let ri=0;ri<3;ri++) if(Math.hypot(zr-ROOTS[ri].r,zi-ROOTS[ri].i)<.0001){whichRoot=ri;break;}
         if(whichRoot>=0)break;
       }
-      const shade=Math.max(0,1-n/maxIt);
-      const rc=whichRoot>=0?RCOLS[whichRoot]:[0,0,0];
-      const [pr,pg,pb]=PALS_RGB[currentPal](shade);
-      const idx=(dy*W+px)*4;
-      id.data[idx]  =rc[0]*pr|0; id.data[idx+1]=rc[1]*pg|0;
-      id.data[idx+2]=rc[2]*pb|0; id.data[idx+3]=255;
+      const shade=Math.max(0,1-n/maxIt), rc=whichRoot>=0?RCOLS[whichRoot]:[0,0,0], [pr,pg,pb]=PALS_RGB[currentPal](shade), idx=(dy*W+px)*4;
+      id.data[idx]=rc[0]*pr|0; id.data[idx+1]=rc[1]*pg|0; id.data[idx+2]=rc[2]*pb|0; id.data[idx+3]=255;
     }
   }
-  ctx.putImageData(id,0,newRow);
-  newRow=(newRow+ROWS)%H;
+  ctx.putImageData(id,0,newRow); newRow=(newRow+ROWS)%H;
 }
 
-// ── 14 BÉNARD CONVECTION ─────────────────────────────────────────
+// 14 Bénard
 let benPts=[];
-function init14(){
-  benPts=[]; const n=500;
-  for(let i=0;i<n;i++) benPts.push({x:Math.random()*W,y:Math.random()*H,T:Math.random(),vx:0,vy:0});
-}
+function init14(){ benPts=[]; for(let i=0;i<500;i++) benPts.push({x:Math.random()*W,y:Math.random()*H,T:Math.random(),vx:0,vy:0}); }
 function step14(){
   ctx.fillStyle='rgba(4,2,12,.06)'; ctx.fillRect(0,0,W,H);
-  // Convection: hot particles (T>0.5) rise, cold sink; horizontal repulsion creates cells
   for(let i=0;i<benPts.length;i++){
-    const p=benPts[i];
-    let fx=0,fy=p.T>.5?-.8:.8; // buoyancy
+    const p=benPts[i]; let fx=0,fy=p.T>.5?-.8:.8;
     for(let j=0;j<benPts.length;j+=6){
-      const o=benPts[j]; if(o===p)continue;
-      const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy);
+      const o=benPts[j]; if(o===p)continue; const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy);
       if(d<40&&d>0){fx+=dx/(d*d)*12;fy+=dy/(d*d)*6;}
     }
-    p.vx=(p.vx+fx*.04)*.9; p.vy=(p.vy+fy*.04)*.9;
-    p.x+=p.vx; p.y+=p.vy;
-    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
-    if(p.y<5)   {p.y=5;  p.vy*=-1;p.T=Math.max(0,p.T-.01);}
-    if(p.y>H-5) {p.y=H-5;p.vy*=-1;p.T=Math.min(1,p.T+.01);}
-    const f=p.T; const [r,g,b]=PALS_RGB[currentPal](f);
-    ctx.fillStyle=`rgba(${r},${g},${b},.7)`; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+    p.vx=(p.vx+fx*.04)*.9; p.vy=(p.vy+fy*.04)*.9; p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<5){p.y=5;p.vy*=-1;p.T=Math.max(0,p.T-.01);} if(p.y>H-5){p.y=H-5;p.vy*=-1;p.T=Math.min(1,p.T+.01);}
+    const [r,g,b]=PALS_RGB[currentPal](p.T); ctx.fillStyle=`rgba(${r},${g},${b},.7)`; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
   }
-  // Hot/cold border lines
-  ctx.fillStyle=PALS_CSS[currentPal](1); ctx.fillRect(0,0,W,3);
-  ctx.fillStyle=PALS_CSS[currentPal](0); ctx.fillRect(0,H-3,W,3);
 }
 
-// ── 15 HOPF FIBRATION ────────────────────────────────────────────
+// 15 Hopf
 let hopfAngle=0, hopfFibers=[];
 function init15(){
   hopfFibers=[]; hopfAngle=0;
-  // Sample points on S² (η levels and ξ angles)
-  for(let eta=.1;eta<Math.PI/2-.05;eta+=.2){
-    for(let xi=0;xi<Math.PI*2;xi+=.3){
-      hopfFibers.push({eta,xi,pts:[]});
-    }
-  }
+  for(let eta=.1;eta<Math.PI/2-.05;eta+=.2)for(let xi=0;xi<Math.PI*2;xi+=.3) hopfFibers.push({eta,xi,pts:[]});
 }
 function step15(){
   ctx.fillStyle='rgba(4,2,12,.04)'; ctx.fillRect(0,0,W,H);
-  hopfAngle+=.006;
-  const sc=Math.min(W,H)*.22;
-
+  hopfAngle+=.006; const sc=Math.min(W,H)*.22;
   for(const fib of hopfFibers){
     fib.pts=[];
     for(let t=0;t<Math.PI*2;t+=.08){
-      // Hopf fiber parametrization on S³
-      const e=fib.eta, x1=fib.xi, t2=t;
-      const p=[Math.cos(e)*Math.cos(t2), Math.cos(e)*Math.sin(t2), Math.sin(e)*Math.cos(x1+t2), Math.sin(e)*Math.sin(x1+t2)];
-      // Stereographic projection S³ → R³ (avoiding w→1)
-      const denom=1-p[3]+.001;
-      const X=p[0]/denom, Y=p[1]/denom, Z=p[2]/denom;
-      // Rotate + project R³ → R²
+      const p=[Math.cos(fib.eta)*Math.cos(t), Math.cos(fib.eta)*Math.sin(t), Math.sin(fib.eta)*Math.cos(fib.xi+t), Math.sin(fib.eta)*Math.sin(fib.xi+t)];
+      const denom=1-p[3]+.001, X=p[0]/denom, Y=p[1]/denom, Z=p[2]/denom;
       const cosH=Math.cos(hopfAngle), sinH=Math.sin(hopfAngle);
       const rx=X*cosH-Z*sinH, rz=X*sinH+Z*cosH;
-      const cosV=.35, sinV=.93; // fixed tilt
-      const fy=Y*cosV-rz*sinV;
-      const fz=Y*sinV+rz*cosV;
-      const perspective=1/(1+fz*.3+.01);
+      const cosV=.35, sinV=.93, fy=Y*cosV-rz*sinV, fz=Y*sinV+rz*cosV, perspective=1/(1+fz*.3+.01);
       fib.pts.push([W/2+rx*sc*perspective, H/2-fy*sc*perspective, fz]);
     }
     if(fib.pts.length<2)continue;
-    // Color by eta value
     const f=fib.eta/(Math.PI/2);
     for(let j=1;j<fib.pts.length;j++){
-      const depth=(fib.pts[j][2]+3)/6; const alpha=.05+Math.max(0,depth)*.4;
-      ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.globalAlpha=alpha; ctx.lineWidth=.7;
+      ctx.strokeStyle=PALS_CSS[currentPal](f); ctx.lineWidth=.7;
       ctx.beginPath(); ctx.moveTo(fib.pts[j-1][0],fib.pts[j-1][1]); ctx.lineTo(fib.pts[j][0],fib.pts[j][1]); ctx.stroke();
     }
-    ctx.globalAlpha=1;
   }
 }
 
-// ── 16 BARNSLEY FERN ─────────────────────────────────────────────
-let bfX=0, bfY=0, bfPts=[];
-function init16(){ bfX=0; bfY=0; bfPts=[]; }
+// 16 Barnsley
+let bfX=0, bfY=0;
+function init16(){ bfX=0; bfY=0; }
 function step16(){
   ctx.fillStyle='rgba(4,2,12,.02)'; ctx.fillRect(0,0,W,H);
   for(let i=0;i<4000;i++){
-    const r=Math.random();
-    let nx,ny;
+    const r=Math.random(); let nx,ny;
     if(r<.01){nx=0;ny=.16*bfY;}
     else if(r<.86){nx=.85*bfX+.04*bfY; ny=-.04*bfX+.85*bfY+1.6;}
     else if(r<.93){nx=.2*bfX-.26*bfY; ny=.23*bfX+.22*bfY+1.6;}
     else{nx=-.15*bfX+.28*bfY; ny=.26*bfX+.24*bfY+.44;}
     bfX=nx; bfY=ny;
-    const px=W*.5+bfX*(W*.09);
-    const py=H*.97-bfY*(H*.09);
+    const px=W*.5+bfX*(W*.09), py=H*.97-bfY*(H*.09);
     if(px>0&&px<W&&py>0&&py<H){
-      const f=Math.min(1,Math.max(0,bfY/10));
-      const [r2,g,b]=PALS_RGB[currentPal](f);
+      const f=Math.min(1,Math.max(0,bfY/10)), [r2,g,b]=PALS_RGB[currentPal](f);
       ctx.fillStyle=`rgba(${r2},${g},${b},.4)`; ctx.fillRect(px,py,1.2,1.2);
     }
   }
 }
 
-// ── 17 FIBONACCI SPIRAL ──────────────────────────────────────────
+// 17 Fibonacci
 let fibN=0, fibMax=1600;
 function init17(){ fibN=0; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
 function step17(){
   ctx.fillStyle='rgba(4,2,12,.01)'; ctx.fillRect(0,0,W,H);
-  const GOLDEN=137.508*(Math.PI/180);
-  const cx=W/2, cy=H/2, scale=Math.min(W,H)*.008;
+  const GOLDEN=137.508*(Math.PI/180), cx=W/2, cy=H/2, scale=Math.min(W,H)*.008;
   const addN=Math.min(20,fibMax-fibN);
   for(let k=0;k<addN;k++){
-    const n=fibN+k;
-    const r=Math.sqrt(n)*scale;
-    const theta=n*GOLDEN;
+    const n=fibN+k, r=Math.sqrt(n)*scale, theta=n*GOLDEN;
     const x=cx+r*Math.cos(theta), y=cy+r*Math.sin(theta);
-    const f=n/fibMax; const [rr,g,b]=PALS_RGB[currentPal](f);
-    const radius=Math.max(.8,1.8*(1-n/fibMax)+.5);
-    ctx.fillStyle=`rgba(${rr},${g},${b},.85)`; ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill();
+    const f=n/fibMax, [rr,g,b]=PALS_RGB[currentPal](f);
+    ctx.fillStyle=`rgba(${rr},${g},${b},.85)`; ctx.beginPath(); ctx.arc(x,y,Math.max(.8,1.8*(1-n/fibMax)+.5),0,Math.PI*2); ctx.fill();
   }
   fibN+=addN; if(fibN>=fibMax)fibN=0;
 }
 
-// ── 18 BELOUSOV-ZHABOTINSKY ──────────────────────────────────────
-let bzU=null,bzV=null,bzBW=0,bzBH=0;
-const BZ_SCALE=4;
+// 18 Belousov-Zhabotinsky
+let bzU=null,bzV=null,bzBW=0,bzBH=0; const BZ_SCALE=4;
 function init18(){
-  bzBW=W/BZ_SCALE|0; bzBH=H/BZ_SCALE|0;
-  bzU=new Float32Array(bzBW*bzBH); bzV=new Float32Array(bzBW*bzBH);
-  // Init with random activator + a spiral seed
+  bzBW=W/BZ_SCALE|0; bzBH=H/BZ_SCALE|0; bzU=new Float32Array(bzBW*bzBH); bzV=new Float32Array(bzBW*bzBH);
   for(let i=0;i<bzBW*bzBH;i++){bzU[i]=1;bzV[i]=0;}
-  // Spiral seed
-  for(let y=bzBH*.3;y<bzBH*.7;y++)for(let x=bzBW*.3;x<bzBW*.7;x++){
-    bzU[y*bzBW+x|0]=Math.random(); bzV[y*bzBW+x|0]=Math.random();
-  }
+  for(let y=bzBH*.3;y<bzBH*.7;y++)for(let x=bzBW*.3;x<bzBW*.7;x++){ bzU[y*bzBW+x|0]=Math.random(); bzV[y*bzBW+x|0]=Math.random(); }
 }
 function step18(){
-  const Du=.16,Dv=.08,F=.035,k=.065;
-  const nu=new Float32Array(bzBW*bzBH), nv=new Float32Array(bzBW*bzBH);
+  const Du=.16,Dv=.08,F=.035,k=.065, nu=new Float32Array(bzBW*bzBH), nv=new Float32Array(bzBW*bzBH);
   for(let y=1;y<bzBH-1;y++)for(let x=1;x<bzBW-1;x++){
-    const idx=y*bzBW+x;
-    const lapU=bzU[idx-1]+bzU[idx+1]+bzU[idx-bzBW]+bzU[idx+bzBW]-4*bzU[idx];
-    const lapV=bzV[idx-1]+bzV[idx+1]+bzV[idx-bzBW]+bzV[idx+bzBW]-4*bzV[idx];
+    const idx=y*bzBW+x, lapU=bzU[idx-1]+bzU[idx+1]+bzU[idx-bzBW]+bzU[idx+bzBW]-4*bzU[idx], lapV=bzV[idx-1]+bzV[idx+1]+bzV[idx-bzBW]+bzV[idx+bzBW]-4*bzV[idx];
     const uvv=bzU[idx]*bzV[idx]*bzV[idx];
-    nu[idx]=bzU[idx]+Du*lapU-uvv+F*(1-bzU[idx]);
-    nv[idx]=bzV[idx]+Dv*lapV+uvv-(F+k)*bzV[idx];
-    nu[idx]=Math.max(0,Math.min(1,nu[idx])); nv[idx]=Math.max(0,Math.min(1,nv[idx]));
+    nu[idx]=Math.max(0,Math.min(1,bzU[idx]+Du*lapU-uvv+F*(1-bzU[idx])));
+    nv[idx]=Math.max(0,Math.min(1,bzV[idx]+Dv*lapV+uvv-(F+k)*bzV[idx]));
   }
   bzU=nu; bzV=nv;
-  // Render
   const id=ctx.createImageData(W,H);
   for(let y=0;y<bzBH;y++)for(let x=0;x<bzBW;x++){
-    const u=bzU[y*bzBW+x], v=bzV[y*bzBW+x];
-    const f=Math.max(0,Math.min(1,u-v*.5+.3));
-    const [r,g,b]=PALS_RGB[currentPal](f);
+    const f=Math.max(0,Math.min(1,bzU[y*bzBW+x]-bzV[y*bzBW+x]*.5+.3)), [r,g,b]=PALS_RGB[currentPal](f);
     for(let dy=0;dy<BZ_SCALE;dy++)for(let dx=0;dx<BZ_SCALE;dx++){
-      const px=(y*BZ_SCALE+dy)*W+(x*BZ_SCALE+dx);
-      const idx=px*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=255;
+      const idx=((y*BZ_SCALE+dy)*W+(x*BZ_SCALE+dx))*4; id.data[idx]=r;id.data[idx+1]=g;id.data[idx+2]=b;id.data[idx+3]=255;
     }
   }
   ctx.putImageData(id,0,0);
 }
 
-// ── 19 SCHRÖDINGER WAVE ──────────────────────────────────────────
+// 19 Schrödinger
 let schT=0, schSources=[];
 function init19(){
   schT=0; schSources=[];
-  for(let i=0;i<3;i++) schSources.push({
-    x:W*(.3+Math.random()*.4), y:H*(.3+Math.random()*.4),
-    kx:(Math.random()-.5)*4, ky:(Math.random()-.5)*4,
-    sig:50+Math.random()*30, omega:2+Math.random()*2
-  });
+  for(let i=0;i<3;i++) schSources.push({x:W*(.3+Math.random()*.4),y:H*(.3+Math.random()*.4),kx:(Math.random()-.5)*4,ky:(Math.random()-.5)*4,sig:50+Math.random()*30,omega:2+Math.random()*2});
 }
 function step19(){
-  schT+=.04;
-  const id=ctx.createImageData(W,H);
+  schT+=.04; const id=ctx.createImageData(W,H);
   for(let y=0;y<H;y+=2)for(let x=0;x<W;x+=2){
     let psiR=0,psiI=0;
     for(const src of schSources){
-      const dx=x-src.x,dy=y-src.y;
-      const r2=dx*dx+dy*dy;
-      const env=Math.exp(-r2/(2*src.sig*src.sig*(1+schT*.3)));
-      const phase=src.kx*dx+src.ky*dy-src.omega*schT;
+      const dx=x-src.x,dy=y-src.y,r2=dx*dx+dy*dy,env=Math.exp(-r2/(2*src.sig*src.sig*(1+schT*.3))),phase=src.kx*dx+src.ky*dy-src.omega*schT;
       psiR+=env*Math.cos(phase); psiI+=env*Math.sin(phase);
     }
-    const prob=Math.min(1,(psiR*psiR+psiI*psiI)/3);
-    const phase=Math.atan2(psiI,psiR)/Math.PI*.5+.5;
-    const [r,g,b]=PALS_RGB[currentPal](phase);
+    const prob=Math.min(1,(psiR*psiR+psiI*psiI)/3), phase=Math.atan2(psiI,psiR)/Math.PI*.5+.5, [r,g,b]=PALS_RGB[currentPal](phase);
     for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
-      const idx=((y+dy)*W+(x+dx))*4;
-      id.data[idx]=r*prob|0; id.data[idx+1]=g*prob|0;
-      id.data[idx+2]=b*prob|0; id.data[idx+3]=200;
+      const idx=((y+dy)*W+(x+dx))*4; id.data[idx]=r*prob|0; id.data[idx+1]=g*prob|0; id.data[idx+2]=b*prob|0; id.data[idx+3]=200;
     }
   }
   ctx.putImageData(id,0,0);
 }
 
-// ── 20 RULE 110 ──────────────────────────────────────────────────
+// 20 Rule 110
 let r110Grid=null,r110Row=0,r110GW=0;
-function init20(){
-  r110GW=W; r110Row=0;
-  r110Grid=new Uint8Array(r110GW);
-  r110Grid[r110GW>>1]=1;
-  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
-}
+function init20(){ r110GW=W; r110Row=0; r110Grid=new Uint8Array(r110GW); r110Grid[r110GW>>1]=1; ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H); }
 function step20(){
-  // Scroll up
   if(r110Row>=H){
-    ctx.drawImage(canvas,0,1,W,H-1,0,0,W,H-1);
-    ctx.fillStyle='#04020c'; ctx.fillRect(0,H-1,W,1);
-    r110Row=H-1;
-    // Advance one automaton row
-    const ng=new Uint8Array(r110GW);
-    const RULE110=0b01101110;
-    for(let x=0;x<r110GW;x++){
-      const l=r110Grid[(x-1+r110GW)%r110GW];
-      const c=r110Grid[x];
-      const r=r110Grid[(x+1)%r110GW];
-      const pattern=(l<<2)|(c<<1)|r;
-      ng[x]=(RULE110>>pattern)&1;
-    }
+    ctx.drawImage(canvas,0,1,W,H-1,0,0,W,H-1); ctx.fillStyle='#04020c'; ctx.fillRect(0,H-1,W,1); r110Row=H-1;
+    const ng=new Uint8Array(r110GW), RULE110=0b01101110;
+    for(let x=0;x<r110GW;x++){ const pat=(r110Grid[(x-1+r110GW)%r110GW]<<2)|(r110Grid[x]<<1)|r110Grid[(x+1)%r110GW]; ng[x]=(RULE110>>pat)&1; }
     r110Grid=ng;
-    for(let x=0;x<r110GW;x++){
-      if(r110Grid[x]){
-        const f=x/r110GW;
-        const [rr,g,b]=PALS_RGB[currentPal](f);
-        ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,H-1,1,1);
-      }
-    }
+    for(let x=0;x<r110GW;x++) if(r110Grid[x]){ const [rr,g,b]=PALS_RGB[currentPal](x/r110GW); ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,H-1,1,1); }
   } else {
-    const ng=new Uint8Array(r110GW);
-    const RULE110=0b01101110;
-    for(let x=0;x<r110GW;x++){
-      const l=r110Grid[(x-1+r110GW)%r110GW];
-      const c=r110Grid[x];
-      const r=r110Grid[(x+1)%r110GW];
-      const pattern=(l<<2)|(c<<1)|r;
-      ng[x]=(RULE110>>pattern)&1;
-    }
+    const ng=new Uint8Array(r110GW), RULE110=0b01101110;
+    for(let x=0;x<r110GW;x++){ const pat=(r110Grid[(x-1+r110GW)%r110GW]<<2)|(r110Grid[x]<<1)|r110Grid[(x+1)%r110GW]; ng[x]=(RULE110>>pat)&1; }
     r110Grid=ng;
-    for(let x=0;x<r110GW;x++){
-      if(r110Grid[x]){
-        const f=x/r110GW;
-        const [rr,g,b]=PALS_RGB[currentPal](f);
-        ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,r110Row,1,1);
-      }
-    }
+    for(let x=0;x<r110GW;x++) if(r110Grid[x]){ const [rr,g,b]=PALS_RGB[currentPal](x/r110GW); ctx.fillStyle=`rgb(${rr},${g},${b})`; ctx.fillRect(x,r110Row,1,1); }
     r110Row++;
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// METADATOS DE LAS 20 OBRAS
+// NUEVAS 4 OBRAS: PROBLEMAS DEL MILENIO & CONJETURAS (21 A 24)
+// ═══════════════════════════════════════════════════════════════════
+
+// ── 21 LOS CEROS DE RIEMANN (Hipótesis de Riemann · 1859) ─────────
+// Cuerda de luz en la línea crítica s = 1/2 + it.
+// Evalúa la función Z(t) de Riemann-Siegel y traza la espiral 3D.
+let rieT = 0, riePts = [], rieZerosHit = [];
+const RIEMANN_ZEROS = [14.1347, 21.0220, 25.0108, 30.4248, 32.9350, 37.5861, 40.9187];
+let rieRot = 0.4;
+
+function init21() {
+  rieT = 0; riePts = []; rieZerosHit = []; rieRot = 0.4;
+  ctx.fillStyle = '#04020c'; ctx.fillRect(0,0,W,H);
+}
+
+function riemannZ(t) {
+  // Aproximación de Riemann-Siegel para Z(t) en la línea crítica
+  if (t < 0.1) return 1.0;
+  const theta = (t/2)*Math.log(t/(2*Math.PI)) - (t/2) - (Math.PI/8);
+  const N = Math.floor(Math.sqrt(t / (2*Math.PI))) || 1;
+  let sum = 0;
+  for (let n = 1; n <= Math.max(1, N); n++) {
+    sum += Math.cos(theta - t*Math.log(n)) / Math.sqrt(n);
+  }
+  return 2 * sum;
+}
+
+function step21() {
+  ctx.fillStyle = 'rgba(4,2,12,0.035)'; ctx.fillRect(0,0,W,H);
+  rieRot += 0.001;
+
+  // Avanzar a lo largo de la línea crítica t
+  for (let step = 0; step < 4; step++) {
+    rieT += 0.04;
+    if (rieT > 45) { rieT = 0; riePts = []; }
+
+    const zVal = riemannZ(rieT);
+    const theta = (rieT/2)*Math.log(Math.max(1,rieT)/(2*Math.PI)) - (rieT/2);
+    
+    // Coordenadas complejas: parte real e imaginaria
+    const rx = zVal * Math.cos(theta);
+    const ry = zVal * Math.sin(theta);
+    const rz = (rieT - 22.5) * 8;
+
+    // Detectar cruce por cero no trivial
+    for (const z0 of RIEMANN_ZEROS) {
+      if (Math.abs(rieT - z0) < 0.03) {
+        rieZerosHit.push({ x: W/2, y: H/2, r: 1, maxR: 60, col: currentPal });
+      }
+    }
+
+    // Proyección 3D rotada
+    const cosR = Math.cos(rieRot), sinR = Math.sin(rieRot);
+    const px = rx * cosR - rz * sinR * 0.1;
+    const pz = rx * sinR + rz * cosR;
+    const py = ry - pz * 0.2;
+    const sc = Math.min(W, H) * 0.045;
+
+    riePts.push([W/2 + px * sc, H/2 - py * sc, Math.abs(zVal)]);
+    if (riePts.length > 550) riePts.shift();
+  }
+
+  // Dibujar eje del cero (el centro sagrado donde cruzan todos los ceros)
+  ctx.strokeStyle = 'rgba(120, 100, 255, 0.2)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.stroke();
+
+  // Dibujar espiral de la cuerda
+  const n = riePts.length;
+  if (n > 1) {
+    for (let j = 1; j < n; j++) {
+      const frac = j / n;
+      const zDist = riePts[j][2];
+      // Más brillante y dorado cuando se acerca exactamente a cero (zDist ≈ 0)
+      const nearZero = Math.exp(-zDist * 1.5);
+      ctx.strokeStyle = PALS_CSS[currentPal](nearZero * 0.8 + frac * 0.2);
+      ctx.lineWidth = 0.6 + nearZero * 2.5;
+      ctx.beginPath();
+      ctx.moveTo(riePts[j-1][0], riePts[j-1][1]);
+      ctx.lineTo(riePts[j][0], riePts[j][1]);
+      ctx.stroke();
+    }
+  }
+
+  // Ondas expansivas cuando cruza un cero no trivial
+  for (let k = rieZerosHit.length - 1; k >= 0; k--) {
+    const o = rieZerosHit[k];
+    o.r += 1.8;
+    const alpha = 1.0 - o.r / o.maxR;
+    if (alpha <= 0) {
+      rieZerosHit.splice(k, 1);
+      continue;
+    }
+    ctx.strokeStyle = PALS_CSS[currentPal](1.0);
+    ctx.globalAlpha = alpha * 0.8;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ── 22 EL DESIERTO DE BEAL (Conjetura de Beal · Ax + By = Cz) ──────
+// Mapea en el espacio logarítmico las sumas de potencias.
+// Muestra el vacío de exclusión donde ninguna terna coprima puede cruzar.
+let bealStars = [], bealAngle = 0;
+function init22() {
+  bealStars = []; bealAngle = 0;
+  ctx.fillStyle = '#04020c'; ctx.fillRect(0,0,W,H);
+  
+  // Generar candidatos de potencias puras A^x + B^y = C^z
+  for (let A = 2; A <= 9; A++) {
+    for (let B = 2; B <= 9; B++) {
+      for (let x = 3; x <= 6; x++) {
+        for (let y = 3; y <= 6; y++) {
+          const sum = Math.pow(A, x) + Math.pow(B, y);
+          // Buscar si sum es una potencia C^z
+          for (let C = 2; C <= 30; C++) {
+            for (let z = 3; z <= 6; z++) {
+              const cz = Math.pow(C, z);
+              const err = Math.abs(sum - cz) / sum;
+              // Máximo común divisor
+              const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+              const g = gcd(A, gcd(B, C));
+              
+              if (err < 0.08 || g > 1) {
+                bealStars.push({
+                  A, B, C, x, y, z,
+                  hasCommonFactor: g > 1,
+                  th: Math.log(sum) * 1.8,
+                  rad: Math.log(cz) * 12,
+                  energy: 1.0 - err
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function step22() {
+  ctx.fillStyle = 'rgba(4,2,12,0.04)'; ctx.fillRect(0,0,W,H);
+  bealAngle += 0.002;
+  const cx = W / 2, cy = H / 2;
+
+  // Dibujar el 'Desierto de Beal': franja de exclusión circular donde gcd=1 es imposible
+  ctx.strokeStyle = 'rgba(255, 50, 100, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, Math.min(W,H)*0.28, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, Math.min(W,H)*0.36, 0, Math.PI*2); ctx.stroke();
+
+  // Partículas y constelaciones de potencias
+  for (let i = 0; i < bealStars.length; i++) {
+    const s = bealStars[i];
+    const a = s.th + bealAngle * (s.hasCommonFactor ? 1 : -0.7);
+    const r = s.rad * (Math.min(W,H)*0.0035);
+    const px = cx + r * Math.cos(a);
+    const py = cy + r * Math.sin(a);
+
+    if (s.hasCommonFactor) {
+      // Soluciones con factor común resonante (permitidas por la conjetura)
+      ctx.fillStyle = PALS_CSS[currentPal](0.85);
+      ctx.beginPath(); ctx.arc(px, py, 2.5, 0, Math.PI*2); ctx.fill();
+
+      // Líneas de filamento conectando soluciones armónicas
+      if (i > 0 && bealStars[i-1].hasCommonFactor) {
+        const prev = bealStars[i-1];
+        const pa = prev.th + bealAngle;
+        const pr = prev.rad * (Math.min(W,H)*0.0035);
+        ctx.strokeStyle = PALS_CSS[currentPal](0.4);
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(cx + pr*Math.cos(pa), cy + pr*Math.sin(pa)); ctx.stroke();
+      }
+    } else {
+      // Intentos coprimos (gcd = 1): repelidos fuera del desierto
+      ctx.fillStyle = 'rgba(255, 80, 80, 0.5)';
+      ctx.beginPath(); ctx.arc(px, py, 1.2, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Texto místico sutil en el centro
+  ctx.fillStyle = 'rgba(180, 140, 255, 0.3)';
+  ctx.font = '10px Space Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('ZONA PROHIBIDA: gcd(A,B,C)=1', cx, cy + 4);
+}
+
+// ── 23 NAVIER-STOKES (Vórtices y Turbulencia 3D) ───────────────────
+// Filamentos de vorticidad ω = ∇ × u y estiramiento de vórtice.
+let nsVortices = [], nsSparks = [], nsRot = 0;
+function init23() {
+  nsVortices = []; nsSparks = []; nsRot = 0;
+  // Crear 3 anillos de vórtice entrelazados
+  for (let ring = 0; ring < 3; ring++) {
+    const pts = [];
+    const R = Math.min(W, H) * (0.16 + ring * 0.05);
+    const zOffset = (ring - 1) * 35;
+    for (let i = 0; i < 64; i++) {
+      const th = (i / 64) * Math.PI * 2;
+      pts.push({
+        x: R * Math.cos(th),
+        y: R * Math.sin(th),
+        z: zOffset + Math.sin(th * 3) * 15,
+        vx: 0, vy: 0, vz: 0
+      });
+    }
+    nsVortices.push({ pts, R, ring });
+  }
+}
+
+function step23() {
+  ctx.fillStyle = 'rgba(4,2,12,0.05)'; ctx.fillRect(0,0,W,H);
+  nsRot += 0.003;
+  const cx = W / 2, cy = H / 2;
+
+  // Interacción de vórtices y estiramiento (Vortex Stretching)
+  for (const v of nsVortices) {
+    const pts = v.pts;
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      // Ley de inducción de Biot-Savart simplificada
+      const th = (i / pts.length) * Math.PI * 2;
+      p.x += Math.sin(p.z * 0.03 + nsRot * 2) * 1.2;
+      p.y += Math.cos(p.z * 0.03 + nsRot * 2) * 1.2;
+      p.z += Math.sin(th * 2 + nsRot) * 0.8;
+
+      // Dispersión turbulenta si se distorsiona mucho
+      if (Math.random() < 0.02) {
+        nsSparks.push({
+          x: p.x, y: p.y, z: p.z,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3,
+          vz: (Math.random() - 0.5) * 3,
+          life: 1.0
+        });
+      }
+    }
+
+    // Proyección 3D rotada
+    const proj = pts.map(p => {
+      const rx = p.x * Math.cos(nsRot) - p.z * Math.sin(nsRot);
+      const rz = p.x * Math.sin(nsRot) + p.z * Math.cos(nsRot);
+      const ry = p.y;
+      const sc = 1.0 / (1.0 + rz * 0.002);
+      return [cx + rx * sc, cy - ry * sc];
+    });
+
+    // Dibujar tubo de vorticidad
+    ctx.strokeStyle = PALS_CSS[currentPal](0.4 + v.ring * 0.25);
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(proj[0][0], proj[0][1]);
+    for (let i = 1; i < proj.length; i++) ctx.lineTo(proj[i][0], proj[i][1]);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Dibujar chispas de Kolmogorov (cascada de energía microscópica)
+  for (let k = nsSparks.length - 1; k >= 0; k--) {
+    const sp = nsSparks[k];
+    sp.x += sp.vx; sp.y += sp.vy; sp.z += sp.vz;
+    sp.life -= 0.025;
+    if (sp.life <= 0) { nsSparks.splice(k, 1); continue; }
+
+    const rx = sp.x * Math.cos(nsRot) - sp.z * Math.sin(nsRot);
+    const ry = sp.y;
+    ctx.fillStyle = PALS_CSS[currentPal](sp.life);
+    ctx.fillRect(cx + rx, cy - ry, 1.5, 1.5);
+  }
+}
+
+// ── 24 EL FLUJO DE RICCI DE POINCARÉ (Perelman · 2002) ─────────────
+// Ecuación de evolución métrica ∂t g_ij = -2 R_ij.
+// Una variedad arrugada se redondea y colapsa en una esfera perfecta S³.
+let ricciAngle = 0, ricciT = 0;
+function init24() {
+  ricciAngle = 0; ricciT = 0;
+  ctx.fillStyle = '#04020c'; ctx.fillRect(0,0,W,H);
+}
+
+function step24() {
+  ctx.fillStyle = 'rgba(4,2,12,0.06)'; ctx.fillRect(0,0,W,H);
+  ricciAngle += 0.004;
+  ricciT += 0.008;
+
+  // Factor de suavizado del flujo de Ricci: de arrugas a esfera perfecta
+  const smoothing = Math.min(1.0, ricciT * 0.08);
+  const baseR = Math.min(W, H) * 0.26;
+  const cx = W / 2, cy = H / 2;
+
+  // Si ya colapsó en esfera perfecta, volver a deformar periódicamente
+  if (ricciT > 25) ricciT = 0;
+
+  // Malla latitudinal y longitudinal de la variedad tridimensional
+  for (let lat = -Math.PI/2 + 0.15; lat <= Math.PI/2 - 0.15; lat += 0.22) {
+    ctx.beginPath();
+    let first = true;
+    for (let lon = 0; lon <= Math.PI * 2; lon += 0.12) {
+      // Perturbaciones iniciales de curvatura (cuellos y arrugas de Perelman)
+      const wrinkle = Math.sin(lon * 4 + lat * 3) * Math.cos(lat * 5);
+      const neckEffect = (1.0 - Math.abs(lat) / (Math.PI/2)) * 0.5 * Math.sin(lon * 2);
+      const deformation = (wrinkle + neckEffect) * (1.0 - smoothing);
+
+      const r = baseR * (1.0 + deformation * 0.4);
+      const x = r * Math.cos(lat) * Math.sin(lon + ricciAngle);
+      const y = r * Math.sin(lat);
+      const z = r * Math.cos(lat) * Math.cos(lon + ricciAngle);
+
+      // Proyección 3D
+      const px = cx + x;
+      const py = cy - y + z * 0.25;
+
+      if (first) { ctx.moveTo(px, py); first = false; }
+      else { ctx.lineTo(px, py); }
+    }
+    const curvatureIntensity = (1.0 - smoothing);
+    ctx.strokeStyle = PALS_CSS[currentPal](0.3 + curvatureIntensity * 0.6);
+    ctx.lineWidth = 0.7 + curvatureIntensity * 0.8;
+    ctx.stroke();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// METADATOS DE LAS 24 OBRAS
 // ═══════════════════════════════════════════════════════════════════
 const ARTWORKS=[
   {badge:"01",mini:"Atractor de Lorenz",cat:"TEORÍA DEL CAOS · 1963",solver:"RK4 Integrator",
    title:"El Vuelo de Lorenz",sub:"El aleteo que gobierna el infinito",
    eq:"dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
-   hist:"En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora. Aquella millonésima desató un tornado y demostró que sistemas perfectamente deterministas pueden ser perpetuamente impredecibles.",
+   hist:"En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora climática. Aquella millonésima desató un tornado y demostró que sistemas perfectamente deterministas pueden ser perpetuamente impredecibles.",
    poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás. Cada decisión ínfima abre una órbita completamente nueva en el tejido del universo."',
    hint:"Arrastra para rotar el atractor en 3D"},
   {badge:"02",mini:"Von Mises",cat:"MECÁNICA CONTINUA · 1913",solver:"Cardano Eigensolver",
@@ -997,13 +1241,39 @@ const ARTWORKS=[
    hist:"Wolfram estudió 256 autómatas celulares de 1D. La Regla 110 resultó ser Turing-completa: con una sola regla de tres vecinos, puede calcular cualquier cosa que una computadora pueda calcular.",
    poem:'"Una sola celda negra en un mar blanco. Una sola regla. Y de eso nace todo lo que una mente puede imaginar o calcular en el universo."',
    hint:"Una celda inicial genera un patrón computacionalmente universal"},
+
+  // ── 21 A 24: ENIGMAS DEL MILENIO & CONJETURAS ──
+  {badge:"21",mini:"Ceros de Riemann",cat:"PROBLEMA DEL MILENIO · 1859",solver:"Riemann-Siegel Critical Spiral",
+   title:"Los Ceros de Riemann",sub:"El enigma de un millón de dólares en la línea crítica",
+   eq:"ζ(s) = ∑ 1/nˢ = 0  ⇒  Re(s) = 1/2\nZ(t) cruza el origen exactamente en t₁, t₂, t₃...",
+   hist:"En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales de su función Zeta yacen en la línea crítica Re(s)=1/2. Es el problema no resuelto más famoso del mundo: gobierna la distribución de todos los números primos.",
+   poem:'"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."',
+   hint:"Observa los destellos expansivos cada vez que la curva cruza un cero no trivial"},
+  {badge:"22",mini:"Desierto de Beal",cat:"CONJETURA DE BEAL · 1993",solver:"Logarithmic Power Lattice",
+   title:"El Desierto de Beal",sub:"La repulsión matemática entre potencias coprimas",
+   eq:"Aˣ + Bʸ = Cᶻ  con  x,y,z > 2\n⇒  mcd(A,B,C) > 1 (Premio $1.000.000 USD)",
+   hist:"El banquero Andrew Beal ofreció $1.000.000 USD a quien demuestre que Aˣ + Bʸ = Cᶻ exige un factor primo común. Si buscas soluciones coprimas, la matemática te expulsa: se crea un vacío donde nada puede tocarse.",
+   poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse. Solo aquellos que comparten la misma sangre prima pueden abrazarse en la geometría."',
+   hint:"Constelaciones ordenadas (factor común) vs Desierto vacío (exclusión coprima)"},
+  {badge:"23",mini:"Navier-Stokes",cat:"PROBLEMA DEL MILENIO · 1845",solver:"3D Vortex Filament Stretching",
+   title:"Vórtices de Navier-Stokes",sub:"El misterio de la turbulencia y las velocidades infinitas",
+   eq:"∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u\n¿Puede la vorticidad ω = ∇×u explotar a infinito?",
+   hist:"Claude Navier y George Stokes formularon las ecuaciones que gobiernan el agua y el aire. El Instituto Clay ofrece $1.000.000 USD a quien demuestre si un fluido puede desarrollar singularidades de energía infinita.",
+   poem:'"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."',
+   hint:"Filamentos de vórtice entrelazados estirándose y liberando chispas turbulentas"},
+  {badge:"24",mini:"Flujo de Ricci",cat:"PROBLEMA DEL MILENIO · 2002",solver:"Perelman Metric Smoothing S³",
+   title:"El Flujo de Ricci de Poincaré",sub:"La redondez cósmica que resolvió Grigori Perelman",
+   eq:"∂g_ij/∂t = -2 R_ij\nDeformación métrica hacia la esfera perfecta S³",
+   hist:"En 1904 Henri Poincaré planteó su conjetura sobre la esfera tridimensional. En 2002, el ermitaño ruso Grigori Perelman la resolvió usando el Flujo de Ricci... y rechazó la Medalla Fields y el millón de dólares.",
+   poem:'"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."',
+   hint:"Observa cómo el flujo alisa las arrugas del espacio hacia la esfera perfecta"}
 ];
 
 // ═══════════════════════════════════════════════════════════════════
 // ORQUESTACIÓN
 // ═══════════════════════════════════════════════════════════════════
-const INITS =[init01,init02,init03,init04,init05,init06,init07,init08,init09,init10,init11,init12,init13,init14,init15,init16,init17,init18,init19,init20];
-const STEPS =[step01,step02,step03,step04,step05,step06,step07,step08,step09,step10,step11,step12,step13,step14,step15,step16,step17,step18,step19,step20];
+const INITS =[init01,init02,init03,init04,init05,init06,init07,init08,init09,init10,init11,init12,init13,init14,init15,init16,init17,init18,init19,init20,init21,init22,init23,init24];
+const STEPS =[step01,step02,step03,step04,step05,step06,step07,step08,step09,step10,step11,step12,step13,step14,step15,step16,step17,step18,step19,step20,step21,step22,step23,step24];
 
 function togglePalette(){ currentPal=(currentPal+1)%4; restartArtwork(); }
 
@@ -1021,8 +1291,8 @@ function selectArtwork(idx){
   document.getElementById('art-poem').textContent=d.poem;
   document.getElementById('hint').textContent=d.hint;
   document.querySelectorAll('#catalog-grid > div').forEach((c,i)=>{
-    c.classList.toggle('border-purple-500/50',i===idx);
-    c.classList.toggle('bg-purple-900/15',i===idx);
+    c.classList.toggle('border-purple-500/60',i===idx);
+    c.classList.toggle('bg-purple-900/20',i===idx);
   });
   restartArtwork();
 }
@@ -1039,7 +1309,7 @@ function loop(){
   animId=requestAnimationFrame(loop);
 }
 
-// Mouse / touch
+// Interacción mouse / touch
 canvas.addEventListener('mousedown',e=>{
   isDrag=true; dragX=e.clientX; dragY=e.clientY; mouseDown=true;
   const r=canvas.getBoundingClientRect(); mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
@@ -1050,10 +1320,16 @@ window.addEventListener('mousemove',e=>{
   const r=canvas.getBoundingClientRect(); mouseX=e.clientX-r.left; mouseY=e.clientY-r.top;
   if(currentArt===4){ chM=Math.max(1,Math.min(8,Math.floor((mouseX/r.width)*8)+1)); chN=Math.max(1,Math.min(8,Math.floor((mouseY/r.height)*8)+1)); }
   if(!isDrag)return;
-  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=(e.clientX-dragX)*.005; lRotX+=(e.clientY-dragY)*.005; rRot+=(e.clientX-dragX)*.005; }
+  const dx=e.clientX-dragX;
+  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=dx*.005; lRotX+=(e.clientY-dragY)*.005; rRot+=dx*.005; }
+  if(currentArt===20){ rieRot+=dx*.005; }
+  if(currentArt===22){ nsRot+=dx*.005; }
+  if(currentArt===23){ ricciAngle+=dx*.005; }
   dragX=e.clientX; dragY=e.clientY;
 });
 window.addEventListener('mouseup',()=>{ isDrag=false; mouseDown=false; });
+
+// Touch
 canvas.addEventListener('touchstart',e=>{
   const t=e.touches[0]; isDrag=true; dragX=t.clientX; dragY=t.clientY; mouseDown=true;
   const r=canvas.getBoundingClientRect(); mouseX=t.clientX-r.left; mouseY=t.clientY-r.top;
@@ -1061,7 +1337,11 @@ canvas.addEventListener('touchstart',e=>{
 window.addEventListener('touchmove',e=>{
   const t=e.touches[0]; const r=canvas.getBoundingClientRect(); mouseX=t.clientX-r.left; mouseY=t.clientY-r.top;
   if(!isDrag)return;
-  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=(t.clientX-dragX)*.005; lRotX+=(t.clientY-dragY)*.005; rRot+=(t.clientX-dragX)*.005; }
+  const dx=t.clientX-dragX;
+  if(currentArt===0||currentArt===6||currentArt===14){ lRotZ+=dx*.005; lRotX+=(t.clientY-dragY)*.005; rRot+=dx*.005; }
+  if(currentArt===20){ rieRot+=dx*.005; }
+  if(currentArt===22){ nsRot+=dx*.005; }
+  if(currentArt===23){ ricciAngle+=dx*.005; }
   dragX=t.clientX; dragY=t.clientY;
 },{passive:true});
 window.addEventListener('touchend',()=>{ isDrag=false; mouseDown=false; });
@@ -1072,18 +1352,19 @@ function downloadArtwork(){
   a.href=canvas.toDataURL('image/png'); a.click();
 }
 
-// ── Construir catálogo en el DOM ──────────────────────────────────
 function buildCatalog(){
   const grid=document.getElementById('catalog-grid');
   ARTWORKS.forEach((d,i)=>{
     const el=document.createElement('div');
-    el.className='glass glow rounded-xl p-3 cursor-pointer transition transform hover:-translate-y-0.5 relative group';
+    const isMillennium = i >= 20;
+    el.className=`glass glow rounded-xl p-3 cursor-pointer transition transform hover:-translate-y-0.5 relative group ${isMillennium ? 'border-amber-500/30 bg-amber-950/10' : ''}`;
     el.innerHTML=`
-      <div class="flex justify-between items-center text-[9px] text-slate-400 mono mb-1.5">
+      <div class="flex justify-between items-center text-[9px] ${isMillennium ? 'text-amber-400 font-bold' : 'text-slate-400'} mono mb-1.5">
         <span>OBRA ${d.badge}</span>
+        ${isMillennium ? '<span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[8px]">$1M</span>' : ''}
       </div>
-      <h3 class="serif font-bold text-white text-sm mb-0.5 group-hover:text-purple-300 transition leading-tight">${d.title}</h3>
-      <div class="text-[10px] mono text-cyan-400/70 mt-1.5 truncate">${d.cat.split('·')[0].trim()}</div>`;
+      <h3 class="serif font-bold text-white text-xs mb-0.5 group-hover:text-purple-300 transition leading-tight truncate">${d.title}</h3>
+      <div class="text-[9px] mono ${isMillennium ? 'text-amber-300/80' : 'text-cyan-400/70'} mt-1 truncate">${d.cat.split('·')[0].trim()}</div>`;
     el.onclick=()=>selectArtwork(i);
     grid.appendChild(el);
   });
@@ -1092,7 +1373,7 @@ function buildCatalog(){
 window.addEventListener('resize',()=>{ resize(); restartArtwork(); });
 resize();
 buildCatalog();
-selectArtwork(0);
+selectArtwork(20); // Arranca mostrando Los Ceros de Riemann
 </script>
 </body>
 </html>

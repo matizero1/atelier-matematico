@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Museo del Infinito — Atelier Matemático</title>
+<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #030308;
+    --card: rgba(10, 10, 24, 0.85);
+    --border: rgba(140, 120, 255, 0.15);
+    --accent: #8b5cf6;
+  }
+  body {
+    background-color: var(--bg);
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
+    user-select: none;
+  }
+  .serif { font-family: 'Cinzel', serif; }
+  .mono  { font-family: 'Space Mono', monospace; }
+  .glass {
+    background: var(--card);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+  }
+  .glow:hover {
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+  }
+  
+  /* PERSPECTIVA ESPACIAL DEL PASILLO 3D */
+  #corridor-viewport {
+    perspective: 1000px;
+    perspective-origin: 50% 50%;
+    transform-style: preserve-3d;
+  }
+  #corridor-track {
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .museum-station {
+    transform-style: preserve-3d;
+  }
+  .wall-left {
+    transform: rotateY(55deg) translateZ(80px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wall-right {
+    transform: rotateY(-55deg) translateZ(80px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wall-left:hover {
+    transform: rotateY(40deg) translateZ(120px) scale(1.04);
+  }
+  .wall-right:hover {
+    transform: rotateY(-40deg) translateZ(120px) scale(1.04);
+  }
+
+  /* Flash de cámara fotográfica */
+  #camera-flash {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+  .flashing {
+    opacity: 0.85 !important;
+    transition: opacity 0.05s ease-in !important;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+</style>
+</head>
+<body class="selection:bg-purple-900 selection:text-purple-100">
+
+<!-- FLASH DE CÁMARA (EFECTO OBTURADOR) -->
+<div id="camera-flash" class="fixed inset-0 bg-white z-[100]"></div>
+
+<!-- HEADER / NAVEGACIÓN SUPERIOR DEL MUSEO -->
+<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center transition-all">
+  <div class="flex items-center gap-3">
+    <button onclick="exitFocusMode()" class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20 group">
+      <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono group-hover:scale-110 transition">🏛️</div>
+    </button>
+    <div>
+      <span class="serif tracking-[.2em] text-white text-xs md:text-sm font-semibold block">MUSEO DEL INFINITO</span>
+      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">Atelier Matemático · Caza de Fórmulas</span>
+    </div>
+  </div>
+
+  <!-- HUD CENTRAL: MODO PASILLO O MODO CONTEMPLACIÓN -->
+  <div class="hidden md:flex items-center gap-2 glass px-4 py-1.5 rounded-full border-white/10 text-xs mono text-slate-300">
+    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+    <span id="nav-mode-indicator">Pasillo Principal · Desliza para caminar</span>
+  </div>
+
+  <!-- DERECHA: BOTONES DE CARRETE & TIENDA -->
+  <div class="flex items-center gap-2.5">
+    <!-- Botón Volver al Pasillo (visible solo en contemplación) -->
+    <button id="btn-back-corridor" onclick="exitFocusMode()" class="hidden glass hover:bg-white/10 text-slate-200 text-xs px-3.5 py-1.5 rounded-full mono transition items-center gap-1.5">
+      <span>← Volver al Pasillo</span>
+    </button>
+
+    <!-- Botón Carrete Fotográfico del Usuario -->
+    <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2 group">
+      <span>📷</span>
+      <span>Mi Carrete</span>
+      <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
+    </button>
+
+    <!-- Botón Tienda de Cuadros Físicos -->
+    <button onclick="toggleShop()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-4 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
+      <span>🖼️</span>
+      <span class="hidden sm:inline">Tienda de Cuadros</span>
+    </button>
+  </div>
+</header>
+
+<!-- ========================================================================= -->
+<!-- VISTA 1: EL PASILLO 3D DEL MUSEO (CORRIDOR WALKTHROUGH)                   -->
+<!-- ========================================================================= -->
+<section id="corridor-view" class="pt-24 min-h-screen relative overflow-hidden flex flex-col justify-center items-center">
+  
+  <!-- Guía de navegación sutil -->
+  <div class="text-center z-10 mb-4 pointer-events-none">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-2">
+      Usa la rueda del mouse o las flechas para caminar por el pasillo
+    </div>
+    <p class="text-xs text-slate-400 font-light">Haz clic en cualquier cuadro a la izquierda o derecha para contemplarlo de frente</p>
+  </div>
+
+  <!-- Viewport 3D -->
+  <div id="corridor-viewport" class="w-full max-w-6xl h-[620px] relative flex justify-center items-center">
+    
+    <!-- Pistas del pasillo (avanza en Z con scroll) -->
+    <div id="corridor-track" class="w-full h-full relative flex items-center justify-center">
+      <!-- Las estaciones del pasillo se generan dinámicamente en JS -->
+    </div>
+
+  </div>
+
+  <!-- Controles de navegación en el pasillo -->
+  <div class="flex items-center gap-4 z-20 mt-4 mb-8">
+    <button onclick="navigateCorridor(-1)" class="glass hover:bg-white/15 text-white w-10 h-10 rounded-full flex items-center justify-center mono transition">←</button>
+    <div class="text-xs mono text-purple-300/80 glass px-4 py-1.5 rounded-full" id="corridor-index-label">Sala 1 de 8</div>
+    <button onclick="navigateCorridor(1)" class="glass hover:bg-white/15 text-white w-10 h-10 rounded-full flex items-center justify-center mono transition">→</button>
+  </div>
+
+</section>
+
+<!-- ========================================================================= -->
+<!-- VISTA 2: MODO CONTEMPLACIÓN DE FRENTE (FOCUS MODE FULLSCREEN)              -->
+<!-- ========================================================================= -->
+<section id="focus-view" class="fixed inset-0 z-40 bg-[#04020c] pt-20 px-4 md:px-10 pb-8 flex flex-col hidden overflow-y-auto">
+  <div class="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch my-auto">
+    
+    <!-- Canvas de la Fórmula en Vivo (8 Cols) -->
+    <div class="lg:col-span-8 glass rounded-2xl p-2 relative flex flex-col min-h-[500px] md:min-h-[620px] shadow-2xl overflow-hidden group">
+      <canvas id="focus-canvas" class="w-full h-full rounded-xl cursor-grab active:cursor-grabbing bg-[#04020c] block flex-1"></canvas>
+      
+      <!-- Barra superior flotante sobre el canvas -->
+      <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+        <div class="glass px-3.5 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto border-white/10">
+          <span class="text-xs text-purple-300 mono" id="focus-badge">OBRA 21</span>
+          <span class="text-slate-500 text-xs">•</span>
+          <span class="text-xs text-white/90 font-medium" id="focus-title-mini">Los Ceros de Riemann</span>
+        </div>
+
+        <div class="flex gap-2 pointer-events-auto items-center">
+          <button onclick="togglePalette()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">
+            <span class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-amber-400"></span>Paleta
+          </button>
+          <button onclick="restartArtwork()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">↻ Reiniciar</button>
+        </div>
+      </div>
+
+      <!-- BOTÓN DEL OBTURADOR / CÁMARA (CON TEMPORIZADOR DE CONTEMPLACIÓN) -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-auto">
+        
+        <!-- Estado del Obturador (Calibrando / Desbloqueado) -->
+        <div id="shutter-timer-badge" class="glass px-3.5 py-1 rounded-full text-[10px] mono text-purple-300/80 border-purple-500/20 flex items-center gap-2">
+          <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span id="shutter-countdown-text">Contempla la obra... (10s para calibrar obturador)</span>
+        </div>
+
+        <!-- Botón Disparador estilo Cámara Clásica -->
+        <button id="btn-shutter" onclick="triggerShutter()" disabled class="opacity-40 cursor-not-allowed bg-gradient-to-r from-purple-700 to-indigo-700 text-white px-6 py-2.5 rounded-full font-mono text-xs flex items-center gap-2.5 shadow-xl transition-all transform hover:scale-105 active:scale-95 border border-purple-400/30">
+          <div class="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center p-[1px]">
+            <div class="w-full h-full bg-red-500 rounded-full"></div>
+          </div>
+          <span id="btn-shutter-label">Obturador Bloqueado</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Editorial Card a la derecha (4 Cols) -->
+    <div class="lg:col-span-4 glass rounded-2xl p-6 md:p-8 flex flex-col justify-between border-white/10 relative overflow-hidden">
+      <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div>
+        <div class="flex justify-between text-xs text-purple-400 mono mb-2">
+          <span id="focus-cat">PROBLEMA DEL MILENIO · 1859</span>
+          <span id="focus-solver">Riemann-Siegel Formula</span>
+        </div>
+        <h2 id="focus-title" class="text-2xl md:text-3xl serif font-bold text-white mb-1">Los Ceros de Riemann</h2>
+        <p id="focus-sub" class="text-xs text-purple-300/70 mono mb-5">El enigma de un millón de dólares en la línea crítica</p>
+
+        <!-- Ecuación -->
+        <div class="bg-black/40 rounded-xl p-3.5 border border-white/5 mb-5">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
+          <div id="focus-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
+        </div>
+
+        <!-- Historia -->
+        <div class="mb-5">
+          <h3 class="text-xs uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
+          </h3>
+          <p id="focus-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
+        </div>
+
+        <!-- Poema -->
+        <div class="mb-5">
+          <h3 class="text-xs uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
+          </h3>
+          <p id="focus-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
+        </div>
+      </div>
+
+      <!-- Pie de la tarjeta editorial -->
+      <div class="pt-4 border-t border-white/5 flex items-center justify-between text-xs mono text-slate-400">
+        <span>Girar: Arrastra el mouse</span>
+        <button onclick="exitFocusMode()" class="text-purple-300 hover:text-white underline">Salir a sala</button>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ========================================================================= -->
+<!-- DRAWER 1: CARRETE DE FOTOS DEL USUARIO (MI CARRETE)                       -->
+<!-- ========================================================================= -->
+<div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
+  <div>
+    <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
+      <div>
+        <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
+          <span>📷</span> Tu Carrete Fotográfico
+        </h3>
+        <p class="text-xs text-slate-400 mono">Instantes capturados en el cosmos vivo</p>
+      </div>
+      <button onclick="toggleCameraRoll()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
+    </div>
+
+    <!-- Indicador de límite de 30 fotos -->
+    <div class="glass p-3 rounded-xl mb-4 flex items-center justify-between text-xs mono text-purple-300">
+      <span>Capacidad gratuita de memoria:</span>
+      <span id="roll-capacity-text" class="font-bold text-white">0 / 30 fotos</span>
+    </div>
+
+    <!-- Grilla de fotos capturadas -->
+    <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
+      <!-- Fotos se agregan aquí dinámicamente -->
+      <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
+        Aún no has tomado fotos.<br>
+        Entra a cualquier obra, contempla y dispara el obturador cuando el instante sea perfecto.
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie del Carrete: Paquetes Digitales -->
+  <div class="pt-4 border-t border-white/10 space-y-2">
+    <div class="text-[11px] mono text-slate-400 text-center mb-1">Descarga tus capturas en Ultra HD (4K):</div>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="checkoutDigitalPack(10, 5)" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+        <div class="font-bold text-sm text-cyan-300">$5 USD</div>
+        <div class="text-[10px] mono text-slate-300">Pack 10 Fotos 4K</div>
+      </button>
+      <button onclick="checkoutDigitalPack(25, 10)" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
+        <div class="font-bold text-sm text-amber-300">$10 USD</div>
+        <div class="text-[10px] mono text-slate-300">Pack 25 Fotos 4K</div>
+      </button>
+    </div>
+    <button onclick="clearCameraRoll()" class="w-full text-center text-[10px] text-slate-500 hover:text-red-400 mono transition pt-1">
+      Vaciar carrete para liberar espacio
+    </button>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- DRAWER 2: TIENDA DE CUADROS FÍSICOS (EDICIÓN DEL AUTOR)                    -->
+<!-- ========================================================================= -->
+<div id="shop-drawer" class="fixed inset-y-0 right-0 w-full max-w-lg bg-[#070614]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl overflow-y-auto">
+  <div>
+    <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
+      <div>
+        <h3 class="serif text-lg font-bold text-white flex items-center gap-2">
+          <span>🖼️</span> Tienda de Cuadros Físicos
+        </h3>
+        <p class="text-xs text-slate-400 mono">Edición de Autor Firmada · Santiago de Chile</p>
+      </div>
+      <button onclick="toggleShop()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
+    </div>
+
+    <!-- Garantía y Confianza -->
+    <div class="glass p-3.5 rounded-xl mb-4 text-xs text-slate-300 space-y-1">
+      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
+        <span>🛡️</span> Garantía de Galería Atelier
+      </div>
+      <p class="text-[11px] text-slate-400">
+        Impresión Fine Art pigmentada sobre papel de algodón de 310g. Moldura de madera negra con paspartú libre de ácido y vidrio. Cada pieza incluye certificado con la ecuación y firma a mano.
+      </p>
+      <div class="text-[10px] mono text-cyan-300 pt-1">
+        📦 Plazo de fabricación y entrega: 3 a 5 días hábiles en Santiago · Envíos a todo Chile.
+      </div>
+    </div>
+
+    <!-- Catálogo de Obras Físicas Disponibles -->
+    <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-1">
+      
+      <!-- Obra Física 1: Chladni -->
+      <div class="glass p-3 rounded-xl flex gap-3 items-center">
+        <div class="w-16 h-16 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🎵</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs serif font-bold text-white truncate">Los Cantos de Chladni</div>
+          <div class="text-[10px] text-slate-400 mono">Resonancia Acústica (1787)</div>
+          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
+        </div>
+        <button onclick="orderArtworkPhysical('Los Cantos de Chladni', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+      </div>
+
+      <!-- Obra Física 2: Lorenz -->
+      <div class="glass p-3 rounded-xl flex gap-3 items-center">
+        <div class="w-16 h-16 rounded-lg bg-black border border-purple-500/20 flex items-center justify-center text-xl shrink-0">🦋</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs serif font-bold text-white truncate">El Vuelo de Lorenz</div>
+          <div class="text-[10px] text-slate-400 mono">Efecto Mariposa & Caos (1963)</div>
+          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$68.000 CLP <span class="text-[9px] text-slate-400 font-normal">· 50×70 cm</span></div>
+        </div>
+        <button onclick="orderArtworkPhysical('El Vuelo de Lorenz', 68000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+      </div>
+
+      <!-- Obra Física 3: Riemann -->
+      <div class="glass p-3 rounded-xl flex gap-3 items-center">
+        <div class="w-16 h-16 rounded-lg bg-black border border-amber-500/30 flex items-center justify-center text-xl shrink-0">🌌</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs serif font-bold text-white truncate">Los Ceros de Riemann</div>
+          <div class="text-[10px] text-slate-400 mono">Problema del Milenio (1859)</div>
+          <div class="text-xs font-mono font-bold text-amber-300 mt-1">$120.000 CLP <span class="text-[9px] text-slate-400 font-normal">· Acrílico 40×60 cm</span></div>
+        </div>
+        <button onclick="orderArtworkPhysical('Los Ceros de Riemann', 120000)" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg mono transition">Encargar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contacto / Dudas de Encargo -->
+  <div class="pt-4 border-t border-white/10 text-center">
+    <p class="text-[11px] text-slate-400 mb-2">¿Quieres un formato a medida o cotizar acrílico?</p>
+    <a href="https://wa.me/56900000000?text=Hola,%20quisiera%20consultar%20por%20un%20cuadro%20de%20Atelier%20Matemático" target="_blank" class="glass hover:bg-white/10 text-white text-xs py-2 px-4 rounded-xl mono inline-flex items-center gap-2 border-white/15">
+      <span>💬</span> Hablar con Matías (Fundador)
+    </a>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT: MOTOR 3D DEL MUSEO, OBTURADOR RITUAL & CARRETE               -->
+<!-- ========================================================================= -->
+<script>
+// ── CATÁLOGO CURADO DE SALAS DEL MUSEO ─────────────────────────────
+const STATIONS = [
+  {
+    left:  { id: 20, badge: "21", title: "Los Ceros de Riemann", cat: "PROBLEMA DEL MILENIO · 1859", icon: "🌌" },
+    right: { id: 4,  badge: "05", title: "Los Cantos de Chladni", cat: "CIMÁTICA · 1787", icon: "🎵" }
+  },
+  {
+    left:  { id: 0,  badge: "01", title: "El Vuelo de Lorenz", cat: "TEORÍA DEL CAOS · 1963", icon: "🦋" },
+    right: { id: 21, badge: "22", title: "El Desierto de Beal", cat: "CONJETURA DE BEAL · 1993", icon: "🏜️" }
+  },
+  {
+    left:  { id: 22, badge: "23", title: "Navier-Stokes", cat: "PROBLEMA DEL MILENIO · 1845", icon: "🌊" },
+    right: { id: 23, badge: "24", title: "Flujo de Ricci", cat: "PROBLEMA DEL MILENIO · 2002", icon: "🔮" }
+  },
+  {
+    left:  { id: 5,  badge: "06", title: "El Telar de Turing", cat: "MORFOGÉNESIS · 1952", icon: "🐆" },
+    right: { id: 2,  badge: "03", title: "Danza de Yoshida", cat: "HAMILTONIANO · 1990", icon: "⏳" }
+  }
+];
+
+let currentStationIndex = 0;
+let isFocusMode = false;
+let shutterUnlocked = false;
+let shutterTimerInterval = null;
+let contemplationTimeLeft = 10;
+let userCameraRoll = [];
+
+// ── GENERAR EL PASILLO 3D EN EL DOM ────────────────────────────────
+function buildCorridorDOM() {
+  const track = document.getElementById('corridor-track');
+  track.innerHTML = '';
+  
+  STATIONS.forEach((st, idx) => {
+    const stationEl = document.createElement('div');
+    stationEl.className = 'museum-station absolute inset-0 flex justify-between items-center px-4 md:px-12';
+    // Colocar cada estación a una distancia Z distinta
+    const zOffset = -idx * 750;
+    stationEl.style.transform = `translateZ(${zOffset}px)`;
+    
+    stationEl.innerHTML = `
+      <!-- Cuadro Muro Izquierdo -->
+      <div onclick="enterFocusMode(${st.left.id})" class="wall-left glass glow w-48 md:w-72 h-64 md:h-96 rounded-2xl p-4 cursor-pointer flex flex-col justify-between border-purple-500/20 group">
+        <div class="flex justify-between text-[10px] mono text-purple-300">
+          <span>SALA ${st.left.badge}</span>
+          <span class="text-cyan-400 group-hover:scale-125 transition">🔍 Entrar</span>
+        </div>
+        <div class="my-auto text-center">
+          <div class="text-4xl md:text-5xl mb-2">${st.left.icon}</div>
+          <h4 class="serif font-bold text-white text-base md:text-lg group-hover:text-purple-300 transition">${st.left.title}</h4>
+          <p class="text-[10px] text-slate-400 mono mt-1">${st.left.cat.split('·')[0].trim()}</p>
+        </div>
+        <div class="text-[9px] mono text-slate-500 text-center">Haz clic para mirar de frente</div>
+      </div>
+
+      <!-- Cuadro Muro Derecho -->
+      <div onclick="enterFocusMode(${st.right.id})" class="wall-right glass glow w-48 md:w-72 h-64 md:h-96 rounded-2xl p-4 cursor-pointer flex flex-col justify-between border-purple-500/20 group">
+        <div class="flex justify-between text-[10px] mono text-purple-300">
+          <span>SALA ${st.right.badge}</span>
+          <span class="text-cyan-400 group-hover:scale-125 transition">🔍 Entrar</span>
+        </div>
+        <div class="my-auto text-center">
+          <div class="text-4xl md:text-5xl mb-2">${st.right.icon}</div>
+          <h4 class="serif font-bold text-white text-base md:text-lg group-hover:text-purple-300 transition">${st.right.title}</h4>
+          <p class="text-[10px] text-slate-400 mono mt-1">${st.right.cat.split('·')[0].trim()}</p>
+        </div>
+        <div class="text-[9px] mono text-slate-500 text-center">Haz clic para mirar de frente</div>
+      </div>
+    `;
+    track.appendChild(stationEl);
+  });
+}
+
+// ── NAVEGACIÓN EN EL PASILLO (SCROLL / FLECHAS) ────────────────────
+function navigateCorridor(dir) {
+  currentStationIndex = Math.max(0, Math.min(STATIONS.length - 1, currentStationIndex + dir));
+  updateCorridorTransform();
+}
+
+function updateCorridorTransform() {
+  const track = document.getElementById('corridor-track');
+  const targetZ = currentStationIndex * 750;
+  track.style.transform = `translateZ(${targetZ}px)`;
+  document.getElementById('corridor-index-label').textContent = `Sala ${currentStationIndex + 1} de ${STATIONS.length}`;
+}
+
+window.addEventListener('wheel', (e) => {
+  if (isFocusMode) return;
+  if (Math.abs(e.deltaY) > 25) {
+    navigateCorridor(e.deltaY > 0 ? 1 : -1);
+  }
+}, { passive: true });
+
+window.addEventListener('keydown', (e) => {
+  if (isFocusMode) {
+    if (e.key === 'Escape') exitFocusMode();
+    return;
+  }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') navigateCorridor(1);
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') navigateCorridor(-1);
+});
+
+// ── MODO CONTEMPLACIÓN (ENTRAR / SALIR) ────────────────────────────
+function enterFocusMode(artId) {
+  isFocusMode = true;
+  document.getElementById('focus-view').classList.remove('hidden');
+  document.getElementById('btn-back-corridor').classList.remove('hidden');
+  document.getElementById('nav-mode-indicator').textContent = 'Modo Contemplación · Disparador en calibración';
+  
+  selectArtworkFocus(artId);
+  startShutterRitual();
+}
+
+function exitFocusMode() {
+  isFocusMode = false;
+  document.getElementById('focus-view').classList.add('hidden');
+  document.getElementById('btn-back-corridor').classList.add('hidden');
+  document.getElementById('nav-mode-indicator').textContent = 'Pasillo Principal · Desliza para caminar';
+  clearInterval(shutterTimerInterval);
+  cancelAnimationFrame(animId);
+}
+
+// ── EL RITUAL DEL OBTURADOR (DESBLOQUEO TRAS CONTEMPLACIÓN) ────────
+function startShutterRitual() {
+  shutterUnlocked = false;
+  contemplationTimeLeft = 10; // 10 segundos obligatorios para contemplar y leer
+  clearInterval(shutterTimerInterval);
+
+  const btnShutter = document.getElementById('btn-shutter');
+  const timerBadge = document.getElementById('shutter-timer-badge');
+  const countdownText = document.getElementById('shutter-countdown-text');
+  const shutterLabel = document.getElementById('btn-shutter-label');
+
+  btnShutter.disabled = true;
+  btnShutter.classList.add('opacity-40', 'cursor-not-allowed');
+  btnShutter.classList.remove('opacity-100', 'cursor-pointer', 'animate-bounce');
+  timerBadge.classList.remove('hidden');
+  shutterLabel.textContent = 'Obturador Bloqueado';
+
+  shutterTimerInterval = setInterval(() => {
+    contemplationTimeLeft--;
+    if (contemplationTimeLeft > 0) {
+      countdownText.textContent = `Contempla la obra... (${contemplationTimeLeft}s para calibrar obturador)`;
+    } else {
+      clearInterval(shutterTimerInterval);
+      unlockShutter();
+    }
+  }, 1000);
+}
+
+function unlockShutter() {
+  shutterUnlocked = true;
+  const btnShutter = document.getElementById('btn-shutter');
+  const timerBadge = document.getElementById('shutter-timer-badge');
+  const shutterLabel = document.getElementById('btn-shutter-label');
+
+  timerBadge.classList.add('hidden');
+  btnShutter.disabled = false;
+  btnShutter.classList.remove('opacity-40', 'cursor-not-allowed');
+  btnShutter.classList.add('opacity-100', 'cursor-pointer', 'shadow-purple-500/50');
+  shutterLabel.textContent = '📸 Capturar Instante';
+  document.getElementById('nav-mode-indicator').textContent = 'Obturador Listo · Captura tu instante';
+}
+
+// ── SONIDO DE OBTURADOR CLÁSICO CON WEB AUDIO API ─────────────────
+function playShutterSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Ruido mecánico sutil del espejo y obturador
+    const bufferSize = audioCtx.sampleRate * 0.08;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.2));
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 1200;
+    noise.connect(filter);
+    filter.connect(audioCtx.destination);
+    noise.start();
+  } catch (e) {
+    // Si el navegador bloquea audio, continuar silenciosamente
+  }
+}
+
+// ── DISPARAR OBTURADOR Y GUARDAR EN CARRETE ───────────────────────
+function triggerShutter() {
+  if (!shutterUnlocked) return;
+  if (userCameraRoll.length >= 30) {
+    alert('Has alcanzado el límite de 30 capturas gratuitas. Abre tu carrete para descargar el pack o liberar espacio.');
+    toggleCameraRoll();
+    return;
+  }
+
+  // Sonido y Flash
+  playShutterSound();
+  const flash = document.getElementById('camera-flash');
+  flash.classList.add('flashing');
+  setTimeout(() => flash.classList.remove('flashing'), 120);
+
+  // Capturar imagen exacta del canvas
+  const canvas = document.getElementById('focus-canvas');
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+  const capture = {
+    id: Date.now(),
+    artTitle: ARTWORKS[currentArt].title,
+    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    img: dataUrl
+  };
+
+  userCameraRoll.unshift(capture);
+  updateRollUI();
+
+  // Animación del botón carrete
+  const badge = document.getElementById('roll-counter-badge');
+  badge.classList.add('bg-cyan-500', 'text-white', 'scale-125');
+  setTimeout(() => badge.classList.remove('bg-cyan-500', 'text-white', 'scale-125'), 400);
+}
+
+// ── ACTUALIZAR UI DEL CARRETE ─────────────────────────────────────
+function updateRollUI() {
+  const grid = document.getElementById('roll-grid');
+  const counterBadge = document.getElementById('roll-counter-badge');
+  const capacityText = document.getElementById('roll-capacity-text');
+  const emptyState = document.getElementById('roll-empty-state');
+
+  counterBadge.textContent = `${userCameraRoll.length}/30`;
+  capacityText.textContent = `${userCameraRoll.length} / 30 fotos`;
+
+  if (userCameraRoll.length === 0) {
+    emptyState.classList.remove('hidden');
+    grid.innerHTML = '';
+    grid.appendChild(emptyState);
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+  grid.innerHTML = '';
+
+  userCameraRoll.forEach((item, index) => {
+    const card = document.createElement('div');
+    card.className = 'glass rounded-xl p-2 relative group overflow-hidden border-white/10';
+    card.innerHTML = `
+      <img src="${item.img}" class="w-full h-28 object-cover rounded-lg mb-1.5 bg-black" />
+      <div class="flex justify-between items-center text-[10px] mono text-slate-300">
+        <span class="truncate">${item.artTitle}</span>
+        <span class="text-purple-400">${item.date}</span>
+      </div>
+      <button onclick="deleteRollItem(${item.id})" class="absolute top-3 right-3 bg-black/70 hover:bg-red-600 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function deleteRollItem(id) {
+  userCameraRoll = userCameraRoll.filter(item => item.id !== id);
+  updateRollUI();
+}
+
+function clearCameraRoll() {
+  if (confirm('¿Vaciar todas las fotos de tu carrete?')) {
+    userCameraRoll = [];
+    updateRollUI();
+  }
+}
+
+function toggleCameraRoll() {
+  const drawer = document.getElementById('roll-drawer');
+  drawer.classList.toggle('translate-x-full');
+}
+
+function toggleShop() {
+  const drawer = document.getElementById('shop-drawer');
+  drawer.classList.toggle('translate-x-full');
+}
+
+function checkoutDigitalPack(photos, price) {
+  if (userCameraRoll.length === 0) {
+    alert('Primero captura fotos en el museo para incluirlas en tu pack.');
+    return;
+  }
+  alert(`Redirigiendo a checkout seguro de $${price} USD por tus ${Math.min(userCameraRoll.length, photos)} capturas en 4K... (Integración lista con Stripe/PayPal).`);
+}
+
+function orderArtworkPhysical(title, price) {
+  const msg = encodeURIComponent(`Hola Matías! Quiero encargar el cuadro físico de "${title}" ($${price.toLocaleString()} CLP). ¿Cómo coordinamos el abono del 50% y la entrega?`);
+  window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
+}
+
+// ── SINCRONIZAR MOTOR FÍSICO CON EL CANVAS DE ENFOQUE ──────────────
+const focusCanvas = document.getElementById('focus-canvas');
+const ctx = focusCanvas.getContext('2d');
+let W, H, currentArt = 20, currentPal = 0, animId;
+let isDrag = false, dragX = 0, dragY = 0;
+let mouseX = -9999, mouseY = -9999, mouseDown = false;
+
+function resizeFocusCanvas() {
+  const r = focusCanvas.parentElement.getBoundingClientRect();
+  W = focusCanvas.width  = r.width  | 0;
+  H = focusCanvas.height = (r.height - 8) | 0;
+}
+
+function selectArtworkFocus(idx) {
+  currentArt = idx;
+  const d = ARTWORKS[idx];
+  document.getElementById('focus-badge').textContent = 'OBRA ' + d.badge;
+  document.getElementById('focus-title-mini').textContent = d.mini;
+  document.getElementById('focus-cat').textContent = d.cat;
+  document.getElementById('focus-solver').textContent = d.solver;
+  document.getElementById('focus-title').textContent = d.title;
+  document.getElementById('focus-sub').textContent = d.sub;
+  document.getElementById('focus-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
+  document.getElementById('focus-hist').textContent = d.hist;
+  document.getElementById('focus-poem').textContent = d.poem;
+
+  resizeFocusCanvas();
+  restartArtwork();
+}
+
+function togglePalette() { currentPal = (currentPal + 1) % 4; restartArtwork(); }
+function restartArtwork() {
+  cancelAnimationFrame(animId);
+  ctx.fillStyle = '#04020c'; ctx.fillRect(0, 0, W, H);
+  INITS[currentArt]();
+  loop();
+}
+function loop() {
+  STEPS[currentArt]();
+  animId = requestAnimationFrame(loop);
+}
+
+// ── IMPORTAR LOS MOTORES Y METADATOS MATEMÁTICOS DE ATELIER ────────
+// Paletas de color
+const PALS_CSS = [
+  f => `hsla(${250-f*210},90%,${45+f*35}%,${.08+f*.7})`,
+  f => `rgba(${f*40|0},${120+f*135|0},${Math.max(0,200-f*50)|0},${.08+f*.7})`,
+  f => `rgba(${Math.min(255,60+f*220)|0},${Math.min(255,f>.6?(f-.6)*450:20)|0},${f<.3?180:20},${.08+f*.75})`,
+  f => `rgba(${220+f*35|0},${180+f*70|0},${120+f*135|0},${.08+f*.65})`,
+];
+
+// Obras maestras (Lorenz, Chladni, Riemann, Beal, Navier-Stokes, Ricci, etc.)
+// 01 Lorenz
+let lTrajs=[], lRotZ=.5, lRotX=.3;
+function init01(){ lTrajs=[]; for(let i=0;i<12;i++){ let x=.1+i*.04,y=i*.02,z=14+i*.03; for(let k=0;k<400;k++){x+=.005*(10*(y-x));y+=.005*(x*(28-z)-y);z+=.005*(x*y-2.667*z);} lTrajs.push({x,y,z,pts:[],max:700}); } }
+function step01(){
+  ctx.fillStyle='rgba(4,2,12,.035)'; ctx.fillRect(0,0,W,H); lRotZ+=.0008; const sc=Math.min(W,H)*.015;
+  for(const tr of lTrajs){
+    for(let s=0;s<6;s++){
+      const dt=.004, f=(x,y,z)=>[10*(y-x),x*(28-z)-y,x*y-2.667*z];
+      const [k1x,k1y,k1z]=f(tr.x,tr.y,tr.z); const [k2x,k2y,k2z]=f(tr.x+dt/2*k1x,tr.y+dt/2*k1y,tr.z+dt/2*k1z);
+      const [k3x,k3y,k3z]=f(tr.x+dt/2*k2x,tr.y+dt/2*k2y,tr.z+dt/2*k2z); const [k4x,k4y,k4z]=f(tr.x+dt*k3x,tr.y+dt*k3y,tr.z+dt*k3z);
+      tr.x+=dt/6*(k1x+2*k2x+2*k3x+k4x); tr.y+=dt/6*(k1y+2*k2y+2*k3y+k4y); tr.z+=dt/6*(k1z+2*k2z+2*k3z+k4z);
+      const cz=tr.z-25, rx=tr.x*Math.cos(lRotZ)-tr.y*Math.sin(lRotZ), ry=tr.x*Math.sin(lRotZ)+tr.y*Math.cos(lRotZ), rz=ry*Math.sin(lRotX)+cz*Math.cos(lRotX);
+      tr.pts.push([W/2+rx*sc, H/2-rz*sc]); if(tr.pts.length>tr.max)tr.pts.shift();
+    }
+    const n=tr.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){ ctx.strokeStyle=PALS_CSS[currentPal](j/n); ctx.lineWidth=.5+(j/n)*1.5; ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke(); }
+  }
+}
+
+// 03 Yoshida
+let yTrails=[];
+function init03(){ yTrails=[]; const L=Math.min(W,H)*.22; for(let i=0;i<16;i++) yTrails.push({th1:Math.PI*(.4+i*.03),th2:Math.PI*(.8+i*.02),w1:0,w2:0,pts:[],max:550,cx:W/2,cy:H*.42,L}); }
+function step03(){
+  ctx.fillStyle='rgba(4,2,12,.03)'; ctx.fillRect(0,0,W,H); const c1=.6756,c0=-.1756,d1=1.3512,d0=-1.7024,g=9.8,dt=.03;
+  for(const tr of yTrails){
+    for(let s=0;s<5;s++)for(const [c,d] of [[c1,d1],[c0,d0],[c1,d1]]){
+      tr.th1+=c*dt*tr.w1; tr.th2+=c*dt*tr.w2; const dth=tr.th1-tr.th2, den=2-Math.cos(2*dth);
+      const dw1=(-g*(2*Math.sin(tr.th1)-Math.cos(dth)*Math.sin(tr.th2))-Math.sin(dth)*(tr.w2*tr.w2+tr.w1*tr.w1*Math.cos(dth)))/den;
+      const dw2=(g*(2*Math.cos(dth)*Math.sin(tr.th1)-2*Math.sin(tr.th2))+Math.sin(dth)*(2*tr.w1*tr.w1+tr.w2*tr.w2*Math.cos(dth)))/den;
+      tr.w1+=d*dt*dw1; tr.w2+=d*dt*dw2;
+    }
+    const x1=tr.cx+tr.L*Math.sin(tr.th1),y1=tr.cy+tr.L*Math.cos(tr.th1);
+    tr.pts.push([x1+tr.L*Math.sin(tr.th2),y1+tr.L*Math.cos(tr.th2)]); if(tr.pts.length>tr.max)tr.pts.shift();
+    const n=tr.pts.length; if(n<2)continue;
+    for(let j=1;j<n;j++){ ctx.strokeStyle=PALS_CSS[currentPal](j/n); ctx.lineWidth=.5+(j/n)*1.4; ctx.beginPath(); ctx.moveTo(tr.pts[j-1][0],tr.pts[j-1][1]); ctx.lineTo(tr.pts[j][0],tr.pts[j][1]); ctx.stroke(); }
+  }
+}
+
+// 05 Chladni
+let chSand=[], chM=3, chN=5;
+function init05(){ chSand=[]; for(let i=0;i<5500;i++) chSand.push({x:Math.random()*W,y:Math.random()*H,vx:0,vy:0}); }
+function step05(){
+  ctx.fillStyle='rgba(4,2,12,.12)'; ctx.fillRect(0,0,W,H); const L=Math.min(W,H)*.85, ox=(W-L)/2, oy=(H-L)/2;
+  for(const p of chSand){
+    const u=(p.x-ox)/L,v=(p.y-oy)/L;
+    if(u>=0&&u<=1&&v>=0&&v<=1){
+      const val=Math.sin(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-Math.sin(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
+      const gx=chN*Math.PI*Math.cos(chN*Math.PI*u)*Math.sin(chM*Math.PI*v)-chM*Math.PI*Math.cos(chM*Math.PI*u)*Math.sin(chN*Math.PI*v);
+      const gy=chM*Math.PI*Math.sin(chN*Math.PI*u)*Math.cos(chM*Math.PI*v)-chN*Math.PI*Math.sin(chM*Math.PI*u)*Math.cos(chN*Math.PI*v);
+      p.vx=p.vx*.82-Math.sign(val)*gx*.08+(Math.random()-.5)*.4; p.vy=p.vy*.82-Math.sign(val)*gy*.08+(Math.random()-.5)*.4;
+      p.x+=p.vx; p.y+=p.vy;
+      ctx.fillStyle=PALS_CSS[currentPal](Math.exp(-Math.abs(val)*6)); ctx.fillRect(p.x,p.y,1.2,1.2);
+    } else { p.x=ox+Math.random()*L; p.y=oy+Math.random()*L; p.vx=p.vy=0; }
+  }
+}
+
+// 06 Turing
+let tAgents=[];
+function init06(){ tAgents=[]; for(let i=0;i<280;i++) tAgents.push({x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,angle:Math.random()*Math.PI*2,sp:i%2,pts:[]}); }
+function step06(){
+  ctx.fillStyle='rgba(4,2,12,.025)'; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<tAgents.length;i++){
+    const ag=tAgents[i]; let repX=0,repY=0;
+    for(let j=0;j<30;j++){ const o=tAgents[(i+j*7)%tAgents.length],dx=o.x-ag.x,dy=o.y-ag.y,dist=Math.hypot(dx,dy)||1; if(dist<45){const f=(ag.sp===o.sp?-1:1.4)*(45-dist)/dist; repX+=f*dx;repY+=f*dy;} }
+    ag.angle+=(Math.atan2(repY,repX)-ag.angle)*.08+(Math.random()-.5)*.2; ag.x+=Math.cos(ag.angle)*1.8; ag.y+=Math.sin(ag.angle)*1.8;
+    if(ag.x<0)ag.x=W; if(ag.x>W)ag.x=0; if(ag.y<0)ag.y=H; if(ag.y>H)ag.y=0;
+    ag.pts.push([ag.x,ag.y]); if(ag.pts.length>70)ag.pts.shift();
+    if(ag.pts.length>2){ ctx.strokeStyle=PALS_CSS[currentPal](ag.sp===0?.85:.2); ctx.lineWidth=ag.sp===0?2.2:1.2; ctx.beginPath(); ctx.moveTo(ag.pts[ag.pts.length-2][0],ag.pts[ag.pts.length-2][1]); ctx.lineTo(ag.pts[ag.pts.length-1][0],ag.pts[ag.pts.length-1][1]); ctx.stroke(); }
+  }
+}
+
+// 21 Riemann
+let rieT = 0, riePts = [], rieZerosHit = [], rieRot = 0.4;
+const RIEMANN_ZEROS = [14.1347, 21.0220, 25.0108, 30.4248, 32.9350, 37.5861, 40.9187];
+function init21() { rieT = 0; riePts = []; rieZerosHit = []; rieRot = 0.4; }
+function riemannZ(t) {
+  if (t < 0.1) return 1.0;
+  const theta = (t/2)*Math.log(t/(2*Math.PI)) - (t/2) - (Math.PI/8), N = Math.floor(Math.sqrt(t/(2*Math.PI))) || 1;
+  let sum = 0; for (let n = 1; n <= N; n++) sum += Math.cos(theta - t*Math.log(n)) / Math.sqrt(n);
+  return 2 * sum;
+}
+function step21() {
+  ctx.fillStyle = 'rgba(4,2,12,0.035)'; ctx.fillRect(0,0,W,H); rieRot += 0.001;
+  for (let s = 0; s < 4; s++) {
+    rieT += 0.04; if (rieT > 45) { rieT = 0; riePts = []; }
+    const zVal = riemannZ(rieT), theta = (rieT/2)*Math.log(Math.max(1,rieT)/(2*Math.PI)) - (rieT/2);
+    const rx = zVal * Math.cos(theta), ry = zVal * Math.sin(theta), rz = (rieT - 22.5) * 8;
+    for (const z0 of RIEMANN_ZEROS) if (Math.abs(rieT - z0) < 0.03) rieZerosHit.push({ x: W/2, y: H/2, r: 1, maxR: 60 });
+    const cosR = Math.cos(rieRot), sinR = Math.sin(rieRot);
+    const px = rx * cosR - rz * sinR * 0.1, pz = rx * sinR + rz * cosR, py = ry - pz * 0.2;
+    riePts.push([W/2 + px * (Math.min(W,H)*0.045), H/2 - py * (Math.min(W,H)*0.045), Math.abs(zVal)]);
+    if (riePts.length > 550) riePts.shift();
+  }
+  ctx.strokeStyle = 'rgba(120, 100, 255, 0.2)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.stroke();
+  const n = riePts.length;
+  if (n > 1) {
+    for (let j = 1; j < n; j++) {
+      const nearZero = Math.exp(-riePts[j][2] * 1.5);
+      ctx.strokeStyle = PALS_CSS[currentPal](nearZero * 0.8 + (j/n) * 0.2);
+      ctx.lineWidth = 0.6 + nearZero * 2.5; ctx.beginPath(); ctx.moveTo(riePts[j-1][0], riePts[j-1][1]); ctx.lineTo(riePts[j][0], riePts[j][1]); ctx.stroke();
+    }
+  }
+  for (let k = rieZerosHit.length - 1; k >= 0; k--) {
+    const o = rieZerosHit[k]; o.r += 1.8;
+    if (o.r >= o.maxR) { rieZerosHit.splice(k, 1); continue; }
+    ctx.strokeStyle = PALS_CSS[currentPal](1.0); ctx.globalAlpha = 1.0 - o.r / o.maxR; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(o.x, o.y, o.r, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
+
+// 22 Beal
+let bealStars = [], bealAngle = 0;
+function init22() {
+  bealStars = []; bealAngle = 0;
+  for (let A = 2; A <= 8; A++) for (let B = 2; B <= 8; B++) for (let x = 3; x <= 5; x++) for (let y = 3; y <= 5; y++) {
+    const sum = Math.pow(A, x) + Math.pow(B, y);
+    for (let C = 2; C <= 25; C++) for (let z = 3; z <= 5; z++) {
+      const cz = Math.pow(C, z), err = Math.abs(sum - cz) / sum;
+      const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+      if (err < 0.08 || gcd(A, gcd(B, C)) > 1) bealStars.push({ hasCommonFactor: gcd(A, gcd(B, C)) > 1, th: Math.log(sum)*1.8, rad: Math.log(cz)*12 });
+    }
+  }
+}
+function step22() {
+  ctx.fillStyle = 'rgba(4,2,12,0.04)'; ctx.fillRect(0,0,W,H); bealAngle += 0.002; const cx = W/2, cy = H/2;
+  ctx.strokeStyle = 'rgba(255, 50, 100, 0.15)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, Math.min(W,H)*0.28, 0, Math.PI*2); ctx.stroke();
+  for (const s of bealStars) {
+    const a = s.th + bealAngle * (s.hasCommonFactor ? 1 : -0.7), r = s.rad * (Math.min(W,H)*0.0035);
+    ctx.fillStyle = s.hasCommonFactor ? PALS_CSS[currentPal](0.85) : 'rgba(255, 80, 80, 0.5)';
+    ctx.beginPath(); ctx.arc(cx + r*Math.cos(a), cy + r*Math.sin(a), s.hasCommonFactor ? 2.5 : 1.2, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+// 23 Navier Stokes
+let nsVortices = [], nsRot = 0;
+function init23() {
+  nsVortices = []; nsRot = 0;
+  for (let ring = 0; ring < 3; ring++) {
+    const pts = [], R = Math.min(W, H) * (0.16 + ring * 0.05);
+    for (let i = 0; i < 48; i++) pts.push({ x: R * Math.cos(i/48*Math.PI*2), y: R * Math.sin(i/48*Math.PI*2), z: (ring-1)*35 });
+    nsVortices.push({ pts, ring });
+  }
+}
+function step23() {
+  ctx.fillStyle = 'rgba(4,2,12,0.05)'; ctx.fillRect(0,0,W,H); nsRot += 0.003; const cx = W/2, cy = H/2;
+  for (const v of nsVortices) {
+    const proj = v.pts.map(p => {
+      p.x += Math.sin(p.z * 0.03 + nsRot * 2) * 1.2; p.y += Math.cos(p.z * 0.03 + nsRot * 2) * 1.2;
+      const rx = p.x * Math.cos(nsRot) - p.z * Math.sin(nsRot); return [cx + rx, cy - p.y];
+    });
+    ctx.strokeStyle = PALS_CSS[currentPal](0.4 + v.ring * 0.25); ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(proj[0][0], proj[0][1]); for (let i = 1; i < proj.length; i++) ctx.lineTo(proj[i][0], proj[i][1]); ctx.closePath(); ctx.stroke();
+  }
+}
+
+// 24 Ricci
+let ricciAngle = 0, ricciT = 0;
+function init24() { ricciAngle = 0; ricciT = 0; }
+function step24() {
+  ctx.fillStyle = 'rgba(4,2,12,0.06)'; ctx.fillRect(0,0,W,H); ricciAngle += 0.004; ricciT += 0.008;
+  const smoothing = Math.min(1.0, ricciT * 0.08), baseR = Math.min(W, H) * 0.26, cx = W/2, cy = H/2;
+  if (ricciT > 25) ricciT = 0;
+  for (let lat = -Math.PI/2 + 0.15; lat <= Math.PI/2 - 0.15; lat += 0.25) {
+    ctx.beginPath(); let first = true;
+    for (let lon = 0; lon <= Math.PI * 2; lon += 0.14) {
+      const deformation = (Math.sin(lon * 4 + lat * 3) * Math.cos(lat * 5)) * (1.0 - smoothing);
+      const r = baseR * (1.0 + deformation * 0.4);
+      const px = cx + r * Math.cos(lat) * Math.sin(lon + ricciAngle);
+      const py = cy - r * Math.sin(lat) + r * Math.cos(lat) * Math.cos(lon + ricciAngle) * 0.25;
+      if (first) { ctx.moveTo(px, py); first = false; } else { ctx.lineTo(px, py); }
+    }
+    ctx.strokeStyle = PALS_CSS[currentPal](0.3 + (1.0 - smoothing) * 0.6); ctx.lineWidth = 0.8; ctx.stroke();
+  }
+}
+
+// Mapas de orquestación
+const INITS = { 0: init01, 2: init03, 4: init05, 5: init06, 20: init21, 21: init22, 22: init23, 23: init24 };
+const STEPS = { 0: step01, 2: step03, 4: step05, 5: step06, 20: step21, 21: step22, 22: step23, 23: step24 };
+
+const ARTWORKS = {
+  0: { badge: "01", mini: "Lorenz", title: "El Vuelo de Lorenz", sub: "El aleteo que gobierna el infinito", cat: "TEORÍA DEL CAOS · 1963", solver: "RK4 Integrator", eq: "dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z", hist: "En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora. Aquella millonésima demostró que el universo es matemáticamente determinista pero humanamente impredecible.", poem: '"Dos alas que nacen de un suspiro y giran eternamente sin tocarse jamás. Cada decisión ínfima en nuestra vida abre una órbita completamente nueva en el cosmos."' },
+  2: { badge: "03", mini: "Yoshida", title: "La Danza de Yoshida", sub: "La memoria que el tiempo jamás disuelve", cat: "HAMILTONIANO · 1990", solver: "Symplectic 4th Order", eq: "z_{n+1}=exp(c_i Δt D_A) exp(d_i Δt D_B) z_n", hist: "En 1990, Haruo Yoshida descubrió coeficientes analíticos de 4º orden que conservan la energía exacta de un sistema por la eternidad sin perder un solo julio.", poem: '"Dos cuerpos bailan al borde del abismo, sin motor ni fricción. Es la música pura de la conservación."' },
+  4: { badge: "05", mini: "Chladni", title: "Los Cantos de Chladni", sub: "La arquitectura que el sonido dibuja en el silencio", cat: "CIMÁTICA · 1787", solver: "Helmholtz Nodal Wave", eq: "w(x,y)=sin(nπx/L)sin(mπy/L) - sin(mπx/L)sin(nπy/L)=0", hist: "Ernst Chladni pasó un arco de violín por una placa de bronce con arena en 1787. El sonido expulsó los granos hacia las líneas nodales de reposo, revelando mandalas sagrados.", poem: '"El silencio no es el vacío; es el punto exacto donde las ondas opuestas se abrazan y anulan, permitiendo que la arena del mundo descanse en geometría sagrada."' },
+  5: { badge: "06", mini: "Turing", title: "El Telar de Turing", sub: "Cómo el leopardo tejió sus manchas en el caos", cat: "MORFOGÉNESIS · 1952", solver: "Reaction-Diffusion PDE", eq: "∂u/∂t = D_u ∇²u - uv² + F(1-u)", hist: "Alan Turing demostró en 1952 que dos sustancias químicas compitiendo bastan para crear todas las manchas de los leopardos y arrecifes de coral.", poem: '"La vida no necesitó un pincel: solo dos moléculas jugando a perseguirse a través de las edades."' },
+  20: { badge: "21", mini: "Riemann", title: "Los Ceros de Riemann", sub: "El enigma de un millón de dólares en la línea crítica", cat: "PROBLEMA DEL MILENIO · 1859", solver: "Riemann-Siegel Critical Spiral", eq: "ζ(s) = ∑ 1/nˢ = 0 ⇒ Re(s) = 1/2", hist: "En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales yacen en la línea crítica Re(s)=1/2. Es el problema de un millón de dólares que gobierna todos los números primos.", poem: '"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."' },
+  21: { badge: "22", mini: "Beal", title: "El Desierto de Beal", sub: "La repulsión matemática entre potencias coprimas", cat: "CONJETURA DE BEAL · 1993", solver: "Logarithmic Power Lattice", eq: "Aˣ + Bʸ = Cᶻ con x,y,z > 2 ⇒ mcd(A,B,C) > 1", hist: "Andrew Beal ofreció $1.000.000 USD a quien demuestre que Aˣ+Bʸ=Cᶻ exige factor común. Si buscas soluciones coprimas, se forma un desierto de exclusión absoluto.", poem: '"En el desierto de las potencias puras, los números solitarios jamás logran sumarse. Solo aquellos que comparten la misma sangre prima pueden abrazarse en la geometría."' },
+  22: { badge: "23", mini: "Navier-Stokes", title: "Vórtices de Navier-Stokes", sub: "El misterio de la turbulencia y las velocidades infinitas", cat: "PROBLEMA DEL MILENIO · 1845", solver: "3D Vortex Filament Stretching", eq: "∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u", hist: "El Instituto Clay ofrece $1.000.000 USD por demostrar si un fluido suave puede concentrar tanta energía que su velocidad explote a infinito.", poem: '"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."' },
+  23: { badge: "24", mini: "Ricci", title: "El Flujo de Ricci de Poincaré", sub: "La redondez cósmica que resolvió Grigori Perelman", cat: "PROBLEMA DEL MILENIO · 2002", solver: "Perelman Metric Smoothing S³", eq: "∂g_ij/∂t = -2 R_ij", hist: "Henri Poincaré conjeturó la esfera 3D en 1904. En 2002, Grigori Perelman la resolvió alisando el espacio con el Flujo de Ricci y rechazó el millón de dólares.", poem: '"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."' }
+};
+
+// ── INTERACCIÓN EN CANVAS DE ENFOQUE ──────────────────────────────
+focusCanvas.addEventListener('mousedown', e => {
+  isDrag = true; dragX = e.clientX; dragY = e.clientY; mouseDown = true;
+});
+window.addEventListener('mousemove', e => {
+  if (!isDrag) return;
+  const dx = e.clientX - dragX;
+  if (currentArt === 0) { lRotZ += dx * 0.005; lRotX += (e.clientY - dragY) * 0.005; }
+  if (currentArt === 20) { rieRot += dx * 0.005; }
+  if (currentArt === 22) { nsRot += dx * 0.005; }
+  if (currentArt === 23) { ricciAngle += dx * 0.005; }
+  dragX = e.clientX; dragY = e.clientY;
+});
+window.addEventListener('mouseup', () => { isDrag = false; mouseDown = false; });
+
+// ── INICIALIZACIÓN GENERAL ────────────────────────────────────────
+window.addEventListener('resize', () => {
+  if (isFocusMode) resizeFocusCanvas();
+});
+
+buildCorridorDOM();
+updateRollUI();
+</script>
+</body>
+</html>

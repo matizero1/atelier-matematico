@@ -39,6 +39,31 @@
   ::-webkit-scrollbar-track { background: var(--bg-base); }
   ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* ========================================================================= */
+  /* TRANSICIONES CINEMÁTICAS NATIVAS (VIEW TRANSITIONS API W3C)               */
+  /* ========================================================================= */
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: luxury-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  ::view-transition-new(root) {
+    animation: luxury-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  @keyframes luxury-fade-out {
+    0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(0.99); filter: blur(3px); }
+  }
+  @keyframes luxury-fade-in {
+    0% { opacity: 0; transform: scale(1.01); filter: blur(3px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+  }
+  ::view-transition-group(artwork-shared) {
+    animation-duration: 0.65s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
 </style>
 </head>
 <body class="selection:bg-amber-900 selection:text-amber-100 min-h-screen flex flex-col bg-[#08080a]">
@@ -79,7 +104,7 @@
   <main class="flex-1 pt-14 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-3.5rem)] relative">
     
     <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (PARED DE GALERÍA Y FOCO CENITAL) -->
-    <div class="w-full lg:w-7/12 h-[500px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]">
+    <div class="w-full lg:w-7/12 h-[500px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
       
       <!-- Canvas Three.js -->
       <canvas id="vitrina-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
@@ -1298,7 +1323,7 @@
       for (let x = -400; x <= 400; x += 4) {
         const env = Math.exp(-0.5 * (x / 140) * (x / 140));
         const y = cy - 200 * env * Math.cos(x * 0.08);
-        if (x === -400) ctx.moveTo(cx + x, py); else ctx.lineTo(cx + x, py);
+        if (x === -400) ctx.moveTo(cx + x, y); else ctx.lineTo(cx + x, y);
       }
       ctx.stroke();
     }
@@ -1342,6 +1367,65 @@
         ctx.ellipse(cx, cy, r, r * 0.65, Math.PI / 4, 0, Math.PI * 2);
         ctx.stroke();
       }
+    }
+  </script>
+
+  <!-- CURSOR CINÉTICO DE BRONCE (SUTIL) -->
+  <div id="kinetic-cursor" class="fixed pointer-events-none z-[100] w-6 h-6 rounded-full border border-[#c5a059]/60 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-out opacity-0 hidden md:block"></div>
+
+  <!-- SCRIPT LENIS SMOOTH SCROLL & MICRO-INTERACCIONES -->
+  <script src="js/lenis.min.js"></script>
+  <script>
+    // 1. Lenis Smooth Scroll con física inercial
+    if (typeof Lenis !== 'undefined') {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        smoothWheel: true,
+        wheelMultiplier: 0.85
+      });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    }
+
+    // 2. Cursor cinético sutil
+    const cursor = document.getElementById('kinetic-cursor');
+    if (cursor && window.matchMedia('(pointer: fine)').matches) {
+      cursor.classList.remove('opacity-0');
+      let mouseX = -100, mouseY = -100;
+      let cursorX = -100, cursorY = -100;
+
+      window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function renderCursor() {
+        cursorX += (mouseX - cursorX) * 0.18;
+        cursorY += (mouseY - cursorY) * 0.18;
+        cursor.style.left = `${cursorX}px`;
+        cursor.style.top = `${cursorY}px`;
+        requestAnimationFrame(renderCursor);
+      }
+      requestAnimationFrame(renderCursor);
+
+      // Efecto hover magnético en enlaces y botones
+      document.querySelectorAll('a, button, [onclick], input, select').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1.6)';
+          cursor.style.borderColor = '#dfc285';
+          cursor.style.backgroundColor = 'rgba(197, 160, 89, 0.08)';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+          cursor.style.borderColor = 'rgba(197, 160, 89, 0.6)';
+          cursor.style.backgroundColor = 'transparent';
+        });
+      });
     }
   </script>
 </body>

@@ -493,7 +493,7 @@
 
       renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true, powerPreference: 'high-performance' });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      renderer.setPixelRatio(1.0); // Disciplina térmica de Apple Silicon
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.15;
 
@@ -857,8 +857,15 @@
       productGroup.add(group);
     }
 
-    // 4. ANIMACIÓN Y BUCLE DE RENDER
+    // 4. ANIMACIÓN Y BUCLE DE RENDER (SUSPENSIÓN EN SEGUNDO PLANO)
+    let isTabVisible = true;
+    document.addEventListener('visibilitychange', () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) requestAnimationFrame(animate);
+    });
+
     function animate() {
+      if (!isTabVisible) return;
       requestAnimationFrame(animate);
 
       if (autoRotate) {

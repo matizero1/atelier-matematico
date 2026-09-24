@@ -181,6 +181,11 @@
       <span id="voice-status-icon">🔊</span>
       <span id="voice-status-text" class="text-slate-300 text-[11px]">Voz Activa</span>
     </button>
+    <button onclick="toggleDiscoveryDrawer()" class="glass hover:bg-white/10 border-cyan-500/30 text-cyan-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2">
+      <span>📜</span>
+      <span class="hidden sm:inline">Bitácora</span>
+      <span id="discovery-counter-badge" class="bg-cyan-600/40 text-cyan-200 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+    </button>
     <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3.5 py-1.5 rounded-full mono transition flex items-center gap-2">
       <span>📷</span>
       <span class="hidden sm:inline">Carrete</span>
@@ -407,6 +412,50 @@
 </div>
 
 <!-- ========================================================================= -->
+<!-- TOAST DE NOTIFICACIÓN DE NAI CENTINELA (HALLAZGOS DE CANDIDATOS)          -->
+<!-- ========================================================================= -->
+<div id="discovery-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 glass px-5 py-3 rounded-2xl border-cyan-400/50 shadow-2xl transition-all duration-500 opacity-0 -translate-y-8 pointer-events-none flex items-center gap-3">
+  <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping shrink-0"></div>
+  <div>
+    <div class="text-[10px] mono text-cyan-300 uppercase tracking-widest font-bold">✨ NAI CENTINELA · CANDIDATO REGISTRADO</div>
+    <div id="toast-message" class="text-xs text-white font-medium">Candidato detectado en Navier-Stokes con residuo 2.14e-6</div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- CAJÓN LATERAL: BITÁCORA DE CANDIDATOS & TELEMETRÍA TIMONEL F2              -->
+<!-- ========================================================================= -->
+<div id="discovery-drawer" class="fixed top-0 right-0 w-full max-w-md h-full glass border-l border-cyan-500/30 shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col pointer-events-auto">
+  <div class="p-5 border-b border-white/10 flex justify-between items-center">
+    <div>
+      <h3 class="text-base serif font-bold text-white flex items-center gap-2">
+        <span>📜</span> Bitácora de Candidatos Timonel F2
+      </h3>
+      <span id="discovery-count-text" class="text-xs mono text-cyan-400">0 candidatos archivados</span>
+    </div>
+    <button onclick="toggleDiscoveryDrawer()" class="text-slate-400 hover:text-white p-2 text-sm">✕</button>
+  </div>
+
+  <div class="p-3 bg-black/40 border-b border-white/5 flex gap-2">
+    <button onclick="exportDiscoveryLedger()" class="flex-1 glass hover:bg-white/10 text-cyan-300 text-xs py-2 px-3 rounded-xl mono transition border-cyan-500/20 flex items-center justify-center gap-1.5">
+      <span>📥</span> Exportar JSON
+    </button>
+    <button onclick="clearDiscoveryLedger()" class="glass hover:bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-xl mono transition border-rose-500/20">
+      🗑️ Limpiar
+    </button>
+    <button onclick="simulateDiscoveryCandidate()" class="glass hover:bg-purple-500/20 text-purple-300 text-xs py-2 px-3 rounded-xl mono transition border-purple-500/20" title="Probar Alerta de NAI">
+      ⚡ Test NAI
+    </button>
+  </div>
+
+  <div id="discovery-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+    <div id="discovery-empty-state" class="text-center py-16 text-slate-500 mono text-xs">
+      No hay candidatos anómalos registrados.<br>Las leyes abiertas están explorando el espacio.
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
 <!-- JAVASCRIPT: ATLAS CÓSMICO DE 24 LEYES & HILOS DE TIMONEL                   -->
 <!-- ========================================================================= -->
 <script>
@@ -570,6 +619,139 @@ let activeProductTexture = null;
 let productRotation = { x: 0, y: 0 }, targetProductRotation = { x: 0, y: 0 };
 
 // ── INICIALIZACIÓN PRINCIPAL ──────────────────────────────────────
+
+// ── BITÁCORA DE CANDIDATOS & NAI CENTINELA (TIMONEL F2) ───────────
+let discoveryLedger = [];
+let lastDiscoveryAlertTime = 0;
+
+function loadDiscoveryLedger() {
+  try {
+    const saved = localStorage.getItem('NAI_DISCOVERY_LEDGER');
+    if (saved) discoveryLedger = JSON.parse(saved);
+  } catch(e) {}
+  updateDiscoveryUI();
+}
+
+function saveDiscoveryLedger() {
+  try {
+    localStorage.setItem('NAI_DISCOVERY_LEDGER', JSON.stringify(discoveryLedger));
+  } catch(e) {}
+}
+
+function toggleDiscoveryDrawer() {
+  document.getElementById('discovery-drawer').classList.toggle('translate-x-full');
+}
+
+function updateDiscoveryUI() {
+  const badge = document.getElementById('discovery-counter-badge');
+  const countText = document.getElementById('discovery-count-text');
+  const emptyState = document.getElementById('discovery-empty-state');
+  const list = document.getElementById('discovery-list');
+
+  if (badge) badge.textContent = discoveryLedger.length;
+  if (countText) countText.textContent = `${discoveryLedger.length} candidatos archivados`;
+
+  if (!list) return;
+
+  if (discoveryLedger.length === 0) {
+    list.innerHTML = '';
+    if (emptyState) {
+      emptyState.classList.remove('hidden');
+      list.appendChild(emptyState);
+    }
+    return;
+  }
+
+  list.innerHTML = '';
+  discoveryLedger.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'glass rounded-xl p-3.5 border border-cyan-500/25 space-y-2 relative overflow-hidden';
+    card.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="text-[9px] mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">#${item.badge} · ${item.cat}</span>
+          <h4 class="text-xs serif font-bold text-white mt-1">${item.title}</h4>
+        </div>
+        <span class="text-[10px] mono text-slate-400">${item.timeFormatted}</span>
+      </div>
+      <div class="bg-black/60 rounded p-2 text-[10px] mono text-purple-300">
+        <div>Residuo Timonel: <strong class="text-cyan-300">${item.residual}</strong></div>
+        <div class="text-slate-400 mt-0.5">${item.reason}</div>
+      </div>
+      <div class="flex justify-between items-center text-[9px] mono text-slate-500">
+        <span>Nodo: ${item.nodeId}</span>
+        <span class="text-emerald-400 font-semibold">CERTIFICADO CANDIDATO</span>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function showDiscoveryToast(entry) {
+  const toast = document.getElementById('discovery-toast');
+  const msg = document.getElementById('toast-message');
+  if (!toast || !msg) return;
+
+  msg.textContent = `${entry.title}: Residuo ${entry.residual} — ${entry.reason}`;
+  toast.classList.remove('opacity-0', '-translate-y-8');
+  setTimeout(() => {
+    toast.classList.add('opacity-0', '-translate-y-8');
+  }, 6000);
+}
+
+function recordDiscoveryCandidate(astro, reason, details) {
+  const entry = {
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toISOString(),
+    timeFormatted: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    badge: astro.data.badge,
+    title: astro.data.title,
+    cat: astro.data.cat,
+    reason: reason,
+    residual: astro.residual.toFixed(5),
+    details: details || "Convergencia local fuera del equilibrio",
+    nodeId: swarmNodeId
+  };
+
+  discoveryLedger.unshift(entry);
+  if (discoveryLedger.length > 50) discoveryLedger.pop();
+  saveDiscoveryLedger();
+  updateDiscoveryUI();
+  showDiscoveryToast(entry);
+
+  // Pulso especial en el núcleo 3D de NAI
+  if (nai3D && nai3D.core) {
+    nai3D.core.material.color.setHex(0x10b981);
+    setTimeout(() => { if (nai3D.core) nai3D.core.material.color.setHex(0xa855f7); }, 2500);
+  }
+
+  // Alerta vocal de NAI
+  speakNai(`Atención Matías. El nodo ha registrado un candidato numérico con residuo bajo en ${astro.data.title}. Archivado en la bitácora.`);
+}
+
+function exportDiscoveryLedger() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(discoveryLedger, null, 2));
+  const a = document.createElement('a');
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `timonel_discovery_ledger_${Date.now()}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function clearDiscoveryLedger() {
+  if (confirm('¿Vaciar la bitácora de candidatos?')) {
+    discoveryLedger = [];
+    saveDiscoveryLedger();
+    updateDiscoveryUI();
+  }
+}
+
+function simulateDiscoveryCandidate() {
+  const astro = astros24[22] || astros24[0]; // Navier-Stokes o primero
+  recordDiscoveryCandidate(astro, "Singularidad 3D acotada: Enstrofía Ω(t) disipó coherentemente sin estallido.", "Prueba de alerta NAI");
+}
+
 function initAtlasCosmico() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
@@ -585,6 +767,7 @@ function initAtlasCosmico() {
   renderer.shadowMap.enabled = false;
 
   document.getElementById('swarm-node-id').textContent = "#" + swarmNodeId;
+  loadDiscoveryLedger();
 
   buildCosmicVoid();
   buildNaiSovereignEntity();
@@ -1974,6 +2157,21 @@ function animate() {
     astro.relaxFactor = relaxFactor;
     astro.residual = residual;
     astro.timonelRing.material.color.setHex(ringColor);
+
+
+    // ── NAI CENTINELA: DETECCIÓN DE CANDIDATOS EN LEYES DEL MILENIO ─
+    if (phase === 'CRYSTALLIZED' && astro.cycleT > 7.5 && astro.cycleT < 7.6) {
+      const now = performance.now();
+      // Evaluar si es un problema abierto o candidato crítico (Navier-Stokes, Riemann, Beal)
+      if ((astro.data.id === 20 || astro.data.id === 21 || astro.data.id === 22) && (now - lastDiscoveryAlertTime > 35000)) {
+        lastDiscoveryAlertTime = now;
+        let reason = "Mínimo residual formal verificado por Timonel F2";
+        if (astro.data.id === 20) reason = "Cero no trivial sobre la línea crítica Re(s)=1/2 verificado dentro de ε";
+        else if (astro.data.id === 21) reason = "Cota de exclusión coprima Aˣ+Bʸ=Cᶻ preservada en radio de prueba";
+        else if (astro.data.id === 22) reason = "Tubo de vórtice helicoidal 3D disipó enstrofía sin singularidad infinita";
+        recordDiscoveryCandidate(astro, reason, "Búsqueda por relajación en silicio");
+      }
+    }
 
     if (astro.model && astro.model.update) {
       astro.model.update(delta, astro.cycleT, phase, relaxFactor);

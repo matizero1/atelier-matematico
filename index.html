@@ -24,13 +24,19 @@
   * {
     box-sizing: border-box;
   }
-  html, body {
+  html {
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  body {
     background-color: var(--bg-base) !important;
     color: var(--text-primary) !important;
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    min-height: 100vh;
   }
   .serif {
     font-family: 'Cinzel', serif;
@@ -752,26 +758,11 @@
       <span>© 2026 Atelier Matemático. Todos los derechos reservados.</span>
       <span>Impreso en papel Hahnemühle 308g con tintas Epson UltraChrome Pro.</span>
     </div>
-  <!-- SCRIPT LENIS SMOOTH SCROLL & PARALAJE ESPACIAL 3D -->
-  <script src="js/lenis.min.js"></script>
-  <script>
-    // 1. Lenis Smooth Scroll ultra-reactivo (Cero fricción ni sensación de freno)
-    if (typeof Lenis !== 'undefined') {
-      const lenis = new Lenis({
-        duration: 0.75,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        smoothWheel: true,
-        wheelMultiplier: 1.15
-      });
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-      requestAnimationFrame(raf);
-    }
+  </footer>
 
-    // 2. Motor de Profundidad Espacial 3D: Cuadro en Pared con Paralaje Real (60 FPS)
+  <!-- SCRIPT PARALAJE ESPACIAL 3D (60 FPS NATIVO) -->
+  <script>
+    // Motor de Profundidad Espacial 3D: Cuadro en Pared con Paralaje Real (60 FPS)
     const stage = document.getElementById('pavilion-3d-stage');
     const bgImg = document.getElementById('pavilion-bg-img');
     const frameBody = document.getElementById('framed-artwork-3d');

@@ -3,318 +3,315 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Boutique & Vitrina 3D — Atelier Matemático</title>
+<title>Boutique & Vitrina Arquitectónica — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #040308;
-    --card: rgba(10, 8, 20, 0.88);
-    --border: rgba(168, 85, 247, 0.2);
-    --accent: #d97706;
-    --cyan: #38bdf8;
+    --bg-base: #08080a;
+    --bg-surface: #101014;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(197, 160, 89, 0.3);
+    --gold: #c5a059;
+    --gold-light: #dfc285;
+    --text-primary: #f4f1ea;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
   }
-  body {
-    background-color: var(--bg);
-    color: #f1f5f9;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+  * { box-sizing: border-box; }
+  html, body {
+    background-color: var(--bg-base) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    margin: 0; padding: 0;
     overflow-x: hidden;
   }
-  .serif { font-family: 'Cinzel', serif; }
+  .serif { font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
   .mono  { font-family: 'Space Mono', monospace; }
-  .glass {
-    background: var(--card);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--border);
-  }
-  .gold-glow {
-    box-shadow: 0 0 35px rgba(217, 119, 6, 0.25);
-  }
-  /* Scrollbar estilizada */
+  .luxury-border { border: 1px solid var(--border-subtle); }
+  .luxury-gold-border { border: 1px solid var(--border-gold); }
+  
+  /* Scrollbar fina y oscura */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: rgba(10, 10, 20, 0.6); }
-  ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.3); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 </style>
 </head>
-<body class="selection:bg-amber-900 selection:text-amber-100 min-h-screen flex flex-col">
+<body class="selection:bg-amber-900 selection:text-amber-100 min-h-screen flex flex-col bg-[#08080a]">
 
-  <!-- TOP HEADER / NAVEGACIÓN -->
-  <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 px-4 md:px-8 py-3 flex justify-between items-center transition-all">
+  <!-- ========================================================================= -->
+  <!-- 1. HEADER EDITORIAL DISCRETO                                              -->
+  <!-- ========================================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/90 backdrop-blur-md border-b border-white/[0.08] px-6 md:px-10 py-3.5 flex justify-between items-center transition-all">
     <div class="flex items-center gap-4">
-      <a href="index.html" class="flex items-center gap-2 text-xs mono text-slate-400 hover:text-white transition group">
-        <span class="text-amber-400 group-hover:-translate-x-0.5 transition">←</span>
-        <span>Pórtico Editorial</span>
+      <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest">
+        <span>←</span>
+        <span>Pórtico</span>
       </a>
       <span class="text-white/20">|</span>
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
-        <span class="serif text-xs md:text-sm tracking-widest text-amber-200 font-semibold">VITRINA DE GALERÍA</span>
-        <span class="hidden md:inline-block text-[10px] mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">Edición Física</span>
+      <div class="flex items-center gap-2.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">SALA DE VITRINA 3D</span>
+        <span class="hidden md:inline-block text-[9px] mono uppercase tracking-widest px-2 py-0.5 rounded border border-[#c5a059]/30 text-[#c5a059]">
+          Inspección Física
+        </span>
       </div>
     </div>
 
     <!-- ACCESOS RÁPIDOS -->
     <div class="flex items-center gap-3">
-      <a href="museum.html" class="hidden sm:flex items-center gap-1.5 text-xs text-cyan-300 hover:text-cyan-100 px-3 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 mono transition">
-        <span>🚀 Observatorio 3D</span>
+      <a href="museum.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
+        Observatorio 3D
       </a>
-      <a href="studio.html" class="hidden sm:flex items-center gap-1.5 text-xs text-purple-300 hover:text-purple-100 px-3 py-1.5 rounded-full bg-purple-950/40 border border-purple-500/30 mono transition">
-        <span>🎨 Estudio Reels 2D</span>
-      </a>
-      <button onclick="openCheckoutModal()" class="flex items-center gap-1.5 text-xs font-semibold text-black bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 px-4 py-1.5 rounded-full transition shadow-lg shadow-amber-500/20 mono">
-        <span>Comprar Obra</span>
+      <button onclick="openCheckoutModal()" class="text-xs mono uppercase tracking-wider font-semibold text-[#08080a] bg-[#c5a059] hover:bg-[#dfc285] px-4 py-1.5 rounded-full transition shadow-sm">
+        Adquirir Pieza
       </button>
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL: VITRINA 3D + PANEL COMERCIAL -->
+  <!-- ========================================================================= -->
+  <!-- 2. CONTENEDOR PRINCIPAL: ESCENARIO ARQUITECTÓNICO + PANEL CONFIGURADOR    -->
+  <!-- ========================================================================= -->
   <main class="flex-1 pt-14 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-3.5rem)] relative">
     
-    <!-- ÁREA 1: ESCENARIO 3D CON ILUMINACIÓN DE GALERÍA (VIEWPORT) -->
-    <div class="w-full lg:w-7/12 h-[450px] lg:h-full relative bg-[#040308] overflow-hidden flex flex-col">
+    <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (PARED DE GALERÍA Y FOCO CENITAL) -->
+    <div class="w-full lg:w-7/12 h-[500px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]">
       
       <!-- Canvas Three.js -->
       <canvas id="vitrina-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
 
-      <!-- Overlay Controles de Iluminación y Cámara -->
-      <div class="absolute top-4 left-4 z-20 flex flex-wrap gap-2">
-        <div class="glass px-3 py-1.5 rounded-full flex items-center gap-2 text-xs mono text-slate-300 border-white/10">
-          <span class="text-amber-400">💡 Iluminación:</span>
-          <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 text-[11px] font-bold">Galería 3200K</button>
-          <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded hover:bg-white/10 text-slate-400 text-[11px]">Estudio 4500K</button>
-          <button onclick="setLighting('dramatic')" id="btn-light-dramatic" class="px-2 py-0.5 rounded hover:bg-white/10 text-slate-400 text-[11px]">Dramática</button>
-        </div>
+      <!-- Selector de Iluminación de Galería -->
+      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#101014]/80 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono">
+        <span class="text-[#71717a] uppercase tracking-wider mr-1">Luz:</span>
+        <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium">Galería 3200K</button>
+        <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Estudio 4500K</button>
+        <button onclick="setLighting('intimate')" id="btn-light-intimate" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Noche Íntima</button>
       </div>
 
-      <!-- Controles de Vista de Cámara -->
-      <div class="absolute top-4 right-4 z-20 flex items-center gap-1.5">
-        <button onclick="setCameraAngle('front')" class="glass hover:bg-white/10 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg mono transition">Frontal</button>
-        <button onclick="setCameraAngle('angle')" class="glass hover:bg-white/10 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg mono transition">Perspectiva</button>
-        <button onclick="setCameraAngle('macro')" class="glass hover:bg-white/10 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg mono transition">Macro Detalle</button>
-        <button onclick="toggleAutoRotate()" id="btn-rotate" class="glass hover:bg-white/10 text-amber-300 text-xs px-2.5 py-1.5 rounded-lg mono transition">Rotar ⟳</button>
+      <!-- Controles de Ángulo de Cámara -->
+      <div class="absolute top-5 right-5 z-20 flex items-center gap-1.5">
+        <button onclick="setCameraAngle('front')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Frontal</button>
+        <button onclick="setCameraAngle('angle')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perspectiva</button>
+        <button onclick="setCameraAngle('macro')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Macro Detalle</button>
+        <button onclick="toggleAutoRotate()" id="btn-rotate" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Rotar ⟳</button>
       </div>
 
-      <!-- Pie de Escenario: Pedestal & Certificación Fonoestética -->
-      <div class="absolute bottom-4 left-4 right-4 z-20 flex justify-between items-end pointer-events-none">
-        <div class="glass px-4 py-2.5 rounded-xl border-white/10 pointer-events-auto max-w-sm">
-          <div class="text-[10px] mono text-amber-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Vitrina de Exhibición Activa
+      <!-- Pie de Escenario: Descripción Arquitectónica -->
+      <div class="absolute bottom-5 left-5 right-5 z-20 flex justify-between items-end pointer-events-none">
+        <div class="bg-[#101014]/90 backdrop-blur-md px-4 py-3 rounded-xl luxury-border pointer-events-auto max-w-sm">
+          <div class="text-[9px] mono uppercase tracking-[0.2em] text-[#c5a059] font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span> Espacio de Exposición
           </div>
-          <div class="text-xs text-slate-200 font-medium mt-0.5" id="vitrina-product-badge">
+          <div class="text-xs text-[#f4f1ea] font-medium mt-0.5" id="vitrina-product-badge">
             Cuadro Fine Art 50×70 cm · Paspartú Biselado
           </div>
-          <div class="text-[11px] text-slate-400 font-light mt-0.5" id="vitrina-formula-badge">
-            Obra 21: Los Ceros de Riemann (Problema del Milenio)
+          <div class="text-[11px] text-[#a1a1aa] font-light mt-0.5" id="vitrina-formula-badge">
+            Obra 21: Los Ceros de Riemann (Bernard Riemann, 1859)
           </div>
         </div>
 
         <div class="text-right pointer-events-auto hidden md:block">
-          <span class="text-[10px] mono text-slate-500 uppercase tracking-widest block">Pedestal Escultórico</span>
-          <span class="text-xs mono text-slate-300">Mármol Negro Belga · Bisel Dorado</span>
+          <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#71717a] block">Montaje Físico</span>
+          <span class="text-xs mono text-[#a1a1aa]">Muro de Galería · Luz Cenital Focal</span>
         </div>
       </div>
 
     </div>
 
-    <!-- ÁREA 2: PANEL COMERCIAL & CONFIGURADOR DE COMPRA (ACCIONES DIRECTAS) -->
-    <div class="w-full lg:w-5/12 h-auto lg:h-full glass border-l border-white/10 flex flex-col overflow-y-auto p-5 md:p-7 space-y-6">
+    <!-- ÁREA 2: PANEL EDITORIAL DE COMPRA & CONFIGURACIÓN -->
+    <div class="w-full lg:w-5/12 h-auto lg:h-full bg-[#0c0c0f] flex flex-col overflow-y-auto p-6 md:p-8 space-y-7">
       
-      <!-- CABECERA DE PRODUCTO -->
-      <div>
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs mono text-amber-400 uppercase tracking-wider font-semibold">Configuración de Coleccionista</span>
-          <span class="text-xs mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">● 100% Hecho a Mano</span>
+      <!-- CABECERA DE OBRA -->
+      <div class="space-y-1.5 border-b border-white/[0.08] pb-5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] mono uppercase tracking-[0.25em] text-[#c5a059]" id="current-badge-code">
+            Obra 21 de 24
+          </span>
+          <span class="text-[10px] mono text-[#71717a] uppercase tracking-wider">
+            Edición Limitada 100 Piezas
+          </span>
         </div>
-        <h1 class="text-2xl md:text-3xl serif font-bold text-white tracking-tight leading-snug" id="shop-title">
+        <h1 class="serif text-2xl md:text-3xl text-[#f4f1ea] font-normal leading-snug" id="shop-title">
           Los Ceros de Riemann
         </h1>
-        <p class="text-xs text-slate-400 font-light mt-1" id="shop-subtitle">
-          Ecuación funcional analítica calculada en silicio · Impresión giclée de archivo de 12 tintas.
+        <p class="text-xs text-[#a1a1aa] font-light leading-relaxed" id="shop-subtitle">
+          Hipótesis del Milenio sobre Números Primos · Bernard Riemann, 1859.
         </p>
       </div>
 
-      <!-- PASO 1: SELECCIONA EL FORMATO DEL OBJETO -->
-      <div class="space-y-2.5">
-        <label class="text-xs mono text-slate-300 font-semibold block uppercase tracking-wider">
-          1. Selecciona el Formato Físico
-        </label>
-        <div class="grid grid-cols-2 gap-2.5" id="format-grid">
+      <!-- PASO 1: SELECCIÓN DE FORMATO -->
+      <div class="space-y-3">
+        <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
+          1. Formato de Montaje
+        </span>
+        <div class="grid grid-cols-2 gap-3" id="format-grid">
           
           <!-- Cuadro Fine Art -->
-          <button onclick="selectFormat('fineart')" id="card-fmt-fineart" class="format-card text-left p-3 rounded-xl border border-amber-500/60 bg-amber-500/10 transition space-y-1">
+          <button onclick="selectFormat('fineart')" id="card-fmt-fineart" class="format-card text-left p-3.5 rounded-xl luxury-gold-border bg-[#141418] transition space-y-1">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold text-white">Cuadro Fine Art</span>
-              <span class="text-[10px] mono text-amber-300 font-bold bg-amber-400/20 px-1.5 py-0.5 rounded">Popular</span>
+              <span class="text-xs font-medium text-[#f4f1ea]">Cuadro Fine Art</span>
+              <span class="text-[9px] mono text-[#c5a059] uppercase">Principal</span>
             </div>
-            <p class="text-[11px] text-slate-300">50×70 cm · Paspartú 5cm · Vidrio UV</p>
-            <div class="text-xs font-bold text-amber-400 mono pt-0.5">$68.000 CLP <span class="text-[10px] text-slate-400 font-normal">(~$75 USD)</span></div>
+            <p class="text-[11px] text-[#a1a1aa] font-light">50×70 cm · Paspartú 5 cm</p>
+            <div class="serif text-xs text-[#c5a059] pt-1">$68.000 CLP <span class="text-[10px] text-[#71717a] mono">(~$75 USD)</span></div>
           </button>
 
-          <!-- Cuadro Acrílico Luxury -->
-          <button onclick="selectFormat('acrylic')" id="card-fmt-acrylic" class="format-card text-left p-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 transition space-y-1">
+          <!-- Acrílico Luxury -->
+          <button onclick="selectFormat('acrylic')" id="card-fmt-acrylic" class="format-card text-left p-3.5 rounded-xl luxury-border bg-[#101014] hover:border-white/20 transition space-y-1">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold text-white">Acrílico Luxury</span>
-              <span class="text-[10px] mono text-purple-300 font-bold bg-purple-400/20 px-1.5 py-0.5 rounded">6mm</span>
+              <span class="text-xs font-medium text-[#f4f1ea]">Acrílico Luxury</span>
+              <span class="text-[9px] mono text-[#71717a] uppercase">6 mm</span>
             </div>
-            <p class="text-[11px] text-slate-300">40×60 cm · Montaje Flotante</p>
-            <div class="text-xs font-bold text-amber-400 mono pt-0.5">$120.000 CLP <span class="text-[10px] text-slate-400 font-normal">(~$130 USD)</span></div>
+            <p class="text-[11px] text-[#a1a1aa] font-light">40×60 cm · Montaje Flotante</p>
+            <div class="serif text-xs text-[#c5a059] pt-1">$120.000 CLP <span class="text-[10px] text-[#71717a] mono">(~$130 USD)</span></div>
           </button>
 
-          <!-- Taza Cerámica Soft-Touch -->
-          <button onclick="selectFormat('mug')" id="card-fmt-mug" class="format-card text-left p-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 transition space-y-1">
+          <!-- Taza Cerámica -->
+          <button onclick="selectFormat('mug')" id="card-fmt-mug" class="format-card text-left p-3.5 rounded-xl luxury-border bg-[#101014] hover:border-white/20 transition space-y-1">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold text-white">Taza Cerámica</span>
-              <span class="text-[10px] mono text-cyan-300 font-bold bg-cyan-400/20 px-1.5 py-0.5 rounded">11 oz</span>
+              <span class="text-xs font-medium text-[#f4f1ea]">Taza Cerámica</span>
+              <span class="text-[9px] mono text-[#71717a] uppercase">11 oz</span>
             </div>
-            <p class="text-[11px] text-slate-300">Negro Mate Soft-Touch grabado</p>
-            <div class="text-xs font-bold text-amber-400 mono pt-0.5">$16.900 CLP <span class="text-[10px] text-slate-400 font-normal">(~$18 USD)</span></div>
+            <p class="text-[11px] text-[#a1a1aa] font-light">Negro Mate Soft-Touch</p>
+            <div class="serif text-xs text-[#c5a059] pt-1">$16.900 CLP <span class="text-[10px] text-[#71717a] mono">(~$18 USD)</span></div>
           </button>
 
-          <!-- Cuaderno de Campo Moleskine -->
-          <button onclick="selectFormat('notebook')" id="card-fmt-notebook" class="format-card text-left p-3 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 transition space-y-1">
+          <!-- Cuaderno Moleskine -->
+          <button onclick="selectFormat('notebook')" id="card-fmt-notebook" class="format-card text-left p-3.5 rounded-xl luxury-border bg-[#101014] hover:border-white/20 transition space-y-1">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold text-white">Cuaderno de Campo</span>
-              <span class="text-[10px] mono text-emerald-300 font-bold bg-emerald-400/20 px-1.5 py-0.5 rounded">Moleskine</span>
+              <span class="text-xs font-medium text-[#f4f1ea]">Cuaderno de Campo</span>
+              <span class="text-[9px] mono text-[#71717a] uppercase">100g</span>
             </div>
-            <p class="text-[11px] text-slate-300">Tapa dura grabada en bajorrelieve</p>
-            <div class="text-xs font-bold text-amber-400 mono pt-0.5">$24.900 CLP <span class="text-[10px] text-slate-400 font-normal">(~$27 USD)</span></div>
+            <p class="text-[11px] text-[#a1a1aa] font-light">Tapa dura en bajorrelieve</p>
+            <div class="serif text-xs text-[#c5a059] pt-1">$24.900 CLP <span class="text-[10px] text-[#71717a] mono">(~$27 USD)</span></div>
           </button>
 
         </div>
       </div>
 
-      <!-- PASO 2: SELECCIONA LA OBRA / ECUACIÓN (24 FÓRMULAS) -->
+      <!-- PASO 2: SELECCIÓN DE OBRA (24 LEYES) -->
       <div class="space-y-2">
-        <div class="flex justify-between items-center">
-          <label class="text-xs mono text-slate-300 font-semibold uppercase tracking-wider">
-            2. Selecciona la Obra / Ecuación
-          </label>
-          <span class="text-[11px] mono text-purple-300" id="current-badge-code">Obra #21 de 24</span>
-        </div>
-
-        <select id="artwork-select" onchange="onSelectArtwork(this.value)" class="w-full bg-[#0a0718] border border-white/20 text-slate-100 text-xs rounded-xl p-3 mono focus:outline-none focus:border-amber-400 transition cursor-pointer">
+        <label class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
+          2. Selección de Obra / Ecuación
+        </label>
+        <select id="artwork-select" onchange="onSelectArtwork(this.value)" class="w-full bg-[#101014] luxury-border text-[#f4f1ea] text-xs rounded-lg p-3 mono focus:outline-none focus:border-[#c5a059] transition cursor-pointer">
           <optgroup label="── PROBLEMAS DEL MILENIO & MATEMÁTICA PURA ──">
-            <option value="20" selected>Obra 21 · Los Ceros de Riemann (Hipótesis del Milenio)</option>
-            <option value="21">Obra 22 · La Conjetura de Beal (Fermat Generalizado)</option>
-            <option value="22">Obra 23 · Navier-Stokes & Vórtices de Fluido (Milenio)</option>
-            <option value="23">Obra 24 · El Flujo de Ricci de Poincaré (Perelman)</option>
+            <option value="20" selected>Obra 21 · Los Ceros de Riemann (1859)</option>
+            <option value="21">Obra 22 · La Conjetura de Beal (1993)</option>
+            <option value="22">Obra 23 · Navier-Stokes & Vórtices (1845)</option>
+            <option value="23">Obra 24 · El Flujo de Ricci de Poincaré (2002)</option>
           </optgroup>
-          <optgroup label="── CAOS & DINÁMICA NO LINEAL ──">
-            <option value="0">Obra 01 · El Vuelo de Lorenz (Atractor de Caos 3D)</option>
-            <option value="6">Obra 07 · La Cinta del Panadero (Atractor de Rössler)</option>
-            <option value="9">Obra 10 · La Autopista del Caos (Hormiga de Langton)</option>
-            <option value="12">Obra 13 · Los Ríos de Newton (Fractal de Cuencas)</option>
+          <optgroup label="── TEORÍA DEL CAOS & DINÁMICA ──">
+            <option value="0">Obra 01 · El Vuelo de Lorenz (1963)</option>
+            <option value="6">Obra 07 · La Cinta del Panadero de Rössler (1976)</option>
+            <option value="9">Obra 10 · La Autopista del Caos de Langton (1986)</option>
+            <option value="12">Obra 13 · Los Ríos de Newton (1669)</option>
           </optgroup>
           <optgroup label="── ONDAS, FÍSICA & CIMÁTICA ──">
-            <option value="4">Obra 05 · Los Cantos de Chladni (Cimática Sonora 1787)</option>
-            <option value="10">Obra 11 · La Ola Eterna (Solitones No Lineales KdV)</option>
-            <option value="13">Obra 14 · Las Celdas del Sol (Convección de Bénard)</option>
-            <option value="18">Obra 19 · El Colapso Cuántico (Ecuación de Schrödinger)</option>
+            <option value="4">Obra 05 · Los Cantos de Chladni (1787)</option>
+            <option value="10">Obra 11 · La Ola Eterna de Solitones KdV (1834)</option>
+            <option value="13">Obra 14 · Las Celdas del Sol de Bénard (1900)</option>
+            <option value="18">Obra 19 · El Colapso Cuántico de Schrödinger (1926)</option>
           </optgroup>
           <optgroup label="── GEOMETRÍA, TOPOLOGÍA & FRACTALES ──">
-            <option value="1">Obra 02 · El Umbral de la Materia (Elasticidad Tensorial)</option>
-            <option value="2">Obra 03 · La Danza de Yoshida (Conservación Simpléctica)</option>
-            <option value="3">Obra 04 · Los Ríos Invisibles (Números Duales de Clifford)</option>
-            <option value="5">Obra 06 · El Telar de Turing (Morfogénesis Química)</option>
-            <option value="7">Obra 08 · Las Esferas de Apolonio (Curvatura Fractal)</option>
-            <option value="8">Obra 09 · El Espejo de Julia (Dinámica Holomorfa)</option>
-            <option value="11">Obra 12 · La Piel de la Jirafa (Teselación de Voronoi)</option>
-            <option value="14">Obra 15 · La Fibración de Hopf (Esfera 4D en Luz)</option>
-            <option value="15">Obra 16 · El Juego del Caos (Helecho de Barnsley)</option>
-            <option value="16">Obra 17 · Las Flores del Girasol (Filotaxis Áurea)</option>
-            <option value="17">Obra 18 · Las Espirales Químicas (Belousov-Zhabotinsky)</option>
-            <option value="19">Obra 20 · El Laberinto Perfecto (Regla 110 Wolfram)</option>
+            <option value="1">Obra 02 · El Umbral de la Materia (1913)</option>
+            <option value="2">Obra 03 · La Danza de Yoshida (1990)</option>
+            <option value="3">Obra 04 · Los Ríos Invisibles de Clifford (1873)</option>
+            <option value="5">Obra 06 · El Telar de Turing (1952)</option>
+            <option value="7">Obra 08 · Las Esferas de Apolonio (200 a.C.)</option>
+            <option value="8">Obra 09 · El Espejo de Julia (1918)</option>
+            <option value="11">Obra 12 · La Piel de la Jirafa de Voronoi (1908)</option>
+            <option value="14">Obra 15 · La Fibración de Hopf (1931)</option>
+            <option value="15">Obra 16 · El Juego del Caos de Barnsley (1988)</option>
+            <option value="16">Obra 17 · Las Flores de Fibonacci (1202)</option>
+            <option value="17">Obra 18 · Las Espirales de Belousov-Zhabotinsky (1951)</option>
+            <option value="19">Obra 20 · El Laberinto de la Regla 110 (1983)</option>
           </optgroup>
         </select>
       </div>
 
-      <!-- PASO 3: PERSONALIZACIÓN DE ACABADOS (MARCO Y PASPARTÚ) -->
-      <div id="finish-section" class="space-y-3 pt-1">
-        <label class="text-xs mono text-slate-300 font-semibold block uppercase tracking-wider">
-          3. Acabados de Carpintería & Paspartú
-        </label>
+      <!-- PASO 3: MOLDURA & PASPARTÚ (SOLO PARA CUADRO) -->
+      <div id="finish-section" class="space-y-4 pt-1">
+        <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
+          3. Carpintería Noble & Paspartú
+        </span>
         
-        <!-- Color del Marco -->
+        <!-- Moldura de Madera -->
         <div class="space-y-1.5">
-          <span class="text-[11px] text-slate-400 mono">Moldura de Madera Maciza:</span>
+          <span class="text-[10px] text-[#a1a1aa] mono uppercase tracking-wider block">Madera Maciza de la Moldura:</span>
           <div class="flex gap-2">
-            <button onclick="setFrameFinish('black')" id="btn-frame-black" class="finish-btn flex-1 py-1.5 px-2 rounded-lg border border-amber-400 bg-black text-amber-200 text-xs font-medium flex items-center justify-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-neutral-900 border border-neutral-600"></span> Negro Mate
+            <button onclick="setFrameFinish('black')" id="btn-frame-black" class="finish-btn flex-1 py-2 px-2 rounded-lg luxury-gold-border bg-[#101014] text-[#c5a059] text-xs font-medium flex items-center justify-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#111115] border border-white/20"></span> Ébano Mate
             </button>
-            <button onclick="setFrameFinish('oak')" id="btn-frame-oak" class="finish-btn flex-1 py-1.5 px-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#c29b63] border border-amber-800"></span> Roble Claro
+            <button onclick="setFrameFinish('oak')" id="btn-frame-oak" class="finish-btn flex-1 py-2 px-2 rounded-lg luxury-border bg-[#101014] text-[#a1a1aa] text-xs font-medium flex items-center justify-center gap-2 hover:border-white/20">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#c29b63]"></span> Roble Claro
             </button>
-            <button onclick="setFrameFinish('walnut')" id="btn-frame-walnut" class="finish-btn flex-1 py-1.5 px-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium flex items-center justify-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#4a2e18] border border-amber-950"></span> Nogal Noble
+            <button onclick="setFrameFinish('walnut')" id="btn-frame-walnut" class="finish-btn flex-1 py-2 px-2 rounded-lg luxury-border bg-[#101014] text-[#a1a1aa] text-xs font-medium flex items-center justify-center gap-2 hover:border-white/20">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#4a2e18]"></span> Nogal Noble
             </button>
           </div>
         </div>
 
-        <!-- Color del Paspartú -->
+        <!-- Paspartú -->
         <div class="space-y-1.5">
-          <span class="text-[11px] text-slate-400 mono">Paspartú Biselado 5 cm (Libre de Ácido):</span>
+          <span class="text-[10px] text-[#a1a1aa] mono uppercase tracking-wider block">Paspartú Biselado 5 cm (Libre de Ácido):</span>
           <div class="flex gap-2">
-            <button onclick="setMatteFinish('white')" id="btn-mat-white" class="mat-btn flex-1 py-1.5 px-2 rounded-lg border border-amber-400 bg-white/10 text-amber-200 text-xs font-medium">
+            <button onclick="setMatteFinish('white')" id="btn-mat-white" class="mat-btn flex-1 py-2 px-2 rounded-lg luxury-gold-border bg-[#101014] text-[#c5a059] text-xs font-medium">
               Blanco Algodón
             </button>
-            <button onclick="setMatteFinish('cream')" id="btn-mat-cream" class="mat-btn flex-1 py-1.5 px-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium">
+            <button onclick="setMatteFinish('cream')" id="btn-mat-cream" class="mat-btn flex-1 py-2 px-2 rounded-lg luxury-border bg-[#101014] text-[#a1a1aa] text-xs font-medium hover:border-white/20">
               Crema Museo
             </button>
-            <button onclick="setMatteFinish('dark')" id="btn-mat-dark" class="mat-btn flex-1 py-1.5 px-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium">
+            <button onclick="setMatteFinish('dark')" id="btn-mat-dark" class="mat-btn flex-1 py-2 px-2 rounded-lg luxury-border bg-[#101014] text-[#a1a1aa] text-xs font-medium hover:border-white/20">
               Grafito Profundo
             </button>
           </div>
         </div>
       </div>
 
-      <!-- PASO 4: DOSSIER DE CONTENIDO & CERTIFICACIÓN -->
-      <div class="p-3.5 bg-black/40 rounded-xl border border-white/10 space-y-2 text-xs">
-        <div class="text-amber-400 font-bold mono flex items-center gap-1.5">
-          <span>📦</span> QUÉ RECIBIRÁS EN TU PUERTA:
-        </div>
-        <ul class="text-slate-300 space-y-1.5 font-light list-disc list-inside">
-          <li><strong>Papel 100% Algodón:</strong> Hahnemühle Photo Rag 310g con 12 tintas pigmentadas minerales.</li>
-          <li><strong>Protección de Museo:</strong> Paspartú biselado libre de ácido + vidrio acrílico UV anti-rotura.</li>
-          <li><strong>Certificado de Procedencia:</strong> Sellado con lacre en seco y firma manuscrita de Matías Cortés Figueroa.</li>
-          <li><strong>Confección & Despacho:</strong> 10 a 15 días hábiles de confección manual. Entrega máxima garantizada en 20 días.</li>
+      <!-- PASO 4: QUÉ INCLUYE EL PAQUETE (SOBRIO) -->
+      <div class="p-4 rounded-xl bg-[#101014] luxury-border space-y-2.5 text-xs text-[#a1a1aa]">
+        <span class="mono text-[10px] uppercase tracking-widest text-[#c5a059] font-medium block">
+          Inclusiones de Archivo
+        </span>
+        <ul class="space-y-1.5 font-light list-disc list-inside">
+          <li>Papel Hahnemühle Photo Rag 308g con 12 tintas pigmentadas minerales.</li>
+          <li>Paspartú biselado libre de ácido + vidrio acrílico UV99 anti-rotura.</li>
+          <li>Certificado de Procedencia sellado con lacre en seco y firmado por Matías Cortés Figueroa.</li>
+          <li>Kit de colgado de acero reforzado + guía de montaje en pared.</li>
         </ul>
       </div>
 
-      <!-- PASO 5: RESUMEN COMERCIAL & BOTONES DE COMPRA INMEDIATA -->
-      <div class="pt-2 border-t border-white/10 space-y-3">
+      <!-- PASO 5: PRECIO & BOTONES DE ADQUISICIÓN -->
+      <div class="pt-2 border-t border-white/[0.08] space-y-4">
         <div class="flex justify-between items-baseline">
           <div>
-            <span class="text-xs mono text-slate-400 block">Total a Pagar (IVA Incluido):</span>
-            <span class="text-xs text-slate-500">Despacho en Santiago / Envíos a todo Chile</span>
+            <span class="text-[10px] mono text-[#71717a] uppercase tracking-wider block">Inversión Final:</span>
+            <span class="text-xs text-[#a1a1aa]">Despacho en Santiago / Envíos a todo Chile</span>
           </div>
           <div class="text-right">
-            <div class="text-2xl md:text-3xl font-bold font-mono text-amber-300" id="total-price-clp">$68.000 CLP</div>
-            <div class="text-[11px] mono text-slate-400" id="total-price-usd">~$75 USD</div>
+            <div class="serif text-2xl md:text-3xl text-[#f4f1ea]" id="total-price-clp">$68.000 CLP</div>
+            <div class="text-[11px] mono text-[#71717a]" id="total-price-usd">~$75 USD</div>
           </div>
         </div>
 
-        <!-- ACCIONES DE CONVERSIÓN -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-          
-          <!-- Botón de Pago con Tarjeta -->
-          <button onclick="openCheckoutModal()" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-300 hover:from-amber-400 hover:to-amber-200 text-black font-bold py-3.5 px-4 rounded-xl text-xs md:text-sm mono transition shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2">
-            <span>💳</span>
-            <span>Pagar con Tarjeta</span>
+        <!-- ACCIONES DIRECTAS -->
+        <div class="space-y-2.5">
+          <button onclick="openCheckoutModal()" class="w-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-3.5 px-6 rounded-full text-xs uppercase tracking-widest mono transition shadow-sm">
+            Adquirir Pieza — Pago Seguro
           </button>
-
-          <!-- Botón de WhatsApp Concierge -->
-          <button onclick="orderViaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl text-xs md:text-sm mono transition shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">
-            <span>💬</span>
-            <span>Ordenar por WhatsApp</span>
+          <button onclick="orderViaWhatsApp()" class="w-full border border-white/15 hover:border-white/30 text-[#f4f1ea] font-medium py-3 px-6 rounded-full text-xs uppercase tracking-widest mono transition">
+            Consultar por WhatsApp Concierge
           </button>
-
         </div>
 
         <div class="text-center">
-          <span class="text-[10px] mono text-slate-500">
-            🔒 Pago 100% seguro y garantizado · Webpay Plus, Transbank, Stripe o Transferencia Bancaria
+          <span class="text-[9px] mono uppercase tracking-wider text-[#71717a]">
+            Manufactura artesanal 10 a 15 días hábiles · Entrega garantizada
           </span>
         </div>
       </div>
@@ -323,121 +320,105 @@
 
   </main>
 
-  <!-- MODAL DE CHECKOUT INMEDIATO (TARJETA / WEBPAY / TRANSFERENCIA) -->
-  <div id="checkout-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass max-w-lg w-full rounded-2xl p-6 md:p-8 space-y-5 border-amber-500/30 relative">
+  <!-- ========================================================================= -->
+  <!-- 3. MODAL DE CHECKOUT SOBRIO & CRIPTO-SEGURO                                -->
+  <!-- ========================================================================= -->
+  <div id="checkout-modal" class="fixed inset-0 z-50 bg-[#08080a]/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="max-w-lg w-full rounded-2xl bg-[#101014] p-8 space-y-6 luxury-gold-border relative">
       
-      <!-- Cerrar Modal -->
-      <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white mono text-lg">✕</button>
+      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 text-[#a1a1aa] hover:text-[#f4f1ea] mono text-sm">✕</button>
 
-      <div class="border-b border-white/10 pb-3">
-        <div class="text-xs mono text-amber-400 font-semibold uppercase">Atelier Matemático · Checkout Seguro</div>
-        <h2 class="text-xl serif font-bold text-white mt-1">Finalizar Encargo de Obra</h2>
+      <div class="border-b border-white/[0.08] pb-4">
+        <span class="text-[10px] mono uppercase tracking-widest text-[#c5a059]">Atelier Matemático · Formalización de Orden</span>
+        <h2 class="serif text-2xl text-[#f4f1ea] font-normal mt-1">Detalle del Encargo</h2>
       </div>
 
-      <!-- Resumen del Pedido -->
-      <div class="bg-black/50 p-4 rounded-xl space-y-2 text-xs border border-white/5">
+      <div class="bg-[#08080a] p-4 rounded-xl space-y-2 text-xs luxury-border">
         <div class="flex justify-between">
-          <span class="text-slate-400">Obra:</span>
-          <strong class="text-white font-mono" id="modal-art-title">Los Ceros de Riemann</strong>
+          <span class="text-[#71717a]">Obra:</span>
+          <span class="text-[#f4f1ea] mono" id="modal-art-title">Los Ceros de Riemann</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-400">Formato & Acabado:</span>
-          <span class="text-slate-300 font-mono" id="modal-art-format">Cuadro Fine Art 50×70 cm (Negro Mate)</span>
+          <span class="text-[#71717a]">Formato & Moldura:</span>
+          <span class="text-[#a1a1aa] mono" id="modal-art-format">Cuadro Fine Art 50×70 cm (Ébano)</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-400">Plazo de Confección:</span>
-          <span class="text-amber-300 font-mono">10 a 15 días hábiles (Artesanal)</span>
+          <span class="text-[#71717a]">Plazo de Taller:</span>
+          <span class="text-[#c5a059] mono">10 a 15 días hábiles (Artesanal)</span>
         </div>
-        <div class="flex justify-between border-t border-white/10 pt-2 font-bold text-sm">
-          <span class="text-white">Total a Pagar:</span>
-          <span class="text-amber-400 font-mono" id="modal-art-price">$68.000 CLP</span>
+        <div class="flex justify-between border-t border-white/[0.08] pt-2 text-sm">
+          <span class="text-[#f4f1ea] serif">Monto Total:</span>
+          <span class="serif text-base text-[#c5a059]" id="modal-art-price">$68.000 CLP</span>
         </div>
       </div>
 
-      <!-- Formulario de Datos del Cliente -->
-      <form id="order-form" onsubmit="submitOrder(event)" class="space-y-3 text-xs">
+      <form id="order-form" onsubmit="submitOrder(event)" class="space-y-4 text-xs">
         <div>
-          <label class="block text-slate-300 mono mb-1">Nombre Completo *</label>
-          <input type="text" id="cust-name" required placeholder="Ej: Dr. Roberto Gómez" class="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-400 mono">
+          <label class="block text-[#a1a1aa] mono text-[11px] uppercase tracking-wider mb-1">Nombre Completo *</label>
+          <input type="text" id="cust-name" required placeholder="Roberto Gómez" class="w-full bg-[#08080a] luxury-border rounded-lg px-3.5 py-2.5 text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-slate-300 mono mb-1">Correo Electrónico *</label>
-            <input type="email" id="cust-email" required placeholder="roberto@universidad.cl" class="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-400 mono">
+            <label class="block text-[#a1a1aa] mono text-[11px] uppercase tracking-wider mb-1">Correo Electrónico *</label>
+            <input type="email" id="cust-email" required placeholder="roberto@estudio.cl" class="w-full bg-[#08080a] luxury-border rounded-lg px-3.5 py-2.5 text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono">
           </div>
           <div>
-            <label class="block text-slate-300 mono mb-1">Teléfono / WhatsApp *</label>
-            <input type="tel" id="cust-phone" required placeholder="+56 9 8765 4321" class="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-400 mono">
+            <label class="block text-[#a1a1aa] mono text-[11px] uppercase tracking-wider mb-1">Teléfono / WhatsApp *</label>
+            <input type="tel" id="cust-phone" required placeholder="+56 9 8765 4321" class="w-full bg-[#08080a] luxury-border rounded-lg px-3.5 py-2.5 text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono">
           </div>
         </div>
 
         <div>
-          <label class="block text-slate-300 mono mb-1">Dirección de Despacho (Comuna y Región) *</label>
-          <input type="text" id="cust-addr" required placeholder="Av. Providencia 1234, Dpto 802, Santiago" class="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-400 mono">
+          <label class="block text-[#a1a1aa] mono text-[11px] uppercase tracking-wider mb-1">Dirección de Despacho *</label>
+          <input type="text" id="cust-addr" required placeholder="Av. Providencia 1234, Dpto 802, Santiago" class="w-full bg-[#08080a] luxury-border rounded-lg px-3.5 py-2.5 text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono">
         </div>
 
-        <!-- Método de Pago -->
-        <div class="pt-2">
-          <label class="block text-slate-300 mono mb-1.5">Selecciona Pasarela de Pago:</label>
-          <div class="grid grid-cols-2 gap-2">
-            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white/5 border border-amber-400/60 cursor-pointer">
-              <input type="radio" name="paymethod" value="webpay" checked class="accent-amber-400">
-              <span class="text-xs text-white font-mono">Webpay Plus / Tarjetas</span>
-            </label>
-            <label class="flex items-center gap-2 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer">
-              <input type="radio" name="paymethod" value="transfer" class="accent-amber-400">
-              <span class="text-xs text-white font-mono">Transferencia Bancaria</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Botón Enviar Pedido -->
-        <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-black font-bold py-3 rounded-xl mono transition shadow-lg shadow-amber-400/20">
-          Confirmar y Proceder al Pago
+        <button type="submit" class="w-full mt-2 bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-3.5 rounded-full mono text-xs uppercase tracking-widest transition">
+          Confirmar y Proceder al Pago Seguro →
         </button>
       </form>
 
     </div>
   </div>
 
-  <!-- SCRIPT DE THREE.JS, RENDER PROCEDURAL DE OBRAS Y LÓGICA DE VITRINA -->
+  <!-- ========================================================================= -->
+  <!-- 4. THREE.JS: ESCENARIO DE GALERÍA ARQUITECTÓNICA & RENDER PROCEDURAL       -->
+  <!-- ========================================================================= -->
   <script>
     // CATÁLOGO DE LAS 24 OBRAS
     const OBRAS = [
-      { id: 1, title: "El Vuelo de Lorenz", sub: "Atractor de Caos 3D", cat: "CAOS · 1963", color: "#ec4899", fn: drawLorenz },
-      { id: 2, title: "El Umbral de la Materia", sub: "Elasticidad Tensorial de Cauchy", cat: "ELASTICIDAD · 1913", color: "#06b6d4", fn: drawElasticity },
-      { id: 3, title: "La Danza de Yoshida", sub: "Conservación Simpléctica de 4º Orden", cat: "SIMPLÉCTICO · 1990", color: "#8b5cf6", fn: drawYoshida },
-      { id: 4, title: "Los Ríos Invisibles", sub: "Números Duales de Clifford ε²=0", cat: "ÁLGEBRA · 1873", color: "#3b82f6", fn: drawClifford },
-      { id: 5, title: "Los Cantos de Chladni", sub: "Cimática Nodal en Placa", cat: "CIMÁTICA · 1787", color: "#fbbf24", fn: drawChladni },
-      { id: 6, title: "El Telar de Turing", sub: "Morfogénesis Química de Activador-Inhibidor", cat: "BIOLOGÍA MATEMÁTICA · 1952", color: "#10b981", fn: drawTuring },
-      { id: 7, title: "La Cinta del Panadero", sub: "Atractor Plegado de Rössler", cat: "TOPOLOGÍA · 1976", color: "#f97316", fn: drawRossler },
-      { id: 8, title: "Las Esferas de Apolonio", sub: "Fractal de Curvatura de Descartes", cat: "GEOMETRÍA · 200 a.C.", color: "#6366f1", fn: drawApollonian },
-      { id: 9, title: "El Espejo de Julia", sub: "Dinámica Holomorfa en el Plano Complejo", cat: "FRACTAL · 1918", color: "#a855f7", fn: drawJulia },
-      { id: 10, title: "La Autopista del Caos", sub: "Autómata Celular de Langton", cat: "AUTÓMATA · 1986", color: "#14b8a6", fn: drawLangton },
-      { id: 11, title: "La Ola Eterna", sub: "Solitones No Lineales de KdV", cat: "ONDAS · 1834", color: "#0284c7", fn: drawKdV },
-      { id: 12, title: "La Piel de la Jirafa", sub: "Teselación de Voronoi", cat: "GEOMETRÍA · 1908", color: "#d97706", fn: drawVoronoi },
-      { id: 13, title: "Los Ríos de Newton", sub: "Cuencas de Atracción Complejas", cat: "FRACTAL · 1669", color: "#e11d48", fn: drawNewton },
-      { id: 14, title: "Las Celdas del Sol", sub: "Convección Térmica de Bénard", cat: "TERMODINÁMICA · 1900", color: "#f59e0b", fn: drawBenard },
-      { id: 15, title: "La Fibración de Hopf", sub: "Esfera Cuadridimensional S³ en Luz", cat: "TOPOLOGÍA 4D · 1931", color: "#8b5cf6", fn: drawHopf },
-      { id: 16, title: "El Juego del Caos", sub: "Helecho Fractal de Barnsley", cat: "IFS · 1988", color: "#22c55e", fn: drawBarnsley },
-      { id: 17, title: "Las Flores del Girasol", sub: "Filotaxis y Espiral Áurea de Fibonacci", cat: "BOTÁNICA · 1202", color: "#eab308", fn: drawFibonacci },
-      { id: 18, title: "Las Espirales Químicas", sub: "Ondas Auto-organizadas de Belousov-Zhabotinsky", cat: "QUÍMICA NO LINEAL · 1951", color: "#ef4444", fn: drawBZ },
-      { id: 19, title: "El Colapso Cuántico", sub: "Función de Onda de Schrödinger", cat: "FÍSICA CUÁNTICA · 1926", color: "#06b6d4", fn: drawSchrodinger },
-      { id: 20, title: "El Laberinto Perfecto", sub: "Regla 110 y Universalidad de Turing", cat: "COMPUTACIÓN · 1983", color: "#64748b", fn: drawRule110 },
-      { id: 21, title: "Los Ceros de Riemann", sub: "Hipótesis del Milenio sobre Números Primos", cat: "PROBLEMA DEL MILENIO · 1859", color: "#38bdf8", fn: drawRiemann },
-      { id: 22, title: "La Conjetura de Beal", sub: "Ecuación Aˣ + Bʸ = Cᶻ y Factores Primos", cat: "TEORÍA DE NÚMEROS · 1993", color: "#f43f5e", fn: drawBeal },
-      { id: 23, title: "Vórtices de Navier-Stokes", sub: "Turbulencia y Singularidad Hidrodinámica", cat: "PROBLEMA DEL MILENIO · 1845", color: "#0ea5e9", fn: drawNavierStokes },
-      { id: 24, title: "El Flujo de Ricci de Poincaré", sub: "Geometrización de 3-Variedades de Perelman", cat: "PROBLEMA DEL MILENIO · 2002", color: "#a855f7", fn: drawRicci }
+      { id: 1, title: "El Vuelo de Lorenz", sub: "Atractor de Caos 3D · Edward Lorenz, 1963", color: "#c5a059", fn: drawLorenz },
+      { id: 2, title: "El Umbral de la Materia", sub: "Elasticidad Tensorial de Cauchy, 1913", color: "#38bdf8", fn: drawElasticity },
+      { id: 3, title: "La Danza de Yoshida", sub: "Integrador Simpléctico de 4º Orden, 1990", color: "#c5a059", fn: drawYoshida },
+      { id: 4, title: "Los Ríos Invisibles", sub: "Números Duales de Clifford ε²=0, 1873", color: "#f4f1ea", fn: drawClifford },
+      { id: 5, title: "Los Cantos de Chladni", sub: "Cimática Nodal en Placa Acústica, 1787", color: "#dfc285", fn: drawChladni },
+      { id: 6, title: "El Telar de Turing", sub: "Morfogénesis Química de Reacción-Difusión, 1952", color: "#38bdf8", fn: drawTuring },
+      { id: 7, title: "La Cinta del Panadero", sub: "Atractor Caótico Plegado de Rössler, 1976", color: "#c5a059", fn: drawRossler },
+      { id: 8, title: "Las Esferas de Apolonio", sub: "Teorema de Curvatura de Descartes, 200 a.C.", color: "#f4f1ea", fn: drawApollonian },
+      { id: 9, title: "El Espejo de Julia", sub: "Dinámica Holomorfa en el Plano Complejo, 1918", color: "#dfc285", fn: drawJulia },
+      { id: 10, title: "La Autopista del Caos", sub: "Autómata Celular de Langton, 1986", color: "#38bdf8", fn: drawLangton },
+      { id: 11, title: "La Ola Eterna", sub: "Solitones No Lineales de KdV, 1834", color: "#f4f1ea", fn: drawKdV },
+      { id: 12, title: "La Piel de la Jirafa", sub: "Teselaciones de Voronoi, 1908", color: "#c5a059", fn: drawVoronoi },
+      { id: 13, title: "Los Ríos de Newton", sub: "Cuencas de Atracción Fractales, 1669", color: "#dfc285", fn: drawNewton },
+      { id: 14, title: "Las Celdas del Sol", sub: "Convección Térmica de Bénard, 1900", color: "#c5a059", fn: drawBenard },
+      { id: 15, title: "La Fibración de Hopf", sub: "Topología de la Esfera 4D S³, 1931", color: "#f4f1ea", fn: drawHopf },
+      { id: 16, title: "El Juego del Caos", sub: "Helecho Fractal de Barnsley, 1988", color: "#38bdf8", fn: drawBarnsley },
+      { id: 17, title: "Las Flores del Girasol", sub: "Filotaxis Áurea de Fibonacci, 1202", color: "#dfc285", fn: drawFibonacci },
+      { id: 18, title: "Las Espirales Químicas", sub: "Ondas Auto-organizadas de BZ, 1951", color: "#c5a059", fn: drawBZ },
+      { id: 19, title: "El Colapso Cuántico", sub: "Ecuación de Onda de Schrödinger, 1926", color: "#38bdf8", fn: drawSchrodinger },
+      { id: 20, title: "El Laberinto Perfecto", sub: "Regla 110 y Universalidad de Turing, 1983", color: "#f4f1ea", fn: drawRule110 },
+      { id: 21, title: "Los Ceros de Riemann", sub: "Hipótesis del Milenio sobre Números Primos, 1859", color: "#38bdf8", fn: drawRiemann },
+      { id: 22, title: "La Conjetura de Beal", sub: "Ecuación Diofántica y Factores Primos, 1993", color: "#c5a059", fn: drawBeal },
+      { id: 23, title: "Vórtices de Navier-Stokes", sub: "Problema del Milenio de Fluidos, 1845", color: "#38bdf8", fn: drawNavierStokes },
+      { id: 24, title: "El Flujo de Ricci de Poincaré", sub: "Geometrización de 3-Variedades de Perelman, 2002", color: "#dfc285", fn: drawRicci }
     ];
 
-    // ESTADO DE CONFIGURACIÓN
-    let currentArtworkIdx = 20; // Default: Riemann (Obra 21)
+    let currentArtworkIdx = 20; // Default: Riemann
     let currentFormat = 'fineart';
     let currentFrameFinish = 'black';
     let currentMatteFinish = 'white';
-    let autoRotate = true;
+    let autoRotate = false;
 
     const PRICES = {
       fineart:  { clp: 68000, usd: 75, name: "Cuadro Fine Art 50×70 cm" },
@@ -446,13 +427,14 @@
       notebook: { clp: 24900, usd: 27, name: "Cuaderno Moleskine de Campo" }
     };
 
-    // VARIABLES DE THREE.JS
-    let scene, camera, renderer, pedestalGroup, productGroup;
-    let spotLight1, spotLight2, ambientLight;
+    // THREE.JS VARIABLES
+    let scene, camera, renderer, architecturalGroup, productGroup;
+    let spotLightKey, spotLightFill, ambientLight;
     let artworkTextureCanvas, artworkTexture;
     let isMouseDown = false, mouseX = 0, mouseY = 0;
-    let targetRotationX = 0.1, targetRotationY = 0.3;
+    let targetRotationX = 0.05, targetRotationY = 0.15;
     let targetCamDist = 3.2;
+    let isTabVisible = true;
 
     // INICIALIZACIÓN CON PARÁMETROS URL
     window.addEventListener('DOMContentLoaded', () => {
@@ -467,9 +449,7 @@
       }
       if (urlParams.has('format')) {
         const f = urlParams.get('format');
-        if (PRICES[f]) {
-          currentFormat = f;
-        }
+        if (PRICES[f]) currentFormat = f;
       }
 
       initThree();
@@ -479,97 +459,99 @@
       animate();
     });
 
-    // 1. INICIALIZACIÓN DE THREE.JS
+    document.addEventListener('visibilitychange', () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) requestAnimationFrame(animate);
+    });
+
+    // 1. INICIALIZACIÓN DEL ESCENARIO ARQUITECTÓNICO
     function initThree() {
       const container = document.getElementById('vitrina-canvas');
       const w = container.clientWidth;
       const h = container.clientHeight;
 
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x040308);
+      scene.background = new THREE.Color(0x0a0a0d);
 
-      camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-      camera.position.set(0, 0.6, targetCamDist);
+      camera = new THREE.PerspectiveCamera(36, w / h, 0.1, 100);
+      camera.position.set(0, 0.2, targetCamDist);
 
-      renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(1.0); // Disciplina térmica de Apple Silicon
+      renderer.setPixelRatio(1.0); // Disciplina térmica Apple Silicon
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.1;
 
-      // LUCES DE GALERÍA
-      ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      // ILUMINACIÓN DE GALERÍA (KEY SPOTLIGHT + FILL)
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
       scene.add(ambientLight);
 
-      // Foco Cenital Cálido (Key Light)
-      spotLight1 = new THREE.SpotLight(0xffeedd, 3.2);
-      spotLight1.position.set(1.5, 4.0, 2.5);
-      spotLight1.angle = 0.55;
-      spotLight1.penumbra = 0.7;
-      scene.add(spotLight1);
+      // Foco Cenital Focal (Key Light de 3200K cálido)
+      spotLightKey = new THREE.SpotLight(0xfef2db, 3.4);
+      spotLightKey.position.set(0.8, 3.8, 2.8);
+      spotLightKey.angle = 0.5;
+      spotLightKey.penumbra = 0.8;
+      scene.add(spotLightKey);
 
       // Foco de Relleno Suave (Fill Light)
-      spotLight2 = new THREE.SpotLight(0x88bbff, 1.8);
-      spotLight2.position.set(-2.0, 3.0, 1.5);
-      spotLight2.angle = 0.6;
-      spotLight2.penumbra = 0.8;
-      scene.add(spotLight2);
+      spotLightFill = new THREE.SpotLight(0xaabbcc, 1.2);
+      spotLightFill.position.set(-2.0, 2.5, 1.8);
+      spotLightFill.angle = 0.6;
+      spotLightFill.penumbra = 0.9;
+      scene.add(spotLightFill);
 
-      // PEDESTAL DE MÁRMOL NEGRO
-      pedestalGroup = new THREE.Group();
-      
-      // Cilindro / Base de mármol
-      const pedGeom = new THREE.CylinderGeometry(1.2, 1.35, 1.2, 48);
-      const pedMat = new THREE.MeshStandardMaterial({
-        color: 0x0a0a0f,
-        roughness: 0.18,
-        metalness: 0.85
+      // ESCENARIO ARQUITECTÓNICO: PARED DE GALERÍA & SUELO DE PIEDRA
+      architecturalGroup = new THREE.Group();
+
+      // Muro de Galería posterior (Estuco suave de museo)
+      const wallGeom = new THREE.PlaneGeometry(12, 8);
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: 0x141418,
+        roughness: 0.85,
+        metalness: 0.05
       });
-      const pedestal = new THREE.Mesh(pedGeom, pedMat);
-      pedestal.position.y = -1.2;
-      pedestalGroup.add(pedestal);
+      const backWall = new THREE.Mesh(wallGeom, wallMat);
+      backWall.position.z = -0.15;
+      architecturalGroup.add(backWall);
 
-      // Anillo Biselado Dorado
-      const ringGeom = new THREE.TorusGeometry(1.21, 0.02, 16, 48);
-      const ringMat = new THREE.MeshStandardMaterial({
-        color: 0xd4af37,
-        roughness: 0.25,
-        metalness: 0.95
-      });
-      const goldRing = new THREE.Mesh(ringGeom, ringMat);
-      goldRing.rotation.x = Math.PI / 2;
-      goldRing.position.y = -0.6;
-      pedestalGroup.add(goldRing);
-
-      // Suelo de galería con sutil reflexión
-      const floorGeom = new THREE.PlaneGeometry(20, 20);
+      // Suelo de Galería (Piedra oscura / roble negro)
+      const floorGeom = new THREE.PlaneGeometry(12, 8);
       const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x020204,
+        color: 0x0c0c0e,
         roughness: 0.45,
-        metalness: 0.6
+        metalness: 0.4
       });
       const floor = new THREE.Mesh(floorGeom, floorMat);
       floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -1.8;
-      pedestalGroup.add(floor);
+      floor.position.y = -1.6;
+      floor.position.z = 2.0;
+      architecturalGroup.add(floor);
 
-      scene.add(pedestalGroup);
+      // Sombra de contacto suave proyectada en la pared
+      const shadowGeom = new THREE.PlaneGeometry(1.6, 2.1);
+      const shadowMat = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        transparent: true,
+        opacity: 0.45
+      });
+      const shadowPlane = new THREE.Mesh(shadowGeom, shadowMat);
+      shadowPlane.position.set(0.04, -0.06, -0.13);
+      architecturalGroup.add(shadowPlane);
 
-      // GRUPO DE PRODUCTO
+      scene.add(architecturalGroup);
+
+      // GRUPO DEL PRODUCTO
       productGroup = new THREE.Group();
-      productGroup.position.y = 0.0;
+      productGroup.position.set(0, 0, 0);
       scene.add(productGroup);
 
-      // EVENTOS DE INTERACCIÓN DE RATÓN
+      // EVENTOS DE INTERACCIÓN
       container.addEventListener('mousedown', onMouseDown);
       window.addEventListener('mouseup', onMouseUp);
       window.addEventListener('mousemove', onMouseMove);
       container.addEventListener('wheel', onWheel, { passive: false });
-
-      // Touch events
       container.addEventListener('touchstart', onTouchStart, { passive: true });
       container.addEventListener('touchmove', onTouchMove, { passive: true });
-
       window.addEventListener('resize', onWindowResize);
     }
 
@@ -582,22 +564,23 @@
       renderer.setSize(w, h);
     }
 
-    // INTERACCIÓN DE RATÓN Y ÓRBITA
     function onMouseDown(e) {
       isMouseDown = true;
       mouseX = e.clientX;
       mouseY = e.clientY;
       autoRotate = false;
-      document.getElementById('btn-rotate').classList.remove('text-amber-300');
+      document.getElementById('btn-rotate').classList.remove('text-[#c5a059]');
+      document.getElementById('btn-rotate').classList.add('text-[#a1a1aa]');
     }
     function onMouseUp() { isMouseDown = false; }
     function onMouseMove(e) {
       if (!isMouseDown) return;
       const dx = e.clientX - mouseX;
       const dy = e.clientY - mouseY;
-      targetRotationY += dx * 0.008;
-      targetRotationX += dy * 0.006;
-      targetRotationX = Math.max(-0.4, Math.min(0.8, targetRotationX));
+      targetRotationY += dx * 0.006;
+      targetRotationX += dy * 0.005;
+      targetRotationX = Math.max(-0.25, Math.min(0.45, targetRotationX));
+      targetRotationY = Math.max(-0.9, Math.min(0.9, targetRotationY));
       mouseX = e.clientX;
       mouseY = e.clientY;
     }
@@ -612,25 +595,26 @@
       if (e.touches.length === 1) {
         const dx = e.touches[0].clientX - mouseX;
         const dy = e.touches[0].clientY - mouseY;
-        targetRotationY += dx * 0.008;
-        targetRotationX += dy * 0.006;
-        targetRotationX = Math.max(-0.4, Math.min(0.8, targetRotationX));
+        targetRotationY += dx * 0.006;
+        targetRotationX += dy * 0.005;
+        targetRotationX = Math.max(-0.25, Math.min(0.45, targetRotationX));
+        targetRotationY = Math.max(-0.9, Math.min(0.9, targetRotationY));
         mouseX = e.touches[0].clientX;
         mouseY = e.touches[0].clientY;
       }
     }
     function onWheel(e) {
       e.preventDefault();
-      targetCamDist += e.deltaY * 0.0025;
-      targetCamDist = Math.max(1.8, Math.min(5.5, targetCamDist));
+      targetCamDist += e.deltaY * 0.002;
+      targetCamDist = Math.max(1.8, Math.min(4.8, targetCamDist));
     }
 
-    // 2. TEXTURA DINÁMICA DE LA OBRA (RENDER EN CANVAS 2D A ALTA DEFINICIÓN)
+    // 2. TEXTURA PROCEDURAL DE LA OBRA (ALTA DEFINICIÓN)
     function renderArtworkCanvas() {
       if (!artworkTextureCanvas) {
         artworkTextureCanvas = document.createElement('canvas');
         artworkTextureCanvas.width = 1024;
-        artworkTextureCanvas.height = 1448; // Proporción 50x70 aprox
+        artworkTextureCanvas.height = 1448; // Proporción 50x70
         artworkTexture = new THREE.CanvasTexture(artworkTextureCanvas);
         artworkTexture.minFilter = THREE.LinearFilter;
         artworkTexture.magFilter = THREE.LinearFilter;
@@ -640,29 +624,28 @@
       const w = artworkTextureCanvas.width;
       const h = artworkTextureCanvas.height;
 
-      // Fondo base de papel de algodón
-      ctx.fillStyle = '#06040d';
+      // Base de papel de algodón de conservación
+      ctx.fillStyle = '#080610';
       ctx.fillRect(0, 0, w, h);
 
-      // Dibujar la fórmula matemática activa
+      // Trazo matemático
       const current = OBRAS[currentArtworkIdx];
       current.fn(ctx, w, h, current.color);
 
-      // Marca de pie de edición de museo
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.font = '16px "Space Mono", monospace';
+      // Leyenda de edición de museo al pie
+      ctx.fillStyle = 'rgba(244, 241, 234, 0.4)';
+      ctx.font = '15px "Space Mono", monospace';
       ctx.textAlign = 'left';
-      ctx.fillText(`ATELIER MATEMÁTICO · OBRA ${String(current.id).padStart(2, '0')}`, 60, h - 50);
+      ctx.fillText(`ATELIER MATEMÁTICO · OBRA ${String(current.id).padStart(2, '0')}`, 50, h - 45);
       
       ctx.textAlign = 'right';
-      ctx.fillText('EDICIÓN LIMITADA HAHNEMÜHLE 310G', w - 60, h - 50);
+      ctx.fillText('HAHNEMÜHLE PHOTO RAG 308G · 1/100', w - 50, h - 45);
 
       artworkTexture.needsUpdate = true;
     }
 
-    // 3. CONSTRUCCIÓN DE MODELOS PROCEDURALES EN 3D
+    // 3. MODELADO FÍSICO PROCEDURAL DE LOS FORMATOS
     function buildProductGeometry() {
-      // Limpiar geometría anterior
       while (productGroup.children.length > 0) {
         productGroup.remove(productGroup.children[0]);
       }
@@ -678,21 +661,17 @@
       }
     }
 
-    // Modelo 1: Cuadro Fine Art 50x70 cm con Paspartú
+    // Cuadro Fine Art 50x70 con Paspartú
     function buildFineArtFrame() {
       const frameGroup = new THREE.Group();
+      const fw = 1.35, fh = 1.85, fd = 0.08;
 
-      const fw = 1.25, fh = 1.75, fd = 0.08; // Proporción 50x70
-
-      // Color del marco
-      let frameColor = 0x111115; // black
-      let frameRoughness = 0.4;
+      let frameColor = 0x121215; // ebano
+      let frameRoughness = 0.45;
       if (currentFrameFinish === 'oak') {
-        frameColor = 0xc29b63;
-        frameRoughness = 0.55;
+        frameColor = 0xc29b63; frameRoughness = 0.6;
       } else if (currentFrameFinish === 'walnut') {
-        frameColor = 0x3d2212;
-        frameRoughness = 0.5;
+        frameColor = 0x3d2212; frameRoughness = 0.5;
       }
 
       const frameMat = new THREE.MeshStandardMaterial({
@@ -706,177 +685,143 @@
       frameGroup.add(outerBox);
 
       // Paspartú biselado
-      let matColor = 0xf5f3ea; // white
+      let matColor = 0xf2efe9; // blanco algodón
       if (currentMatteFinish === 'cream') matColor = 0xe8e0cf;
       if (currentMatteFinish === 'dark') matColor = 0x18181f;
 
       const matBoard = new THREE.Mesh(
         new THREE.PlaneGeometry(fw - 0.12, fh - 0.12),
-        new THREE.MeshStandardMaterial({ color: matColor, roughness: 0.85 })
+        new THREE.MeshStandardMaterial({ color: matColor, roughness: 0.9 })
       );
       matBoard.position.z = fd / 2 + 0.002;
       frameGroup.add(matBoard);
 
-      // Lámina impresa central (con la textura matemática)
+      // Lámina impresa
       const printGeom = new THREE.PlaneGeometry(fw - 0.38, fh - 0.38);
       const printMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
       const printMesh = new THREE.Mesh(printGeom, printMat);
-      printMesh.position.z = fd / 2 + 0.005;
+      printMesh.position.z = fd / 2 + 0.004;
       frameGroup.add(printMesh);
 
-      // Vidrio acrílico de museo con reflejos sutiles
+      // Vidrio acrílico museo UV99
       const glassGeom = new THREE.PlaneGeometry(fw - 0.1, fh - 0.1);
       const glassMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.22,
-        roughness: 0.05,
-        transmission: 0.9,
-        ior: 1.48
+        opacity: 0.18,
+        roughness: 0.04,
+        transmission: 0.94,
+        ior: 1.49
       });
       const glassMesh = new THREE.Mesh(glassGeom, glassMat);
-      glassMesh.position.z = fd / 2 + 0.012;
+      glassMesh.position.z = fd / 2 + 0.01;
       frameGroup.add(glassMesh);
 
       productGroup.add(frameGroup);
     }
 
-    // Modelo 2: Acrílico Luxury 40x60 cm Montaje Directo Flotante
+    // Acrílico Luxury Montaje Directo 40x60 cm
     function buildAcrylicMount() {
       const group = new THREE.Group();
-      const aw = 1.1, ah = 1.6, ad = 0.04;
+      const aw = 1.15, ah = 1.65, ad = 0.05;
 
-      // Bloque de acrílico cristalino frontal
+      // Metacrilato cristalino frontal
       const acrylicGeom = new THREE.BoxGeometry(aw, ah, ad);
       const acrylicMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         roughness: 0.02,
         metalness: 0.05,
-        transmission: 0.92,
+        transmission: 0.93,
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.92,
         ior: 1.52
       });
       const acrylicMesh = new THREE.Mesh(acrylicGeom, acrylicMat);
       group.add(acrylicMesh);
 
-      // Lámina fotográfica tras el acrílico
+      // Lámina trasera protegida
       const printGeom = new THREE.PlaneGeometry(aw - 0.01, ah - 0.01);
       const printMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
       const printMesh = new THREE.Mesh(printGeom, printMat);
       printMesh.position.z = -ad / 2 + 0.001;
       group.add(printMesh);
 
-      // Bastidor trasero flotante de aluminio
-      const frameGeom = new THREE.BoxGeometry(aw * 0.75, ah * 0.75, 0.06);
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.3, metalness: 0.9 });
-      const rearFrame = new THREE.Mesh(frameGeom, frameMat);
-      rearFrame.position.z = -ad / 2 - 0.03;
-      group.add(rearFrame);
+      // Bastidor trasero oculto
+      const subGeom = new THREE.BoxGeometry(aw * 0.75, ah * 0.75, 0.06);
+      const subMat = new THREE.MeshStandardMaterial({ color: 0x666677, roughness: 0.3, metalness: 0.8 });
+      const subFrame = new THREE.Mesh(subGeom, subMat);
+      subFrame.position.z = -ad / 2 - 0.03;
+      group.add(subFrame);
 
       productGroup.add(group);
     }
 
-    // Modelo 3: Taza Cerámica Negro Mate 11 oz
+    // Taza Cerámica Negro Mate
     function buildCeramicMug() {
       const group = new THREE.Group();
 
-      // Cilindro principal de la taza
       const mugGeom = new THREE.CylinderGeometry(0.5, 0.45, 1.1, 48, 1, true);
-      const mugMat = new THREE.MeshStandardMaterial({
-        color: 0x121216,
-        roughness: 0.65,
-        metalness: 0.15
-      });
+      const mugMat = new THREE.MeshStandardMaterial({ color: 0x121215, roughness: 0.65, metalness: 0.1 });
       const mug = new THREE.Mesh(mugGeom, mugMat);
       group.add(mug);
 
-      // Interior de la taza
       const insideGeom = new THREE.CylinderGeometry(0.46, 0.41, 1.05, 32);
-      const insideMat = new THREE.MeshStandardMaterial({ color: 0x1c1c22, roughness: 0.5 });
+      const insideMat = new THREE.MeshStandardMaterial({ color: 0x18181d, roughness: 0.5 });
       const inside = new THREE.Mesh(insideGeom, insideMat);
       inside.position.y = 0.02;
       group.add(inside);
 
-      // Asa ergonómica
       const handleGeom = new THREE.TorusGeometry(0.35, 0.065, 16, 32, Math.PI);
       const handle = new THREE.Mesh(handleGeom, mugMat);
       handle.position.set(0.55, 0.0, 0);
       handle.rotation.z = -Math.PI / 2;
       group.add(handle);
 
-      // Banda con la fórmula grabada en alta resolución
       const printBandGeom = new THREE.CylinderGeometry(0.505, 0.455, 0.8, 48, 1, true);
-      const printBandMat = new THREE.MeshBasicMaterial({
-        map: artworkTexture,
-        transparent: true,
-        opacity: 0.92
-      });
+      const printBandMat = new THREE.MeshBasicMaterial({ map: artworkTexture, transparent: true, opacity: 0.9 });
       const printBand = new THREE.Mesh(printBandGeom, printBandMat);
       group.add(printBand);
 
       productGroup.add(group);
     }
 
-    // Modelo 4: Cuaderno de Campo Moleskine
+    // Cuaderno Moleskine
     function buildMoleskineNotebook() {
       const group = new THREE.Group();
       const nw = 1.0, nh = 1.45, nd = 0.12;
 
-      // Cubierta dura en negro mate soft-touch
       const coverGeom = new THREE.BoxGeometry(nw, nh, nd);
-      const coverMat = new THREE.MeshStandardMaterial({
-        color: 0x14141a,
-        roughness: 0.7,
-        metalness: 0.1
-      });
+      const coverMat = new THREE.MeshStandardMaterial({ color: 0x141418, roughness: 0.7, metalness: 0.1 });
       const notebook = new THREE.Mesh(coverGeom, coverMat);
       group.add(notebook);
 
-      // Lámina central grabada en bajorrelieve dorado/blanco
       const debossGeom = new THREE.PlaneGeometry(nw - 0.25, nh - 0.35);
       const debossMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
       const deboss = new THREE.Mesh(debossGeom, debossMat);
       deboss.position.z = nd / 2 + 0.002;
       group.add(deboss);
 
-      // Elástico de cierre perimetral
       const bandGeom = new THREE.BoxGeometry(0.06, nh + 0.01, nd + 0.008);
-      const bandMat = new THREE.MeshStandardMaterial({ color: 0x060608, roughness: 0.9 });
+      const bandMat = new THREE.MeshStandardMaterial({ color: 0x08080a, roughness: 0.9 });
       const band = new THREE.Mesh(bandGeom, bandMat);
       band.position.x = nw / 2 - 0.14;
       group.add(band);
 
-      // Cinta marcapáginas
-      const ribbonGeom = new THREE.BoxGeometry(0.03, 0.4, 0.01);
-      const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.4 });
-      const ribbon = new THREE.Mesh(ribbonGeom, ribbonMat);
-      ribbon.position.set(0, -nh / 2 - 0.15, 0);
-      group.add(ribbon);
-
       productGroup.add(group);
     }
 
-    // 4. ANIMACIÓN Y BUCLE DE RENDER (SUSPENSIÓN EN SEGUNDO PLANO)
-    let isTabVisible = true;
-    document.addEventListener('visibilitychange', () => {
-      isTabVisible = !document.hidden;
-      if (isTabVisible) requestAnimationFrame(animate);
-    });
-
+    // 4. ANIMACIÓN Y BUCLE DE RENDER
     function animate() {
       if (!isTabVisible) return;
       requestAnimationFrame(animate);
 
       if (autoRotate) {
-        targetRotationY += 0.003;
+        targetRotationY += 0.002;
       }
 
-      // Suavizado inercial de rotación
       productGroup.rotation.y += (targetRotationY - productGroup.rotation.y) * 0.08;
       productGroup.rotation.x += (targetRotationX - productGroup.rotation.x) * 0.08;
 
-      // Suavizado de zoom
       camera.position.z += (targetCamDist - camera.position.z) * 0.08;
       camera.lookAt(0, 0, 0);
 
@@ -887,18 +832,16 @@
     function selectFormat(fmt) {
       currentFormat = fmt;
       
-      // Actualizar estilos de tarjetas
       document.querySelectorAll('.format-card').forEach(el => {
-        el.classList.remove('border-amber-500/60', 'bg-amber-500/10');
-        el.classList.add('border-white/10', 'bg-white/5');
+        el.classList.remove('luxury-gold-border', 'bg-[#141418]');
+        el.classList.add('luxury-border', 'bg-[#101014]');
       });
       const activeCard = document.getElementById(`card-fmt-${fmt}`);
       if (activeCard) {
-        activeCard.classList.add('border-amber-500/60', 'bg-amber-500/10');
-        activeCard.classList.remove('border-white/10', 'bg-white/5');
+        activeCard.classList.add('luxury-gold-border', 'bg-[#141418]');
+        activeCard.classList.remove('luxury-border', 'bg-[#101014]');
       }
 
-      // Mostrar u ocultar sección de acabados de marco
       const finishSection = document.getElementById('finish-section');
       if (fmt === 'fineart') {
         finishSection.style.display = 'block';
@@ -919,13 +862,13 @@
     function setFrameFinish(finish) {
       currentFrameFinish = finish;
       document.querySelectorAll('.finish-btn').forEach(btn => {
-        btn.classList.remove('border-amber-400', 'text-amber-200');
-        btn.classList.add('border-white/10', 'text-slate-300');
+        btn.classList.remove('luxury-gold-border', 'text-[#c5a059]');
+        btn.classList.add('luxury-border', 'text-[#a1a1aa]');
       });
       const activeBtn = document.getElementById(`btn-frame-${finish}`);
       if (activeBtn) {
-        activeBtn.classList.add('border-amber-400', 'text-amber-200');
-        activeBtn.classList.remove('border-white/10', 'text-slate-300');
+        activeBtn.classList.add('luxury-gold-border', 'text-[#c5a059]');
+        activeBtn.classList.remove('luxury-border', 'text-[#a1a1aa]');
       }
       buildProductGeometry();
       updateUI();
@@ -934,13 +877,13 @@
     function setMatteFinish(matte) {
       currentMatteFinish = matte;
       document.querySelectorAll('.mat-btn').forEach(btn => {
-        btn.classList.remove('border-amber-400', 'text-amber-200', 'bg-white/10');
-        btn.classList.add('border-white/10', 'text-slate-300', 'bg-white/5');
+        btn.classList.remove('luxury-gold-border', 'text-[#c5a059]');
+        btn.classList.add('luxury-border', 'text-[#a1a1aa]');
       });
       const activeBtn = document.getElementById(`btn-mat-${matte}`);
       if (activeBtn) {
-        activeBtn.classList.add('border-amber-400', 'text-amber-200', 'bg-white/10');
-        activeBtn.classList.remove('border-white/10', 'text-slate-300', 'bg-white/5');
+        activeBtn.classList.add('luxury-gold-border', 'text-[#c5a059]');
+        activeBtn.classList.remove('luxury-border', 'text-[#a1a1aa]');
       }
       buildProductGeometry();
       updateUI();
@@ -948,51 +891,46 @@
 
     function setLighting(mode) {
       document.querySelectorAll('[id^="btn-light-"]').forEach(btn => {
-        btn.classList.remove('bg-amber-500/20', 'text-amber-200', 'font-bold');
-        btn.classList.add('text-slate-400');
+        btn.classList.remove('text-[#c5a059]', 'bg-[#c5a059]/10', 'font-medium');
+        btn.classList.add('text-[#a1a1aa]');
       });
       const activeBtn = document.getElementById(`btn-light-${mode}`);
       if (activeBtn) {
-        activeBtn.classList.add('bg-amber-500/20', 'text-amber-200', 'font-bold');
-        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('text-[#c5a059]', 'bg-[#c5a059]/10', 'font-medium');
+        activeBtn.classList.remove('text-[#a1a1aa]');
       }
 
       if (mode === 'warm') {
-        spotLight1.color.setHex(0xffeedd);
-        spotLight1.intensity = 3.2;
-        spotLight2.color.setHex(0x88bbff);
-        spotLight2.intensity = 1.8;
-        ambientLight.intensity = 0.4;
+        spotLightKey.color.setHex(0xfef2db);
+        spotLightKey.intensity = 3.4;
+        spotLightFill.color.setHex(0xaabbcc);
+        spotLightFill.intensity = 1.2;
+        ambientLight.intensity = 0.35;
       } else if (mode === 'neutral') {
-        spotLight1.color.setHex(0xffffff);
-        spotLight1.intensity = 3.8;
-        spotLight2.color.setHex(0xddddff);
-        spotLight2.intensity = 2.2;
-        ambientLight.intensity = 0.6;
-      } else if (mode === 'dramatic') {
-        spotLight1.color.setHex(0xffb040);
-        spotLight1.intensity = 4.8;
-        spotLight2.color.setHex(0x4080ff);
-        spotLight2.intensity = 0.8;
+        spotLightKey.color.setHex(0xffffff);
+        spotLightKey.intensity = 3.8;
+        spotLightFill.color.setHex(0xddddff);
+        spotLightFill.intensity = 1.6;
+        ambientLight.intensity = 0.5;
+      } else if (mode === 'intimate') {
+        spotLightKey.color.setHex(0xdfa050);
+        spotLightKey.intensity = 4.2;
+        spotLightFill.color.setHex(0x334466);
+        spotLightFill.intensity = 0.6;
         ambientLight.intensity = 0.15;
       }
     }
 
     function setCameraAngle(angle) {
       autoRotate = false;
-      document.getElementById('btn-rotate').classList.remove('text-amber-300');
+      document.getElementById('btn-rotate').classList.remove('text-[#c5a059]');
+      document.getElementById('btn-rotate').classList.add('text-[#a1a1aa]');
       if (angle === 'front') {
-        targetRotationX = 0;
-        targetRotationY = 0;
-        targetCamDist = 3.0;
+        targetRotationX = 0; targetRotationY = 0; targetCamDist = 3.1;
       } else if (angle === 'angle') {
-        targetRotationX = 0.12;
-        targetRotationY = 0.45;
-        targetCamDist = 3.2;
+        targetRotationX = 0.08; targetRotationY = 0.35; targetCamDist = 3.2;
       } else if (angle === 'macro') {
-        targetRotationX = 0.05;
-        targetRotationY = 0.15;
-        targetCamDist = 2.0;
+        targetRotationX = 0.04; targetRotationY = 0.12; targetCamDist = 2.0;
       }
     }
 
@@ -1000,9 +938,11 @@
       autoRotate = !autoRotate;
       const btn = document.getElementById('btn-rotate');
       if (autoRotate) {
-        btn.classList.add('text-amber-300');
+        btn.classList.add('text-[#c5a059]');
+        btn.classList.remove('text-[#a1a1aa]');
       } else {
-        btn.classList.remove('text-amber-300');
+        btn.classList.remove('text-[#c5a059]');
+        btn.classList.add('text-[#a1a1aa]');
       }
     }
 
@@ -1011,33 +951,31 @@
       const pInfo = PRICES[currentFormat];
 
       document.getElementById('shop-title').innerText = art.title;
-      document.getElementById('shop-subtitle').innerText = `${art.sub} · ${art.cat}`;
+      document.getElementById('shop-subtitle').innerText = art.sub;
       document.getElementById('current-badge-code').innerText = `Obra #${String(art.id).padStart(2, '0')} de 24`;
 
       document.getElementById('vitrina-product-badge').innerText = pInfo.name;
-      document.getElementById('vitrina-formula-badge').innerText = `Obra ${art.id}: ${art.title} (${art.cat})`;
+      document.getElementById('vitrina-formula-badge').innerText = `Obra ${art.id}: ${art.title}`;
 
       document.getElementById('total-price-clp').innerText = `$${pInfo.clp.toLocaleString('es-CL')} CLP`;
       document.getElementById('total-price-usd').innerText = `~$${pInfo.usd} USD`;
 
-      // Modal info
-      document.getElementById('modal-art-title').innerText = `${art.title} (#${art.id})`;
+      document.getElementById('modal-art-title').innerText = `${art.title} (N° ${art.id})`;
       document.getElementById('modal-art-format').innerText = `${pInfo.name} (${currentFrameFinish.toUpperCase()})`;
       document.getElementById('modal-art-price').innerText = `$${pInfo.clp.toLocaleString('es-CL')} CLP`;
     }
 
-    // 6. ACCIONES COMERCIALES (WHATSAPP & CHECKOUT)
     function orderViaWhatsApp() {
       const art = OBRAS[currentArtworkIdx];
       const pInfo = PRICES[currentFormat];
-      let details = `• Obra: ${art.title} (Obra #${art.id})\n• Formato: ${pInfo.name}`;
+      let details = `• Obra: ${art.title} (Obra N° ${art.id})\n• Formato: ${pInfo.name}`;
       if (currentFormat === 'fineart') {
-        details += `\n• Marco: ${currentFrameFinish}\n• Paspartú: ${currentMatteFinish}`;
+        details += `\n• Moldura: ${currentFrameFinish}\n• Paspartú: ${currentMatteFinish}`;
       }
       details += `\n• Total: $${pInfo.clp.toLocaleString('es-CL')} CLP`;
 
       const msg = encodeURIComponent(
-        `Hola Matías, deseo encargar una obra física del Atelier Matemático:\n\n${details}\n\nPor favor indícame los pasos para el pago y coordinar el despacho.`
+        `Estimado Matías, deseo formalizar el encargo de una pieza del Atelier Matemático:\n\n${details}\n\nQuedo a la espera de tus indicaciones para coordinar el pago anticipado y la entrega.`
       );
       window.open(`https://wa.me/56987654321?text=${msg}`, '_blank');
     }
@@ -1056,16 +994,14 @@
       const art = OBRAS[currentArtworkIdx];
       const pInfo = PRICES[currentFormat];
 
-      alert(`¡Gracias ${name}! Tu solicitud para la obra "${art.title}" por $${pInfo.clp.toLocaleString('es-CL')} CLP ha sido registrada.\n\nTe redirigiremos a la pasarela segura Webpay Plus para procesar el pago anticipado.`);
+      alert(`Estimado/a ${name}, su encargo para "${art.title}" ($${pInfo.clp.toLocaleString('es-CL')} CLP) ha sido registrado.\n\nSerá redirigido al portal seguro Webpay Plus para procesar el pago.`);
       closeCheckoutModal();
     }
 
-    // 7. GENERADORES MATEMÁTICOS PARA EL CANVAS 2D PROCEDURAL
+    // 6. GENERADORES MATEMÁTICOS PARA EL CANVAS PROCEDURAL
     function drawRiemann(ctx, w, h, col) {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
       const cx = w / 2, cy = h / 2;
-      // Espiral de Dirichlet y ceros no triviales
       ctx.beginPath();
       for (let t = 0; t < 120; t += 0.05) {
         const r = 25 + t * 4.2;
@@ -1074,23 +1010,19 @@
         if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
-
-      // Círculos concéntricos de ceros
       for (let i = 1; i <= 6; i++) {
         ctx.beginPath();
         ctx.arc(cx, cy, i * 70, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(56, 189, 248, ${0.4 - i * 0.05})`;
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = `rgba(56, 189, 248, ${0.35 - i * 0.04})`;
+        ctx.lineWidth = 0.8;
         ctx.stroke();
       }
     }
 
     function drawLorenz(ctx, w, h, col) {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2 + 50;
-      let x = 0.1, y = 0, z = 0;
-      const dt = 0.008;
+      let x = 0.1, y = 0, z = 0, dt = 0.008;
       ctx.beginPath();
       for (let i = 0; i < 4000; i++) {
         const dx = 10 * (y - x);
@@ -1105,8 +1037,7 @@
     }
 
     function drawChladni(ctx, w, h, col) {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       for (let r = 20; r < 400; r += 18) {
         ctx.beginPath();
@@ -1122,7 +1053,7 @@
     }
 
     function drawElasticity(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
       const cx = w / 2, cy = h / 2;
       for (let i = -15; i <= 15; i++) {
         ctx.beginPath();
@@ -1136,7 +1067,7 @@
     }
 
     function drawYoshida(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       for (let k = 1; k <= 8; k++) {
         ctx.beginPath();
@@ -1152,7 +1083,7 @@
     }
 
     function drawClifford(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
       const cx = w / 2, cy = h / 2;
       for (let y = -400; y <= 400; y += 25) {
         ctx.beginPath();
@@ -1170,11 +1101,11 @@
       const cx = w / 2, cy = h / 2;
       for (let i = 0; i < 280; i++) {
         const rad = Math.sqrt(i) * 24;
-        const th = i * 2.39996; // Golden angle
+        const th = i * 2.39996;
         const px = cx + rad * Math.cos(th);
         const py = cy + rad * Math.sin(th);
         ctx.beginPath();
-        ctx.arc(px, py, 6 + (i % 5) * 2, 0, Math.PI * 2);
+        ctx.arc(px, py, 5 + (i % 4) * 2, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -1182,8 +1113,7 @@
     function drawRossler(ctx, w, h, col) {
       ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2 + 30;
-      let x = 1, y = 1, z = 1;
-      const dt = 0.02;
+      let x = 1, y = 1, z = 1, dt = 0.02;
       ctx.beginPath();
       for (let i = 0; i < 3500; i++) {
         const dx = -y - z;
@@ -1198,7 +1128,7 @@
     }
 
     function drawApollonian(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       function circle(x, y, r, depth) {
         if (depth <= 0 || r < 4) return;
@@ -1230,7 +1160,7 @@
     }
 
     function drawLangton(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 3;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
       const cx = w / 2, cy = h / 2;
       ctx.beginPath();
       for (let i = 0; i < 200; i++) {
@@ -1242,7 +1172,7 @@
     }
 
     function drawKdV(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.2;
       const cx = w / 2, cy = h / 2;
       for (let k = -4; k <= 4; k++) {
         ctx.beginPath();
@@ -1256,7 +1186,7 @@
     }
 
     function drawVoronoi(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       for (let i = 0; i < 18; i++) {
         const ang = (i / 18) * Math.PI * 2;
@@ -1269,7 +1199,7 @@
     }
 
     function drawNewton(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
       const cx = w / 2, cy = h / 2;
       for (let r = 20; r < 360; r += 14) {
         ctx.beginPath();
@@ -1284,7 +1214,7 @@
     }
 
     function drawBenard(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       const hexR = 45;
       for (let q = -4; q <= 4; q++) {
@@ -1307,7 +1237,7 @@
     }
 
     function drawHopf(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.6;
       const cx = w / 2, cy = h / 2;
       for (let i = 0; i < 24; i++) {
         const tilt = (i / 24) * Math.PI;
@@ -1338,15 +1268,15 @@
       const cx = w / 2, cy = h / 2;
       for (let i = 0; i < 600; i++) {
         const r = Math.sqrt(i) * 15;
-        const th = i * 2.399963229728653; // Golden angle
+        const th = i * 2.399963229728653;
         ctx.beginPath();
-        ctx.arc(cx + r * Math.cos(th), cy + r * Math.sin(th), 3.2, 0, Math.PI * 2);
+        ctx.arc(cx + r * Math.cos(th), cy + r * Math.sin(th), 3, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
     function drawBZ(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       for (let a = 0; a < 3; a++) {
         const offset = (a * Math.PI * 2) / 3;
@@ -1362,7 +1292,7 @@
     }
 
     function drawSchrodinger(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.2;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.0;
       const cx = w / 2, cy = h / 2;
       ctx.beginPath();
       for (let x = -400; x <= 400; x += 4) {
@@ -1374,7 +1304,7 @@
     }
 
     function drawRule110(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
       const cx = w / 2, cy = h / 2;
       for (let i = 0; i < 30; i++) {
         ctx.beginPath();
@@ -1385,7 +1315,7 @@
     }
 
     function drawBeal(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.2;
       const cx = w / 2, cy = h / 2;
       for (let i = 1; i <= 3; i++) {
         ctx.beginPath();
@@ -1405,7 +1335,7 @@
     }
 
     function drawRicci(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
       const cx = w / 2, cy = h / 2;
       for (let r = 40; r < 360; r += 28) {
         ctx.beginPath();

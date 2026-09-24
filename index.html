@@ -3,666 +3,723 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Atelier Matemático — Arte Físico de Museo & Silicio Nativo</title>
+<title>Atelier Matemático — Ediciones Físicas de Museo & Silicio Nativo</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #030206;
-    --card: rgba(10, 8, 22, 0.78);
-    --border: rgba(168, 85, 247, 0.18);
-    --gold: #f59e0b;
-    --gold-light: #fbbf24;
-    --cyan: #38bdf8;
+    --bg-base: #08080a;
+    --bg-surface: #101014;
+    --bg-elevated: #16161c;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(197, 160, 89, 0.28);
+    --gold: #c5a059;
+    --gold-light: #dfc285;
+    --text-primary: #f4f1ea;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
   }
-  body {
-    background-color: var(--bg);
-    color: #f1f5f9;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    background-color: var(--bg-base) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
     overflow-x: hidden;
   }
-  .serif { font-family: 'Cinzel', serif; }
-  .mono  { font-family: 'Space Mono', monospace; }
-  .glass {
-    background: var(--card);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
+  .serif {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
   }
-  .glass-gold {
-    background: rgba(24, 18, 8, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(245, 158, 11, 0.3);
+  .mono {
+    font-family: 'Space Mono', monospace;
   }
-  .gold-gradient-text {
-    background: linear-gradient(135deg, #fef3c7 0%, #f59e0b 50%, #d97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .luxury-border {
+    border: 1px solid var(--border-subtle);
   }
-  .cosmic-gradient-text {
-    background: linear-gradient(135deg, #ffffff 0%, #c084fc 40%, #38bdf8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .luxury-gold-border {
+    border: 1px solid var(--border-gold);
   }
-  .radial-glow {
-    background: radial-gradient(circle at 50% 20%, rgba(139, 92, 246, 0.15) 0%, rgba(217, 119, 6, 0.08) 35%, transparent 70%);
+  .gold-accent {
+    color: var(--gold);
   }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #030206; }
-  ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.25); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.5); }
+  .gold-pill {
+    background: rgba(197, 160, 89, 0.08);
+    border: 1px solid rgba(197, 160, 89, 0.25);
+    color: var(--gold-light);
+  }
+  /* Scrollbar discreta */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 </style>
 </head>
-<body class="selection:bg-amber-900 selection:text-amber-100 radial-glow min-h-screen">
+<body class="selection:bg-amber-900 selection:text-amber-100">
 
   <!-- ========================================================================= -->
-  <!-- 1. NAVBAR DE ALTA GAMA (FLOTANTE & CRISTALINO)                            -->
+  <!-- 1. HEADER / MASTHEAD EDITORIAL                                            -->
   <!-- ========================================================================= -->
-  <header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 px-5 md:px-10 py-3.5 flex justify-between items-center transition-all duration-300">
-    <div class="flex items-center gap-3.5">
-      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 via-purple-600 to-cyan-400 p-[1px] shadow-lg shadow-amber-500/20">
-        <div class="w-full h-full bg-[#060410] rounded-full flex items-center justify-center text-amber-300 text-sm mono font-bold">∑</div>
-      </div>
-      <div>
-        <a href="index.html" class="serif tracking-[.22em] text-white text-sm md:text-base font-bold block hover:text-amber-300 transition">
-          ATELIER MATEMÁTICO
-        </a>
-        <span class="text-[9px] text-amber-200/60 uppercase tracking-widest mono block">
-          Ediciones Físicas de Museo · Silicio Nativo · Santiago
-        </span>
-      </div>
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/90 backdrop-blur-md border-b border-white/[0.08] px-6 md:px-12 py-4 flex justify-between items-center transition-all">
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <span class="w-8 h-8 rounded-full border border-[#c5a059]/40 bg-[#121216] flex items-center justify-center text-[#c5a059] text-xs mono">∑</span>
+        <div>
+          <span class="serif text-sm md:text-base font-semibold tracking-[0.2em] text-[#f4f1ea] block group-hover:text-[#c5a059] transition">
+            ATELIER MATEMÁTICO
+          </span>
+          <span class="text-[9px] uppercase tracking-[0.25em] text-[#71717a] mono block">
+            Ediciones de Museo · Santiago de Chile
+          </span>
+        </div>
+      </a>
     </div>
 
-    <!-- NAVEGACIÓN PRINCIPAL -->
-    <nav class="hidden lg:flex items-center gap-7 text-xs mono text-slate-300">
-      <a href="#dossier" class="hover:text-amber-300 transition">Dossier de Manufactura</a>
-      <a href="#catalogo" class="hover:text-amber-300 transition">Catálogo 24 Obras</a>
-      <a href="#negocio" class="hover:text-amber-300 transition">Modelo & Tiempos</a>
-      <a href="#portales" class="hover:text-amber-300 transition">Experiencias 3D</a>
+    <!-- NAVEGACIÓN DISCRETA -->
+    <nav class="hidden lg:flex items-center gap-8 text-xs tracking-wider uppercase mono text-[#a1a1aa]">
+      <a href="#dossier" class="hover:text-[#f4f1ea] transition">Manufactura</a>
+      <a href="#coleccion" class="hover:text-[#f4f1ea] transition">Formatos</a>
+      <a href="#catalogo" class="hover:text-[#f4f1ea] transition">24 Obras</a>
+      <a href="#manifiesto" class="hover:text-[#f4f1ea] transition">Garantía & Tiempos</a>
     </nav>
 
-    <!-- CTAS DIRECTOS -->
-    <div class="flex items-center gap-2.5">
-      <a href="museum.html" class="hidden sm:flex items-center gap-1.5 text-xs text-cyan-300 hover:text-cyan-100 px-3.5 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 mono transition">
-        <span>🚀 Observatorio 3D</span>
+    <!-- CTAS PRINCIPALES -->
+    <div class="flex items-center gap-3">
+      <a href="museum.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-4 py-2 border border-white/10 rounded-full hover:border-white/20 transition">
+        Observatorio 3D
       </a>
-      <a href="shop.html" class="flex items-center gap-1.5 text-xs font-bold text-black bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 px-4 py-1.5 rounded-full transition shadow-lg shadow-amber-500/25 mono">
-        <span>🛍️ Boutique Vitrina</span>
+      <a href="shop.html" class="text-xs mono uppercase tracking-wider font-semibold text-[#08080a] bg-[#c5a059] hover:bg-[#dfc285] px-5 py-2 rounded-full transition shadow-sm">
+        Vitrina Boutique
       </a>
     </div>
   </header>
 
   <!-- ========================================================================= -->
-  <!-- 2. HERO EDITORIAL & PROPUESTA DE VALOR                                    -->
+  <!-- 2. HERO MONOGRÁFICO: LA OBRA EN SU ESPACIO ARQUITECTÓNICO                 -->
   <!-- ========================================================================= -->
-  <section class="pt-32 pb-20 px-5 md:px-10 max-w-6xl mx-auto flex flex-col items-center text-center relative">
+  <section class="pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto flex flex-col items-center text-center">
     
-    <!-- BADGE DE AUTENTICIDAD -->
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs mono mb-6">
-      <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-      Manufactura en Santiago de Chile · Papel Hahnemühle 310g · Tintas Minerales >100 Años
+    <!-- SUB-ENCABEZADO DE AUTENTICIDAD -->
+    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full gold-pill text-[11px] mono uppercase tracking-widest mb-8">
+      <span>●</span>
+      <span>Hahnemühle 308g · Tintas Minerales >100 Años · Carpintería Noble</span>
     </div>
 
-    <!-- TITULAR MONUMENTAL -->
-    <h1 class="text-3xl sm:text-5xl md:text-6xl serif font-extrabold text-white tracking-tight leading-[1.15] max-w-4xl mb-6">
-      Donde los enigmas del cosmos<br>
-      se convierten en <span class="gold-gradient-text">arte físico de museo</span>
+    <!-- TITULAR PRINCIPAL -->
+    <h1 class="serif text-3xl sm:text-5xl md:text-6xl text-[#f4f1ea] font-normal leading-[1.18] max-w-4xl mb-6">
+      La belleza exacta de las leyes del cosmos,<br>
+      plasmada en <span class="italic text-[#c5a059]">arte físico de archivo</span>.
     </h1>
 
-    <!-- PÁRRAFO CLARIFICADOR (CERO AUTOENGAÑO, PROPÓSITO TRANSPARENTE) -->
-    <p class="text-sm md:text-base text-slate-300 font-light leading-relaxed max-w-2xl mb-9">
-      Atelier Matemático transforma las grandes ecuaciones de la física y los Problemas del Milenio calculados en silicio en <strong class="text-white font-medium">cuadros físicos tangibles de colección</strong>. No vendemos posters digitales vacíos: manufacturamos piezas fine-art sobre algodón de grado archivo, paspartú biselado y montajes acrílicos sellados, acompañados de su certificado de procedencia firmado a mano.
+    <!-- TEXTO EDITORIAL CURATORIAL -->
+    <p class="text-sm md:text-base text-[#a1a1aa] font-light leading-relaxed max-w-2xl mb-10">
+      Atelier Matemático es un estudio de alta manufactura física fundado por Matías Cortés Figueroa. Calculamos los enigmas de la física teórica y los Problemas del Milenio en silicio nativo para materializarlos en piezas tangibles de colección: papel de algodón alemán, paspartú biselado y montajes acrílicos con certificado de procedencia firmado a mano.
     </p>
 
-    <!-- BOTONES DE ENTRADA A LAS TRES VENTANAS -->
-    <div class="flex flex-wrap items-center justify-center gap-3.5 mb-14">
-      <a href="shop.html" class="flex items-center gap-2 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-200 hover:from-amber-300 hover:to-amber-100 text-black font-bold px-7 py-3 rounded-full text-xs md:text-sm mono transition shadow-xl shadow-amber-500/25">
-        <span>🛍️</span>
-        <span>Entrar a la Boutique & Vitrina 3D</span>
+    <!-- ACCIONES PRINCIPALES (SIN EMOJIS, CON GRÁVITAS) -->
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-16">
+      <a href="shop.html" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold text-xs uppercase tracking-widest mono transition">
+        <span>Adquirir Pieza en Vitrina</span>
+        <span>→</span>
       </a>
-
-      <a href="museum.html" class="glass hover:bg-white/10 text-cyan-200 border-cyan-500/30 text-xs md:text-sm px-6 py-3 rounded-full mono transition flex items-center gap-2">
-        <span>🌌</span>
-        <span>Explorar Observatorio Cósmico (Gravedad Cero)</span>
+      <a href="museum.html" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-white/15 hover:border-white/30 text-[#f4f1ea] text-xs uppercase tracking-widest mono transition">
+        <span>Explorar Observatorio Orbital</span>
       </a>
-
-      <a href="studio.html" class="glass hover:bg-white/10 text-purple-200 border-purple-500/30 text-xs md:text-sm px-5 py-3 rounded-full mono transition flex items-center gap-2">
-        <span>🎨</span>
-        <span>Estudio 2D & Grabador Reels</span>
+      <a href="studio.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-white/10 hover:border-white/20 text-[#a1a1aa] hover:text-[#f4f1ea] text-xs uppercase tracking-widest mono transition">
+        <span>Estudio 2D de Grabación</span>
       </a>
     </div>
 
-    <!-- MATRIZ DE MÉTRICAS VERIFICABLES -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl text-left">
-      <div class="glass p-4 rounded-xl border-white/10">
-        <div class="text-xl md:text-2xl font-bold mono text-amber-400">24 Obras</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">Leyes físicas y Problemas del Milenio en catálogo.</div>
+    <!-- MOCKUP ARQUITECTÓNICO PRINCIPAL (EL CUADRO EN LA PARED) -->
+    <div class="w-full max-w-5xl rounded-2xl overflow-hidden luxury-border bg-[#101014] relative shadow-2xl">
+      
+      <!-- Representación arquitectónica: Salón de galería minimalista con pared de hormigón y luz de tarde -->
+      <div class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-gradient-to-b from-[#141418] via-[#101013] to-[#0c0c0e] flex items-center justify-center p-8 md:p-14">
+        
+        <!-- Foco cenital proyectado sobre la pared -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(245,240,225,0.08)_0%,transparent_60%)] pointer-events-none"></div>
+
+        <!-- Muro de galería con cuadro enmarcado colgado -->
+        <div class="relative z-10 flex flex-col items-center">
+          
+          <!-- Sombra proyectada detrás del marco -->
+          <div class="relative p-2 md:p-3 bg-[#0a0a0c] rounded-sm shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border border-white/10 max-w-md md:max-w-xl">
+            
+            <!-- Marco exterior de madera negra maciza -->
+            <div class="bg-[#121215] p-4 md:p-6 border border-white/5 shadow-inner">
+              
+              <!-- Paspartú biselado 5 cm -->
+              <div class="bg-[#f2efe9] p-6 md:p-10 shadow-[inset_0_2px_8px_rgba(0,0,0,0.35)] relative">
+                
+                <!-- Lámina de la Obra (Riemann) -->
+                <div class="w-48 h-64 md:w-72 md:h-96 bg-[#080612] p-3 flex flex-col justify-between items-center shadow-sm relative overflow-hidden">
+                  
+                  <!-- Diagrama geométrico Riemann en alta definición -->
+                  <svg viewBox="0 0 200 280" class="w-full h-full opacity-90">
+                    <circle cx="100" cy="140" r="85" fill="none" stroke="#38bdf8" stroke-width="0.8" stroke-dasharray="2,3"/>
+                    <circle cx="100" cy="140" r="55" fill="none" stroke="#c5a059" stroke-width="0.7"/>
+                    <line x1="100" y1="20" x2="100" y2="260" stroke="#f4f1ea" stroke-width="0.6" stroke-dasharray="1,2"/>
+                    <line x1="20" y1="140" x2="180" y2="140" stroke="#71717a" stroke-width="0.5"/>
+                    <!-- Espiral armónica -->
+                    <path d="M 100 140 Q 120 120 135 140 T 155 140 T 170 140" fill="none" stroke="#38bdf8" stroke-width="1"/>
+                    <path d="M 100 140 Q 80 160 65 140 T 45 140 T 30 140" fill="none" stroke="#c5a059" stroke-width="1"/>
+                  </svg>
+
+                  <div class="absolute bottom-2 left-3 right-3 flex justify-between text-[7px] mono text-white/50 tracking-wider">
+                    <span>ATELIER MATEMÁTICO · OBRA 21</span>
+                    <span>1/100</span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Pie de foto arquitectónico -->
+          <div class="mt-4 text-center">
+            <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#a1a1aa] block">
+              Obra 21 · Los Ceros de Riemann (50×70 cm en Ébano Mate)
+            </span>
+            <span class="text-[10px] text-[#71717a] font-light">
+              Montado sobre muro de galería en Providencia, Santiago.
+            </span>
+          </div>
+
+        </div>
+
       </div>
-      <div class="glass p-4 rounded-xl border-white/10">
-        <div class="text-xl md:text-2xl font-bold mono text-purple-300">100+ Años</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">Certificación Wilhelm Imaging Research de pigmentos.</div>
-      </div>
-      <div class="glass p-4 rounded-xl border-white/10">
-        <div class="text-xl md:text-2xl font-bold mono text-cyan-300">310 g/m²</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">Papel Hahnemühle Photo Rag 100% fibra de algodón.</div>
-      </div>
-      <div class="glass p-4 rounded-xl border-white/10">
-        <div class="text-xl md:text-2xl font-bold mono text-emerald-400">10–15 Días</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">Confección artesanal y despacho blindado a todo Chile.</div>
-      </div>
+
     </div>
 
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 3. EL DOSSIER DE MANUFACTURA FÍSICA ("LA ANATOMÍA DE LA OBRA")            -->
+  <!-- 3. EL DOSSIER DE MANUFACTURA (LA ANATOMÍA DE LA OBRA)                     -->
   <!-- ========================================================================= -->
-  <section id="dossier" class="py-16 px-5 md:px-10 max-w-6xl mx-auto space-y-10 border-t border-white/10">
-    <div class="text-center max-w-2xl mx-auto space-y-2">
-      <span class="text-xs mono text-amber-400 uppercase tracking-widest font-semibold block">01 · Especificación Material</span>
-      <h2 class="text-2xl md:text-4xl serif font-bold text-white">El Dossier de Manufactura</h2>
-      <p class="text-xs md:text-sm text-slate-400 font-light">
-        La matemática vive en el cálculo; la obra nace en la materia. Cada cuadro está construido con insumos certificados de conservación para perdurar por generaciones.
+  <section id="dossier" class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <div class="max-w-3xl mb-16 space-y-3">
+      <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
+        01 · Especificación Material de Museo
+      </span>
+      <h2 class="serif text-3xl md:text-5xl text-[#f4f1ea] font-normal">
+        La Anatomía de la Obra
+      </h2>
+      <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
+        La matemática vive en el cálculo; la pieza de colección nace en la honestidad de sus materiales. No producimos impresiones comerciales de consumo efímero: cada cuadro está construido bajo estándares internacionales de conservación museística.
       </p>
     </div>
 
-    <!-- BENTO GRID DE MATERIALES -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- DESGLOSE EDITORIAL DE LOS 6 PILARES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       
-      <!-- Componente 1: Papel Hahnemühle -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-white/10 hover:border-amber-500/30 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">📜</span>
-          <span class="text-[10px] mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">310 g/m²</span>
+      <!-- Pilar 1 -->
+      <div class="p-8 rounded-xl bg-[#101014] luxury-border space-y-4 hover:border-[#c5a059]/40 transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">I</span>
+          <span class="text-[10px] mono text-[#a1a1aa] uppercase tracking-widest">Dassel, Alemania</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Papel Hahnemühle Photo Rag</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          100% fibra de algodón puro, sin blanqueadores ópticos artificiales (OBA). Su superficie aterciopelada mate absorbe la luz sin reflejos molestos, otorgando una profundidad tridimensional única a cada trazo vectorial.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Papel Hahnemühle Photo Rag</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Fabricado con 100% fibra de algodón puro de 308 g/m². Libre de lignina y blanqueadores ópticos artificiales (OBA). Su superficie mate aterciopelada absorbe la luz de la habitación sin generar reflejos molestos, permitiendo contemplar el trazo desde cualquier ángulo.
         </p>
-        <div class="pt-2 text-[10px] mono text-slate-500 border-t border-white/5">
-          Origen: Dassel, Alemania · pH Neutro 8.0
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#71717a]">
+          Gramaje: 308 g/m² · pH Neutro 8.0 · Reserva alcalina
         </div>
       </div>
 
-      <!-- Componente 2: Tintas Epson UltraChrome -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-white/10 hover:border-amber-500/30 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">🎨</span>
-          <span class="text-[10px] mono text-purple-300 bg-purple-400/10 px-2 py-0.5 rounded border border-purple-400/20">12 Canales</span>
+      <!-- Pilar 2 -->
+      <div class="p-8 rounded-xl bg-[#101014] luxury-border space-y-4 hover:border-[#c5a059]/40 transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">II</span>
+          <span class="text-[10px] mono text-[#a1a1aa] uppercase tracking-widest">12 Canales Minerales</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Pigmentos Minerales de Archivo</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          Inyección giclée con 12 tintas minerales encapsuladas en micro-resina (Epson UltraChrome Pro). Certificación oficial de permanencia de más de 100 años bajo luz ambiental sin decoloración ni viraje cromático.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Tintas Epson UltraChrome Pro</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Inyección giclée de archivo con micro-pigmentos minerales encapsulados en resina. A diferencia de las tintas de base agua convencionales que viran de color a los pocos años, este sistema cuenta con certificación de permanencia superior a un siglo sin decoloración.
         </p>
-        <div class="pt-2 text-[10px] mono text-slate-500 border-t border-white/5">
-          Permanencia WIR > 100 años · Micro-gotas 3.5 pl
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#71717a]">
+          Certificación Wilhelm Imaging Research > 100 años
         </div>
       </div>
 
-      <!-- Componente 3: Paspartú Libre de Ácido -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-white/10 hover:border-amber-500/30 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">📐</span>
-          <span class="text-[10px] mono text-cyan-300 bg-cyan-400/10 px-2 py-0.5 rounded border border-cyan-400/20">Bisel 45°</span>
+      <!-- Pilar 3 -->
+      <div class="p-8 rounded-xl bg-[#101014] luxury-border space-y-4 hover:border-[#c5a059]/40 transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">III</span>
+          <span class="text-[10px] mono text-[#a1a1aa] uppercase tracking-widest">Corte Biselado 45°</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Paspartú Museo de 5 cm</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          Cartón de conservación 100% libre de lignina y ácido, con corte biselado a 45° que revela su alma blanca impoluta. Crea una cámara de aire protectora entre el vidrio y la obra para evitar la condensación térmica.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Paspartú de Conservación 5 cm</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Cartón de conservación libre de ácido de 5 centímetros de margen perimetral. Su corte a 45° revela un alma blanca impoluta que otorga aire a la composición y separa físicamente la lámina del cristal para evitar que la humedad ambiental dañe el soporte.
         </p>
-        <div class="pt-2 text-[10px] mono text-slate-500 border-t border-white/5">
-          Reserva alcalina Ca CO3 · Espesor 1.8 mm
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#71717a]">
+          Espesor 1.8 mm · Blanco Algodón de archivo
         </div>
       </div>
 
-      <!-- Componente 4: Molduras de Madera Maciza -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-white/10 hover:border-amber-500/30 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">🪵</span>
-          <span class="text-[10px] mono text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">Madera Noble</span>
+      <!-- Pilar 4 -->
+      <div class="p-8 rounded-xl bg-[#101014] luxury-border space-y-4 hover:border-[#c5a059]/40 transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">IV</span>
+          <span class="text-[10px] mono text-[#a1a1aa] uppercase tracking-widest">Carpintería de Autor</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Moldura Maciza & Ensamble a Inglete</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          Perfiles de madera seleccionada (Negro Mate Studio, Roble Natural Nórdico o Nogal Profundo). Ensamblado manual con uniones reforzadas en esquinas sin grapas exteriores visibles, sellado contra polvo y humedad.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Molduras de Madera Noble</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Confeccionadas en madera sólida seleccionada: Ébano Negro Mate Studio, Roble Claro Nórdico o Nogal Profundo. Cada unión a inglete se ajusta a mano sin grapas exteriores visibles, sellando el reverso con cinta de enmarcado libre de ácido contra el polvo.
         </p>
-        <div class="pt-2 text-[10px] mono text-slate-500 border-t border-white/5">
-          Perfil 20×35 mm · Trasera MDF sellada
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#71717a]">
+          Perfil 20×35 mm · Trasera sellada con herrajes de acero
         </div>
       </div>
 
-      <!-- Componente 5: Vidrio Acrílico Museo UV99 -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-white/10 hover:border-amber-500/30 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">🛡️</span>
-          <span class="text-[10px] mono text-pink-300 bg-pink-400/10 px-2 py-0.5 rounded border border-pink-400/20">Filtro UV99</span>
+      <!-- Pilar 5 -->
+      <div class="p-8 rounded-xl bg-[#101014] luxury-border space-y-4 hover:border-[#c5a059]/40 transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">V</span>
+          <span class="text-[10px] mono text-[#a1a1aa] uppercase tracking-widest">Protección Óptica</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Vidrio Acrílico Anti-Rotura</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          Acrílico óptico de conservación grado museo que bloquea el 99% de la radiación ultravioleta. Es diez veces más resistente a impactos que el vidrio flotado tradicional y no se quiebra en astillas durante el despacho.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Vidrio Acrílico Museo UV99</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Metacrilato óptico de alta pureza que bloquea el 99% de la radiación ultravioleta perjudicial. Ofrece máxima transparencia visual, reduce el peso de la pieza a la mitad y garantiza que el cuadro viaje seguro en transporte nacional sin riesgo de quebrar.
         </p>
-        <div class="pt-2 text-[10px] mono text-slate-500 border-t border-white/5">
-          Claridad óptica 92% · Peso aligerado 50%
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#71717a]">
+          Filtro UV 99% · 10× más resistente que el vidrio flotado
         </div>
       </div>
 
-      <!-- Componente 6: Certificado de Procedencia Firmado -->
-      <div class="glass p-6 rounded-2xl space-y-3.5 border-amber-500/30 bg-amber-950/20 transition">
-        <div class="flex justify-between items-center">
-          <span class="text-2xl">🖋️</span>
-          <span class="text-[10px] mono text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30">Autenticidad</span>
+      <!-- Pilar 6 -->
+      <div class="p-8 rounded-xl bg-[#14121a] luxury-gold-border space-y-4 hover:border-[#c5a059] transition">
+        <div class="flex justify-between items-baseline">
+          <span class="serif text-2xl text-[#c5a059]">VI</span>
+          <span class="text-[10px] mono text-[#c5a059] uppercase tracking-widest">Autenticidad Notarial</span>
         </div>
-        <h3 class="text-base serif font-bold text-white">Certificado Físico Firmado</h3>
-        <p class="text-xs text-slate-300 leading-relaxed font-light">
-          Cada pieza incluye una hoja de procedencia en papel verjurado con sello en seco, número de serie único de edición y <strong class="text-amber-200">firma manuscrita de Matías Cortés Figueroa</strong>, vinculada a un hash criptográfico verificable.
+        <h3 class="serif text-xl text-[#f4f1ea] font-medium">Certificado Físico de Procedencia</h3>
+        <p class="text-xs text-[#a1a1aa] leading-relaxed font-light">
+          Cada obra se acompaña de su hoja de procedencia en papel verjurado con sello en seco en relieve, número de serie único de edición limitada y firma manuscrita de Matías Cortés Figueroa, vinculada a un hash criptográfico verificable.
         </p>
-        <div class="pt-2 text-[10px] mono text-amber-300/70 border-t border-amber-500/20">
-          Edición Limitada · Serial Criptográfico SHA-256
+        <div class="pt-4 border-t border-white/5 text-[10px] mono text-[#c5a059]">
+          Firma a mano · Lacre en seco · Hash SHA-256
         </div>
       </div>
 
     </div>
+
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 4. FORMATOS FÍSICOS & PRECIOS ("SABEMOS LO QUE TE ESTAMOS VENDIENDO")     -->
+  <!-- 4. FORMATOS & PRECIOS (TRANSPARENCIA COMERCIAL DE COLECCIÓN)               -->
   <!-- ========================================================================= -->
-  <section class="py-16 px-5 md:px-10 max-w-6xl mx-auto space-y-10 border-t border-white/10">
-    <div class="text-center max-w-2xl mx-auto space-y-2">
-      <span class="text-xs mono text-amber-400 uppercase tracking-widest font-semibold block">02 · Formatos en Vitrina</span>
-      <h2 class="text-2xl md:text-4xl serif font-bold text-white">Piezas Físicas Disponibles</h2>
-      <p class="text-xs md:text-sm text-slate-400 font-light">
-        Elige el soporte que mejor resuene con tu espacio. Puedes configurar cualquiera de las 24 obras maestras sobre cualquiera de estos formatos en nuestra vitrina 3D.
+  <section id="coleccion" class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <div class="max-w-3xl mb-16 space-y-3">
+      <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
+        02 · Opciones de Montaje
+      </span>
+      <h2 class="serif text-3xl md:text-5xl text-[#f4f1ea] font-normal">
+        Formatos en Vitrina
+      </h2>
+      <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
+        Cuatro configuraciones físicas diseñadas para dialogar con diferentes tipologías de espacio y arquitectura interior.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       
-      <!-- FORMATO 1: CUADRO FINE ART 50x70 CM -->
-      <div class="glass p-6 rounded-2xl flex flex-col justify-between space-y-4 border-amber-500/40 relative group hover:border-amber-400 transition">
-        <div class="absolute -top-3 left-6 bg-amber-400 text-black text-[10px] mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-          Más Elegido
-        </div>
-        <div class="space-y-2">
-          <div class="text-xs mono text-amber-400">01 · Colección Principal</div>
-          <h3 class="text-lg serif font-bold text-white">Cuadro Fine Art 50×70 cm</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Hahnemühle 310g con paspartú biselado libre de ácido de 5 cm, marco de madera maciza (Negro Mate, Roble o Nogal) y vidrio acrílico UV99.
+      <!-- FORMATO 1: CUADRO FINE ART -->
+      <div class="p-7 rounded-xl bg-[#101014] luxury-gold-border flex flex-col justify-between space-y-6 relative">
+        <div class="space-y-3">
+          <span class="text-[10px] mono uppercase tracking-widest text-[#c5a059] block">Edición Principal</span>
+          <h3 class="serif text-xl text-[#f4f1ea]">Cuadro Fine Art 50×70 cm</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Hahnemühle Photo Rag 308g con paspartú biselado libre de ácido de 5 cm, marco de madera noble maciza y acrílico UV99.
           </p>
         </div>
-        <div class="space-y-3 pt-3 border-t border-white/10">
+        <div class="pt-6 border-t border-white/5 space-y-3">
           <div>
-            <div class="text-2xl font-bold mono text-amber-300">$68.000 CLP</div>
-            <div class="text-[11px] mono text-slate-400">~$75 USD · Confección 10–15 días</div>
+            <div class="serif text-2xl text-[#f4f1ea]">$68.000 CLP</div>
+            <div class="text-[11px] mono text-[#71717a]">~$75 USD · Manufactura 10–15 días</div>
           </div>
-          <a href="shop.html?format=fineart" class="block text-center w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold mono transition">
-            Configurar en Vitrina 3D →
+          <a href="shop.html?format=fineart" class="block text-center w-full py-2.5 rounded-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold mono uppercase tracking-wider transition">
+            Configurar en Vitrina →
           </a>
         </div>
       </div>
 
-      <!-- FORMATO 2: ACRÍLICO LUXURY 40x60 CM -->
-      <div class="glass p-6 rounded-2xl flex flex-col justify-between space-y-4 border-white/10 hover:border-purple-500/40 transition">
-        <div class="space-y-2">
-          <div class="text-xs mono text-purple-300">02 · Montaje Directo</div>
-          <h3 class="text-lg serif font-bold text-white">Acrílico Luxury 40×60 cm</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Bloque de metacrilato cristalino de 6 mm con pulido perimetral de diamante y bastidor trasero flotante de aluminio oculto para colgar sin marco.
+      <!-- FORMATO 2: ACRÍLICO LUXURY -->
+      <div class="p-7 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-6">
+        <div class="space-y-3">
+          <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Montaje Directo</span>
+          <h3 class="serif text-xl text-[#f4f1ea]">Acrílico Luxury 40×60 cm</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Bloque de metacrilato de 6 mm con pulido perimetral de diamante y bastidor trasero flotante de aluminio oculto para colgado sin marco.
           </p>
         </div>
-        <div class="space-y-3 pt-3 border-t border-white/10">
+        <div class="pt-6 border-t border-white/5 space-y-3">
           <div>
-            <div class="text-2xl font-bold mono text-amber-300">$120.000 CLP</div>
-            <div class="text-[11px] mono text-slate-400">~$130 USD · Profundidad Tridimensional</div>
+            <div class="serif text-2xl text-[#f4f1ea]">$120.000 CLP</div>
+            <div class="text-[11px] mono text-[#71717a]">~$130 USD · Profundidad Tridimensional</div>
           </div>
-          <a href="shop.html?format=acrylic" class="block text-center w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold mono transition">
-            Configurar en Vitrina 3D →
+          <a href="shop.html?format=acrylic" class="block text-center w-full py-2.5 rounded-full border border-white/15 hover:border-white/30 text-[#f4f1ea] text-xs font-medium mono uppercase tracking-wider transition">
+            Configurar en Vitrina →
           </a>
         </div>
       </div>
 
-      <!-- FORMATO 3: TAZA CERÁMICA NEGRO MATE -->
-      <div class="glass p-6 rounded-2xl flex flex-col justify-between space-y-4 border-white/10 hover:border-cyan-500/40 transition">
-        <div class="space-y-2">
-          <div class="text-xs mono text-cyan-300">03 · Objeto Táctil</div>
-          <h3 class="text-lg serif font-bold text-white">Taza Cerámica Negro Mate</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Cerámica de 11 oz con acabado soft-touch satinado en negro azabache y serigrafía perimetral de la ecuación en oro o blanco de alta definición.
+      <!-- FORMATO 3: TAZA CERÁMICA -->
+      <div class="p-7 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-6">
+        <div class="space-y-3">
+          <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Objeto Cotidiano</span>
+          <h3 class="serif text-xl text-[#f4f1ea]">Taza Cerámica Negro Mate</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Cerámica de 11 oz con acabado soft-touch satinado en negro azabache y serigrafía perimetral de la ecuación en oro o blanco.
           </p>
         </div>
-        <div class="space-y-3 pt-3 border-t border-white/10">
+        <div class="pt-6 border-t border-white/5 space-y-3">
           <div>
-            <div class="text-2xl font-bold mono text-amber-300">$16.900 CLP</div>
-            <div class="text-[11px] mono text-slate-400">~$18 USD · Uso Diario o Colección</div>
+            <div class="serif text-2xl text-[#f4f1ea]">$16.900 CLP</div>
+            <div class="text-[11px] mono text-[#71717a]">~$18 USD · Uso Diario o Estudio</div>
           </div>
-          <a href="shop.html?format=mug" class="block text-center w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold mono transition">
-            Configurar en Vitrina 3D →
+          <a href="shop.html?format=mug" class="block text-center w-full py-2.5 rounded-full border border-white/15 hover:border-white/30 text-[#f4f1ea] text-xs font-medium mono uppercase tracking-wider transition">
+            Configurar en Vitrina →
           </a>
         </div>
       </div>
 
-      <!-- FORMATO 4: CUADERNO MOLESKINE DE CAMPO -->
-      <div class="glass p-6 rounded-2xl flex flex-col justify-between space-y-4 border-white/10 hover:border-emerald-500/40 transition">
-        <div class="space-y-2">
-          <div class="text-xs mono text-emerald-300">04 · Bitácora de Mano</div>
-          <h3 class="text-lg serif font-bold text-white">Cuaderno de Campo</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Cuaderno Moleskine de tapa dura con grabado en bajorrelieve en la portada, papel marfil ahuesado de 100g, cinta marcapáginas y bolsillo trasero.
+      <!-- FORMATO 4: CUADERNO DE CAMPO -->
+      <div class="p-7 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-6">
+        <div class="space-y-3">
+          <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Bitácora de Mano</span>
+          <h3 class="serif text-xl text-[#f4f1ea]">Cuaderno de Campo</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Cuaderno Moleskine de tapa dura con grabado en bajorrelieve en portada, papel ahuesado marfil de 100g y cinta marcapáginas.
           </p>
         </div>
-        <div class="space-y-3 pt-3 border-t border-white/10">
+        <div class="pt-6 border-t border-white/5 space-y-3">
           <div>
-            <div class="text-2xl font-bold mono text-amber-300">$24.900 CLP</div>
-            <div class="text-[11px] mono text-slate-400">~$27 USD · Para Ingenieros & Físicos</div>
+            <div class="serif text-2xl text-[#f4f1ea]">$24.900 CLP</div>
+            <div class="text-[11px] mono text-[#71717a]">~$27 USD · Para Ingenieros & Físicos</div>
           </div>
-          <a href="shop.html?format=notebook" class="block text-center w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold mono transition">
-            Configurar en Vitrina 3D →
+          <a href="shop.html?format=notebook" class="block text-center w-full py-2.5 rounded-full border border-white/15 hover:border-white/30 text-[#f4f1ea] text-xs font-medium mono uppercase tracking-wider transition">
+            Configurar en Vitrina →
           </a>
         </div>
       </div>
 
     </div>
+
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 5. CATÁLOGO CURADO DE LAS 24 OBRAS MAESTRAS                               -->
+  <!-- 5. CURADURÍA: LAS 24 LEYES DE LA CIENCIA                                  -->
   <!-- ========================================================================= -->
-  <section id="catalogo" class="py-16 px-5 md:px-10 max-w-6xl mx-auto space-y-8 border-t border-white/10">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-      <div>
-        <span class="text-xs mono text-amber-400 uppercase tracking-widest font-semibold block">03 · Catálogo Universal</span>
-        <h2 class="text-2xl md:text-4xl serif font-bold text-white">Las 24 Leyes de la Ciencia</h2>
-        <p class="text-xs md:text-sm text-slate-400 font-light mt-1">
-          De los 7 Problemas del Milenio a la Teoría del Caos y la Cimática de 1787.
+  <section id="catalogo" class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+      <div class="max-w-2xl space-y-3">
+        <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
+          03 · Catálogo Universal
+        </span>
+        <h2 class="serif text-3xl md:text-5xl text-[#f4f1ea] font-normal">
+          Las 24 Leyes del Cosmos
+        </h2>
+        <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
+          Desde los 7 Problemas del Milenio hasta la teoría del caos y la cimática sonora. Cada ecuación ha sido calculada en silicio nativo y tipografiada con rigor matemático.
         </p>
       </div>
 
-      <!-- BOTÓN VER TODAS EN VITRINA -->
-      <a href="shop.html" class="glass hover:bg-white/10 text-amber-300 border-amber-500/30 text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2">
-        <span>Ir a la Vitrina 3D Interactiva</span>
+      <a href="shop.html" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[#c5a059]/40 hover:border-[#c5a059] text-[#c5a059] text-xs mono uppercase tracking-wider transition">
+        <span>Inspeccionar las 24 en Vitrina 3D</span>
         <span>→</span>
       </a>
     </div>
 
-    <!-- BENTO DE 6 OBRAS ESTRELLA CON VISTA PREVIA RÁPIDA -->
+    <!-- SELECCIÓN EDITORIAL DE OBRAS MAESTRAS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       
       <!-- Obra 21: Riemann -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-cyan-500/30 hover:border-cyan-400 transition flex flex-col justify-between">
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-cyan-300 font-bold">OBRA #21</span>
-            <span class="text-slate-500">PROBLEMA DEL MILENIO · 1859</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 21</span>
+            <span>PROBLEMA DEL MILENIO · 1859</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">Los Ceros de Riemann</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-cyan-300 mt-2">
+          <h3 class="serif text-lg text-[#f4f1ea]">Los Ceros de Riemann</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
             ζ(s) = ∑ n⁻ˢ = 0 ⇒ Re(s) = ½
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            La hipótesis más célebre de la matemática moderna sobre la distribución secreta de todos los números primos en la recta crítica.
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            La hipótesis más profunda de la matemática pura: el misterio de la distribución de todos los números primos a lo largo de la recta crítica.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=20" class="text-xs mono text-cyan-300 hover:text-cyan-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=20" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
       <!-- Obra 01: Lorenz -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-purple-500/30 hover:border-purple-400 transition flex flex-col justify-between">
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-purple-300 font-bold">OBRA #01</span>
-            <span class="text-slate-500">TEORÍA DEL CAOS · 1963</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 01</span>
+            <span>TEORÍA DEL CAOS · 1963</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">El Vuelo de Lorenz</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-purple-300 mt-2">
-            dx/dt = σ(y-x), dy/dt = x(ρ-z)-y
+          <h3 class="serif text-lg text-[#f4f1ea]">El Vuelo de Lorenz</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
+            dx/dt = σ(y-x) · dy/dt = x(ρ-z)-y
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            El nacimiento del efecto mariposa: dos alas que nunca se cortan, girando por la eternidad en órbita aperiódica determinista.
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            El nacimiento del efecto mariposa en meteorología. Dos alas que jamás se cruzan, tejiendo una órbita infinita y aperiódica.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=0" class="text-xs mono text-purple-300 hover:text-purple-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=0" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
       <!-- Obra 05: Chladni -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-amber-500/30 hover:border-amber-400 transition flex flex-col justify-between">
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-amber-300 font-bold">OBRA #05</span>
-            <span class="text-slate-500">CIMÁTICA NODAL · 1787</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 05</span>
+            <span>CIMÁTICA NODAL · 1787</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">Los Cantos de Chladni</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-amber-300 mt-2">
-            w = sin(nπx)sin(mπy) - sin(mπx)sin(nπy) = 0
+          <h3 class="serif text-lg text-[#f4f1ea]">Los Cantos de Chladni</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
+            w(x,y) = sin(nπx)sin(mπy) - sin(mπx)sin(nπy) = 0
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            El arco de violín vibrando una placa de metal: el sonido expulsa la arena hacia líneas nodales de reposo, revelando mandalas sagrados.
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            El violín acariciando una placa de latón: la vibración sonora expulsa la arena hacia las líneas de silencio, tejiendo mandalas exactos.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=4" class="text-xs mono text-amber-300 hover:text-amber-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=4" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
       <!-- Obra 23: Navier-Stokes -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-cyan-500/30 hover:border-cyan-400 transition flex flex-col justify-between">
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-cyan-300 font-bold">OBRA #23</span>
-            <span class="text-slate-500">PROBLEMA DEL MILENIO · 1845</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 23</span>
+            <span>PROBLEMA DEL MILENIO · 1845</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">Vórtices de Navier-Stokes</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-cyan-300 mt-2">
+          <h3 class="serif text-lg text-[#f4f1ea]">Vórtices de Navier-Stokes</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
             ρ(∂u/∂t + u·∇u) = -∇p + μ∇²u + f
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            La turbulencia de los fluidos incompresibles: ¿puede formarse una singularidad infinita en tiempo finito o la energía permanece suave?
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            La turbulencia de los fluidos incompresibles: la frontera donde el orden laminar colapsa en vórtices auto-inducidos.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=22" class="text-xs mono text-cyan-300 hover:text-cyan-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=22" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
       <!-- Obra 15: Hopf -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-purple-500/30 hover:border-purple-400 transition flex flex-col justify-between">
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-purple-300 font-bold">OBRA #15</span>
-            <span class="text-slate-500">TOPOLOGÍA 4D · 1931</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 15</span>
+            <span>TOPOLOGÍA 4D · 1931</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">La Fibración de Hopf</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-purple-300 mt-2">
-            π: S³ → S² (Fibras entrelazadas)
+          <h3 class="serif text-lg text-[#f4f1ea]">La Fibración de Hopf</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
+            π: S³ → S² (Fibras circulares entrelazadas)
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            La esfera cuadridimensional descompuesta en círculos entrelazados que llenan el espacio sin tocarse jamás, proyectada en luz estereográfica.
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            La esfera de cuatro dimensiones proyectada en tres dimensiones: círculos perfectos que llenan el espacio sin cortarse jamás.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=14" class="text-xs mono text-purple-300 hover:text-purple-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=14" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
-      <!-- Obra 24: Ricci / Poincaré -->
-      <div class="glass p-5 rounded-2xl space-y-3 border-amber-500/30 hover:border-amber-400 transition flex flex-col justify-between">
+      <!-- Obra 24: Ricci -->
+      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
         <div>
-          <div class="flex justify-between items-center text-[10px] mono">
-            <span class="text-amber-300 font-bold">OBRA #24</span>
-            <span class="text-slate-500">PROBLEMA RESUELTO · 2002</span>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+            <span>OBRA 24</span>
+            <span>PROBLEMA DEL MILENIO RESUELTO · 2002</span>
           </div>
-          <h3 class="text-base serif font-bold text-white mt-1">El Flujo de Ricci de Poincaré</h3>
-          <div class="bg-black/50 p-2 rounded-lg mono text-[11px] text-amber-300 mt-2">
+          <h3 class="serif text-lg text-[#f4f1ea]">El Flujo de Ricci de Poincaré</h3>
+          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
             ∂g_ij/∂t = -2 R_ij (Perelman)
           </div>
-          <p class="text-xs text-slate-300 font-light mt-2 leading-relaxed">
-            Grigori Perelman alisó las arrugas del espacio para demostrar que cualquier forma 3D cerrada sin agujeros puede encogerse a una esfera redonda.
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Grigori Perelman demostró que cualquier variedad tridimensional cerrada puede alisarse geométricamente hasta converger en una esfera.
           </p>
         </div>
-        <div class="pt-3 border-t border-white/10 flex justify-between items-center">
-          <span class="text-xs mono text-amber-300 font-bold">$68.000 CLP</span>
-          <a href="shop.html?art=23" class="text-xs mono text-amber-300 hover:text-amber-100 transition">Ver en Vitrina →</a>
+        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+          <span class="text-[#f4f1ea]">$68.000 CLP</span>
+          <a href="shop.html?art=23" class="text-[#c5a059] hover:underline">Ver en Vitrina →</a>
         </div>
       </div>
 
     </div>
+
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 6. MANIFIESTO COMERCIAL: TRANSPARENCIA TOTAL & TIEMPOS                     -->
+  <!-- 6. MANIFIESTO COMERCIAL: PLAZOS, GARANTÍA & CONDICIONES                   -->
   <!-- ========================================================================= -->
-  <section id="negocio" class="py-16 px-5 md:px-10 max-w-6xl mx-auto space-y-10 border-t border-white/10">
-    <div class="glass-gold p-8 md:p-12 rounded-3xl space-y-8">
+  <section id="manifiesto" class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <div class="p-8 md:p-14 rounded-2xl bg-[#101014] luxury-gold-border space-y-10">
+      
       <div class="max-w-3xl space-y-3">
-        <span class="text-xs mono text-amber-400 uppercase tracking-widest font-semibold block">04 · Transparencia & Tiempos</span>
-        <h2 class="text-2xl md:text-4xl serif font-bold text-white">El Manifiesto Comercial</h2>
-        <p class="text-xs md:text-sm text-amber-100/80 font-light leading-relaxed">
-          Sin falsas expectativas ni letra chica. Te explicamos exactamente cómo opera nuestro taller para asegurar que cada obra que recibas sea una joya patrimonial.
+        <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
+          04 · Honestidad & Procedimiento
+        </span>
+        <h2 class="serif text-3xl md:text-4xl text-[#f4f1ea] font-normal">
+          El Manifiesto Comercial
+        </h2>
+        <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
+          Sin falsas promesas ni ambigüedad. Te explicamos con exactitud los tiempos de taller y las garantías que protegen cada obra desde nuestro taller en Santiago hasta tu puerta.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-200">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-xs">
         
-        <!-- Regla 1 -->
-        <div class="bg-black/40 p-5 rounded-2xl border border-amber-500/20 space-y-2">
-          <div class="text-amber-400 font-bold mono text-sm flex items-center gap-2">
-            <span>💳</span> Pago 100% Anticipado
-          </div>
-          <p class="text-slate-300 leading-relaxed font-light">
-            Al ser piezas personalizadas con enmarcado a medida, el pago se procesa en su totalidad mediante Webpay Plus, tarjetas de crédito/débito o transferencia bancaria al momento del encargo.
+        <div class="space-y-2 border-l border-[#c5a059]/40 pl-4">
+          <span class="mono text-[#c5a059] uppercase tracking-wider block font-semibold">1. Pago 100% Anticipado</span>
+          <p class="text-[#a1a1aa] font-light leading-relaxed">
+            Al tratarse de piezas de manufactura personalizada con moldura y paspartú cortados a medida, el encargo se formaliza mediante Webpay Plus, tarjetas bancarias o transferencia directa al momento de la orden.
           </p>
         </div>
 
-        <!-- Regla 2 -->
-        <div class="bg-black/40 p-5 rounded-2xl border border-amber-500/20 space-y-2">
-          <div class="text-amber-400 font-bold mono text-sm flex items-center gap-2">
-            <span>⏳</span> 10 a 15 Días Hábiles
-          </div>
-          <p class="text-slate-300 leading-relaxed font-light">
-            El tiempo de manufactura artesanal (impresión giclée, secado de pigmentos, biselado de paspartú y armado de carpintería) toma entre 10 y 15 días hábiles. Entrega máxima garantizada en 20 días hábiles.
+        <div class="space-y-2 border-l border-[#c5a059]/40 pl-4">
+          <span class="mono text-[#c5a059] uppercase tracking-wider block font-semibold">2. Tiempos de Taller Honesto</span>
+          <p class="text-[#a1a1aa] font-light leading-relaxed">
+            La impresión giclée, el curado de los pigmentos en cámara, el biselado manual y el enmarcado artesanal requieren entre 10 y 15 días hábiles. Garantizamos la entrega final en un plazo máximo de 20 días hábiles.
           </p>
         </div>
 
-        <!-- Regla 3 -->
-        <div class="bg-black/40 p-5 rounded-2xl border border-amber-500/20 space-y-2">
-          <div class="text-amber-400 font-bold mono text-sm flex items-center gap-2">
-            <span>📦</span> Embalaje Blindado
-          </div>
-          <p class="text-slate-300 leading-relaxed font-light">
-            Cada envío viaja en caja rígida de cartón tricapa de exportación con esquineras de espuma de alta densidad (EPE) y doble envoltura hidrófuga para resistir cualquier trayecto en Chile o el extranjero.
+        <div class="space-y-2 border-l border-[#c5a059]/40 pl-4">
+          <span class="mono text-[#c5a059] uppercase tracking-wider block font-semibold">3. Embalaje Blindado de Exportación</span>
+          <p class="text-[#a1a1aa] font-light leading-relaxed">
+            Cada envío viaja protegido en caja de cartón tricapa de alta resistencia, esquineras de espuma de polietileno de alta densidad (EPE) y doble envoltura hidrófuga para asegurar que la pieza llegue impecable a cualquier región de Chile.
           </p>
         </div>
 
       </div>
 
-      <div class="pt-4 border-t border-amber-500/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs mono">
-        <div class="text-slate-300">
-          ¿Deseas una medida especial o asesoría para un despacho corporativo?
-        </div>
-        <a href="https://wa.me/56987654321?text=Hola%20Mat%C3%ADas%2C%20quisiera%20consultar%20por%20un%20encargo%20especial%20del%20Atelier%20Matem%C3%A1tico" target="_blank" class="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition flex items-center gap-2">
-          <span>💬</span> Hablar con Matías por WhatsApp
+      <div class="pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs mono">
+        <span class="text-[#71717a]">¿Requieres asesoría para un despacho corporativo o enmarcación especial?</span>
+        <a href="https://wa.me/56987654321?text=Hola%20Mat%C3%ADas%2C%20quisiera%20consultar%20por%20un%20encargo%20especial%20del%20Atelier%20Matem%C3%A1tico" target="_blank" class="px-5 py-2.5 rounded-full border border-[#c5a059] text-[#c5a059] hover:bg-[#c5a059] hover:text-[#08080a] transition uppercase tracking-wider">
+          Hablar con Matías por WhatsApp →
         </a>
       </div>
+
     </div>
+
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 7. LOS TRES PORTALES DEL ECOSISTEMA (NAVEGACIÓN MULTI-VENTANA)             -->
+  <!-- 7. PORTALES DE EXPERIENCIA EN SILICIO (NAVEGACIÓN MULTI-VENTANA)          -->
   <!-- ========================================================================= -->
-  <section id="portales" class="py-16 px-5 md:px-10 max-w-6xl mx-auto space-y-10 border-t border-white/10">
-    <div class="text-center max-w-2xl mx-auto space-y-2">
-      <span class="text-xs mono text-purple-400 uppercase tracking-widest font-semibold block">05 · Ecosistema Digital & Físico</span>
-      <h2 class="text-2xl md:text-4xl serif font-bold text-white">Explora las Tres Ventanas del Atelier</h2>
-      <p class="text-xs md:text-sm text-slate-400 font-light">
-        Elige cómo deseas experimentar el proyecto: comprando en la vitrina de galería, flotando en el cosmos 3D o generando tus propios reels matemáticos.
+  <section class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
+    
+    <div class="max-w-2xl mb-16 space-y-3">
+      <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
+        05 · Ecosistema de Tres Ventanas
+      </span>
+      <h2 class="serif text-3xl md:text-5xl text-[#f4f1ea] font-normal">
+        Las Tres Salas del Atelier
+      </h2>
+      <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
+        Elige cómo deseas experimentar el universo de Atelier Matemático:
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       
-      <!-- PORTAL 1: BOUTIQUE & VITRINA 3D -->
-      <a href="shop.html" class="glass p-7 rounded-3xl flex flex-col justify-between space-y-6 border-amber-500/30 hover:border-amber-400 transition group hover:scale-[1.02] duration-300">
+      <!-- Sala 1: Boutique -->
+      <a href="shop.html" class="p-8 rounded-xl bg-[#101014] luxury-gold-border flex flex-col justify-between space-y-6 group hover:border-[#c5a059] transition">
         <div class="space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl group-hover:scale-110 transition">
-            🛍️
-          </div>
-          <h3 class="text-xl serif font-bold text-white">La Boutique & Vitrina 3D</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Una sala de exhibición dedicada con iluminación de galería de arte y pedestal de mármol negro. Inspecciona los cuadros en 360°, cambia los marcos y finaliza tu compra con 1 clic.
+          <span class="text-[10px] mono uppercase tracking-widest text-[#c5a059] block">Sala de Vitrina</span>
+          <h3 class="serif text-2xl text-[#f4f1ea]">La Boutique 3D</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Una galería arquitectónica con iluminación cenital de museo. Inspecciona el cuadro en 360°, cambia la madera noble de la moldura y formaliza tu pedido en línea con total transparencia.
           </p>
         </div>
-        <div class="flex items-center gap-2 text-xs mono text-amber-300 font-bold">
-          <span>Entrar a la Vitrina de Compra</span>
+        <div class="text-xs mono uppercase tracking-wider text-[#c5a059] flex items-center gap-2">
+          <span>Ingresar a la Vitrina</span>
           <span class="group-hover:translate-x-1 transition">→</span>
         </div>
       </a>
 
-      <!-- PORTAL 2: OBSERVATORIO CÓSMICO 3D -->
-      <a href="museum.html" class="glass p-7 rounded-3xl flex flex-col justify-between space-y-6 border-cyan-500/30 hover:border-cyan-400 transition group hover:scale-[1.02] duration-300">
+      <!-- Sala 2: Observatorio -->
+      <a href="museum.html" class="p-8 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-6 group hover:border-white/30 transition">
         <div class="space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-2xl group-hover:scale-110 transition">
-            🌌
-          </div>
-          <h3 class="text-xl serif font-bold text-white">Observatorio Cósmico (6DOF)</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            Vuelo orbital en gravedad cero entre las 24 leyes vivas de la ciencia. Tu dispositivo aporta cómputo a la red enjambre mientras exploras y cazas fotos de los hitos matemáticos.
+          <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Gravedad Cero (6DOF)</span>
+          <h3 class="serif text-2xl text-[#f4f1ea]">Observatorio Cósmico</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Vuelo orbital inercial libre entre las 24 leyes científicas vivas calculadas en silicio. Tu dispositivo aporta cómputo voluntario a la red mientras cazas capturas fotográficas en tiempo real.
           </p>
         </div>
-        <div class="flex items-center gap-2 text-xs mono text-cyan-300 font-bold">
-          <span>Iniciar Vuelo Orbital en Silicio</span>
+        <div class="text-xs mono uppercase tracking-wider text-[#f4f1ea] flex items-center gap-2">
+          <span>Iniciar Vuelo Orbital</span>
           <span class="group-hover:translate-x-1 transition">→</span>
         </div>
       </a>
 
-      <!-- PORTAL 3: ESTUDIO GENERATIVO 2D -->
-      <a href="studio.html" class="glass p-7 rounded-3xl flex flex-col justify-between space-y-6 border-purple-500/30 hover:border-purple-400 transition group hover:scale-[1.02] duration-300">
+      <!-- Sala 3: Estudio 2D -->
+      <a href="studio.html" class="p-8 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-6 group hover:border-white/30 transition">
         <div class="space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-2xl group-hover:scale-110 transition">
-            🎨
-          </div>
-          <h3 class="text-xl serif font-bold text-white">Estudio 2D & Grabador Reels</h3>
-          <p class="text-xs text-slate-300 font-light leading-relaxed">
-            El lienzo táctil interactivo. Modula los diales de parámetros en tiempo real, graba videos verticales de 15s/30s a 60 FPS para TikTok/Reels o descarga láminas en resolución de imprenta.
+          <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Lienzo Generativo</span>
+          <h3 class="serif text-2xl text-[#f4f1ea]">Estudio 2D & Reels</h3>
+          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
+            Manipula los diales de constantes físicas en tiempo real, graba videos verticales de 15s y 30s a 60 FPS o descarga archivos maestros en ultra alta definición a 300 DPI.
           </p>
         </div>
-        <div class="flex items-center gap-2 text-xs mono text-purple-300 font-bold">
-          <span>Abrir Estudio de Creación</span>
+        <div class="text-xs mono uppercase tracking-wider text-[#f4f1ea] flex items-center gap-2">
+          <span>Abrir Estudio Táctil</span>
           <span class="group-hover:translate-x-1 transition">→</span>
         </div>
       </a>
 
     </div>
+
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 8. FOOTER INSTITUCIONAL & DE CRÉDITO                                      -->
+  <!-- 8. FOOTER INSTITUCIONAL SOBRIO                                            -->
   <!-- ========================================================================= -->
-  <footer class="py-12 px-5 md:px-10 border-t border-white/10 text-xs text-slate-400 space-y-6 max-w-6xl mx-auto">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <div class="space-y-1 text-center md:text-left">
-        <div class="serif text-white text-sm font-bold tracking-widest">ATELIER MATEMÁTICO</div>
-        <p class="text-[11px] text-slate-500 font-light">
-          Fundado por Matías Cortés Figueroa · Silicio Nativo & Timonel F2 · Santiago de Chile.
+  <footer class="py-16 px-6 md:px-12 border-t border-white/[0.08] text-xs text-[#71717a] max-w-7xl mx-auto space-y-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <span class="serif text-base text-[#f4f1ea] font-medium tracking-widest block">ATELIER MATEMÁTICO</span>
+        <p class="text-[11px] text-[#71717a] font-light mt-1">
+          Fundado por Matías Cortés Figueroa · Cero autoengaño, física real en silicio y manufactura de archivo. Santiago de Chile.
         </p>
       </div>
 
-      <div class="flex items-center gap-6 mono text-[11px]">
-        <a href="shop.html" class="hover:text-amber-300 transition">Boutique</a>
-        <a href="museum.html" class="hover:text-cyan-300 transition">Observatorio 3D</a>
-        <a href="studio.html" class="hover:text-purple-300 transition">Estudio Reels</a>
-        <a href="executive_summary.html" class="hover:text-white transition">Dossier Ejecutivo</a>
+      <div class="flex items-center gap-8 mono text-[11px] uppercase tracking-wider">
+        <a href="shop.html" class="text-[#a1a1aa] hover:text-[#c5a059] transition">Vitrina Boutique</a>
+        <a href="museum.html" class="text-[#a1a1aa] hover:text-[#f4f1ea] transition">Observatorio 3D</a>
+        <a href="studio.html" class="text-[#a1a1aa] hover:text-[#f4f1ea] transition">Estudio Reels</a>
+        <a href="executive_summary.html" class="text-[#a1a1aa] hover:text-[#f4f1ea] transition">Dossier</a>
       </div>
     </div>
 
-    <div class="pt-6 border-t border-white/5 text-center text-[10px] mono text-slate-600">
-      © 2026 Atelier Matemático. Cero autoengaño, física real en silicio y manufactura de archivo. Todos los derechos reservados.
+    <div class="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] mono text-[#52525b]">
+      <span>© 2026 Atelier Matemático. Todos los derechos reservados.</span>
+      <span>Impreso en papel Hahnemühle 308g con tintas Epson UltraChrome Pro.</span>
     </div>
   </footer>
 

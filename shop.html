@@ -572,41 +572,69 @@
       // ESCENARIO ARQUITECTÓNICO INMÓVIL
       architecturalGroup = new THREE.Group();
 
-      // Muro posterior (Piedra de Travertino idéntica a la portada)
-      const wallGeom = new THREE.PlaneGeometry(16, 10);
+      // Helper para generar textura de sombra física suave y difusa (Luz rasante desde superior-izquierda)
+      function createSoftShadowTexture() {
+        const c = document.createElement('canvas');
+        c.width = 512;
+        c.height = 700;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, 512, 700);
+
+        const cx = 256 + 8, cy = 350 + 14; // Desplazamiento sutil hacia abajo-derecha
+        const w = 310, h = 440;
+        const x = cx - w / 2, y = cy - h / 2;
+
+        // Penumbra suave y difusa con márgenes generosos (bordes 100% transparentes)
+        for (let i = 24; i >= 0; i--) {
+          const alpha = 0.024 * Math.pow((24 - i) / 24, 0.7);
+          ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+          const offset = i * 2.2;
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(x - offset, y - offset, w + offset * 2, h + offset * 2, [28 + offset]);
+          } else {
+            ctx.rect(x - offset, y - offset, w + offset * 2, h + offset * 2);
+          }
+          ctx.fill();
+        }
+        // Oclusión de contacto directa profunda
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.58)';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x + 2, y + 4, w - 4, h - 8, [12]);
+        } else {
+          ctx.rect(x + 2, y + 4, w - 4, h - 8);
+        }
+        ctx.fill();
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.minFilter = THREE.LinearFilter;
+        return tex;
+      }
+
+      // Muro posterior (Piedra de Travertino monolítica idéntica a la portada)
+      const wallGeom = new THREE.PlaneGeometry(16, 9);
       const wallTex = new THREE.TextureLoader().load('assets/atelier_gallery_wall.jpg');
       wallTex.colorSpace = THREE.SRGBColorSpace;
       const wallMat = new THREE.MeshStandardMaterial({
         map: wallTex,
-        roughness: 0.88,
+        roughness: 0.90,
         metalness: 0.02
       });
       const backWall = new THREE.Mesh(wallGeom, wallMat);
-      backWall.position.z = -0.06;
+      backWall.position.set(0, 0.45, -0.06);
       architecturalGroup.add(backWall);
 
-      // Suelo de piedra de galería
-      const floorGeom = new THREE.PlaneGeometry(14, 9);
-      const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x0c0c0e,
-        roughness: 0.5,
-        metalness: 0.35
-      });
-      const floor = new THREE.Mesh(floorGeom, floorMat);
-      floor.rotation.x = -Math.PI / 2;
-      floor.position.y = -1.6;
-      floor.position.z = 2.0;
-      architecturalGroup.add(floor);
-
-      // Sombra de contacto real proyectada en la pared detrás del cuadro
-      const shadowGeom = new THREE.PlaneGeometry(1.68, 2.18);
+      // Sombra de contacto suave proyectada en el travertino detrás del cuadro
+      const shadowTex = createSoftShadowTexture();
+      const shadowGeom = new THREE.PlaneGeometry(1.36, 1.92);
       const shadowMat = new THREE.MeshBasicMaterial({
-        color: 0x000000,
+        map: shadowTex,
         transparent: true,
-        opacity: 0.52
+        opacity: 0.80
       });
       const shadowPlane = new THREE.Mesh(shadowGeom, shadowMat);
-      shadowPlane.position.set(0.03, 0.08, -0.05);
+      shadowPlane.position.set(0, 0.12, -0.055);
       architecturalGroup.add(shadowPlane);
 
       scene.add(architecturalGroup);

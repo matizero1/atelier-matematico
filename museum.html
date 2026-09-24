@@ -119,7 +119,7 @@
 <div id="capsule-reticle"></div>
 
 <!-- RETÍCULA COLIMADORA ASTRONÓMICA (MODO TELESCOPIO EN ROTONDA) -->
-<div id="telescope-collimator-hud" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300">
+<div id="telescope-collimator-hud" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300 flex flex-col items-center gap-2.5">
   <div id="telescope-target-card" class="hidden bg-[#101014]/95 backdrop-blur-md px-5 py-3.5 rounded-2xl luxury-gold-border pointer-events-auto flex items-center gap-4 shadow-2xl">
     <div class="space-y-0.5">
       <div class="flex items-center gap-2 text-[10px] mono text-[#c5a059] uppercase tracking-wider">
@@ -132,6 +132,9 @@
     <button id="btn-collimator-warp" onclick="warpToTargetAstro()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold px-4 py-2.5 rounded-xl mono uppercase tracking-wider transition shadow-md whitespace-nowrap">
       Enfocar con Telescopio →
     </button>
+  </div>
+  <div id="telescope-nav-hint" class="bg-[#0c0c10]/85 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 text-[10px] mono text-[#a1a1aa] tracking-wider pointer-events-none shadow-lg">
+    <span class="text-[#c5a059] font-medium">WASD / Flechas:</span> Caminar a barandilla &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Mouse:</span> Mirar bóveda &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar órbita
   </div>
 </div>
 
@@ -480,127 +483,130 @@
 <!-- JAVASCRIPT: ATLAS CÓSMICO DE 24 LEYES & HILOS DE TIMONEL                   -->
 <!-- ========================================================================= -->
 <script>
-// CATÁLOGO COMPLETO DE LAS 24 LEYES DE LA HUMANIDAD
+// CATÁLOGO COMPLETO DE LAS 24 LEYES DE LA HUMANIDAD (BÓVEDA CELESTE VISIBLE · TIMONEL F2)
 const ARTWORKS_24 = [
+  // ── ANILLO I: HORIZONTE Y LEYES CLÁSICAS (R = 18m, φ ∈ [+0.12, +0.28] rad sobre el horizonte)
   { id: 0, badge:"01", title:"El Vuelo de Lorenz", sub:"Atractor Caótico Aperiodico", cat:"TEORÍA DEL CAOS · 1963",
     eq:"dx/dt=10(y-x)\ndy/dt=x(28-z)-y\ndz/dt=xy-(8/3)z", metric:"Lyapunov: λ₁ = +0.9056",
     hist:"Edward Lorenz descubrió que una millonésima de redondeo desata trayectorias perpetuamente impredecibles.",
-    poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás."', radius: 12, theta: 0.0, phi: -0.2 },
+    poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás."', radius: 18, theta: 0.00, phi: 0.15 },
 
   { id: 1, badge:"02", title:"El Umbral de la Materia", sub:"Límite de Fluencia Tensorial", cat:"MECÁNICA CONTINUA · 1913",
     eq:"σ_v = √((σ₁-σ₂)²+(σ₂-σ₃)²+(σ₃-σ₁)²)/√2", metric:"Von Mises: J₂ ≤ k²",
     hist:"Richard von Mises encontró la cota exacta donde un metal cede plásticamente bajo tensión multiaxial.",
-    poem:'"La materia resiste hasta que la tensión ya no cabe en sus átomos."', radius: 12, theta: 1.05, phi: 0.3 },
+    poem:'"La materia resiste hasta que la tensión ya no cabe en sus átomos."', radius: 18, theta: 1.05, phi: 0.24 },
 
   { id: 2, badge:"03", title:"La Danza de Yoshida", sub:"Conservación Hamiltoniana Pura", cat:"INTEGRADORES SIMPLÉCTICOS · 1990",
     eq:"z_{n+1}=exp(c_i·Δt·D_A)·exp(d_i·Δt·D_B)·z_n", metric:"Energía: ΔH ≤ 1e-15",
     hist:"Haruo Yoshida descubrió coeficientes analíticos de 4º orden que conservan la energía sin perder un solo julio.",
-    poem:'"Dos cuerpos bailan al borde del abismo sin motor ni fricción."', radius: 12, theta: 2.1, phi: -0.1 },
+    poem:'"Dos cuerpos bailan al borde del abismo sin motor ni fricción."', radius: 18, theta: 2.09, phi: 0.16 },
 
   { id: 3, badge:"04", title:"Los Ríos Invisibles", sub:"Autodiferenciación con Clifford", cat:"ÁLGEBRA DUAL · 1873",
     eq:"f(x+d·ε) = f(x) + d·f'(x)·ε  (ε²=0)", metric:"Error Truncamiento: 0.000",
     hist:"William Clifford formuló el número infinitesimal ε cuyo cuadrado es cero para obtener derivadas sin error.",
-    poem:'"Corrientes subterráneas que horadan la roca en silencio."', radius: 12, theta: 3.14, phi: 0.2 },
+    poem:'"Corrientes subterráneas que horadan la roca en silencio."', radius: 18, theta: 3.14, phi: 0.26 },
 
   { id: 4, badge:"05", title:"Los Cantos de Chladni", sub:"Relajación Nodal Cimática", cat:"CIMÁTICA ACÚSTICA · 1787",
     eq:"w(x,y)=sin(nπx)sin(mπy)-sin(mπx)sin(nπy)=0", metric:"Residuo Nodal: ‖F(x)‖ ≤ 2.4e-5",
     hist:"Ernst Chladni pasó un arco de violín por una placa de bronce y reveló los mandalas sagrados del sonido.",
-    poem:'"El silencio es el punto exacto donde las ondas se anulan."', radius: 12, theta: 4.2, phi: -0.25 },
+    poem:'"El silencio es el punto exacto donde las ondas se anulan."', radius: 18, theta: 4.19, phi: 0.18 },
 
   { id: 5, badge:"06", title:"El Telar de Turing", sub:"Morfogénesis y Reacción-Difusión", cat:"MORFOGÉNESIS · 1952",
     eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v", metric:"Turing Wavelength: λ_c ≈ 0.42",
     hist:"Alan Turing demostró cómo dos sustancias químicas difundiéndose bastan para tejer las manchas del leopardo.",
-    poem:'"La vida no necesitó pincel: solo dos moléculas jugando a perseguirse."', radius: 12, theta: 5.25, phi: 0.15 },
+    poem:'"La vida no necesitó pincel: solo dos moléculas jugando a perseguirse."', radius: 18, theta: 5.24, phi: 0.22 },
 
+  // ── ANILLO II: BÓVEDA MEDIA Y MORFOGÉNESIS (R = 26m, φ ∈ [+0.38, +0.65] rad)
   { id: 6, badge:"07", title:"La Cinta del Panadero", sub:"Plegado Caótico de Rössler", cat:"TOPOLOGÍA CAÓTICA · 1976",
     eq:"dx/dt=-y-z\ndy/dt=x+0.2y\ndz/dt=0.2+z(x-5.7)", metric:"Fractal Dim: D ≈ 2.01",
     hist:"Otto Rössler diseñó el atractor que se estira y pliega sobre sí mismo como el panadero amasa la masa.",
-    poem:'"El tiempo es una cinta de seda que el universo estira y dobla."', radius: 22, theta: 0.3, phi: 0.4 },
+    poem:'"El tiempo es una cinta de seda que el universo estira y dobla."', radius: 26, theta: 0.31, phi: 0.42 },
 
   { id: 7, badge:"08", title:"Las Esferas de Apolonio", cat:"Empaquetamiento Fractal", sub:"Teorema de Círculos de Descartes", cat:"GEOMETRÍA FRACTAL · 200 a.C.",
     eq:"(k₁+k₂+k₃+k₄)²=2(k₁²+k₂²+k₃²+k₄²)", metric:"Curvatura: k = 1/r",
     hist:"Apolonio demostró que tres círculos tangentes dejan un hueco donde cabe exactamente una nueva esfera infinita.",
-    poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera."', radius: 22, theta: 0.9, phi: -0.4 },
+    poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera."', radius: 26, theta: 0.94, phi: 0.58 },
 
   { id: 8, badge:"09", title:"El Espejo de Julia", sub:"Dinámica Holomorfa en C", cat:"GEOMETRÍA COMPLEJA · 1918",
     eq:"z_{n+1} = z_n² + c  (|c| ≈ 0.7885)", metric:"Mandelbrot Boundary ∂M",
     hist:"Gaston Julia escribió 200 páginas a mano describiendo fractales que jamás pudo ver en una pantalla.",
-    poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles."', radius: 22, theta: 1.5, phi: 0.2 },
+    poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles."', radius: 26, theta: 1.57, phi: 0.40 },
 
   { id: 9, badge:"10", title:"La Autopista del Caos", sub:"Autómata de Langton", cat:"AUTÓMATA CELULAR · 1986",
     eq:"Blanco→girar_derecha+pintar_negro\nNegro→girar_izquierda+pintar_blanco", metric:"Paso crítico: t=10.000",
     hist:"Tras 10.000 pasos de caos absoluto, la hormiga construye espontáneamente una autopista infinita.",
-    poem:'"El orden no necesita arquitecto: emerge cuando nadie lo espera."', radius: 22, theta: 2.1, phi: -0.3 },
+    poem:'"El orden no necesita arquitecto: emerge cuando nadie lo espera."', radius: 26, theta: 2.20, phi: 0.62 },
 
   { id: 10, badge:"11", title:"La Ola Eterna", sub:"Solitones Analíticos de KdV", cat:"ONDAS NO LINEALES · 1834",
     eq:"u(x,t) = -2k² · sech²(k(x - 4k²t))", metric:"Solitón Invariante: ‖u‖_L2 = cte",
     hist:"John Scott Russell vio una ola en un canal viajar millas sin deformarse ni morir jamás.",
-    poem:'"Hay personas que, como estas olas, colisionan y salen intactas al otro lado."', radius: 22, theta: 2.7, phi: 0.35 },
+    poem:'"Hay personas que, como estas olas, colisionan y salen intactas al otro lado."', radius: 26, theta: 2.83, phi: 0.46 },
 
   { id: 11, badge:"12", title:"La Piel de la Jirafa", sub:"Partición Natural de Voronoi", cat:"TESELACIÓN ESPACIAL · 1908",
     eq:"Cel(sᵢ) = {x : d(x,sᵢ) ≤ d(x,sⱼ)}", metric:"Métrica: Euclidiana L₂",
     hist:"Georgy Voronoi describió la división celular que gobierna los ojos de mosca y las galaxias.",
-    poem:'"A cada semilla, todo lo que está más cerca de ella."', radius: 22, theta: 3.3, phi: -0.2 },
+    poem:'"A cada semilla, todo lo que está más cerca de ella."', radius: 26, theta: 3.46, phi: 0.59 },
 
   { id: 12, badge:"13", title:"Los Ríos de Newton", sub:"Cuencas Fractales de Atracción", cat:"ANÁLISIS COMPLEJO · 1669",
     eq:"z_{n+1} = (2z³+1)/(3z²)  (z³-1 = 0)", metric:"Convergencia: z → 1, e^{i2π/3}",
     hist:"El método de Newton para hallar raíces genera fronteras fractales infinitas en el plano complejo.",
-    poem:'"Incluso Newton jamás supo qué camino tomará el caos para llegar a la verdad."', radius: 22, theta: 3.9, phi: 0.4 },
+    poem:'"Incluso Newton jamás supo qué camino tomará el caos para llegar a la verdad."', radius: 26, theta: 4.08, phi: 0.42 },
 
   { id: 13, badge:"14", title:"Las Celdas del Sol", sub:"Convección de Rayleigh-Bénard", cat:"TERMODINÁMICA · 1900",
     eq:"Ra = gαΔTL³/(νκ) > 1708 (Hexágonos)", metric:"Rayleigh: Ra/Ra_c = 1.45",
     hist:"Henri Bénard demostró que el calor no destruye el orden: fabrica hexágonos perfectos como el Sol.",
-    poem:'"El calor siempre fabrica hexágonos, la forma más eficiente del universo."', radius: 22, theta: 4.5, phi: -0.35 },
+    poem:'"El calor siempre fabrica hexágonos, la forma más eficiente del universo."', radius: 26, theta: 4.71, phi: 0.64 },
 
   { id: 14, badge:"15", title:"La Fibración de Hopf", sub:"Proyección Cuadridimensional S³→R³", cat:"TOPOLOGÍA 4D · 1931",
     eq:"π: S³ → S² (Fibras entrelazadas)", metric:"Invariante de Hopf: H = 1",
     hist:"Heinz Hopf demostró que la esfera 4D se desmonta en infinitos círculos que no se tocan jamás.",
-    poem:'"La sombra de cuatro dimensiones cayendo como una flor sobre nuestra realidad."', radius: 22, theta: 5.1, phi: 0.25 },
+    poem:'"La sombra de cuatro dimensiones cayendo como una flor sobre nuestra realidad."', radius: 26, theta: 5.34, phi: 0.48 },
 
   { id: 15, badge:"16", title:"El Juego del Caos", sub:"Helecho Fractal de Barnsley", cat:"SISTEMAS IFS · 1988",
     eq:"w_i(x) = A_i x + b_i (4 Matrices)", metric:"Hausdorff Dimension D ≈ 1.82",
     hist:"Michael Barnsley demostró que tirar un dado con cuatro reglas reproduce una hoja de helecho perfecta.",
-    poem:'"Tres instrucciones y un dado bastan para dibujar la vida."', radius: 22, theta: 5.7, phi: -0.4 },
+    poem:'"Tres instrucciones y un dado bastan para dibujar la vida."', radius: 26, theta: 5.97, phi: 0.56 },
 
+  // ── ANILLO III: BÓVEDA ALTA Y ENIGMAS DEL MILENIO (R = 34m, φ ∈ [+0.75, +1.25] rad hacia el cenit)
   { id: 16, badge:"17", title:"Las Flores del Girasol", sub:"Filotaxis de Fibonacci", cat:"GEOMETRÍA ÁUREA · 1202",
     eq:"θₙ = n · 137.508° (Ángulo Áureo)", metric:"Razón Áurea: φ ≈ 1.618033",
     hist:"En 1202 Fibonacci contó conejos y descubrió la espiral que empaqueta las semillas de los girasoles.",
-    poem:'"La flor no sabe matemáticas: solo crece de la forma más hermosa."', radius: 32, theta: 0.2, phi: -0.2 },
+    poem:'"La flor no sabe matemáticas: solo crece de la forma más hermosa."', radius: 34, theta: 0.40, phi: 0.78 },
 
   { id: 17, badge:"18", title:"Las Espirales Químicas", sub:"Reacción Belousov-Zhabotinsky", cat:"OSCILACIÓN NO LINEAL · 1951",
     eq:"∂u/∂t = Dᵤ∇²u + f(u,v)", metric:"Período químico: T ≈ 4.2s",
     hist:"Boris Belousov descubrió una reacción química que latía como un corazón y la ciencia lo tildó de loco.",
-    poem:'"Cada latido tuyo es una reacción química que se negó a detenerse."', radius: 32, theta: 0.95, phi: 0.35 },
+    poem:'"Cada latido tuyo es una reacción química que se negó a detenerse."', radius: 34, theta: 1.18, phi: 0.92 },
 
   { id: 18, badge:"19", title:"El Colapso Cuántico", sub:"Ecuación de Schrödinger", cat:"MECÁNICA CUÁNTICA · 1926",
     eq:"iℏ ∂ψ/∂t = -ℏ²/2m ∇²ψ + Vψ", metric:"Norma Unitaria: ∫|ψ|² dV = 1",
     hist:"Erwin Schrödinger formuló la ola de probabilidad donde las cosas existen en todos lados hasta ser observadas.",
-    poem:'"Antes de ser mirado, el electrón existe en todas partes a la vez."', radius: 32, theta: 1.7, phi: -0.4 },
+    poem:'"Antes de ser mirado, el electrón existe en todas partes a la vez."', radius: 34, theta: 1.96, phi: 0.80 },
 
   { id: 19, badge:"20", title:"El Laberinto Perfecto", sub:"Regla 110 de Wolfram", cat:"COMPUTACIÓN UNIVERSAL · 1983",
     eq:"111→0 · 110→1 · 101→1 · 100→0...", metric:"Clase 4: Turing-Completo",
     hist:"Stephen Wolfram demostró que una regla elemental de tres celdas puede computar cualquier cosa en el universo.",
-    poem:'"Una sola celda negra en un mar blanco, capaz de pensarlo todo."', radius: 32, theta: 2.45, phi: 0.2 },
+    poem:'"Una sola celda negra en un mar blanco, capaz de pensarlo todo."', radius: 34, theta: 2.75, phi: 0.96 },
 
   { id: 20, badge:"21", title:"Los Ceros de Riemann", sub:"Espiral Crítica en s = 1/2 + it", cat:"PROBLEMA DEL MILENIO · 1859",
     eq:"ζ(s) = ∑ 1/nˢ = 0 ⇒ Re(s) = 1/2", metric:"Línea Crítica: Re(s) = 0.500000",
     hist:"Bernhard Riemann planteó el enigma de $1.000.000 USD sobre el ritmo íntimo de los números primos.",
-    poem:'"Una cuerda de luz tensada que besa el cero absoluto en cada primo."', radius: 32, theta: 3.2, phi: -0.3 },
+    poem:'"Una cuerda de luz tensada que besa el cero absoluto en cada primo."', radius: 34, theta: 3.53, phi: 1.18 },
 
   { id: 21, badge:"22", title:"El Desierto de Beal", sub:"Conjetura de Beal Coprima", cat:"TEORÍA DE NÚMEROS · 1993",
     eq:"Aˣ + Bʸ = Cᶻ (x,y,z > 2) ⇒ mcd > 1", metric:"Exclusión Coprima: 100% Vacío",
     hist:"Andrew Beal ofreció $1.000.000 USD a quien demuestre por qué las potencias coprimas se repelen en el vacío.",
-    poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse."', radius: 32, theta: 3.95, phi: 0.3 },
+    poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse."', radius: 34, theta: 4.32, phi: 0.84 },
 
   { id: 22, badge:"23", title:"Vórtices de Navier-Stokes", sub:"Singularidades y Turbulencia 3D", cat:"PROBLEMA DEL MILENIO · 1845",
     eq:"∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u", metric:"Enstrofía: Ω(t) < ∞ (Búsqueda)",
     hist:"¿Puede la velocidad del agua explotar a infinito? El misterio del millón de dólares de la física de fluidos.",
-    poem:'"Tubos de remolinos microscópicos trenzándose como músculos de luz."', radius: 32, theta: 4.7, phi: -0.25 },
+    poem:'"Tubos de remolinos microscópicos trenzándose como músculos de luz."', radius: 34, theta: 5.11, phi: 1.22 },
 
   { id: 23, badge:"24", title:"El Flujo de Ricci de Poincaré", sub:"Alisamiento Métrico a 3-Esfera", cat:"PROBLEMA DEL MILENIO · 2002",
     eq:"∂g_ij/∂t = -2 R_ij ⇒ M³ → S³", metric:"Curvatura Escalar: R(t) → 1.000",
     hist:"Grigori Perelman usó el flujo de calor métrico para alisar el espacio, y rechazó la Medalla Fields.",
-    poem:'"El calor geométrico plancha cada arruga hasta devolver la pureza a la primera esfera."', radius: 32, theta: 5.45, phi: 0.35 }
+    poem:'"El calor geométrico plancha cada arruga hasta devolver la pureza a la primera esfera."', radius: 34, theta: 5.89, phi: 0.98 }
 ];
 
 // Variables Three.js & Silicio
@@ -785,7 +791,7 @@ function initAtlasCosmico() {
   scene.fog = new THREE.FogExp2(0x08080a, 0.009);
 
   camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
-  camera.position.set(0, 0, 4);
+  camera.position.set(0, 0.5, 0);
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "low-power", preserveDrawingBuffer: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -803,6 +809,17 @@ function initAtlasCosmico() {
   populateNaiAstroSelector();
   window.addEventListener('resize', onWindowResize);
   animate();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('direct') === '1' || urlParams.get('astro') !== null) {
+    enterCapsule(false);
+    if (urlParams.get('astro') !== null) {
+      const targetId = parseInt(urlParams.get('astro'), 10);
+      if (!isNaN(targetId) && targetId >= 0 && targetId < astros24.length) {
+        setTimeout(() => { warpToTargetAstro(targetId); }, 150);
+      }
+    }
+  }
 }
 
 // ── VACÍO CÓSMICO & CONFINAMIENTO DE LOS 24 HILOS DE TIMONEL ──────
@@ -830,31 +847,31 @@ function buildCosmicVoid() {
   });
 }
 
-// ── ROTONDA TECTÓNICA & PLATAFORMA DE OBSERVACIÓN DE TIMONEL ───────
+// ── ROTONDA TECTÓNICA & MIRADOR ASTRONÓMICO DE PARANAL (TIMONEL F2) ─
 function buildTectonicRotunda() {
   const rotundaGroup = new THREE.Group();
-  rotundaGroup.position.set(0, -1.8, 0);
+  rotundaGroup.position.set(0, -1.0, 0);
 
-  // 1. Plataforma Monumental de Basalto Escalonado (R = 10m)
-  const baseFloorGeo = new THREE.CylinderGeometry(10.0, 10.4, 0.35, 64);
+  // 1. Mirador Esbelto de Basalto Escalonado (R = 3.8m, escala humana íntima)
+  const baseFloorGeo = new THREE.CylinderGeometry(3.8, 4.0, 0.25, 48);
   const baseFloorMat = new THREE.MeshStandardMaterial({
     color: 0x0c0c10,
     roughness: 0.85,
     metalness: 0.15
   });
   const baseFloor = new THREE.Mesh(baseFloorGeo, baseFloorMat);
-  baseFloor.position.y = -0.175;
+  baseFloor.position.y = -0.125;
   rotundaGroup.add(baseFloor);
 
   // Zócalo inferior de granito oscuro
-  const subPlinthGeo = new THREE.CylinderGeometry(11.2, 11.5, 0.2, 64);
+  const subPlinthGeo = new THREE.CylinderGeometry(4.0, 4.2, 0.15, 48);
   const subPlinthMat = new THREE.MeshStandardMaterial({
     color: 0x070709,
     roughness: 0.9,
     metalness: 0.1
   });
   const subPlinth = new THREE.Mesh(subPlinthGeo, subPlinthMat);
-  subPlinth.position.y = -0.45;
+  subPlinth.position.y = -0.32;
   rotundaGroup.add(subPlinth);
 
   // Anillos concéntricos de bronce incrustados en el pavimento
@@ -863,8 +880,8 @@ function buildTectonicRotunda() {
     roughness: 0.28,
     metalness: 0.85
   });
-  [3.2, 6.4, 9.2].forEach(r => {
-    const ringGeo = new THREE.TorusGeometry(r, 0.025, 16, 64);
+  [1.0, 2.0, 3.2].forEach(r => {
+    const ringGeo = new THREE.TorusGeometry(r, 0.02, 16, 48);
     const ringMesh = new THREE.Mesh(ringGeo, bronzeMat);
     ringMesh.rotation.x = Math.PI / 2;
     ringMesh.position.y = 0.01;
@@ -874,15 +891,15 @@ function buildTectonicRotunda() {
   // Juntas radiales de piedra (12 ejes de brújula astronómica)
   for (let i = 0; i < 12; i++) {
     const angle = (i * Math.PI) / 6;
-    const jointGeo = new THREE.BoxGeometry(0.03, 0.02, 6.0);
+    const jointGeo = new THREE.BoxGeometry(0.02, 0.015, 2.2);
     const jointMesh = new THREE.Mesh(jointGeo, bronzeMat);
-    jointMesh.position.set(Math.sin(angle) * 6.2, 0.01, Math.cos(angle) * 6.2);
+    jointMesh.position.set(Math.sin(angle) * 2.1, 0.01, Math.cos(angle) * 2.1);
     jointMesh.rotation.y = angle;
     rotundaGroup.add(jointMesh);
   }
 
   // 2. Medallón Central de Astrolabio / Rosa de los Vientos de Timonel
-  const medallionGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.04, 48);
+  const medallionGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.03, 32);
   const medallionMat = new THREE.MeshStandardMaterial({
     color: 0x14141c,
     roughness: 0.5,
@@ -893,85 +910,85 @@ function buildTectonicRotunda() {
   rotundaGroup.add(medallion);
 
   // Anillo exterior del medallón en bronce
-  const medRingGeo = new THREE.TorusGeometry(2.2, 0.04, 16, 48);
+  const medRingGeo = new THREE.TorusGeometry(0.9, 0.03, 16, 32);
   const medRing = new THREE.Mesh(medRingGeo, bronzeMat);
   medRing.rotation.x = Math.PI / 2;
-  medRing.position.y = 0.04;
+  medRing.position.y = 0.035;
   rotundaGroup.add(medRing);
 
   // Cruz central de ejes coordenados Timonel F2
-  const axisX = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.02, 0.04), bronzeMat);
-  axisX.position.y = 0.045;
+  const axisX = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.015, 0.03), bronzeMat);
+  axisX.position.y = 0.04;
   rotundaGroup.add(axisX);
-  const axisZ = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 3.6), bronzeMat);
-  axisZ.position.y = 0.045;
+  const axisZ = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.015, 1.6), bronzeMat);
+  axisZ.position.y = 0.04;
   rotundaGroup.add(axisZ);
 
-  // 3. Balaustrada Perimetral Minimalista (Acero oscuro & Bronce)
+  // 3. Balaustrada Perimetral Minimalista (Acero oscuro & Bronce fino)
   const steelMat = new THREE.MeshStandardMaterial({
     color: 0x16161c,
     roughness: 0.45,
     metalness: 0.75
   });
-  // Pasamanos circular perimetral a 0.85m de altura
-  const handrailGeo = new THREE.TorusGeometry(9.6, 0.04, 16, 64);
+  // Pasamanos circular perimetral a 0.85m de altura (Radio 3.6m)
+  const handrailGeo = new THREE.TorusGeometry(3.6, 0.025, 16, 48);
   const handrail = new THREE.Mesh(handrailGeo, bronzeMat);
   handrail.rotation.x = Math.PI / 2;
   handrail.position.y = 0.85;
   rotundaGroup.add(handrail);
 
-  // 12 Columnas Estructurales hacia el Óculo Cenital
-  const oculusRingGeo = new THREE.TorusGeometry(4.2, 0.06, 16, 64);
+  // Óculo Cenital Esbelto en el techo de la cúpula
+  const oculusRingGeo = new THREE.TorusGeometry(1.6, 0.035, 16, 48);
   const oculusRing = new THREE.Mesh(oculusRingGeo, bronzeMat);
   oculusRing.rotation.x = Math.PI / 2;
-  oculusRing.position.y = 11.5;
+  oculusRing.position.y = 7.5;
   rotundaGroup.add(oculusRing);
 
+  // 12 Columnas y Costillas Arquitectónicas hacia el Óculo
   for (let i = 0; i < 12; i++) {
     const angle = (i * Math.PI) / 6;
-    const px = Math.sin(angle) * 9.6;
-    const pz = Math.cos(angle) * 9.6;
+    const px = Math.sin(angle) * 3.6;
+    const pz = Math.cos(angle) * 3.6;
 
-    // Balautra inferior
-    const postGeo = new THREE.CylinderGeometry(0.035, 0.045, 0.85, 16);
+    // Balustra perimetral
+    const postGeo = new THREE.CylinderGeometry(0.025, 0.035, 0.85, 16);
     const post = new THREE.Mesh(postGeo, bronzeMat);
     post.position.set(px, 0.425, pz);
     rotundaGroup.add(post);
 
-    // Costilla arquitectónica curva que asciende al óculo cenital
+    // Costilla curva que asciende libremente hacia el óculo cenital sin tapar el cosmos
     const curvePoints = [];
-    const steps = 14;
+    const steps = 12;
     for (let s = 0; s <= steps; s++) {
       const t = s / steps;
-      const cy = t * 11.5;
-      const cr = 9.6 * (1 - t) + 4.2 * t + Math.sin(t * Math.PI) * 0.8;
+      const cy = 0.85 + t * (7.5 - 0.85);
+      const cr = 3.6 * (1 - t) + 1.6 * t + Math.sin(t * Math.PI) * 0.35;
       curvePoints.push(new THREE.Vector3(Math.sin(angle) * cr, cy, Math.cos(angle) * cr));
     }
     const ribCurve = new THREE.CatmullRomCurve3(curvePoints);
-    const ribGeo = new THREE.TubeGeometry(ribCurve, 20, 0.05, 8, false);
+    const ribGeo = new THREE.TubeGeometry(ribCurve, 16, 0.03, 8, false);
     const rib = new THREE.Mesh(ribGeo, steelMat);
     rotundaGroup.add(rib);
 
-    // Foco de suelo empotrado (3200K Galería)
+    // Focos rasantes empotrados en el suelo de basalto
     if (i % 2 === 0) {
-      const spot = new THREE.SpotLight(0xffeedd, 1.2, 14, Math.PI / 5, 0.45);
-      spot.position.set(px * 0.9, 0.1, pz * 0.9);
-      spot.target.position.set(px * 0.5, 5.0, pz * 0.5);
+      const spot = new THREE.SpotLight(0xffeedd, 1.0, 10, Math.PI / 6, 0.45);
+      spot.position.set(px * 0.85, 0.05, pz * 0.85);
+      spot.target.position.set(px * 0.4, 4.0, pz * 0.4);
       rotundaGroup.add(spot);
       rotundaGroup.add(spot.target);
 
-      // Aro de luminaria empotrada
-      const fixtureGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 16);
+      const fixtureGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.015, 16);
       const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
       const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
-      fixture.position.set(px * 0.9, 0.02, pz * 0.9);
+      fixture.position.set(px * 0.85, 0.015, pz * 0.85);
       rotundaGroup.add(fixture);
     }
   }
 
-  // Foco cenital sobre el medallón central
-  const centerSpot = new THREE.SpotLight(0xffeedd, 1.8, 12, Math.PI / 6, 0.4);
-  centerSpot.position.set(0, 8.0, 0);
+  // Foco cenital sobre el medallón
+  const centerSpot = new THREE.SpotLight(0xffeedd, 1.6, 9, Math.PI / 6, 0.35);
+  centerSpot.position.set(0, 6.0, 0);
   centerSpot.target.position.set(0, 0, 0);
   rotundaGroup.add(centerSpot);
   rotundaGroup.add(centerSpot.target);
@@ -2187,7 +2204,10 @@ const MODE_ROTUNDA_TELESCOPE = 0;
 const MODE_SPHERE_CONFINEMENT = 1;
 let currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
 
-const rotundaBasePos = new THREE.Vector3(0, 0.0, 0); // Ojo del observador sobre el basalto
+// Navegación sobre la cubierta de basalto de Paranal (altura de ojos: 0.5m sobre origen)
+const platformObserverPos = new THREE.Vector3(0, 0.5, 0);
+const targetPlatformPos = new THREE.Vector3(0, 0.5, 0);
+const keysPressed = {};
 let collimatedAstroIndex = -1;
 
 // Coordenadas esféricas S² de la cámara en la burbuja de confinamiento
@@ -2273,6 +2293,9 @@ function warpToTargetAstro(idx) {
   const reticle = document.getElementById('capsule-reticle');
   if (reticle) reticle.style.display = 'none';
 
+  const colHud = document.getElementById('telescope-collimator-hud');
+  if (colHud) colHud.classList.add('hidden');
+
   const colCard = document.getElementById('telescope-target-card');
   if (colCard) colCard.classList.add('hidden');
   const returnBar = document.getElementById('confinement-return-bar');
@@ -2304,9 +2327,16 @@ function returnToRotunda() {
   activeConfinementAstro = null;
   currentFocusedAstro = null;
 
-  // Restaurar retícula central de apuntado astronómico
+  targetPlatformPos.set(0, 0.5, 0);
+  platformObserverPos.set(0, 0.5, 0);
+  camera.position.set(0, 0.5, 0);
+
+  // Restaurar retícula central de apuntado astronómico y barra de navegación
   const reticle = document.getElementById('capsule-reticle');
   if (reticle) reticle.style.display = 'block';
+
+  const colHud = document.getElementById('telescope-collimator-hud');
+  if (colHud) colHud.classList.remove('hidden');
 
   const returnBar = document.getElementById('confinement-return-bar');
   if (returnBar) returnBar.classList.add('hidden');
@@ -2347,7 +2377,7 @@ function setup6DOFControls() {
       userInertiaTimer = 0;
       targetOrientation.yaw -= dx * 0.0035;
       targetOrientation.pitch -= dy * 0.0035;
-      targetOrientation.pitch = Math.max(-0.4, Math.min(1.48, targetOrientation.pitch)); // Permite mirar arriba al óculo
+      targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch)); // Permite mirar el zócalo/barandilla y al cenit
     } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
       // El observador se desplaza libremente en S² al mover el mouse
       userInertiaTimer = 0;
@@ -2376,7 +2406,7 @@ function setup6DOFControls() {
       if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
         targetOrientation.yaw -= dx * 0.0035;
         targetOrientation.pitch -= dy * 0.0035;
-        targetOrientation.pitch = Math.max(-0.4, Math.min(1.48, targetOrientation.pitch));
+        targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch));
       } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
         targetSphereTheta -= dx * 0.0045;
         targetSpherePhi   -= dy * 0.0045;
@@ -2407,6 +2437,8 @@ function setup6DOFControls() {
   }, { passive: true });
 
   window.addEventListener('keydown', (e) => {
+    keysPressed[e.code] = true;
+
     if (isInShopMode) {
       if (e.key === 'Escape') exitShopMode();
       return;
@@ -2422,6 +2454,10 @@ function setup6DOFControls() {
         triggerShutter();
       }
     }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    keysPressed[e.code] = false;
   });
 }
 
@@ -2474,8 +2510,36 @@ function animate() {
     });
 
   } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-    // 1. MODO ROTONDA: La cámara está de pie en la plataforma de basalto
-    camera.position.lerp(rotundaBasePos, 0.08);
+    // 1. MODO ROTONDA: Desplazamiento libre por la plataforma hacia la barandilla
+    const forwardX = -Math.sin(orientation.yaw);
+    const forwardZ = -Math.cos(orientation.yaw);
+    const rightX = Math.cos(orientation.yaw);
+    const rightZ = -Math.sin(orientation.yaw);
+
+    let moveX = 0;
+    let moveZ = 0;
+    if (keysPressed['KeyW'] || keysPressed['ArrowUp']) { moveX += forwardX; moveZ += forwardZ; }
+    if (keysPressed['KeyS'] || keysPressed['ArrowDown']) { moveX -= forwardX; moveZ -= forwardZ; }
+    if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { moveX += rightX; moveZ += rightZ; }
+    if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) { moveX -= rightX; moveZ -= rightZ; }
+
+    const moveLen = Math.hypot(moveX, moveZ);
+    if (moveLen > 0.001) {
+      const walkSpeed = 0.07; // Marcha serena por el basalto
+      targetPlatformPos.x += (moveX / moveLen) * walkSpeed;
+      targetPlatformPos.z += (moveZ / moveLen) * walkSpeed;
+    }
+
+    // Límite circular de la barandilla de bronce (radio barandilla 3.6m, límite observador r <= 2.8m)
+    const distCenter = Math.hypot(targetPlatformPos.x, targetPlatformPos.z);
+    if (distCenter > 2.8) {
+      targetPlatformPos.x *= 2.8 / distCenter;
+      targetPlatformPos.z *= 2.8 / distCenter;
+    }
+    targetPlatformPos.y = 0.5;
+
+    platformObserverPos.lerp(targetPlatformPos, 0.12);
+    camera.position.copy(platformObserverPos);
 
     orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.18;
     orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.18;

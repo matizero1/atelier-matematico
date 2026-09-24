@@ -738,87 +738,148 @@ function step22() {
   ctx.fillText('ZONA PROHIBIDA: gcd(A,B,C)=1', cx, cy + 4);
 }
 
-// ── 23 NAVIER-STOKES (Vórtices y Turbulencia 3D) ───────────────────
-// Filamentos de vorticidad ω = ∇ × u y estiramiento de vórtice.
-let nsVortices = [], nsSparks = [], nsRot = 0;
+// ── 23 NAVIER-STOKES (Vórtices, Turbulencia y Cascada de Enstrofía) ─
+// Ecuación de Navier-Stokes incompresible: ∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u,  ∇·u = 0.
+// Modelado hidrodinámico por el método de partículas de vórtice (Biot-Savart Lamb-Oseen) y líneas de corriente lagrangianas.
+let nsParticles = [], nsVortexCores = [], nsTime = 0;
+
 function init23() {
-  nsVortices = []; nsSparks = []; nsRot = 0;
-  // Crear 3 anillos de vórtice entrelazados
-  for (let ring = 0; ring < 3; ring++) {
-    const pts = [];
-    const R = Math.min(W, H) * (0.16 + ring * 0.05);
-    const zOffset = (ring - 1) * 35;
-    for (let i = 0; i < 64; i++) {
-      const th = (i / 64) * Math.PI * 2;
-      pts.push({
-        x: R * Math.cos(th),
-        y: R * Math.sin(th),
-        z: zOffset + Math.sin(th * 3) * 15,
-        vx: 0, vy: 0, vz: 0
-      });
-    }
-    nsVortices.push({ pts, R, ring });
+  nsParticles = [];
+  nsVortexCores = [];
+  nsTime = 0;
+  ctx.fillStyle = '#04020c';
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2;
+  const minDim = Math.min(W, H);
+
+  // 1. Núcleos Coherentes de Vorticidad (Pares de vórtices interactuantes de Lamb-Oseen)
+  // Generan la recirculación hidrodinámica fundamental ω = ∇ × u
+  const coreConfigs = [
+    { r: 0.16, angle: 0.0,              gamma: +4800, rCore: 45, speed: +0.008 },
+    { r: 0.16, angle: Math.PI,          gamma: -4800, rCore: 45, speed: +0.008 },
+    { r: 0.28, angle: Math.PI * 0.5,    gamma: -2800, rCore: 55, speed: -0.006 },
+    { r: 0.28, angle: Math.PI * 1.5,    gamma: +2800, rCore: 55, speed: -0.006 },
+    { r: 0.06, angle: 0.0,              gamma: +2200, rCore: 35, speed: +0.016 }
+  ];
+
+  for (const cfg of coreConfigs) {
+    nsVortexCores.push({
+      baseR: minDim * cfg.r,
+      angle: cfg.angle,
+      gamma: cfg.gamma,
+      sigma2: cfg.rCore * cfg.rCore,
+      speed: cfg.speed,
+      x: cx + Math.cos(cfg.angle) * minDim * cfg.r,
+      y: cy + Math.sin(cfg.angle) * minDim * cfg.r
+    });
+  }
+
+  // 2. Trazadores Lagrangianos de Fluido (Filamentos de humo y vórtices espirales)
+  const numParticles = 1400;
+  for (let i = 0; i < numParticles; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const rad = Math.pow(Math.random(), 0.5) * minDim * 0.42;
+    const px = cx + Math.cos(th) * rad;
+    const py = cy + Math.sin(th) * rad;
+    nsParticles.push({
+      x: px, y: py,
+      prevX: px, prevY: py,
+      age: Math.floor(Math.random() * 260),
+      maxAge: 180 + Math.floor(Math.random() * 200),
+      speed: 0
+    });
   }
 }
 
 function step23() {
-  ctx.fillStyle = 'rgba(4,2,12,0.05)'; ctx.fillRect(0,0,W,H);
-  nsRot += 0.003;
+  // Fading viscoso lento: preserva filamentos como en cámara de niebla
+  ctx.fillStyle = 'rgba(4, 2, 12, 0.028)';
+  ctx.fillRect(0, 0, W, H);
+
+  nsTime += 0.014;
   const cx = W / 2, cy = H / 2;
+  const minDim = Math.min(W, H);
 
-  // Interacción de vórtices y estiramiento (Vortex Stretching)
-  for (const v of nsVortices) {
-    const pts = v.pts;
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i];
-      // Ley de inducción de Biot-Savart simplificada
-      const th = (i / pts.length) * Math.PI * 2;
-      p.x += Math.sin(p.z * 0.03 + nsRot * 2) * 1.2;
-      p.y += Math.cos(p.z * 0.03 + nsRot * 2) * 1.2;
-      p.z += Math.sin(th * 2 + nsRot) * 0.8;
-
-      // Dispersión turbulenta si se distorsiona mucho
-      if (Math.random() < 0.02) {
-        nsSparks.push({
-          x: p.x, y: p.y, z: p.z,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3,
-          vz: (Math.random() - 0.5) * 3,
-          life: 1.0
-        });
-      }
-    }
-
-    // Proyección 3D rotada
-    const proj = pts.map(p => {
-      const rx = p.x * Math.cos(nsRot) - p.z * Math.sin(nsRot);
-      const rz = p.x * Math.sin(nsRot) + p.z * Math.cos(nsRot);
-      const ry = p.y;
-      const sc = 1.0 / (1.0 + rz * 0.002);
-      return [cx + rx * sc, cy - ry * sc];
-    });
-
-    // Dibujar tubo de vorticidad
-    ctx.strokeStyle = PALS_CSS[currentPal](0.4 + v.ring * 0.25);
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(proj[0][0], proj[0][1]);
-    for (let i = 1; i < proj.length; i++) ctx.lineTo(proj[i][0], proj[i][1]);
-    ctx.closePath();
-    ctx.stroke();
+  // 1. Precesión y Dinámica Orbital de los Núcleos de Vórtice
+  for (let k = 0; k < nsVortexCores.length; k++) {
+    const c = nsVortexCores[k];
+    c.angle += c.speed;
+    const wobble = 1.0 + Math.sin(nsTime * 1.6 + k * 1.3) * 0.15;
+    c.x = cx + Math.cos(c.angle) * c.baseR * wobble;
+    c.y = cy + Math.sin(c.angle * 1.15) * (c.baseR * 0.9) * wobble;
   }
 
-  // Dibujar chispas de Kolmogorov (cascada de energía microscópica)
-  for (let k = nsSparks.length - 1; k >= 0; k--) {
-    const sp = nsSparks[k];
-    sp.x += sp.vx; sp.y += sp.vy; sp.z += sp.vz;
-    sp.life -= 0.025;
-    if (sp.life <= 0) { nsSparks.splice(k, 1); continue; }
+  // 2. Integración de Partículas en el Campo Incompresible (∇·u = 0)
+  for (let i = 0; i < nsParticles.length; i++) {
+    const p = nsParticles[i];
+    p.prevX = p.x;
+    p.prevY = p.y;
 
-    const rx = sp.x * Math.cos(nsRot) - sp.z * Math.sin(nsRot);
-    const ry = sp.y;
-    ctx.fillStyle = PALS_CSS[currentPal](sp.life);
-    ctx.fillRect(cx + rx, cy - ry, 1.5, 1.5);
+    // Ley de Biot-Savart regularizada (Lamb-Oseen) para cada núcleo de remolino
+    let vx = 0;
+    let vy = 0;
+
+    for (let k = 0; k < nsVortexCores.length; k++) {
+      const c = nsVortexCores[k];
+      const dx = p.x - c.x;
+      const dy = p.y - c.y;
+      const r2 = dx * dx + dy * dy;
+      const factor = c.gamma / (r2 + c.sigma2);
+      vx -= dy * factor;
+      vy += dx * factor;
+    }
+
+    // Perturbaciones armónicas incompresibles de Taylor-Green / Kolmogorov
+    const waveX =  Math.sin(p.y * 0.009 + nsTime * 0.8) * Math.cos(p.x * 0.005) * 1.2;
+    const waveY = -Math.cos(p.y * 0.009 + nsTime * 0.8) * Math.sin(p.x * 0.005) * 1.2;
+    vx += waveX;
+    vy += waveY;
+
+    // Suave contención radial hacia el área activa del lienzo
+    const distCenter = Math.hypot(p.x - cx, p.y - cy);
+    if (distCenter > minDim * 0.44) {
+      const pull = (distCenter - minDim * 0.44) * 0.04;
+      vx -= ((p.x - cx) / distCenter) * pull;
+      vy -= ((p.y - cy) / distCenter) * pull;
+    }
+
+    // Limitador de velocidad física (evita explosiones numéricas)
+    const spd = Math.hypot(vx, vy);
+    if (spd > 7.5) {
+      vx = (vx / spd) * 7.5;
+      vy = (vy / spd) * 7.5;
+    }
+
+    p.x += vx;
+    p.y += vy;
+    p.speed = Math.hypot(vx, vy);
+    p.age++;
+
+    // Reinyección periódica para mantener filamentos vivos y densos
+    if (p.age >= p.maxAge || p.x < 15 || p.x > W - 15 || p.y < 15 || p.y > H - 15) {
+      const targetCore = nsVortexCores[Math.floor(Math.random() * nsVortexCores.length)];
+      const spreadAngle = Math.random() * Math.PI * 2;
+      const spreadR = Math.pow(Math.random(), 0.5) * (minDim * 0.22);
+      p.x = targetCore.x + Math.cos(spreadAngle) * spreadR * 0.6;
+      p.y = targetCore.y + Math.sin(spreadAngle) * spreadR * 0.6;
+      p.prevX = p.x;
+      p.prevY = p.y;
+      p.age = 0;
+      p.maxAge = 180 + Math.floor(Math.random() * 200);
+      continue;
+    }
+
+    // Renderizado del filamento de flujo:
+    // Color y grosor gobernados por la enstrofía y velocidad del vórtice
+    const frac = Math.min(1.0, p.speed / 5.2);
+    ctx.strokeStyle = PALS_CSS[currentPal](0.1 + frac * 0.85);
+    ctx.lineWidth = 0.6 + frac * 1.6;
+
+    ctx.beginPath();
+    ctx.moveTo(p.prevX, p.prevY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
   }
 }
 

@@ -784,13 +784,19 @@
   <script>
     // 1. Estado y Control de Obras en el Muro de Travertino
     let currentHeroArt = 20; // Obra 21 (Riemann por defecto)
+    const urlArtParam = new URLSearchParams(window.location.search).get('art');
+    if (urlArtParam !== null) {
+      const parsedArt = parseInt(urlArtParam, 10);
+      if (!isNaN(parsedArt) && parsedArt >= 0 && parsedArt < 24) {
+        currentHeroArt = parsedArt;
+      }
+    }
     const heroCanvas = document.getElementById('hero-math-canvas');
     let heroAnimActive = true;
 
     function initHeroMath() {
       if (!heroCanvas || !window.AtelierMath) return;
-      window.AtelierMath.bindCanvas(heroCanvas, 720, 1008);
-      window.AtelierMath.init(currentHeroArt);
+      setHeroArtwork(currentHeroArt);
 
       function heroStepLoop() {
         if (heroAnimActive && window.AtelierMath) {

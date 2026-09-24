@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Boutique & Vitrina Arquitectónica — Atelier Matemático</title>
+<title>Atelier & Vitrina Viva — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
+<script src="js/math_engines.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -34,24 +35,16 @@
   .luxury-border { border: 1px solid var(--border-subtle); }
   .luxury-gold-border { border: 1px solid var(--border-gold); }
   
-  /* Scrollbar fina y oscura */
+  /* Scrollbar fina */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg-base); }
   ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
-  /* ========================================================================= */
-  /* TRANSICIONES CINEMÁTICAS NATIVAS (VIEW TRANSITIONS API W3C)               */
-  /* ========================================================================= */
-  @view-transition {
-    navigation: auto;
-  }
-  ::view-transition-old(root) {
-    animation: luxury-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-  ::view-transition-new(root) {
-    animation: luxury-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  }
+  /* Transiciones Nativas W3C */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: luxury-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  ::view-transition-new(root) { animation: luxury-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
   @keyframes luxury-fade-out {
     0% { opacity: 1; transform: scale(1); filter: blur(0px); }
     100% { opacity: 0; transform: scale(0.99); filter: blur(3px); }
@@ -64,93 +57,121 @@
     animation-duration: 0.65s;
     animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
+
+  /* Animación sutil de grabación */
+  @keyframes pulse-red {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.15); }
+  }
+  .recording-indicator { animation: pulse-red 1.2s infinite ease-in-out; }
 </style>
 </head>
 <body class="selection:bg-amber-900 selection:text-amber-100 min-h-screen flex flex-col bg-[#08080a]">
 
   <!-- ========================================================================= -->
-  <!-- 1. HEADER EDITORIAL DISCRETO                                              -->
+  <!-- 1. HEADER EDITORIAL                                                       -->
   <!-- ========================================================================= -->
   <header class="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/90 backdrop-blur-md border-b border-white/[0.08] px-6 md:px-10 py-3.5 flex justify-between items-center transition-all">
     <div class="flex items-center gap-4">
       <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest">
         <span>←</span>
-        <span>Pórtico</span>
+        <span>Sala I · Pórtico</span>
       </a>
       <span class="text-white/20">|</span>
       <div class="flex items-center gap-2.5">
         <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
-        <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">SALA DE VITRINA 3D</span>
+        <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">SALA II · ATELIER & VITRINA VIVA</span>
         <span class="hidden md:inline-block text-[9px] mono uppercase tracking-widest px-2 py-0.5 rounded border border-[#c5a059]/30 text-[#c5a059]">
-          Inspección Física
+          Lienzo en Pared
         </span>
       </div>
     </div>
 
-    <!-- ACCESOS RÁPIDOS -->
+    <!-- ACCESOS CRUZADOS -->
     <div class="flex items-center gap-3">
+      <a href="studio.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
+        Sala III · Mesa Suizo
+      </a>
       <a href="museum.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
-        Observatorio 3D
+        Sala IV · Rotonda 3D
       </a>
       <button onclick="openCheckoutModal()" class="text-xs mono uppercase tracking-wider font-semibold text-[#08080a] bg-[#c5a059] hover:bg-[#dfc285] px-4 py-1.5 rounded-full transition shadow-sm">
-        Adquirir Pieza
+        Encargar Obra
       </button>
     </div>
   </header>
 
   <!-- ========================================================================= -->
-  <!-- 2. CONTENEDOR PRINCIPAL: ESCENARIO ARQUITECTÓNICO + PANEL CONFIGURADOR    -->
+  <!-- 2. CONTENEDOR PRINCIPAL: ESCENARIO ARQUITECTÓNICO + ATELIER FÍSICO        -->
   <!-- ========================================================================= -->
   <main class="flex-1 pt-14 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-3.5rem)] relative">
     
-    <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (PARED DE GALERÍA Y FOCO CENITAL) -->
-    <div class="w-full lg:w-7/12 h-[500px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
+    <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (EL CUADRO INMÓVIL EN PARED CON PARALAJE HUMANO) -->
+    <div class="w-full lg:w-7/12 h-[560px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
       
       <!-- Canvas Three.js -->
-      <canvas id="vitrina-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+      <canvas id="vitrina-canvas" class="w-full h-full block cursor-crosshair"></canvas>
 
-      <!-- Selector de Iluminación de Galería -->
-      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#101014]/80 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono">
+      <!-- BARRA SUPERIOR IZQUIERDA: Selector de Iluminación de Galería -->
+      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#101014]/85 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono">
         <span class="text-[#71717a] uppercase tracking-wider mr-1">Luz:</span>
         <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium">Galería 3200K</button>
         <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Estudio 4500K</button>
         <button onclick="setLighting('intimate')" id="btn-light-intimate" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Noche Íntima</button>
       </div>
 
-      <!-- Controles de Ángulo de Cámara -->
+      <!-- BARRA SUPERIOR DERECHA: Ángulos de Contemplación del Observador (Paralaje) -->
       <div class="absolute top-5 right-5 z-20 flex items-center gap-1.5">
-        <button onclick="setCameraAngle('front')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Frontal</button>
-        <button onclick="setCameraAngle('angle')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perspectiva</button>
-        <button onclick="setCameraAngle('macro')" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Macro Detalle</button>
-        <button onclick="toggleAutoRotate()" id="btn-rotate" class="bg-[#101014]/80 backdrop-blur-md hover:bg-white/10 text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Rotar ⟳</button>
+        <button onclick="setObserverPreset('front')" id="btn-cam-front" class="bg-[#101014]/85 backdrop-blur-md text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition font-medium">Frontal</button>
+        <button onclick="setObserverPreset('left')" id="btn-cam-left" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perfil Izq. 20°</button>
+        <button onclick="setObserverPreset('right')" id="btn-cam-right" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perfil Der. 20°</button>
+        <button onclick="setObserverPreset('macro')" id="btn-cam-macro" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Macro 1:1</button>
       </div>
 
-      <!-- Pie de Escenario: Descripción Arquitectónica -->
-      <div class="absolute bottom-5 left-5 right-5 z-20 flex justify-between items-end pointer-events-none">
-        <div class="bg-[#101014]/90 backdrop-blur-md px-4 py-3 rounded-xl luxury-border pointer-events-auto max-w-sm">
-          <div class="text-[9px] mono uppercase tracking-[0.2em] text-[#c5a059] font-medium flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span> Espacio de Exposición
+      <!-- BANNER FLOTANTE DE GRABACIÓN DE REEL -->
+      <div id="rec-banner" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-30 bg-red-950/85 backdrop-blur-md px-4 py-2 rounded-full border border-red-500/50 text-red-200 text-xs mono flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-500 recording-indicator"></span>
+        <span id="rec-countdown" class="font-bold">GRABANDO REEL 15s (60 FPS)</span>
+      </div>
+
+      <!-- BARRA FLOTANTE INFERIOR: DIALES DE FÍSICA EN VIVO & TELEMETRÍA TIMONEL -->
+      <div class="absolute bottom-5 left-5 right-5 z-20 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 pointer-events-none">
+        
+        <!-- Ficha Rápida del Cuadro Inmóvil -->
+        <div class="bg-[#101014]/90 backdrop-blur-md px-4 py-3 rounded-xl luxury-border pointer-events-auto max-w-md w-full sm:w-auto space-y-1">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#c5a059] font-medium flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span> Lienzo Vivo en Silicio (60 FPS)
+            </span>
+            <span class="text-[9px] mono text-emerald-400">Timonel Paralaje Activo</span>
           </div>
-          <div class="text-xs text-[#f4f1ea] font-medium mt-0.5" id="vitrina-product-badge">
-            Cuadro Fine Art 50×70 cm · Paspartú Biselado
+          <div class="text-xs text-[#f4f1ea] font-medium" id="vitrina-product-badge">
+            Cuadro Fine Art 50×70 cm · Montado en Pared de Estuco
           </div>
-          <div class="text-[11px] text-[#a1a1aa] font-light mt-0.5" id="vitrina-formula-badge">
+          <div class="text-[11px] text-[#a1a1aa] font-light truncate" id="vitrina-formula-badge">
             Obra 21: Los Ceros de Riemann (Bernard Riemann, 1859)
+          </div>
+          
+          <!-- DIAL DE PARÁMETROS VIVOS SEGÚN LA LEY ACTIVA -->
+          <div class="pt-2 border-t border-white/[0.08] flex items-center gap-2 text-[10px] mono text-[#c8c4bb]" id="dynamic-param-bar">
+            <!-- Inyectado dinámicamente por JavaScript -->
           </div>
         </div>
 
-        <div class="text-right pointer-events-auto hidden md:block">
-          <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#71717a] block">Montaje Físico</span>
-          <span class="text-xs mono text-[#a1a1aa]">Muro de Galería · Luz Cenital Focal</span>
+        <!-- Indicador de Interacción de Paralaje -->
+        <div class="bg-[#101014]/90 backdrop-blur-md px-3.5 py-2 rounded-xl luxury-border pointer-events-auto text-right hidden md:block">
+          <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#71717a] block">Física de Observación</span>
+          <span class="text-[11px] mono text-[#c5a059]">Mueve el cursor para cambiar tu punto de vista</span>
         </div>
+
       </div>
 
     </div>
 
-    <!-- ÁREA 2: PANEL EDITORIAL DE COMPRA & CONFIGURACIÓN -->
+    <!-- ÁREA 2: PANEL EDITORIAL DEL ATELIER & CONFIGURACIÓN FÍSICA -->
     <div class="w-full lg:w-5/12 h-auto lg:h-full bg-[#0c0c0f] flex flex-col overflow-y-auto p-6 md:p-8 space-y-7">
       
-      <!-- CABECERA DE OBRA -->
+      <!-- CABECERA DE OBRA & METADATA -->
       <div class="space-y-1.5 border-b border-white/[0.08] pb-5">
         <div class="flex items-center justify-between">
           <span class="text-[10px] mono uppercase tracking-[0.25em] text-[#c5a059]" id="current-badge-code">
@@ -164,14 +185,60 @@
           Los Ceros de Riemann
         </h1>
         <p class="text-xs text-[#a1a1aa] font-light leading-relaxed" id="shop-subtitle">
-          Hipótesis del Milenio sobre Números Primos · Bernard Riemann, 1859.
+          El enigma de un millón de dólares en la línea crítica · Bernard Riemann, 1859.
         </p>
       </div>
 
-      <!-- PASO 1: SELECCIÓN DE FORMATO -->
+      <!-- PASO 1: SELECCIÓN DE OBRA (24 LEYES) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
+            1. Selección de Obra / Ecuación
+          </label>
+          <button onclick="togglePalette()" class="text-[10px] mono text-[#c5a059] hover:underline">
+            Alternar Paleta ⟳
+          </button>
+        </div>
+        <select id="artwork-select" onchange="onSelectArtwork(parseInt(this.value))" class="w-full bg-[#101014] luxury-border text-[#f4f1ea] text-xs rounded-lg p-3 mono focus:outline-none focus:border-[#c5a059] transition cursor-pointer">
+          <optgroup label="── PROBLEMAS DEL MILENIO & ENIGMAS MATEMÁTICOS ──">
+            <option value="20" selected>Obra 21 · Los Ceros de Riemann (1859)</option>
+            <option value="21">Obra 22 · El Desierto de Beal (1993)</option>
+            <option value="22">Obra 23 · Vórtices de Navier-Stokes (1845)</option>
+            <option value="23">Obra 24 · El Flujo de Ricci de Poincaré (2002)</option>
+          </optgroup>
+          <optgroup label="── TEORÍA DEL CAOS & SISTEMAS DINÁMICOS ──">
+            <option value="0">Obra 01 · El Vuelo de Lorenz (1963)</option>
+            <option value="6">Obra 07 · La Cinta de Rössler (1976)</option>
+            <option value="9">Obra 10 · La Autopista de Langton (1986)</option>
+            <option value="12">Obra 13 · Los Ríos de Newton (1669)</option>
+          </optgroup>
+          <optgroup label="── ONDAS, FÍSICA & CIMÁTICA ──">
+            <option value="4">Obra 05 · Los Cantos de Chladni (1787)</option>
+            <option value="10">Obra 11 · La Ola Eterna de Solitones (1834)</option>
+            <option value="13">Obra 14 · Las Celdas del Sol de Bénard (1900)</option>
+            <option value="18">Obra 19 · El Colapso Cuántico de Schrödinger (1926)</option>
+          </optgroup>
+          <optgroup label="── GEOMETRÍA, TOPOLOGÍA & FRACTALES ──">
+            <option value="1">Obra 02 · El Umbral de la Materia (1913)</option>
+            <option value="2">Obra 03 · La Danza de Yoshida (1990)</option>
+            <option value="3">Obra 04 · Los Ríos de Clifford (1873)</option>
+            <option value="5">Obra 06 · El Telar de Turing (1952)</option>
+            <option value="7">Obra 08 · Las Esferas de Apolonio (200 a.C.)</option>
+            <option value="8">Obra 09 · El Espejo de Julia (1918)</option>
+            <option value="11">Obra 12 · La Piel de Voronoi (1908)</option>
+            <option value="14">Obra 15 · La Fibración de Hopf (1931)</option>
+            <option value="15">Obra 16 · El Juego del Caos de Barnsley (1988)</option>
+            <option value="16">Obra 17 · Las Flores de Fibonacci (1202)</option>
+            <option value="17">Obra 18 · Espirales de Belousov-Zhabotinsky (1951)</option>
+            <option value="19">Obra 20 · El Laberinto de la Regla 110 (1983)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- PASO 2: SELECCIÓN DE FORMATO -->
       <div class="space-y-3">
         <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
-          1. Formato de Montaje
+          2. Formato de Montaje
         </span>
         <div class="grid grid-cols-2 gap-3" id="format-grid">
           
@@ -218,54 +285,13 @@
         </div>
       </div>
 
-      <!-- PASO 2: SELECCIÓN DE OBRA (24 LEYES) -->
-      <div class="space-y-2">
-        <label class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
-          2. Selección de Obra / Ecuación
-        </label>
-        <select id="artwork-select" onchange="onSelectArtwork(this.value)" class="w-full bg-[#101014] luxury-border text-[#f4f1ea] text-xs rounded-lg p-3 mono focus:outline-none focus:border-[#c5a059] transition cursor-pointer">
-          <optgroup label="── PROBLEMAS DEL MILENIO & MATEMÁTICA PURA ──">
-            <option value="20" selected>Obra 21 · Los Ceros de Riemann (1859)</option>
-            <option value="21">Obra 22 · La Conjetura de Beal (1993)</option>
-            <option value="22">Obra 23 · Navier-Stokes & Vórtices (1845)</option>
-            <option value="23">Obra 24 · El Flujo de Ricci de Poincaré (2002)</option>
-          </optgroup>
-          <optgroup label="── TEORÍA DEL CAOS & DINÁMICA ──">
-            <option value="0">Obra 01 · El Vuelo de Lorenz (1963)</option>
-            <option value="6">Obra 07 · La Cinta del Panadero de Rössler (1976)</option>
-            <option value="9">Obra 10 · La Autopista del Caos de Langton (1986)</option>
-            <option value="12">Obra 13 · Los Ríos de Newton (1669)</option>
-          </optgroup>
-          <optgroup label="── ONDAS, FÍSICA & CIMÁTICA ──">
-            <option value="4">Obra 05 · Los Cantos de Chladni (1787)</option>
-            <option value="10">Obra 11 · La Ola Eterna de Solitones KdV (1834)</option>
-            <option value="13">Obra 14 · Las Celdas del Sol de Bénard (1900)</option>
-            <option value="18">Obra 19 · El Colapso Cuántico de Schrödinger (1926)</option>
-          </optgroup>
-          <optgroup label="── GEOMETRÍA, TOPOLOGÍA & FRACTALES ──">
-            <option value="1">Obra 02 · El Umbral de la Materia (1913)</option>
-            <option value="2">Obra 03 · La Danza de Yoshida (1990)</option>
-            <option value="3">Obra 04 · Los Ríos Invisibles de Clifford (1873)</option>
-            <option value="5">Obra 06 · El Telar de Turing (1952)</option>
-            <option value="7">Obra 08 · Las Esferas de Apolonio (200 a.C.)</option>
-            <option value="8">Obra 09 · El Espejo de Julia (1918)</option>
-            <option value="11">Obra 12 · La Piel de la Jirafa de Voronoi (1908)</option>
-            <option value="14">Obra 15 · La Fibración de Hopf (1931)</option>
-            <option value="15">Obra 16 · El Juego del Caos de Barnsley (1988)</option>
-            <option value="16">Obra 17 · Las Flores de Fibonacci (1202)</option>
-            <option value="17">Obra 18 · Las Espirales de Belousov-Zhabotinsky (1951)</option>
-            <option value="19">Obra 20 · El Laberinto de la Regla 110 (1983)</option>
-          </optgroup>
-        </select>
-      </div>
-
-      <!-- PASO 3: MOLDURA & PASPARTÚ (SOLO PARA CUADRO) -->
+      <!-- PASO 3: CARPINTERÍA NOBLE & PASPARTÚ -->
       <div id="finish-section" class="space-y-4 pt-1">
         <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
           3. Carpintería Noble & Paspartú
         </span>
         
-        <!-- Moldura de Madera -->
+        <!-- Moldura de Madera Maciza -->
         <div class="space-y-1.5">
           <span class="text-[10px] text-[#a1a1aa] mono uppercase tracking-wider block">Madera Maciza de la Moldura:</span>
           <div class="flex gap-2">
@@ -281,7 +307,7 @@
           </div>
         </div>
 
-        <!-- Paspartú -->
+        <!-- Paspartú Biselado 5 cm -->
         <div class="space-y-1.5">
           <span class="text-[10px] text-[#a1a1aa] mono uppercase tracking-wider block">Paspartú Biselado 5 cm (Libre de Ácido):</span>
           <div class="flex gap-2">
@@ -298,7 +324,23 @@
         </div>
       </div>
 
-      <!-- PASO 4: QUÉ INCLUYE EL PAQUETE (SOBRIO) -->
+      <!-- PASO 4: CAPTURA CINEMÁTICA & LÁMINA 300 DPI -->
+      <div class="space-y-2.5 pt-1 border-t border-white/[0.08]">
+        <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
+          4. Exportación & Captura a 60 FPS
+        </span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="startVideoRecording(15)" id="btn-rec-15" class="bg-[#101014] hover:bg-[#16161c] luxury-border text-[#f4f1ea] text-xs py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2 mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span>Grabar Reel 15s</span>
+          </button>
+          <button onclick="downloadArtwork300DPI()" class="bg-[#101014] hover:bg-[#16161c] luxury-border text-[#dfc285] text-xs py-2.5 px-3 rounded-lg transition flex items-center justify-center gap-2 mono">
+            <span>Lámina 300 DPI ↓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 5: INCLUSIONES DE ARCHIVO -->
       <div class="p-4 rounded-xl bg-[#101014] luxury-border space-y-2.5 text-xs text-[#a1a1aa]">
         <span class="mono text-[10px] uppercase tracking-widest text-[#c5a059] font-medium block">
           Inclusiones de Archivo
@@ -311,7 +353,7 @@
         </ul>
       </div>
 
-      <!-- PASO 5: PRECIO & BOTONES DE ADQUISICIÓN -->
+      <!-- PASO 6: INVERSIÓN FINAL & FORMALIZACIÓN -->
       <div class="pt-2 border-t border-white/[0.08] space-y-4">
         <div class="flex justify-between items-baseline">
           <div>
@@ -336,7 +378,7 @@
 
         <div class="text-center">
           <span class="text-[9px] mono uppercase tracking-wider text-[#71717a]">
-            Manufactura artesanal 10 a 15 días hábiles · Entrega garantizada
+            Manufactura artesanal 10 a 15 días hábiles · Autofinanciado con 50% de anticipo
           </span>
         </div>
       </div>
@@ -346,7 +388,7 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 3. MODAL DE CHECKOUT SOBRIO & CRIPTO-SEGURO                                -->
+  <!-- 3. MODAL DE FORMALIZACIÓN DE ENCARGO                                      -->
   <!-- ========================================================================= -->
   <div id="checkout-modal" class="fixed inset-0 z-50 bg-[#08080a]/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="max-w-lg w-full rounded-2xl bg-[#101014] p-8 space-y-6 luxury-gold-border relative">
@@ -399,98 +441,102 @@
           <input type="text" id="cust-addr" required placeholder="Av. Providencia 1234, Dpto 802, Santiago" class="w-full bg-[#08080a] luxury-border rounded-lg px-3.5 py-2.5 text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono">
         </div>
 
-        <button type="submit" class="w-full mt-2 bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-3.5 rounded-full mono text-xs uppercase tracking-widest transition">
-          Confirmar y Proceder al Pago Seguro →
-        </button>
+        <div class="pt-2">
+          <button type="submit" class="w-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-3 px-4 rounded-xl uppercase tracking-wider mono transition shadow-md">
+            Confirmar y Coordinar Anticipo (50%)
+          </button>
+        </div>
       </form>
-
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 4. THREE.JS: ESCENARIO DE GALERÍA ARQUITECTÓNICA & RENDER PROCEDURAL       -->
+  <!-- 4. LÓGICA DE SILICIO NATIVO, THREE.JS & PARALAJE DE TIMONEL               -->
   <!-- ========================================================================= -->
   <script>
-    // CATÁLOGO DE LAS 24 OBRAS
-    const OBRAS = [
-      { id: 1, title: "El Vuelo de Lorenz", sub: "Atractor de Caos 3D · Edward Lorenz, 1963", color: "#c5a059", fn: drawLorenz },
-      { id: 2, title: "El Umbral de la Materia", sub: "Elasticidad Tensorial de Cauchy, 1913", color: "#38bdf8", fn: drawElasticity },
-      { id: 3, title: "La Danza de Yoshida", sub: "Integrador Simpléctico de 4º Orden, 1990", color: "#c5a059", fn: drawYoshida },
-      { id: 4, title: "Los Ríos Invisibles", sub: "Números Duales de Clifford ε²=0, 1873", color: "#f4f1ea", fn: drawClifford },
-      { id: 5, title: "Los Cantos de Chladni", sub: "Cimática Nodal en Placa Acústica, 1787", color: "#dfc285", fn: drawChladni },
-      { id: 6, title: "El Telar de Turing", sub: "Morfogénesis Química de Reacción-Difusión, 1952", color: "#38bdf8", fn: drawTuring },
-      { id: 7, title: "La Cinta del Panadero", sub: "Atractor Caótico Plegado de Rössler, 1976", color: "#c5a059", fn: drawRossler },
-      { id: 8, title: "Las Esferas de Apolonio", sub: "Teorema de Curvatura de Descartes, 200 a.C.", color: "#f4f1ea", fn: drawApollonian },
-      { id: 9, title: "El Espejo de Julia", sub: "Dinámica Holomorfa en el Plano Complejo, 1918", color: "#dfc285", fn: drawJulia },
-      { id: 10, title: "La Autopista del Caos", sub: "Autómata Celular de Langton, 1986", color: "#38bdf8", fn: drawLangton },
-      { id: 11, title: "La Ola Eterna", sub: "Solitones No Lineales de KdV, 1834", color: "#f4f1ea", fn: drawKdV },
-      { id: 12, title: "La Piel de la Jirafa", sub: "Teselaciones de Voronoi, 1908", color: "#c5a059", fn: drawVoronoi },
-      { id: 13, title: "Los Ríos de Newton", sub: "Cuencas de Atracción Fractales, 1669", color: "#dfc285", fn: drawNewton },
-      { id: 14, title: "Las Celdas del Sol", sub: "Convección Térmica de Bénard, 1900", color: "#c5a059", fn: drawBenard },
-      { id: 15, title: "La Fibración de Hopf", sub: "Topología de la Esfera 4D S³, 1931", color: "#f4f1ea", fn: drawHopf },
-      { id: 16, title: "El Juego del Caos", sub: "Helecho Fractal de Barnsley, 1988", color: "#38bdf8", fn: drawBarnsley },
-      { id: 17, title: "Las Flores del Girasol", sub: "Filotaxis Áurea de Fibonacci, 1202", color: "#dfc285", fn: drawFibonacci },
-      { id: 18, title: "Las Espirales Químicas", sub: "Ondas Auto-organizadas de BZ, 1951", color: "#c5a059", fn: drawBZ },
-      { id: 19, title: "El Colapso Cuántico", sub: "Ecuación de Onda de Schrödinger, 1926", color: "#38bdf8", fn: drawSchrodinger },
-      { id: 20, title: "El Laberinto Perfecto", sub: "Regla 110 y Universalidad de Turing, 1983", color: "#f4f1ea", fn: drawRule110 },
-      { id: 21, title: "Los Ceros de Riemann", sub: "Hipótesis del Milenio sobre Números Primos, 1859", color: "#38bdf8", fn: drawRiemann },
-      { id: 22, title: "La Conjetura de Beal", sub: "Ecuación Diofántica y Factores Primos, 1993", color: "#c5a059", fn: drawBeal },
-      { id: 23, title: "Vórtices de Navier-Stokes", sub: "Problema del Milenio de Fluidos, 1845", color: "#38bdf8", fn: drawNavierStokes },
-      { id: 24, title: "El Flujo de Ricci de Poincaré", sub: "Geometrización de 3-Variedades de Perelman, 2002", color: "#dfc285", fn: drawRicci }
-    ];
-
-    let currentArtworkIdx = 20; // Default: Riemann
-    let currentFormat = 'fineart';
-    let currentFrameFinish = 'black';
-    let currentMatteFinish = 'white';
-    let autoRotate = false;
-
-    const PRICES = {
-      fineart:  { clp: 68000, usd: 75, name: "Cuadro Fine Art 50×70 cm" },
-      acrylic:  { clp: 120000, usd: 130, name: "Cuadro Acrílico Luxury 40×60 cm" },
-      mug:      { clp: 16900, usd: 18, name: "Taza Cerámica Negro Mate 11 oz" },
-      notebook: { clp: 24900, usd: 27, name: "Cuaderno Moleskine de Campo" }
-    };
-
-    // THREE.JS VARIABLES
-    let scene, camera, renderer, architecturalGroup, productGroup;
+    // ── ESTADO DEL SISTEMA ──────────────────────────────────────────
+    let scene, camera, renderer;
+    let architecturalGroup, productGroup;
     let spotLightKey, spotLightFill, ambientLight;
     let artworkTextureCanvas, artworkTexture;
-    let isMouseDown = false, mouseX = 0, mouseY = 0;
-    let targetRotationX = 0.05, targetRotationY = 0.15;
-    let targetCamDist = 3.2;
+    
+    // Configuración actual del producto
+    let currentArtIdx = 20; // Obra 21 (Riemann por defecto)
+    let currentFormat = 'fineart';
+    let currentFrameFinish = 'black'; // black | oak | walnut
+    let currentMatteFinish = 'white'; // white | cream | dark
+    let currentLighting = 'warm';     // warm | neutral | intimate
+    let isSimulationPaused = false;
     let isTabVisible = true;
 
-    // INICIALIZACIÓN CON PARÁMETROS URL
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('art')) {
-        const a = parseInt(urlParams.get('art'));
-        if (!isNaN(a) && a >= 0 && a < OBRAS.length) {
-          currentArtworkIdx = a;
-          const sel = document.getElementById('artwork-select');
-          if (sel) sel.value = String(a);
-        }
-      }
-      if (urlParams.has('format')) {
-        const f = urlParams.get('format');
-        if (PRICES[f]) currentFormat = f;
-      }
+    // ── PARALAJE FÍSICO DE TIMONEL (EL CUADRO ESTÁ INMÓVIL, EL OJO SE MUEVE) ──
+    // El cuadro cuelga en (0, 0.12, 0)
+    // El observador está frente al cuadro con distancia base Z=2.85m
+    let targetEyePos = new THREE.Vector3(0, 0.12, 2.85);
+    let eyePos       = new THREE.Vector3(0, 0.12, 2.85);
+    let activePreset = 'front'; // front | left | right | macro
 
-      initThree();
-      renderArtworkCanvas();
-      selectFormat(currentFormat);
-      updateUI();
+    // Precios y metadatos
+    const PRICES = {
+      fineart:  { clp: '$68.000 CLP',  usd: '~$75 USD',  label: 'Cuadro Fine Art 50×70 cm' },
+      acrylic:  { clp: '$120.000 CLP', usd: '~$130 USD', label: 'Acrílico Luxury 40×60 cm' },
+      mug:      { clp: '$16.900 CLP',  usd: '~$18 USD',  label: 'Taza Cerámica 11 oz' },
+      notebook: { clp: '$24.900 CLP',  usd: '~$27 USD',  label: 'Cuaderno Moleskine 100g' }
+    };
+
+    // Grabación de video 60 FPS
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordingTimeout = null;
+    let recordingCountdownInterval = null;
+
+    // Control de visibilidad térmica
+    document.addEventListener('visibilitychange', () => {
+      isTabVisible = !document.hidden;
+    });
+
+    // ── INICIALIZACIÓN PRINCIPAL ────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Inicializar textura matemática compartida con AtelierMath
+      initMathCanvasTexture();
+
+      // 2. Inicializar Three.js con el cuadro anclado a la pared
+      initThreeScene();
+
+      // 3. Revisar parámetro de URL (?art=X)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlArt = parseInt(urlParams.get('art'));
+      if (!isNaN(urlArt) && urlArt >= 0 && urlArt < 24) {
+        currentArtIdx = urlArt;
+        document.getElementById('artwork-select').value = urlArt;
+      }
+      const urlView = urlParams.get('view');
+      if (urlView) setObserverPreset(urlView);
+
+      // 4. Cargar la obra inicial
+      selectArtwork(currentArtIdx);
+
+      // 5. Iniciar loop de render
       animate();
     });
 
-    document.addEventListener('visibilitychange', () => {
-      isTabVisible = !document.hidden;
-      if (isTabVisible) requestAnimationFrame(animate);
-    });
+    // ── 1. INICIALIZAR TEXTURA DEL LIENZO MATEMÁTICO VIVO ───────────
+    function initMathCanvasTexture() {
+      artworkTextureCanvas = document.createElement('canvas');
+      artworkTextureCanvas.width = 1024;
+      artworkTextureCanvas.height = 1448; // Ratio 50x70
 
-    // 1. INICIALIZACIÓN DEL ESCENARIO ARQUITECTÓNICO
-    function initThree() {
+      // Conectar AtelierMath a este canvas
+      window.AtelierMath.bindCanvas(artworkTextureCanvas, 1024, 1448);
+
+      // Crear textura Three.js
+      artworkTexture = new THREE.CanvasTexture(artworkTextureCanvas);
+      artworkTexture.minFilter = THREE.LinearFilter;
+      artworkTexture.magFilter = THREE.LinearFilter;
+    }
+
+    // ── 2. ESCENARIO ARQUITECTÓNICO THREE.JS (PARED DE GALERÍA) ───────
+    function initThreeScene() {
       const container = document.getElementById('vitrina-canvas');
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -499,52 +545,53 @@
       scene.background = new THREE.Color(0x0a0a0d);
 
       camera = new THREE.PerspectiveCamera(36, w / h, 0.1, 100);
-      camera.position.set(0, 0.2, targetCamDist);
+      camera.position.copy(eyePos);
+      camera.lookAt(0, 0.12, 0);
 
-      renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true });
+      renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true, alpha: false });
       renderer.setSize(w, h);
       renderer.setPixelRatio(1.0); // Disciplina térmica Apple Silicon
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.1;
+      renderer.toneMappingExposure = 1.15;
 
-      // ILUMINACIÓN DE GALERÍA (KEY SPOTLIGHT + FILL)
-      ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+      // ILUMINACIÓN DE GALERÍA
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.38);
       scene.add(ambientLight);
 
-      // Foco Cenital Focal (Key Light de 3200K cálido)
-      spotLightKey = new THREE.SpotLight(0xfef2db, 3.4);
-      spotLightKey.position.set(0.8, 3.8, 2.8);
-      spotLightKey.angle = 0.5;
-      spotLightKey.penumbra = 0.8;
+      // Foco Cenital Focal (3200K cálido)
+      spotLightKey = new THREE.SpotLight(0xfef2db, 3.6);
+      spotLightKey.position.set(0.6, 3.5, 2.6);
+      spotLightKey.angle = 0.52;
+      spotLightKey.penumbra = 0.85;
       scene.add(spotLightKey);
 
-      // Foco de Relleno Suave (Fill Light)
+      // Foco de Relleno Suave (Fill)
       spotLightFill = new THREE.SpotLight(0xaabbcc, 1.2);
-      spotLightFill.position.set(-2.0, 2.5, 1.8);
-      spotLightFill.angle = 0.6;
+      spotLightFill.position.set(-2.2, 2.4, 1.8);
+      spotLightFill.angle = 0.62;
       spotLightFill.penumbra = 0.9;
       scene.add(spotLightFill);
 
-      // ESCENARIO ARQUITECTÓNICO: PARED DE GALERÍA & SUELO DE PIEDRA
+      // ESCENARIO ARQUITECTÓNICO INMÓVIL
       architecturalGroup = new THREE.Group();
 
-      // Muro de Galería posterior (Estuco suave de museo)
-      const wallGeom = new THREE.PlaneGeometry(12, 8);
+      // Muro posterior (Estuco oscuro de galería)
+      const wallGeom = new THREE.PlaneGeometry(14, 9);
       const wallMat = new THREE.MeshStandardMaterial({
         color: 0x141418,
-        roughness: 0.85,
-        metalness: 0.05
+        roughness: 0.88,
+        metalness: 0.04
       });
       const backWall = new THREE.Mesh(wallGeom, wallMat);
-      backWall.position.z = -0.15;
+      backWall.position.z = -0.06;
       architecturalGroup.add(backWall);
 
-      // Suelo de Galería (Piedra oscura / roble negro)
-      const floorGeom = new THREE.PlaneGeometry(12, 8);
+      // Suelo de piedra de galería
+      const floorGeom = new THREE.PlaneGeometry(14, 9);
       const floorMat = new THREE.MeshStandardMaterial({
         color: 0x0c0c0e,
-        roughness: 0.45,
-        metalness: 0.4
+        roughness: 0.5,
+        metalness: 0.35
       });
       const floor = new THREE.Mesh(floorGeom, floorMat);
       floor.rotation.x = -Math.PI / 2;
@@ -552,32 +599,84 @@
       floor.position.z = 2.0;
       architecturalGroup.add(floor);
 
-      // Sombra de contacto suave proyectada en la pared
-      const shadowGeom = new THREE.PlaneGeometry(1.6, 2.1);
+      // Sombra de contacto real proyectada en la pared detrás del cuadro
+      const shadowGeom = new THREE.PlaneGeometry(1.68, 2.18);
       const shadowMat = new THREE.MeshBasicMaterial({
         color: 0x000000,
         transparent: true,
-        opacity: 0.45
+        opacity: 0.52
       });
       const shadowPlane = new THREE.Mesh(shadowGeom, shadowMat);
-      shadowPlane.position.set(0.04, -0.06, -0.13);
+      shadowPlane.position.set(0.03, 0.08, -0.05);
       architecturalGroup.add(shadowPlane);
 
       scene.add(architecturalGroup);
 
-      // GRUPO DEL PRODUCTO
+      // GRUPO DEL PRODUCTO (ANCLADO, ROTACIÓN 0 INMUTABLE)
       productGroup = new THREE.Group();
-      productGroup.position.set(0, 0, 0);
+      productGroup.position.set(0, 0.12, 0);
+      productGroup.rotation.set(0, 0, 0); // ¡CERO GIROS! El cuadro está colgado en la pared.
       scene.add(productGroup);
 
-      // EVENTOS DE INTERACCIÓN
-      container.addEventListener('mousedown', onMouseDown);
-      window.addEventListener('mouseup', onMouseUp);
-      window.addEventListener('mousemove', onMouseMove);
-      container.addEventListener('wheel', onWheel, { passive: false });
-      container.addEventListener('touchstart', onTouchStart, { passive: true });
-      container.addEventListener('touchmove', onTouchMove, { passive: true });
+      // Construir geometría inicial (Cuadro Fine Art)
+      buildProductGeometry();
+
+      // INTERACCIÓN DE PARALAJE DE TIMONEL
+      container.addEventListener('mousemove', onParallaxMouseMove);
+      container.addEventListener('touchmove', onParallaxTouchMove, { passive: true });
       window.addEventListener('resize', onWindowResize);
+    }
+
+    // ── 3. PARALAJE FÍSICO DE TIMONEL ───────────────────────────────
+    function onParallaxMouseMove(e) {
+      if (activePreset === 'macro') return; // En macro se mantiene enfocado
+      const container = document.getElementById('vitrina-canvas');
+      const r = container.getBoundingClientRect();
+      const normX = ((e.clientX - r.left) / r.width) * 2 - 1;   // [-1, 1]
+      const normY = ((e.clientY - r.top)  / r.height) * 2 - 1;  // [-1, 1]
+
+      // Cono de visión humano natural:
+      // Movimiento lateral: ±0.52 m
+      // Movimiento vertical: ±0.24 m
+      targetEyePos.x = normX * 0.52;
+      targetEyePos.y = 0.12 - normY * 0.24;
+      targetEyePos.z = 2.85;
+    }
+
+    function onParallaxTouchMove(e) {
+      if (e.touches.length === 1 && activePreset !== 'macro') {
+        const container = document.getElementById('vitrina-canvas');
+        const r = container.getBoundingClientRect();
+        const normX = ((e.touches[0].clientX - r.left) / r.width) * 2 - 1;
+        const normY = ((e.touches[0].clientY - r.top)  / r.height) * 2 - 1;
+        targetEyePos.x = normX * 0.45;
+        targetEyePos.y = 0.12 - normY * 0.22;
+        targetEyePos.z = 2.85;
+      }
+    }
+
+    function setObserverPreset(preset) {
+      activePreset = preset;
+      ['front', 'left', 'right', 'macro'].forEach(p => {
+        const btn = document.getElementById(`btn-cam-${p}`);
+        if (btn) {
+          btn.classList.toggle('text-[#c5a059]', p === preset);
+          btn.classList.toggle('text-[#a1a1aa]', p !== preset);
+        }
+      });
+
+      if (preset === 'front') {
+        targetEyePos.set(0, 0.12, 2.85);
+      } else if (preset === 'left') {
+        // Revela el canto lateral de la madera y el corte biselado a 45° del paspartú
+        targetEyePos.set(-0.82, 0.15, 2.65);
+      } else if (preset === 'right') {
+        // Revela el reflejo de la luz rasante en el vidrio de museo
+        targetEyePos.set(0.82, 0.15, 2.65);
+      } else if (preset === 'macro') {
+        // Acercamiento a escala 1:1 para apreciar la textura de papel de 308g
+        targetEyePos.set(0, 0.12, 1.45);
+      }
     }
 
     function onWindowResize() {
@@ -589,87 +688,7 @@
       renderer.setSize(w, h);
     }
 
-    function onMouseDown(e) {
-      isMouseDown = true;
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      autoRotate = false;
-      document.getElementById('btn-rotate').classList.remove('text-[#c5a059]');
-      document.getElementById('btn-rotate').classList.add('text-[#a1a1aa]');
-    }
-    function onMouseUp() { isMouseDown = false; }
-    function onMouseMove(e) {
-      if (!isMouseDown) return;
-      const dx = e.clientX - mouseX;
-      const dy = e.clientY - mouseY;
-      targetRotationY += dx * 0.006;
-      targetRotationX += dy * 0.005;
-      targetRotationX = Math.max(-0.25, Math.min(0.45, targetRotationX));
-      targetRotationY = Math.max(-0.9, Math.min(0.9, targetRotationY));
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    }
-    function onTouchStart(e) {
-      if (e.touches.length === 1) {
-        mouseX = e.touches[0].clientX;
-        mouseY = e.touches[0].clientY;
-        autoRotate = false;
-      }
-    }
-    function onTouchMove(e) {
-      if (e.touches.length === 1) {
-        const dx = e.touches[0].clientX - mouseX;
-        const dy = e.touches[0].clientY - mouseY;
-        targetRotationY += dx * 0.006;
-        targetRotationX += dy * 0.005;
-        targetRotationX = Math.max(-0.25, Math.min(0.45, targetRotationX));
-        targetRotationY = Math.max(-0.9, Math.min(0.9, targetRotationY));
-        mouseX = e.touches[0].clientX;
-        mouseY = e.touches[0].clientY;
-      }
-    }
-    function onWheel(e) {
-      e.preventDefault();
-      targetCamDist += e.deltaY * 0.002;
-      targetCamDist = Math.max(1.8, Math.min(4.8, targetCamDist));
-    }
-
-    // 2. TEXTURA PROCEDURAL DE LA OBRA (ALTA DEFINICIÓN)
-    function renderArtworkCanvas() {
-      if (!artworkTextureCanvas) {
-        artworkTextureCanvas = document.createElement('canvas');
-        artworkTextureCanvas.width = 1024;
-        artworkTextureCanvas.height = 1448; // Proporción 50x70
-        artworkTexture = new THREE.CanvasTexture(artworkTextureCanvas);
-        artworkTexture.minFilter = THREE.LinearFilter;
-        artworkTexture.magFilter = THREE.LinearFilter;
-      }
-
-      const ctx = artworkTextureCanvas.getContext('2d');
-      const w = artworkTextureCanvas.width;
-      const h = artworkTextureCanvas.height;
-
-      // Base de papel de algodón de conservación
-      ctx.fillStyle = '#080610';
-      ctx.fillRect(0, 0, w, h);
-
-      // Trazo matemático
-      const current = OBRAS[currentArtworkIdx];
-      current.fn(ctx, w, h, current.color);
-
-      // Leyenda de edición de museo al pie
-      ctx.fillStyle = 'rgba(244, 241, 234, 0.4)';
-      ctx.font = '15px "Space Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(`ATELIER MATEMÁTICO · OBRA ${String(current.id).padStart(2, '0')}`, 50, h - 45);
-      
-      ctx.textAlign = 'right';
-      ctx.fillText('HAHNEMÜHLE PHOTO RAG 308G · 1/100', w - 50, h - 45);
-
-      artworkTexture.needsUpdate = true;
-    }
-
-    // 3. MODELADO FÍSICO PROCEDURAL DE LOS FORMATOS
+    // ── 4. CONSTRUCCIÓN DE LA GEOMETRÍA FÍSICA DEL MARCO ─────────────
     function buildProductGeometry() {
       while (productGroup.children.length > 0) {
         productGroup.remove(productGroup.children[0]);
@@ -686,746 +705,465 @@
       }
     }
 
-    // Cuadro Fine Art 50x70 con Paspartú
+    // Cuadro Fine Art 50x70 con Moldura Maciza y Paspartú Biselado
     function buildFineArtFrame() {
       const frameGroup = new THREE.Group();
-      const fw = 1.35, fh = 1.85, fd = 0.08;
+      // Proporciones 50x70 calibradas a escala arquitectónica (0.98m x 1.38m)
+      const fw = 0.98, fh = 1.38, fd = 0.055;
 
-      let frameColor = 0x121215; // ebano
+      let frameColor = 0x121215; // Ébano mate
       let frameRoughness = 0.45;
       if (currentFrameFinish === 'oak') {
-        frameColor = 0xc29b63; frameRoughness = 0.6;
+        frameColor = 0xc29b63; frameRoughness = 0.62;
       } else if (currentFrameFinish === 'walnut') {
-        frameColor = 0x3d2212; frameRoughness = 0.5;
+        frameColor = 0x3d2212; frameRoughness = 0.52;
       }
 
       const frameMat = new THREE.MeshStandardMaterial({
         color: frameColor,
         roughness: frameRoughness,
-        metalness: 0.1
+        metalness: 0.08
       });
 
       // Moldura exterior
       const outerBox = new THREE.Mesh(new THREE.BoxGeometry(fw, fh, fd), frameMat);
       frameGroup.add(outerBox);
 
-      // Paspartú biselado
-      let matColor = 0xf2efe9; // blanco algodón
+      // Paspartú biselado de conservación
+      let matColor = 0xf2efe9; // Blanco algodón
       if (currentMatteFinish === 'cream') matColor = 0xe8e0cf;
       if (currentMatteFinish === 'dark') matColor = 0x18181f;
 
       const matBoard = new THREE.Mesh(
-        new THREE.PlaneGeometry(fw - 0.12, fh - 0.12),
-        new THREE.MeshStandardMaterial({ color: matColor, roughness: 0.9 })
+        new THREE.PlaneGeometry(fw - 0.08, fh - 0.08),
+        new THREE.MeshStandardMaterial({ color: matColor, roughness: 0.94 })
       );
       matBoard.position.z = fd / 2 + 0.002;
       frameGroup.add(matBoard);
 
-      // Lámina impresa
-      const printGeom = new THREE.PlaneGeometry(fw - 0.38, fh - 0.38);
+      // Lámina impresa con el lienzo vivo de Three.js (CanvasTexture)
+      const printGeom = new THREE.PlaneGeometry(0.70, 1.00);
       const printMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
       const printMesh = new THREE.Mesh(printGeom, printMat);
       printMesh.position.z = fd / 2 + 0.004;
       frameGroup.add(printMesh);
 
-      // Vidrio acrílico museo UV99
-      const glassGeom = new THREE.PlaneGeometry(fw - 0.1, fh - 0.1);
-      const glassMat = new THREE.MeshPhysicalMaterial({
+      // Vidrio Acrílico Museo UV99 (Reflejo especular sutil sin distorsión)
+      const glassMat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         transparent: true,
-        opacity: 0.18,
-        roughness: 0.04,
-        transmission: 0.94,
-        ior: 1.49
+        opacity: 0.04,
+        roughness: 0.08,
+        metalness: 0.1
       });
-      const glassMesh = new THREE.Mesh(glassGeom, glassMat);
-      glassMesh.position.z = fd / 2 + 0.01;
+      const glassMesh = new THREE.Mesh(new THREE.PlaneGeometry(fw - 0.05, fh - 0.05), glassMat);
+      glassMesh.position.z = fd / 2 + 0.006;
       frameGroup.add(glassMesh);
 
       productGroup.add(frameGroup);
     }
 
-    // Acrílico Luxury Montaje Directo 40x60 cm
+    // Acrílico Luxury 40x60 cm
     function buildAcrylicMount() {
-      const group = new THREE.Group();
-      const aw = 1.15, ah = 1.65, ad = 0.05;
+      const mountGroup = new THREE.Group();
+      const pw = 1.15, ph = 1.65, pd = 0.04;
 
-      // Metacrilato cristalino frontal
-      const acrylicGeom = new THREE.BoxGeometry(aw, ah, ad);
-      const acrylicMat = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        roughness: 0.02,
-        metalness: 0.05,
-        transmission: 0.93,
-        transparent: true,
-        opacity: 0.92,
-        ior: 1.52
-      });
-      const acrylicMesh = new THREE.Mesh(acrylicGeom, acrylicMat);
-      group.add(acrylicMesh);
-
-      // Lámina trasera protegida
-      const printGeom = new THREE.PlaneGeometry(aw - 0.01, ah - 0.01);
+      // Lámina en el fondo
+      const printGeom = new THREE.PlaneGeometry(pw, ph);
       const printMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
       const printMesh = new THREE.Mesh(printGeom, printMat);
-      printMesh.position.z = -ad / 2 + 0.001;
-      group.add(printMesh);
+      printMesh.position.z = pd / 2;
+      mountGroup.add(printMesh);
 
-      // Bastidor trasero oculto
-      const subGeom = new THREE.BoxGeometry(aw * 0.75, ah * 0.75, 0.06);
-      const subMat = new THREE.MeshStandardMaterial({ color: 0x666677, roughness: 0.3, metalness: 0.8 });
-      const subFrame = new THREE.Mesh(subGeom, subMat);
-      subFrame.position.z = -ad / 2 - 0.03;
-      group.add(subFrame);
+      // Capa de metacrilato transparente pulido de 6mm
+      const acrylicMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.18,
+        roughness: 0.02,
+        metalness: 0.15,
+        transmission: 0.92,
+        ior: 1.49
+      });
+      const acrylicBlock = new THREE.Mesh(new THREE.BoxGeometry(pw, ph, pd), acrylicMat);
+      mountGroup.add(acrylicBlock);
 
-      productGroup.add(group);
+      // Bastidor de aluminio oculto trasero
+      const subFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(pw * 0.75, ph * 0.75, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0x222226, metalness: 0.8, roughness: 0.3 })
+      );
+      subFrame.position.z = -0.03;
+      mountGroup.add(subFrame);
+
+      productGroup.add(mountGroup);
     }
 
-    // Taza Cerámica Negro Mate
+    // Taza Cerámica 11 oz
     function buildCeramicMug() {
-      const group = new THREE.Group();
+      const mugGroup = new THREE.Group();
+      const cylGeom = new THREE.CylinderGeometry(0.48, 0.48, 1.1, 48);
+      const mugMat = new THREE.MeshStandardMaterial({
+        color: 0x121215,
+        roughness: 0.35,
+        metalness: 0.1
+      });
+      const mugBody = new THREE.Mesh(cylGeom, mugMat);
+      mugGroup.add(mugBody);
 
-      const mugGeom = new THREE.CylinderGeometry(0.5, 0.45, 1.1, 48, 1, true);
-      const mugMat = new THREE.MeshStandardMaterial({ color: 0x121215, roughness: 0.65, metalness: 0.1 });
-      const mug = new THREE.Mesh(mugGeom, mugMat);
-      group.add(mug);
+      // Decal matemático
+      const wrapGeom = new THREE.CylinderGeometry(0.482, 0.482, 0.85, 48, 1, true, 0, Math.PI * 1.5);
+      const wrapMat = new THREE.MeshBasicMaterial({ map: artworkTexture, side: THREE.DoubleSide });
+      const decal = new THREE.Mesh(wrapGeom, wrapMat);
+      mugGroup.add(decal);
 
-      const insideGeom = new THREE.CylinderGeometry(0.46, 0.41, 1.05, 32);
-      const insideMat = new THREE.MeshStandardMaterial({ color: 0x18181d, roughness: 0.5 });
-      const inside = new THREE.Mesh(insideGeom, insideMat);
-      inside.position.y = 0.02;
-      group.add(inside);
-
-      const handleGeom = new THREE.TorusGeometry(0.35, 0.065, 16, 32, Math.PI);
+      // Asa
+      const handleGeom = new THREE.TorusGeometry(0.35, 0.08, 16, 32, Math.PI * 1.15);
       const handle = new THREE.Mesh(handleGeom, mugMat);
-      handle.position.set(0.55, 0.0, 0);
-      handle.rotation.z = -Math.PI / 2;
-      group.add(handle);
+      handle.position.set(0.48, 0, 0);
+      handle.rotation.z = Math.PI / 2;
+      mugGroup.add(handle);
 
-      const printBandGeom = new THREE.CylinderGeometry(0.505, 0.455, 0.8, 48, 1, true);
-      const printBandMat = new THREE.MeshBasicMaterial({ map: artworkTexture, transparent: true, opacity: 0.9 });
-      const printBand = new THREE.Mesh(printBandGeom, printBandMat);
-      group.add(printBand);
-
-      productGroup.add(group);
+      productGroup.add(mugGroup);
     }
 
     // Cuaderno Moleskine
     function buildMoleskineNotebook() {
-      const group = new THREE.Group();
-      const nw = 1.0, nh = 1.45, nd = 0.12;
+      const nbGroup = new THREE.Group();
+      const bw = 1.05, bh = 1.5, bd = 0.09;
+      const coverMat = new THREE.MeshStandardMaterial({ color: 0x16161c, roughness: 0.75 });
+      const cover = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), coverMat);
+      nbGroup.add(cover);
 
-      const coverGeom = new THREE.BoxGeometry(nw, nh, nd);
-      const coverMat = new THREE.MeshStandardMaterial({ color: 0x141418, roughness: 0.7, metalness: 0.1 });
-      const notebook = new THREE.Mesh(coverGeom, coverMat);
-      group.add(notebook);
+      // Arte en bajorrelieve en la portada
+      const artGeom = new THREE.PlaneGeometry(bw * 0.75, bh * 0.75);
+      const artMesh = new THREE.Mesh(artGeom, new THREE.MeshBasicMaterial({ map: artworkTexture }));
+      artMesh.position.z = bd / 2 + 0.002;
+      nbGroup.add(artMesh);
 
-      const debossGeom = new THREE.PlaneGeometry(nw - 0.25, nh - 0.35);
-      const debossMat = new THREE.MeshBasicMaterial({ map: artworkTexture });
-      const deboss = new THREE.Mesh(debossGeom, debossMat);
-      deboss.position.z = nd / 2 + 0.002;
-      group.add(deboss);
-
-      const bandGeom = new THREE.BoxGeometry(0.06, nh + 0.01, nd + 0.008);
-      const bandMat = new THREE.MeshStandardMaterial({ color: 0x08080a, roughness: 0.9 });
-      const band = new THREE.Mesh(bandGeom, bandMat);
-      band.position.x = nw / 2 - 0.14;
-      group.add(band);
-
-      productGroup.add(group);
+      productGroup.add(nbGroup);
     }
 
-    // 4. ANIMACIÓN Y BUCLE DE RENDER
-    function animate() {
-      if (!isTabVisible) return;
-      requestAnimationFrame(animate);
+    // ── 5. SELECCIÓN DE OBRA & RECONFIGURACIÓN DE DIALES ─────────────
+    function onSelectArtwork(idx) {
+      selectArtwork(idx);
+    }
 
-      if (autoRotate) {
-        targetRotationY += 0.002;
+    function selectArtwork(idx) {
+      currentArtIdx = idx;
+      const d = window.AtelierMath.ARTWORKS[idx];
+      if (!d) return;
+
+      // Actualizar UI
+      document.getElementById('current-badge-code').textContent = `Obra ${d.badge} de 24`;
+      document.getElementById('shop-title').textContent = d.title;
+      document.getElementById('shop-subtitle').textContent = `${d.sub} · ${d.cat}`;
+      document.getElementById('vitrina-formula-badge').textContent = `Obra ${d.badge}: ${d.title} (${d.solver})`;
+
+      // Reiniciar simulación matemática para este índice
+      window.AtelierMath.init(idx);
+      for (let k = 0; k < 12; k++) window.AtelierMath.step(idx);
+      if (artworkTexture) artworkTexture.needsUpdate = true;
+
+      // Generar diales específicos para esta fórmula
+      renderDynamicParamDials(idx);
+    }
+
+    function renderDynamicParamDials(idx) {
+      const container = document.getElementById('dynamic-param-bar');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // Botón de Pausa / Reanudación
+      const btnPause = document.createElement('button');
+      btnPause.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#f4f1ea] transition';
+      btnPause.textContent = isSimulationPaused ? 'Reanudar ▶' : 'Pausa ⏸';
+      btnPause.onclick = () => {
+        isSimulationPaused = !isSimulationPaused;
+        btnPause.textContent = isSimulationPaused ? 'Reanudar ▶' : 'Pausa ⏸';
+      };
+      container.appendChild(btnPause);
+
+      // Botón de Reinicio
+      const btnRestart = document.createElement('button');
+      btnRestart.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#a1a1aa] hover:text-white transition';
+      btnRestart.textContent = 'Reiniciar ↻';
+      btnRestart.onclick = () => window.AtelierMath.init(idx);
+      container.appendChild(btnRestart);
+
+      // Controles paramétricos específicos según la ley
+      if (idx === 4) { // Chladni
+        const modes = window.AtelierMath.getChladniModes();
+        const span = document.createElement('span');
+        span.innerHTML = `Modos: <strong>(${modes.m}, ${modes.n})</strong>`;
+        container.appendChild(span);
+
+        const btnNextMode = document.createElement('button');
+        btnNextMode.className = 'px-2 py-0.5 rounded bg-[#c5a059]/20 text-[#dfc285] hover:bg-[#c5a059]/30 transition';
+        btnNextMode.textContent = 'Siguiente Modo ♫';
+        btnNextMode.onclick = () => {
+          let nm = (modes.m % 7) + 1;
+          let nn = ((modes.n + 1) % 7) + 1;
+          window.AtelierMath.setChladniModes(nm, nn);
+          renderDynamicParamDials(idx);
+        };
+        container.appendChild(btnNextMode);
+      } else {
+        const hintSpan = document.createElement('span');
+        hintSpan.className = 'text-[#a1a1aa] truncate';
+        hintSpan.textContent = window.AtelierMath.ARTWORKS[idx].hint || 'Simulación en silicio';
+        container.appendChild(hintSpan);
       }
-
-      productGroup.rotation.y += (targetRotationY - productGroup.rotation.y) * 0.08;
-      productGroup.rotation.x += (targetRotationX - productGroup.rotation.x) * 0.08;
-
-      camera.position.z += (targetCamDist - camera.position.z) * 0.08;
-      camera.lookAt(0, 0, 0);
-
-      renderer.render(scene, camera);
     }
 
-    // 5. CONTROLADORES DE INTERFAZ & SELECCIÓN
+    function togglePalette() {
+      const nextPal = window.AtelierMath.getPalette() + 1;
+      window.AtelierMath.setPalette(nextPal);
+      window.AtelierMath.init(currentArtIdx);
+    }
+
+    // ── 6. SELECCIÓN DE FORMATO & MOLDURAS ────────────────────────────
     function selectFormat(fmt) {
       currentFormat = fmt;
-      
-      document.querySelectorAll('.format-card').forEach(el => {
-        el.classList.remove('luxury-gold-border', 'bg-[#141418]');
-        el.classList.add('luxury-border', 'bg-[#101014]');
+      ['fineart', 'acrylic', 'mug', 'notebook'].forEach(f => {
+        const el = document.getElementById(`card-fmt-${f}`);
+        if (el) {
+          el.classList.toggle('luxury-gold-border', f === fmt);
+          el.classList.toggle('bg-[#141418]', f === fmt);
+          el.classList.toggle('luxury-border', f !== fmt);
+          el.classList.toggle('bg-[#101014]', f !== fmt);
+        }
       });
-      const activeCard = document.getElementById(`card-fmt-${fmt}`);
-      if (activeCard) {
-        activeCard.classList.add('luxury-gold-border', 'bg-[#141418]');
-        activeCard.classList.remove('luxury-border', 'bg-[#101014]');
+
+      const finishSec = document.getElementById('finish-section');
+      if (finishSec) {
+        finishSec.style.display = (fmt === 'fineart') ? 'block' : 'none';
       }
 
-      const finishSection = document.getElementById('finish-section');
-      if (fmt === 'fineart') {
-        finishSection.style.display = 'block';
-      } else {
-        finishSection.style.display = 'none';
-      }
+      document.getElementById('total-price-clp').textContent = PRICES[fmt].clp;
+      document.getElementById('total-price-usd').textContent = PRICES[fmt].usd;
+      document.getElementById('vitrina-product-badge').textContent = `${PRICES[fmt].label} · Montado en Pared`;
 
       buildProductGeometry();
-      updateUI();
-    }
-
-    function onSelectArtwork(idx) {
-      currentArtworkIdx = parseInt(idx);
-      renderArtworkCanvas();
-      updateUI();
     }
 
     function setFrameFinish(finish) {
       currentFrameFinish = finish;
-      document.querySelectorAll('.finish-btn').forEach(btn => {
-        btn.classList.remove('luxury-gold-border', 'text-[#c5a059]');
-        btn.classList.add('luxury-border', 'text-[#a1a1aa]');
+      ['black', 'oak', 'walnut'].forEach(f => {
+        const btn = document.getElementById(`btn-frame-${f}`);
+        if (btn) {
+          btn.classList.toggle('luxury-gold-border', f === finish);
+          btn.classList.toggle('text-[#c5a059]', f === finish);
+          btn.classList.toggle('luxury-border', f !== finish);
+          btn.classList.toggle('text-[#a1a1aa]', f !== finish);
+        }
       });
-      const activeBtn = document.getElementById(`btn-frame-${finish}`);
-      if (activeBtn) {
-        activeBtn.classList.add('luxury-gold-border', 'text-[#c5a059]');
-        activeBtn.classList.remove('luxury-border', 'text-[#a1a1aa]');
-      }
       buildProductGeometry();
-      updateUI();
     }
 
-    function setMatteFinish(matte) {
-      currentMatteFinish = matte;
-      document.querySelectorAll('.mat-btn').forEach(btn => {
-        btn.classList.remove('luxury-gold-border', 'text-[#c5a059]');
-        btn.classList.add('luxury-border', 'text-[#a1a1aa]');
+    function setMatteFinish(finish) {
+      currentMatteFinish = finish;
+      ['white', 'cream', 'dark'].forEach(f => {
+        const btn = document.getElementById(`btn-mat-${f}`);
+        if (btn) {
+          btn.classList.toggle('luxury-gold-border', f === finish);
+          btn.classList.toggle('text-[#c5a059]', f === finish);
+          btn.classList.toggle('luxury-border', f !== finish);
+          btn.classList.toggle('text-[#a1a1aa]', f !== finish);
+        }
       });
-      const activeBtn = document.getElementById(`btn-mat-${matte}`);
-      if (activeBtn) {
-        activeBtn.classList.add('luxury-gold-border', 'text-[#c5a059]');
-        activeBtn.classList.remove('luxury-border', 'text-[#a1a1aa]');
-      }
       buildProductGeometry();
-      updateUI();
     }
 
     function setLighting(mode) {
-      document.querySelectorAll('[id^="btn-light-"]').forEach(btn => {
-        btn.classList.remove('text-[#c5a059]', 'bg-[#c5a059]/10', 'font-medium');
-        btn.classList.add('text-[#a1a1aa]');
+      currentLighting = mode;
+      ['warm', 'neutral', 'intimate'].forEach(m => {
+        const btn = document.getElementById(`btn-light-${m}`);
+        if (btn) {
+          btn.classList.toggle('text-[#c5a059]', m === mode);
+          btn.classList.toggle('bg-[#c5a059]/10', m === mode);
+          btn.classList.toggle('text-[#a1a1aa]', m !== mode);
+        }
       });
-      const activeBtn = document.getElementById(`btn-light-${mode}`);
-      if (activeBtn) {
-        activeBtn.classList.add('text-[#c5a059]', 'bg-[#c5a059]/10', 'font-medium');
-        activeBtn.classList.remove('text-[#a1a1aa]');
-      }
 
       if (mode === 'warm') {
         spotLightKey.color.setHex(0xfef2db);
-        spotLightKey.intensity = 3.4;
-        spotLightFill.color.setHex(0xaabbcc);
-        spotLightFill.intensity = 1.2;
-        ambientLight.intensity = 0.35;
+        spotLightKey.intensity = 3.6;
+        ambientLight.intensity = 0.38;
       } else if (mode === 'neutral') {
         spotLightKey.color.setHex(0xffffff);
-        spotLightKey.intensity = 3.8;
-        spotLightFill.color.setHex(0xddddff);
-        spotLightFill.intensity = 1.6;
-        ambientLight.intensity = 0.5;
+        spotLightKey.intensity = 3.2;
+        ambientLight.intensity = 0.45;
       } else if (mode === 'intimate') {
-        spotLightKey.color.setHex(0xdfa050);
-        spotLightKey.intensity = 4.2;
-        spotLightFill.color.setHex(0x334466);
-        spotLightFill.intensity = 0.6;
-        ambientLight.intensity = 0.15;
+        spotLightKey.color.setHex(0xffd599);
+        spotLightKey.intensity = 2.4;
+        ambientLight.intensity = 0.22;
       }
     }
 
-    function setCameraAngle(angle) {
-      autoRotate = false;
-      document.getElementById('btn-rotate').classList.remove('text-[#c5a059]');
-      document.getElementById('btn-rotate').classList.add('text-[#a1a1aa]');
-      if (angle === 'front') {
-        targetRotationX = 0; targetRotationY = 0; targetCamDist = 3.1;
-      } else if (angle === 'angle') {
-        targetRotationX = 0.08; targetRotationY = 0.35; targetCamDist = 3.2;
-      } else if (angle === 'macro') {
-        targetRotationX = 0.04; targetRotationY = 0.12; targetCamDist = 2.0;
+    // ── 7. LOOP DE RENDER & PARALAJE DE TIMONEL ──────────────────────
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!isTabVisible) return;
+
+      // 1. Paso de cálculo de la ecuación matemática (a 60 FPS dentro del marco)
+      if (!isSimulationPaused) {
+        window.AtelierMath.step(currentArtIdx);
+        artworkTexture.needsUpdate = true;
       }
+
+      // 2. Interpolar posición del ojo del observador (Paralaje físico suave)
+      eyePos.x += (targetEyePos.x - eyePos.x) * 0.08;
+      eyePos.y += (targetEyePos.y - eyePos.y) * 0.08;
+      eyePos.z += (targetEyePos.z - eyePos.z) * 0.08;
+
+      camera.position.copy(eyePos);
+      // Siempre enfoca el centro del cuadro colgado
+      camera.lookAt(0, 0.12, 0);
+
+      renderer.render(scene, camera);
     }
 
-    function toggleAutoRotate() {
-      autoRotate = !autoRotate;
-      const btn = document.getElementById('btn-rotate');
-      if (autoRotate) {
-        btn.classList.add('text-[#c5a059]');
-        btn.classList.remove('text-[#a1a1aa]');
-      } else {
-        btn.classList.remove('text-[#c5a059]');
-        btn.classList.add('text-[#a1a1aa]');
-      }
+    // ── 8. EXPORTADOR DE LÁMINA 300 DPI & GRABADOR 60 FPS ─────────────
+    function downloadArtwork300DPI() {
+      const d = window.AtelierMath.ARTWORKS[currentArtIdx];
+      const link = document.createElement('a');
+      link.download = `Atelier_${d.title.replace(/\s+/g, '_')}_FineArt_300DPI.png`;
+      link.href = artworkTextureCanvas.toDataURL('image/png');
+      link.click();
     }
 
-    function updateUI() {
-      const art = OBRAS[currentArtworkIdx];
-      const pInfo = PRICES[currentFormat];
+    function startVideoRecording(seconds) {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+      recordedChunks = [];
+      const stream = artworkTextureCanvas.captureStream(60);
 
-      document.getElementById('shop-title').innerText = art.title;
-      document.getElementById('shop-subtitle').innerText = art.sub;
-      document.getElementById('current-badge-code').innerText = `Obra #${String(art.id).padStart(2, '0')} de 24`;
+      let options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options = { mimeType: 'video/mp4' };
+        }
+      }
 
-      document.getElementById('vitrina-product-badge').innerText = pInfo.name;
-      document.getElementById('vitrina-formula-badge').innerText = `Obra ${art.id}: ${art.title}`;
+      try {
+        mediaRecorder = new MediaRecorder(stream, options);
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(stream);
+      }
 
-      document.getElementById('total-price-clp').innerText = `$${pInfo.clp.toLocaleString('es-CL')} CLP`;
-      document.getElementById('total-price-usd').innerText = `~$${pInfo.usd} USD`;
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
 
-      document.getElementById('modal-art-title').innerText = `${art.title} (N° ${art.id})`;
-      document.getElementById('modal-art-format').innerText = `${pInfo.name} (${currentFrameFinish.toUpperCase()})`;
-      document.getElementById('modal-art-price').innerText = `$${pInfo.clp.toLocaleString('es-CL')} CLP`;
+      mediaRecorder.onstop = () => {
+        clearInterval(recordingCountdownInterval);
+        clearTimeout(recordingTimeout);
+        document.getElementById('rec-banner').classList.add('hidden');
+        document.getElementById('btn-rec-15').classList.remove('border-red-500', 'bg-red-950/40');
+
+        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const title = window.AtelierMath.ARTWORKS[currentArtIdx].title.replace(/\s+/g, '_');
+        a.download = `Atelier_${title}_Reel_${seconds}s_60FPS.webm`;
+        a.click();
+      };
+
+      mediaRecorder.start();
+      document.getElementById('rec-banner').classList.remove('hidden');
+      document.getElementById('btn-rec-15').classList.add('border-red-500', 'bg-red-950/40');
+
+      let remaining = seconds;
+      document.getElementById('rec-countdown').textContent = `GRABANDO REEL ${remaining}s (60 FPS)`;
+      recordingCountdownInterval = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+          document.getElementById('rec-countdown').textContent = `GRABANDO REEL ${remaining}s (60 FPS)`;
+        }
+      }, 1000);
+
+      recordingTimeout = setTimeout(() => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+      }, seconds * 1000);
+    }
+
+    // ── 9. FORMALIZACIÓN DE ENCARGO & WHATSAPP ────────────────────────
+    function openCheckoutModal() {
+      const art = window.AtelierMath.ARTWORKS[currentArtIdx];
+      const fmt = PRICES[currentFormat];
+      document.getElementById('modal-art-title').textContent = art.title;
+      
+      let finishStr = fmt.label;
+      if (currentFormat === 'fineart') {
+        const wood = currentFrameFinish === 'black' ? 'Ébano Mate' : (currentFrameFinish === 'oak' ? 'Roble Claro' : 'Nogal Noble');
+        const mat = currentMatteFinish === 'white' ? 'Blanco Algodón' : (currentMatteFinish === 'cream' ? 'Crema Museo' : 'Grafito');
+        finishStr += ` · Marco ${wood} · Paspartú ${mat}`;
+      }
+      document.getElementById('modal-art-format').textContent = finishStr;
+      document.getElementById('modal-art-price').textContent = fmt.clp;
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkout-modal').classList.add('hidden');
     }
 
     function orderViaWhatsApp() {
-      const art = OBRAS[currentArtworkIdx];
-      const pInfo = PRICES[currentFormat];
-      let details = `• Obra: ${art.title} (Obra N° ${art.id})\n• Formato: ${pInfo.name}`;
+      const art = window.AtelierMath.ARTWORKS[currentArtIdx];
+      const fmt = PRICES[currentFormat];
+      let finishStr = fmt.label;
       if (currentFormat === 'fineart') {
-        details += `\n• Moldura: ${currentFrameFinish}\n• Paspartú: ${currentMatteFinish}`;
+        const wood = currentFrameFinish === 'black' ? 'Ébano Mate' : (currentFrameFinish === 'oak' ? 'Roble Claro' : 'Nogal Noble');
+        const mat = currentMatteFinish === 'white' ? 'Blanco Algodón' : (currentMatteFinish === 'cream' ? 'Crema Museo' : 'Grafito');
+        finishStr += ` (Moldura: ${wood}, Paspartú: ${mat})`;
       }
-      details += `\n• Total: $${pInfo.clp.toLocaleString('es-CL')} CLP`;
 
       const msg = encodeURIComponent(
-        `Estimado Matías, deseo formalizar el encargo de una pieza del Atelier Matemático:\n\n${details}\n\nQuedo a la espera de tus indicaciones para coordinar el pago anticipado y la entrega.`
+        `*ATELIER MATEMÁTICO — ENCARGO FORMAL DE AUTOR*\n\n` +
+        `· Obra: ${art.title} (Obra ${art.badge})\n` +
+        `· Ecuación / Enigma: ${art.sub}\n` +
+        `· Formato: ${finishStr}\n` +
+        `· Inversión: ${fmt.clp} (${fmt.usd})\n` +
+        `· Anticipo sugerido: 50% para inicio de manufactura\n\n` +
+        `Hola Matías, he configurado mi pieza en la Vitrina de Pared del Atelier. Deseo coordinar el anticipo para iniciar la manufactura en Santiago.`
       );
-      window.open(`https://wa.me/56987654321?text=${msg}`, '_blank');
-    }
-
-    function openCheckoutModal() {
-      updateUI();
-      document.getElementById('checkout-modal').classList.remove('hidden');
-    }
-    function closeCheckoutModal() {
-      document.getElementById('checkout-modal').classList.add('hidden');
+      window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
     }
 
     function submitOrder(e) {
       e.preventDefault();
       const name = document.getElementById('cust-name').value;
-      const art = OBRAS[currentArtworkIdx];
-      const pInfo = PRICES[currentFormat];
+      const email = document.getElementById('cust-email').value;
+      const phone = document.getElementById('cust-phone').value;
+      const addr = document.getElementById('cust-addr').value;
 
-      alert(`Estimado/a ${name}, su encargo para "${art.title}" ($${pInfo.clp.toLocaleString('es-CL')} CLP) ha sido registrado.\n\nSerá redirigido al portal seguro Webpay Plus para procesar el pago.`);
+      const art = window.AtelierMath.ARTWORKS[currentArtIdx];
+      const fmt = PRICES[currentFormat];
+      let finishStr = fmt.label;
+      if (currentFormat === 'fineart') {
+        const wood = currentFrameFinish === 'black' ? 'Ébano Mate' : (currentFrameFinish === 'oak' ? 'Roble Claro' : 'Nogal Noble');
+        const mat = currentMatteFinish === 'white' ? 'Blanco Algodón' : (currentMatteFinish === 'cream' ? 'Crema Museo' : 'Grafito');
+        finishStr += ` (${wood} / ${mat})`;
+      }
+
+      const msg = encodeURIComponent(
+        `*ATELIER MATEMÁTICO — FORMALIZACIÓN DE ENCARGO*\n\n` +
+        `· Cliente: ${name}\n` +
+        `· Teléfono: ${phone}\n` +
+        `· Email: ${email}\n` +
+        `· Dirección: ${addr}\n` +
+        `· Obra: ${art.title} (Obra ${art.badge})\n` +
+        `· Formato: ${finishStr}\n` +
+        `· Monto Total: ${fmt.clp}\n\n` +
+        `Hola Matías, confirmo mi encargo formal. Quedo a la espera de los datos de transferencia del 50% de anticipo para iniciar la confección en taller.`
+      );
+      window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
       closeCheckoutModal();
-    }
-
-    // 6. GENERADORES MATEMÁTICOS PARA EL CANVAS PROCEDURAL
-    function drawRiemann(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
-      const cx = w / 2, cy = h / 2;
-      ctx.beginPath();
-      for (let t = 0; t < 120; t += 0.05) {
-        const r = 25 + t * 4.2;
-        const x = cx + r * Math.cos(t * 1.4);
-        const y = cy + r * Math.sin(t * 1.4) * 0.85;
-        if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      for (let i = 1; i <= 6; i++) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, i * 70, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(56, 189, 248, ${0.35 - i * 0.04})`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-    }
-
-    function drawLorenz(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2 + 50;
-      let x = 0.1, y = 0, z = 0, dt = 0.008;
-      ctx.beginPath();
-      for (let i = 0; i < 4000; i++) {
-        const dx = 10 * (y - x);
-        const dy = x * (28 - z) - y;
-        const dz = x * y - (8/3) * z;
-        x += dx * dt; y += dy * dt; z += dz * dt;
-        const px = cx + x * 15;
-        const py = cy - z * 11;
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-    }
-
-    function drawChladni(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let r = 20; r < 400; r += 18) {
-        ctx.beginPath();
-        for (let th = 0; th < Math.PI * 2; th += 0.04) {
-          const mod = r * (1 + 0.28 * Math.cos(4 * th) * Math.sin(3 * th));
-          const px = cx + mod * Math.cos(th);
-          const py = cy + mod * Math.sin(th);
-          if (th === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-
-    function drawElasticity(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
-      const cx = w / 2, cy = h / 2;
-      for (let i = -15; i <= 15; i++) {
-        ctx.beginPath();
-        for (let j = -20; j <= 20; j++) {
-          const x = cx + i * 28 + Math.sin(j * 0.2) * 20;
-          const y = cy + j * 28 + Math.cos(i * 0.2) * 20;
-          if (j === -20) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-    }
-
-    function drawYoshida(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let k = 1; k <= 8; k++) {
-        ctx.beginPath();
-        for (let a = 0; a < Math.PI * 2; a += 0.05) {
-          const r = k * 45 + 15 * Math.sin(6 * a);
-          const x = cx + r * Math.cos(a);
-          const y = cy + r * Math.sin(a);
-          if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-
-    function drawClifford(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
-      const cx = w / 2, cy = h / 2;
-      for (let y = -400; y <= 400; y += 25) {
-        ctx.beginPath();
-        for (let x = -400; x <= 400; x += 15) {
-          const px = cx + x;
-          const py = cy + y + 30 * Math.sin(x * 0.015);
-          if (x === -400) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-      }
-    }
-
-    function drawTuring(ctx, w, h, col) {
-      ctx.fillStyle = col;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 0; i < 280; i++) {
-        const rad = Math.sqrt(i) * 24;
-        const th = i * 2.39996;
-        const px = cx + rad * Math.cos(th);
-        const py = cy + rad * Math.sin(th);
-        ctx.beginPath();
-        ctx.arc(px, py, 5 + (i % 4) * 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function drawRossler(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2 + 30;
-      let x = 1, y = 1, z = 1, dt = 0.02;
-      ctx.beginPath();
-      for (let i = 0; i < 3500; i++) {
-        const dx = -y - z;
-        const dy = x + 0.2 * y;
-        const dz = 0.2 + z * (x - 5.7);
-        x += dx * dt; y += dy * dt; z += dz * dt;
-        const px = cx + x * 22;
-        const py = cy + y * 22 - z * 5;
-        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-    }
-
-    function drawApollonian(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      function circle(x, y, r, depth) {
-        if (depth <= 0 || r < 4) return;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.stroke();
-        circle(x - r / 2, y, r / 2, depth - 1);
-        circle(x + r / 2, y, r / 2, depth - 1);
-        circle(x, y - r / 2, r / 2, depth - 1);
-        circle(x, y + r / 2, r / 2, depth - 1);
-      }
-      circle(cx, cy, 380, 4);
-    }
-
-    function drawJulia(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.2;
-      const cx = w / 2, cy = h / 2;
-      for (let r = 10; r < 380; r += 12) {
-        ctx.beginPath();
-        for (let a = 0; a < Math.PI * 2; a += 0.03) {
-          const mod = r * (1 + 0.35 * Math.sin(5 * a));
-          const px = cx + mod * Math.cos(a);
-          const py = cy + mod * Math.sin(a);
-          if (a === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-
-    function drawLangton(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
-      const cx = w / 2, cy = h / 2;
-      ctx.beginPath();
-      for (let i = 0; i < 200; i++) {
-        const x = cx + (i * 3.5) - 350;
-        const y = cy + Math.sin(i * 0.4) * 80 + (i * 1.5);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-
-    function drawKdV(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.2;
-      const cx = w / 2, cy = h / 2;
-      for (let k = -4; k <= 4; k++) {
-        ctx.beginPath();
-        for (let x = -400; x <= 400; x += 10) {
-          const sech = 1 / Math.cosh((x - k * 60) * 0.03);
-          const py = cy + k * 50 - 180 * sech * sech;
-          if (x === -400) ctx.moveTo(cx + x, py); else ctx.lineTo(cx + x, py);
-        }
-        ctx.stroke();
-      }
-    }
-
-    function drawVoronoi(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 0; i < 18; i++) {
-        const ang = (i / 18) * Math.PI * 2;
-        const r = 220 + 80 * Math.sin(i * 3);
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + r * Math.cos(ang), cy + r * Math.sin(ang));
-        ctx.stroke();
-      }
-    }
-
-    function drawNewton(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
-      const cx = w / 2, cy = h / 2;
-      for (let r = 20; r < 360; r += 14) {
-        ctx.beginPath();
-        for (let a = 0; a < Math.PI * 2; a += 0.05) {
-          const px = cx + (r + 20 * Math.cos(3 * a)) * Math.cos(a);
-          const py = cy + (r + 20 * Math.cos(3 * a)) * Math.sin(a);
-          if (a === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
-
-    function drawBenard(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      const hexR = 45;
-      for (let q = -4; q <= 4; q++) {
-        for (let r = -4; r <= 4; r++) {
-          const x = cx + hexR * Math.sqrt(3) * (q + r / 2);
-          const y = cy + hexR * 1.5 * r;
-          if (Math.hypot(x - cx, y - cy) < 360) {
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-              const a = (i * Math.PI) / 3;
-              const px = x + hexR * 0.9 * Math.cos(a);
-              const py = y + hexR * 0.9 * Math.sin(a);
-              if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-            ctx.stroke();
-          }
-        }
-      }
-    }
-
-    function drawHopf(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.6;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 0; i < 24; i++) {
-        const tilt = (i / 24) * Math.PI;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, 260, 110, tilt, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    }
-
-    function drawBarnsley(ctx, w, h, col) {
-      ctx.fillStyle = col;
-      const cx = w / 2, cy = h - 120;
-      let x = 0, y = 0;
-      for (let i = 0; i < 8000; i++) {
-        const r = Math.random();
-        let nx, ny;
-        if (r < 0.01) { nx = 0; ny = 0.16 * y; }
-        else if (r < 0.86) { nx = 0.85 * x + 0.04 * y; ny = -0.04 * x + 0.85 * y + 1.6; }
-        else if (r < 0.93) { nx = 0.2 * x - 0.26 * y; ny = 0.23 * x + 0.22 * y + 1.6; }
-        else { nx = -0.15 * x + 0.28 * y; ny = 0.26 * x + 0.24 * y + 0.44; }
-        x = nx; y = ny;
-        ctx.fillRect(cx + x * 75, cy - y * 110, 1.8, 1.8);
-      }
-    }
-
-    function drawFibonacci(ctx, w, h, col) {
-      ctx.fillStyle = col;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 0; i < 600; i++) {
-        const r = Math.sqrt(i) * 15;
-        const th = i * 2.399963229728653;
-        ctx.beginPath();
-        ctx.arc(cx + r * Math.cos(th), cy + r * Math.sin(th), 3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function drawBZ(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let a = 0; a < 3; a++) {
-        const offset = (a * Math.PI * 2) / 3;
-        ctx.beginPath();
-        for (let t = 0; t < 12 * Math.PI; t += 0.05) {
-          const r = t * 10;
-          const x = cx + r * Math.cos(t + offset);
-          const y = cy + r * Math.sin(t + offset);
-          if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-    }
-
-    function drawSchrodinger(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.0;
-      const cx = w / 2, cy = h / 2;
-      ctx.beginPath();
-      for (let x = -400; x <= 400; x += 4) {
-        const env = Math.exp(-0.5 * (x / 140) * (x / 140));
-        const y = cy - 200 * env * Math.cos(x * 0.08);
-        if (x === -400) ctx.moveTo(cx + x, y); else ctx.lineTo(cx + x, y);
-      }
-      ctx.stroke();
-    }
-
-    function drawRule110(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.4;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 0; i < 30; i++) {
-        ctx.beginPath();
-        ctx.moveTo(cx - 300 + i * 20, cy - 200);
-        ctx.lineTo(cx + 300, cy + 200 - i * 15);
-        ctx.stroke();
-      }
-    }
-
-    function drawBeal(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 2.2;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 1; i <= 3; i++) {
-        ctx.beginPath();
-        ctx.arc(cx - 80 + i * 60, cy, 140, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    }
-
-    function drawNavierStokes(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let i = 1; i <= 14; i++) {
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, i * 25, i * 14, (i * Math.PI) / 8, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    }
-
-    function drawRicci(ctx, w, h, col) {
-      ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      const cx = w / 2, cy = h / 2;
-      for (let r = 40; r < 360; r += 28) {
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, r, r * 0.65, Math.PI / 4, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-    }
-  </script>
-
-  <!-- CURSOR CINÉTICO DE BRONCE (SUTIL) -->
-  <div id="kinetic-cursor" class="fixed pointer-events-none z-[100] w-6 h-6 rounded-full border border-[#c5a059]/60 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-out opacity-0 hidden md:block"></div>
-
-  <!-- SCRIPT LENIS SMOOTH SCROLL & MICRO-INTERACCIONES -->
-  <script src="js/lenis.min.js"></script>
-  <script>
-    // 1. Lenis Smooth Scroll con física inercial
-    if (typeof Lenis !== 'undefined') {
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        smoothWheel: true,
-        wheelMultiplier: 0.85
-      });
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-      requestAnimationFrame(raf);
-    }
-
-    // 2. Cursor cinético sutil
-    const cursor = document.getElementById('kinetic-cursor');
-    if (cursor && window.matchMedia('(pointer: fine)').matches) {
-      cursor.classList.remove('opacity-0');
-      let mouseX = -100, mouseY = -100;
-      let cursorX = -100, cursorY = -100;
-
-      window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
-
-      function renderCursor() {
-        cursorX += (mouseX - cursorX) * 0.18;
-        cursorY += (mouseY - cursorY) * 0.18;
-        cursor.style.left = `${cursorX}px`;
-        cursor.style.top = `${cursorY}px`;
-        requestAnimationFrame(renderCursor);
-      }
-      requestAnimationFrame(renderCursor);
-
-      // Efecto hover magnético en enlaces y botones
-      document.querySelectorAll('a, button, [onclick], input, select').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          cursor.style.transform = 'translate(-50%, -50%) scale(1.6)';
-          cursor.style.borderColor = '#dfc285';
-          cursor.style.backgroundColor = 'rgba(197, 160, 89, 0.08)';
-        });
-        el.addEventListener('mouseleave', () => {
-          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-          cursor.style.borderColor = 'rgba(197, 160, 89, 0.6)';
-          cursor.style.backgroundColor = 'transparent';
-        });
-      });
     }
   </script>
 </body>

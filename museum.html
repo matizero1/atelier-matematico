@@ -118,6 +118,30 @@
 <!-- RETÍCULA DE LA CÁPSULA -->
 <div id="capsule-reticle"></div>
 
+<!-- RETÍCULA COLIMADORA ASTRONÓMICA (MODO TELESCOPIO EN ROTONDA) -->
+<div id="telescope-collimator-hud" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300">
+  <div id="telescope-target-card" class="hidden bg-[#101014]/95 backdrop-blur-md px-5 py-3.5 rounded-2xl luxury-gold-border pointer-events-auto flex items-center gap-4 shadow-2xl">
+    <div class="space-y-0.5">
+      <div class="flex items-center gap-2 text-[10px] mono text-[#c5a059] uppercase tracking-wider">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059] animate-pulse"></span>
+        <span>Telescopio Colimado · <span id="collimator-coord">Asc 14h 22m · Dec +32°</span></span>
+      </div>
+      <div class="serif text-sm text-[#f4f1ea] font-medium" id="collimator-title">Obra 01 · El Vuelo de Lorenz</div>
+      <div class="text-[11px] text-[#a1a1aa] mono font-light" id="collimator-sub">Atractor Caótico Aperiodico · Distancia: 12.0m</div>
+    </div>
+    <button id="btn-collimator-warp" onclick="warpToTargetAstro()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold px-4 py-2.5 rounded-xl mono uppercase tracking-wider transition shadow-md whitespace-nowrap">
+      Enfocar con Telescopio →
+    </button>
+  </div>
+</div>
+
+<!-- BOTÓN FLOTANTE SUPERIOR: REGRESAR AL TELESCOPIO DE LA ROTONDA -->
+<div id="confinement-return-bar" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+  <button onclick="returnToRotunda()" class="bg-[#101014]/95 hover:bg-[#16161c] text-[#dfc285] hover:text-[#f4f1ea] text-xs px-5 py-2.5 rounded-full luxury-gold-border mono transition flex items-center gap-2 shadow-2xl backdrop-blur-md">
+    <span>← Regresar a la Rotonda de Basalto (Telescopio)</span>
+  </button>
+</div>
+
 <!-- CANVAS PRINCIPAL 3D -->
 <canvas id="webgl-canvas"></canvas>
 
@@ -2163,20 +2187,132 @@ function populateNaiAstroSelector() {
   });
 }
 
+// ── MODOS DE OPERACIÓN DEL OBSERVATORIO ASTRONÓMICO ───────────────
+const MODE_ROTUNDA_TELESCOPE = 0;
+const MODE_SPHERE_CONFINEMENT = 1;
+let currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
+
+const rotundaBasePos = new THREE.Vector3(0, 0.0, 0); // Ojo del observador sobre el basalto
+let collimatedAstroIndex = -1;
+
+// Coordenadas esféricas S² de la cámara en la burbuja de confinamiento
+let activeConfinementAstro = null;
+let sphereRadius = 3.6;
+let sphereTheta = 0.0;
+let spherePhi = Math.PI / 2.2;
+let targetSphereTheta = 0.0;
+let targetSpherePhi = Math.PI / 2.2;
+let targetSphereRadius = 3.6;
+
 function propelToAstro(idx) {
-  if (idx < 0 || idx >= ARTWORKS_24.length) return;
-  nai3D.currentIndex = idx;
-  const target = astros24[idx].worldPos;
-  const approachVec = new THREE.Vector3().subVectors(camera.position, target).normalize().multiplyScalar(3.2);
-  const targetCamPos = new THREE.Vector3().addVectors(target, approachVec);
-  velocity.copy(new THREE.Vector3().subVectors(targetCamPos, camera.position).multiplyScalar(0.06));
-  speakNai(`Aproximándonos a ${astros24[idx].data.title}. ${astros24[idx].data.sub}.`);
+  warpToTargetAstro(idx);
 }
 
-// ── CONTROLES INERCIALES 6DOF ─────────────────────────────────────
+// ── CÁLCULO DE COLIMACIÓN ASTRONÓMICA CON TELESCOPIO (MODO ROTONDA) ──
+function updateTelescopeCollimation() {
+  if (currentMuseumMode !== MODE_ROTUNDA_TELESCOPE || isInShopMode) return;
+  const lookDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+
+  let bestIdx = -1;
+  let bestDot = Math.cos(22 * Math.PI / 180); // Cono de 22 grados de visión
+
+  astros24.forEach((a, idx) => {
+    const toA = new THREE.Vector3().subVectors(a.worldPos, camera.position).normalize();
+    const dot = lookDir.dot(toA);
+    if (dot > bestDot) {
+      bestDot = dot;
+      bestIdx = idx;
+    }
+  });
+
+  collimatedAstroIndex = bestIdx;
+  const card = document.getElementById('telescope-target-card');
+  const reticle = document.getElementById('capsule-reticle');
+
+  if (bestIdx >= 0) {
+    const astro = astros24[bestIdx];
+    const d = astro.data;
+    const dist = camera.position.distanceTo(astro.worldPos).toFixed(1);
+    
+    // Coordenadas celestes de ascensión recta y declinación
+    const ascHours = Math.floor(((d.theta + Math.PI) / (Math.PI * 2)) * 24);
+    const ascMins = Math.floor(((((d.theta + Math.PI) / (Math.PI * 2)) * 24) % 1) * 60);
+    const decDeg = Math.floor((d.phi / (Math.PI / 2)) * 90);
+    const decSign = decDeg >= 0 ? '+' : '';
+
+    const coordEl = document.getElementById('collimator-coord');
+    const titleEl = document.getElementById('collimator-title');
+    const subEl   = document.getElementById('collimator-sub');
+    if (coordEl) coordEl.textContent = `Asc ${String(ascHours).padStart(2,'0')}h ${String(ascMins).padStart(2,'0')}m · Dec ${decSign}${decDeg}°`;
+    if (titleEl) titleEl.textContent = `Obra ${d.badge} · ${d.title}`;
+    if (subEl)   subEl.textContent   = `${d.sub} · Distancia: ${dist}m`;
+    
+    if (card) card.classList.remove('hidden');
+    if (reticle) reticle.classList.add('locked');
+  } else {
+    if (card) card.classList.add('hidden');
+    if (reticle) reticle.classList.remove('locked');
+  }
+}
+
+// ── VIAJE TELESCÓPICO HACIA LA BURBUJA S² DE LA LEY ────────────────
+function warpToTargetAstro(idx) {
+  const targetIdx = (typeof idx === 'number') ? idx : collimatedAstroIndex;
+  if (targetIdx < 0 || targetIdx >= astros24.length) return;
+  const astro = astros24[targetIdx];
+  activeConfinementAstro = astro;
+  currentFocusedAstro = astro;
+  currentMuseumMode = MODE_SPHERE_CONFINEMENT;
+
+  // Orientación esférica inicial desde el vector actual para entrada suave
+  const rel = new THREE.Vector3().subVectors(camera.position, astro.worldPos);
+  targetSphereRadius = 3.6;
+  targetSphereTheta = Math.atan2(rel.x, rel.z);
+  targetSpherePhi = Math.acos(Math.max(-0.95, Math.min(0.95, rel.y / (rel.length() || 3.6))));
+  sphereTheta = targetSphereTheta;
+  spherePhi = targetSpherePhi;
+  sphereRadius = rel.length();
+
+  // Actualizar visibilidad de HUDs
+  const colCard = document.getElementById('telescope-target-card');
+  if (colCard) colCard.classList.add('hidden');
+  const returnBar = document.getElementById('confinement-return-bar');
+  if (returnBar) returnBar.classList.remove('hidden');
+
+  // Mostrar tarjeta de telemetría de la ley
+  const hudCard = document.getElementById('orbital-hud-card');
+  if (hudCard) {
+    const d = astro.data;
+    document.getElementById('hud-cat').textContent = d.cat;
+    document.getElementById('hud-solver').textContent = d.metric;
+    document.getElementById('hud-title').textContent = d.title;
+    document.getElementById('hud-sub').textContent = d.sub;
+    document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
+    document.getElementById('hud-hist').textContent = d.hist;
+    hudCard.classList.remove('opacity-0', 'translate-x-8');
+  }
+
+  speakNai(`Telescopio colimado. Confinando órbita de ${astro.data.title}.`);
+}
+
+// ── REGRESO A LA ROTONDA DE BASALTO (PLATAFORMA DEL TELESCOPIO) ────
+function returnToRotunda() {
+  currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
+  activeConfinementAstro = null;
+  currentFocusedAstro = null;
+
+  const returnBar = document.getElementById('confinement-return-bar');
+  if (returnBar) returnBar.classList.add('hidden');
+  const hudCard = document.getElementById('orbital-hud-card');
+  if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8');
+
+  speakNai("Regresando a la plataforma de observación de la rotonda.");
+}
+
+// ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
 function setup6DOFControls() {
   window.addEventListener('mousedown', (e) => {
-    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-bay-overlay')) return;
+    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar')) return;
     isDragging = true;
     dragPrev = { x: e.clientX, y: e.clientY };
   });
@@ -2184,16 +2320,24 @@ function setup6DOFControls() {
   window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     const dx = e.clientX - dragPrev.x, dy = e.clientY - dragPrev.y;
+    dragPrev = { x: e.clientX, y: e.clientY };
+
     if (isInShopMode) {
       targetProductRotation.y += dx * 0.01;
       targetProductRotation.x += dy * 0.01;
-    } else {
+    } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+      // El usuario barre el cielo con el telescopio desde la rotonda de basalto
       userInertiaTimer = 0;
-      targetOrientation.yaw -= dx * 0.0024;
-      targetOrientation.pitch -= dy * 0.0024;
-      targetOrientation.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, targetOrientation.pitch));
+      targetOrientation.yaw -= dx * 0.0028;
+      targetOrientation.pitch -= dy * 0.0028;
+      targetOrientation.pitch = Math.max(-0.4, Math.min(1.48, targetOrientation.pitch)); // Permite mirar arriba al óculo
+    } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+      // ¡EL OBSERVADOR SE DESPLAZA LIBREMENTE EN S²! LA FÓRMULA NO SE TOCA:
+      userInertiaTimer = 0;
+      targetSphereTheta -= dx * 0.0045;
+      targetSpherePhi   -= dy * 0.0045;
+      targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
     }
-    dragPrev = { x: e.clientX, y: e.clientY };
   });
 
   window.addEventListener('mouseup', () => { isDragging = false; });
@@ -2201,8 +2345,10 @@ function setup6DOFControls() {
   window.addEventListener('wheel', (e) => {
     if (isInShopMode) return;
     userInertiaTimer = 0;
-    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    velocity.addScaledVector(dir, -e.deltaY * 0.004);
+    if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+      targetSphereRadius += e.deltaY * 0.003;
+      targetSphereRadius = Math.max(2.0, Math.min(6.5, targetSphereRadius));
+    }
   }, { passive: true });
 
   window.addEventListener('keydown', (e) => {
@@ -2210,50 +2356,18 @@ function setup6DOFControls() {
       if (e.key === 'Escape') exitShopMode();
       return;
     }
-    userInertiaTimer = 0;
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-
-    if (e.code === 'KeyW' || e.code === 'ArrowUp') velocity.addScaledVector(forward, 0.45);
-    if (e.code === 'KeyS' || e.code === 'ArrowDown') velocity.addScaledVector(forward, -0.45);
-    if (e.code === 'KeyA' || e.code === 'ArrowLeft') velocity.addScaledVector(right, -0.35);
-    if (e.code === 'KeyD' || e.code === 'ArrowRight') velocity.addScaledVector(right, 0.35);
-    if (e.code === 'KeyQ') velocity.addScaledVector(up, 0.35);
-    if (e.code === 'KeyE') velocity.addScaledVector(up, -0.35);
-    if (e.code === 'Space') triggerShutter();
-  });
-}
-
-function updateOrbitalProximity() {
-  if (isInShopMode) return;
-  let nearest = null, minDist = 6.0;
-  astros24.forEach(a => {
-    const dist = camera.position.distanceTo(a.worldPos);
-    if (dist < minDist) { minDist = dist; nearest = a; }
-  });
-
-  const card = document.getElementById('orbital-hud-card');
-  const reticle = document.getElementById('capsule-reticle');
-
-  if (nearest) {
-    if (currentFocusedAstro !== nearest) {
-      currentFocusedAstro = nearest;
-      const d = nearest.data;
-      document.getElementById('hud-cat').textContent = d.cat;
-      document.getElementById('hud-solver').textContent = d.metric;
-      document.getElementById('hud-title').textContent = d.title;
-      document.getElementById('hud-sub').textContent = d.sub;
-      document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
-      document.getElementById('hud-hist').textContent = d.hist;
+    if (e.key === 'Escape') {
+      if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) returnToRotunda();
+      return;
     }
-    card.classList.remove('opacity-0', 'translate-x-8');
-    reticle.classList.add('locked');
-  } else {
-    currentFocusedAstro = null;
-    card.classList.add('opacity-0', 'translate-x-8');
-    reticle.classList.remove('locked');
-  }
+    if (e.code === 'Space') {
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
+        warpToTargetAstro();
+      } else {
+        triggerShutter();
+      }
+    }
+  });
 }
 
 // ── BUCLE PRINCIPAL DE ANIMACIÓN Y SILICIO ─────────────────────────
@@ -2304,53 +2418,63 @@ function animate() {
       }
     });
 
-  } else {
+  } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+    // 1. MODO ROTONDA: La cámara está de pie en la plataforma de basalto
+    camera.position.lerp(rotundaBasePos, 0.08);
+
     orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
-    orientation.yaw += (targetOrientation.yaw - orientation.yaw) * 0.12;
+    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.12;
     camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
 
-    camera.position.addScaledVector(velocity, delta * 20.0);
-    velocity.multiplyScalar(0.92);
+    // Calcular colimación astronómica con la lente del telescopio
+    updateTelescopeCollimation();
 
-    // Atractor de NAI si el usuario está inactivo > 2.5s
-    userInertiaTimer += delta;
-    if (userInertiaTimer > 2.5 && !isDragging) {
-      const curAstro = astros24[nai3D.currentIndex];
-      if (curAstro) {
-        const targetPos = new THREE.Vector3(
-          curAstro.worldPos.x + Math.sin(time * 0.0003) * 3.5,
-          curAstro.worldPos.y + Math.cos(time * 0.0004) * 1.5,
-          curAstro.worldPos.z + Math.cos(time * 0.0003) * 3.5
-        );
-        camera.position.lerp(targetPos, 0.008);
-        const m = new THREE.Matrix4().lookAt(camera.position, curAstro.worldPos, new THREE.Vector3(0, 1, 0));
-        const q = new THREE.Quaternion().setFromRotationMatrix(m);
-        camera.quaternion.slerp(q, 0.012);
-        const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
-        orientation.pitch = e.x; orientation.yaw = e.y;
-        targetOrientation.pitch = e.x; targetOrientation.yaw = e.y;
-      }
-    }
-
-    // Dinámica de NAI 3D
+    // Dinámica suave de NAI centinela en la rotonda
     if (nai3D.group) {
       nai3D.pulseTime += delta;
-      const curAstro = astros24[nai3D.currentIndex];
-      if (curAstro) {
-        const naiTarget = new THREE.Vector3(
-          curAstro.worldPos.x + Math.sin(nai3D.pulseTime * 0.8) * 1.8,
-          curAstro.worldPos.y + Math.cos(nai3D.pulseTime * 1.0) * 0.8,
-          curAstro.worldPos.z + 1.2
-        );
-        nai3D.group.position.lerp(naiTarget, 0.04);
-      }
+      const naiTarget = new THREE.Vector3(
+        Math.sin(nai3D.pulseTime * 0.5) * 1.5,
+        0.3 + Math.cos(nai3D.pulseTime * 0.8) * 0.3,
+        -2.5
+      );
+      nai3D.group.position.lerp(naiTarget, 0.04);
+      nai3D.core.rotation.y += 0.02;
+      nai3D.outerHalo.rotation.y -= 0.025;
+      nai3D.light.intensity = 1.6 + Math.sin(nai3D.pulseTime * 4.0) * 0.3;
+    }
+
+    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+
+  } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT && activeConfinementAstro) {
+    // 2. MODO BURBUJA S²: El observador se desplaza sobre la superficie esférica
+    sphereTheta  += (targetSphereTheta - sphereTheta) * 0.1;
+    spherePhi    += (targetSpherePhi - spherePhi) * 0.1;
+    sphereRadius += (targetSphereRadius - sphereRadius) * 0.1;
+
+    const center = activeConfinementAstro.worldPos;
+    const targetCam = new THREE.Vector3(
+      center.x + sphereRadius * Math.sin(spherePhi) * Math.sin(sphereTheta),
+      center.y + sphereRadius * Math.cos(spherePhi),
+      center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
+    );
+    camera.position.lerp(targetCam, 0.12);
+    camera.lookAt(center);
+
+    // Dinámica de NAI orbitando cerca del astro enfocado
+    if (nai3D.group) {
+      nai3D.pulseTime += delta;
+      const naiTarget = new THREE.Vector3(
+        center.x + Math.sin(nai3D.pulseTime * 0.8) * 2.2,
+        center.y + Math.cos(nai3D.pulseTime * 1.0) * 1.0,
+        center.z + 1.6
+      );
+      nai3D.group.position.lerp(naiTarget, 0.06);
       nai3D.core.rotation.y += 0.02;
       nai3D.outerHalo.rotation.y -= 0.025;
       nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
     }
 
     astros24.forEach(a => a.timonelRing.lookAt(camera.position));
-    updateOrbitalProximity();
   }
 
   // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución y Culling Térmico
@@ -2609,6 +2733,13 @@ function bootAtlas() {
       foyer.remove();
     }
     voiceGuideEnabled = false;
+  }
+  if (window.location.href.includes('warp=')) {
+    const match = window.location.href.match(/warp=(\d+)/);
+    if (match) {
+      const targetIdx = parseInt(match[1]);
+      setTimeout(() => warpToTargetAstro(targetIdx), 200);
+    }
   }
 }
 

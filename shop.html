@@ -22,18 +22,13 @@
     --text-secondary: #a1a1aa;
     --text-tertiary: #71717a;
   }
-  html {
-    scroll-behavior: smooth;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-  body {
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
     background-color: var(--bg-base) !important;
     color: var(--text-primary) !important;
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    margin: 0; padding: 0;
-    overflow-x: hidden;
-    min-height: 100vh;
   }
   .serif { font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
   .mono  { font-family: 'Space Mono', monospace; }
@@ -109,28 +104,31 @@
   <!-- ========================================================================= -->
   <!-- 2. CONTENEDOR PRINCIPAL: ESCENARIO ARQUITECTÓNICO + ATELIER FÍSICO        -->
   <!-- ========================================================================= -->
-  <main class="flex-1 pt-14 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-3.5rem)] relative">
+  <main class="fixed inset-0 top-14 flex flex-col md:flex-row overflow-hidden bg-[#08080a]">
     
-    <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (EL CUADRO INMÓVIL EN PARED CON PARALAJE HUMANO) -->
-    <div class="w-full lg:w-7/12 xl:w-2/3 h-[580px] lg:h-full relative bg-[#09090c] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
+    <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (ALTURA COMPLETA, CUADRO FIJO EN PARED) -->
+    <div class="w-full md:w-7/12 lg:w-3/5 xl:w-2/3 h-1/2 md:h-full relative bg-[#08080a] overflow-hidden flex flex-col border-b md:border-b-0 md:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
       
-      <!-- Canvas Three.js -->
+      <!-- Canvas Three.js a pantalla completa -->
       <canvas id="vitrina-canvas" class="w-full h-full block cursor-crosshair"></canvas>
 
-      <!-- BARRA SUPERIOR IZQUIERDA: Selector de Iluminación de Galería -->
-      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#0e0e12]/90 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono shadow-lg">
-        <span class="text-[#71717a] uppercase tracking-wider mr-1">Luz:</span>
-        <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium">Galería 3200K</button>
-        <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Estudio 4500K</button>
-        <button onclick="setLighting('intimate')" id="btn-light-intimate" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Noche Íntima</button>
-      </div>
+      <!-- BARRA SUPERIOR DE CONTROL: LUZ & OBSERVACIÓN (DISTRIBUCIÓN LIMPIA SIN SOLAPAMIENTO) -->
+      <div class="absolute top-4 inset-x-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        <!-- Selector de Luz -->
+        <div class="pointer-events-auto flex items-center gap-1 bg-[#0e0e12]/90 backdrop-blur-md px-2.5 py-1.5 rounded-full luxury-border text-[11px] mono shadow-lg">
+          <span class="text-[#71717a] uppercase tracking-wider mr-1 text-[10px]">Luz:</span>
+          <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium text-[10px]">3200K</button>
+          <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px]">4500K</button>
+          <button onclick="setLighting('intimate')" id="btn-light-intimate" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px]">Íntima</button>
+        </div>
 
-      <!-- BARRA SUPERIOR DERECHA: Ángulos de Contemplación del Observador (Paralaje) -->
-      <div class="absolute top-5 right-5 z-20 flex items-center gap-1.5">
-        <button onclick="setObserverPreset('front')" id="btn-cam-front" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition font-medium shadow-lg">Frontal</button>
-        <button onclick="setObserverPreset('left')" id="btn-cam-left" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Perfil Izq. 20°</button>
-        <button onclick="setObserverPreset('right')" id="btn-cam-right" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Perfil Der. 20°</button>
-        <button onclick="setObserverPreset('macro')" id="btn-cam-macro" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Macro 1:1</button>
+        <!-- Ángulos de Observación -->
+        <div class="pointer-events-auto flex items-center gap-1 bg-[#0e0e12]/90 backdrop-blur-md px-2.5 py-1.5 rounded-full luxury-border text-[11px] mono shadow-lg">
+          <button onclick="setObserverPreset('front')" id="btn-cam-front" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium text-[10px]">Frontal</button>
+          <button onclick="setObserverPreset('left')" id="btn-cam-left" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px]">Izq. 20°</button>
+          <button onclick="setObserverPreset('right')" id="btn-cam-right" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px]">Der. 20°</button>
+          <button onclick="setObserverPreset('macro')" id="btn-cam-macro" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px]">Macro 1:1</button>
+        </div>
       </div>
 
       <!-- BANNER FLOTANTE DE GRABACIÓN DE REEL -->
@@ -139,15 +137,15 @@
         <span id="rec-countdown" class="font-bold">GRABANDO REEL 15s (60 FPS)</span>
       </div>
 
-      <!-- MARCA DE AGUA DISCRETA EN LA BASE DE LA PARED (SIN TAPAR EL CUADRO) -->
+      <!-- MARCA DE AGUA DISCRETA EN LA BASE DE LA PARED -->
       <div class="absolute bottom-4 left-6 pointer-events-none text-[10px] mono text-[#52525b] uppercase tracking-widest hidden sm:block">
-        Muro de Galería · Perspectiva Humana Activa (Mueve el cursor)
+        Muro de Galería Travertino · Perspectiva Humana Activa
       </div>
 
     </div>
 
-    <!-- ÁREA 2: ESTANTERÍA ARQUITECTÓNICA DE MATERIALES & ENMARCADO -->
-    <div id="shop-shelf-panel" class="w-full lg:w-5/12 xl:w-1/3 h-auto lg:h-full bg-[#0d0d11] flex flex-col overflow-y-auto p-6 md:p-8 space-y-6">
+    <!-- ÁREA 2: ESTANTERÍA ARQUITECTÓNICA DE MATERIALES & ENMARCADO (SCROLL INDEPENDIENTE) -->
+    <div id="shop-shelf-panel" class="w-full md:w-5/12 lg:w-2/5 xl:w-1/3 h-1/2 md:h-full bg-[#0d0d11] flex flex-col overflow-y-auto p-6 md:p-8 space-y-6">
       
       <!-- CABECERA DE OBRA & METADATA -->
       <div class="space-y-1.5 border-b border-white/[0.08] pb-5">
@@ -470,9 +468,9 @@
 
     // ── PARALAJE FÍSICO DE TIMONEL (EL CUADRO ESTÁ INMÓVIL, EL OJO SE MUEVE) ──
     // El cuadro cuelga en (0, 0.12, 0)
-    // El observador está frente al cuadro con distancia base Z=2.85m
-    let targetEyePos = new THREE.Vector3(0, 0.12, 2.85);
-    let eyePos       = new THREE.Vector3(0, 0.12, 2.85);
+    // El observador está frente al cuadro con distancia base Z=2.25m (Gran escala y presencia vertical)
+    let targetEyePos = new THREE.Vector3(0, 0.12, 2.25);
+    let eyePos       = new THREE.Vector3(0, 0.12, 2.25);
     let activePreset = 'front'; // front | left | right | macro
 
     // Precios y metadatos
@@ -574,12 +572,14 @@
       // ESCENARIO ARQUITECTÓNICO INMÓVIL
       architecturalGroup = new THREE.Group();
 
-      // Muro posterior (Estuco oscuro de galería)
-      const wallGeom = new THREE.PlaneGeometry(14, 9);
+      // Muro posterior (Piedra de Travertino idéntica a la portada)
+      const wallGeom = new THREE.PlaneGeometry(16, 10);
+      const wallTex = new THREE.TextureLoader().load('assets/atelier_gallery_wall.jpg');
+      wallTex.colorSpace = THREE.SRGBColorSpace;
       const wallMat = new THREE.MeshStandardMaterial({
-        color: 0x141418,
+        map: wallTex,
         roughness: 0.88,
-        metalness: 0.04
+        metalness: 0.02
       });
       const backWall = new THREE.Mesh(wallGeom, wallMat);
       backWall.position.z = -0.06;
@@ -644,11 +644,11 @@
       const normY = ((e.clientY - r.top)  / r.height) * 2 - 1;  // [-1, 1]
 
       // Cono de visión humano natural y fluido:
-      // Movimiento lateral: ±0.65 m
-      // Movimiento vertical: ±0.32 m
-      targetEyePos.x = normX * 0.65;
-      targetEyePos.y = 0.12 - normY * 0.32;
-      targetEyePos.z = 2.85;
+      // Movimiento lateral: ±0.45 m
+      // Movimiento vertical: ±0.22 m
+      targetEyePos.x = normX * 0.45;
+      targetEyePos.y = 0.12 - normY * 0.22;
+      targetEyePos.z = 2.25;
     }
 
     function onParallaxTouchMove(e) {
@@ -657,9 +657,9 @@
         const r = container.getBoundingClientRect();
         const normX = ((e.touches[0].clientX - r.left) / r.width) * 2 - 1;
         const normY = ((e.touches[0].clientY - r.top)  / r.height) * 2 - 1;
-        targetEyePos.x = normX * 0.45;
-        targetEyePos.y = 0.12 - normY * 0.22;
-        targetEyePos.z = 2.85;
+        targetEyePos.x = normX * 0.35;
+        targetEyePos.y = 0.12 - normY * 0.18;
+        targetEyePos.z = 2.25;
       }
     }
 
@@ -674,16 +674,16 @@
       });
 
       if (preset === 'front') {
-        targetEyePos.set(0, 0.12, 2.85);
+        targetEyePos.set(0, 0.12, 2.25);
       } else if (preset === 'left') {
         // Revela el canto lateral de la madera y el corte biselado a 45° del paspartú
-        targetEyePos.set(-0.82, 0.15, 2.65);
+        targetEyePos.set(-0.65, 0.14, 2.15);
       } else if (preset === 'right') {
         // Revela el reflejo de la luz rasante en el vidrio de museo
-        targetEyePos.set(0.82, 0.15, 2.65);
+        targetEyePos.set(0.65, 0.14, 2.15);
       } else if (preset === 'macro') {
         // Acercamiento a escala 1:1 para apreciar la textura de papel de 308g
-        targetEyePos.set(0, 0.12, 1.45);
+        targetEyePos.set(0, 0.12, 1.25);
       }
     }
 

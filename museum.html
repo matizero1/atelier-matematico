@@ -3,31 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Atelier Matemático — Atlas Cósmico de 24 Ecuaciones & Hilos de Timonel</title>
+<title>Rotonda Tectónica & Observatorio 3D — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #010004;
-    --card: rgba(6, 4, 14, 0.88);
-    --border: rgba(168, 85, 247, 0.25);
-    --cyan: #38bdf8;
-    --accent: #8b5cf6;
+    --bg-base: #08080a;
+    --bg-surface: #101014;
+    --bg-elevated: #16161c;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(197, 160, 89, 0.3);
+    --gold: #c5a059;
+    --gold-light: #dfc285;
+    --text-primary: #f4f1ea;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
   }
   body, html {
     margin: 0; padding: 0; width: 100%; height: 100%;
-    background-color: var(--bg); color: #e2e8f0;
-    overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-base); color: var(--text-primary);
+    overflow: hidden; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     user-select: none; -webkit-user-select: none;
   }
-  .serif { font-family: 'Cinzel', serif; }
+  .serif { font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
   .mono  { font-family: 'Space Mono', monospace; }
+  .luxury-border { border: 1px solid var(--border-subtle); }
+  .luxury-gold-border { border: 1px solid var(--border-gold); }
   .glass {
-    background: var(--card);
+    background: rgba(16, 16, 20, 0.88);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-subtle);
   }
   
   /* Canvas 3D a pantalla completa */
@@ -38,17 +47,17 @@
 
   /* Flash de cámara */
   #camera-flash {
-    position: fixed; inset: 0; background: white; z-index: 100;
+    position: fixed; inset: 0; background: #f4f1ea; z-index: 100;
     pointer-events: none; opacity: 0; transition: opacity 0.4s ease-out;
   }
-  .flashing { opacity: 0.95 !important; transition: opacity 0.04s ease-in !important; }
+  .flashing { opacity: 0.9 !important; transition: opacity 0.04s ease-in !important; }
 
-  /* Pulso cuántico */
-  @keyframes quantumPulse {
-    0%, 100% { transform: scale(1); opacity: 0.85; }
-    50% { transform: scale(1.06); opacity: 1; filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.7)); }
+  /* Pulso sutil */
+  @keyframes luxuryPulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.03); opacity: 1; }
   }
-  .nai-pulse { animation: quantumPulse 3s ease-in-out infinite; }
+  .nai-pulse { animation: luxuryPulse 3.5s ease-in-out infinite; }
 
   /* Ondas de voz de NAI */
   @keyframes soundWave {
@@ -57,29 +66,51 @@
   }
   .sound-bar { animation: soundWave 0.75s ease-in-out infinite; }
 
+  /* ========================================================================= */
+  /* TRANSICIONES CINEMÁTICAS NATIVAS (VIEW TRANSITIONS API W3C)               */
+  /* ========================================================================= */
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: luxury-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  ::view-transition-new(root) {
+    animation: luxury-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  @keyframes luxury-fade-out {
+    0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(0.99); filter: blur(3px); }
+  }
+  @keyframes luxury-fade-in {
+    0% { opacity: 0; transform: scale(1.01); filter: blur(3px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+  }
+
   /* Retícula de navegación de la Cápsula */
   #capsule-reticle {
     position: fixed; top: 50%; left: 50%; width: 24px; height: 24px;
     transform: translate(-50%, -50%); z-index: 20; pointer-events: none;
-    border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%;
+    border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 50%;
     transition: all 0.25s ease-out;
   }
   #capsule-reticle::after {
     content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
-    background: rgba(168, 85, 247, 0.8); border-radius: 50%;
+    background: #dfc285; border-radius: 50%;
     transform: translate(-50%, -50%);
   }
   #capsule-reticle.locked {
-    width: 48px; height: 48px; border-color: rgba(56, 189, 248, 0.8);
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+    width: 48px; height: 48px; border-color: #c5a059;
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
   }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 </style>
 </head>
-<body>
+<body class="selection:bg-amber-900 selection:text-amber-100">
 
 <!-- FLASH DE OBTURADOR -->
 <div id="camera-flash"></div>
@@ -91,116 +122,110 @@
 <canvas id="webgl-canvas"></canvas>
 
 <!-- ========================================================================= -->
-<!-- FOYER SOBERANO DE ADMISIÓN                                                -->
+<!-- FOYER SOBERANO DE ADMISIÓN (SALA IV · ROTONDA TECTÓNICA)                  -->
 <!-- ========================================================================= -->
-<div id="foyer-screen" class="fixed inset-0 z-50 bg-[#010004] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-1000">
+<div id="foyer-screen" class="fixed inset-0 z-50 bg-[#08080a] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-1000">
   <div class="flex justify-between items-center max-w-6xl w-full mx-auto">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/25">
-        <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
-      </div>
-      <div>
-        <span class="serif tracking-[.25em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-        <span class="text-[10px] text-purple-300/60 uppercase tracking-widest mono block">Atlas Cósmico de 24 Leyes · Hilos de Timonel</span>
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest">
+        <span>←</span>
+        <span>Pórtico</span>
+      </a>
+      <span class="text-white/20">|</span>
+      <div class="flex items-center gap-2.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">SALA IV · ROTONDA TECTÓNICA</span>
       </div>
     </div>
-    <div class="glass px-3.5 py-1 rounded-full text-xs mono text-cyan-300 border-cyan-500/30">
-      24 Leyes en Gravedad Cero · Enjambre NAI
+    <div class="bg-[#101014] px-3.5 py-1 rounded-full text-xs mono text-[#c5a059] border border-[#c5a059]/30">
+      24 Leyes en Silicio Nativo · Timonel F2
     </div>
   </div>
 
   <div class="max-w-4xl w-full mx-auto my-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
     <div class="w-64 md:w-80 relative shrink-0">
-      <div class="absolute -inset-6 bg-purple-600/25 rounded-full blur-3xl pointer-events-none"></div>
-      <img src="assets/nai_foyer.jpg" alt="NAI" class="w-full rounded-2xl shadow-2xl border border-purple-500/30 nai-pulse" />
-      <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 glass px-3 py-1 rounded-full text-[10px] mono text-cyan-300 border-cyan-500/30 flex items-center gap-1.5 whitespace-nowrap shadow-lg">
-        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        NAI & Timonel · Guía & Auditor
+      <div class="absolute -inset-6 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <img src="assets/nai_foyer.jpg" alt="NAI" class="w-full rounded-2xl shadow-2xl border border-white/10 nai-pulse" />
+      <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#101014]/90 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] mono text-[#dfc285] luxury-border flex items-center gap-2 whitespace-nowrap shadow-xl">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059] animate-pulse"></span>
+        <span>NAI & Timonel · Guía & Auditor</span>
       </div>
     </div>
 
     <div class="flex-1 text-center md:text-left">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
-        Atlas Cósmico de la Ciencia
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101014] border border-[#c5a059]/30 text-[#dfc285] text-xs mono mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span>Observatorio Arquitectónico en 3D</span>
       </div>
-      <h1 class="text-3xl md:text-4xl serif font-bold text-white mb-4 leading-tight">
+      <h1 class="text-2xl md:text-4xl serif font-bold text-[#f4f1ea] mb-4 leading-tight">
         "Cada fórmula es un ovillo de luz.<br>
-        <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">Buscando desenredarse en el vacío."</span>
+        <span class="text-[#c5a059]">Buscando desenredarse en el vacío."</span>
       </h1>
-      <p class="text-sm text-slate-300 font-light leading-relaxed mb-6">
-        24 leyes fundamentales de la humanidad flotan en el cosmos dentro de sus anillos de confinamiento de Timonel. Tu dispositivo aporta su poder de cálculo a la supercomputadora enjambre de NAI mientras exploras, cazas instantes o visitas la Boutique 3D para materializarlos en la materia.
+      <p class="text-xs md:text-sm text-[#a1a1aa] font-light leading-relaxed mb-6">
+        Veinticuatro leyes fundamentales de la humanidad confinadas métricamente por Timonel F2. Desde esta rotonda de basalto puedes orbitar las esculturas matemáticas, explorar su auto-resolución o ingresar a la vitrina física de enmarcado.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-        <button onclick="enterCapsule(true)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-6 py-3 rounded-full font-medium transition shadow-lg shadow-purple-600/30 flex items-center gap-2">
-          <span>🌌</span>
-          <span>Iniciar Vuelo Orbital en la Cápsula</span>
+        <button onclick="enterCapsule(true)" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs px-6 py-3 rounded-full font-medium transition shadow-lg flex items-center gap-2 mono uppercase tracking-wider font-semibold">
+          <span>Entrar al Observatorio 3D →</span>
         </button>
-        <button onclick="enterShopMode()" class="glass hover:bg-white/10 text-cyan-300 text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 border-cyan-500/30">
-          <span>🛍️</span>
-          <span>Boutique de Manufactura 3D</span>
-        </button>
+        <a href="shop.html" class="bg-[#101014] hover:bg-white/10 text-[#f4f1ea] text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 luxury-border">
+          <span>Vitrina de Enmarcado 3D</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <div class="text-center text-[11px] mono text-slate-500 max-w-xl mx-auto">
-    Matías Cortés Figueroa · Timonel F2 · 24 Leyes de la Física & Teoría de Nudos
+  <div class="text-center text-[11px] mono text-[#71717a] max-w-xl mx-auto">
+    Matías Cortés Figueroa · Timonel Suite · 24 Leyes de la Física & Silicio Nativo
   </div>
 </div>
 
 <!-- ========================================================================= -->
 <!-- HUD DE LA CÁPSULA (TELEMETRÍA ENJAMBRE & VUELO)                           -->
 <!-- ========================================================================= -->
-<header id="flight-hud-header" class="fixed top-0 left-0 right-0 z-30 py-3.5 px-6 md:px-10 flex flex-wrap justify-between items-center pointer-events-none transition-opacity duration-500 gap-3">
-  <div class="flex items-center gap-3 pointer-events-auto">
-    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
-      <div class="w-full h-full bg-[#05020c] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
-    </div>
-    <div>
-      <span class="serif tracking-[.25em] text-white text-xs md:text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/70 uppercase tracking-widest mono block">Atlas de 24 Leyes · Hilos de Timonel</span>
-    </div>
-  </div>
-
-  <!-- MONITOR DE RED ENJAMBRE NAI (VOLUNTEER GRID) -->
-  <div class="hidden xl:flex items-center gap-3 glass px-4 py-1.5 rounded-full border-cyan-500/20 text-[11px] mono pointer-events-auto shadow-2xl">
-    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span class="text-slate-300">Nodo <strong id="swarm-node-id" class="text-cyan-300">#CL-7482</strong></span>
-    <span class="text-slate-500">|</span>
-    <span class="text-slate-300">Potencia: <span id="swarm-local-throughput" class="text-purple-300 font-bold">480.000</span> evals/s</span>
-    <span class="text-slate-500">|</span>
-    <span class="text-emerald-400">142 Nodos en Red</span>
-    <span class="text-slate-500">|</span>
-    <span class="text-amber-300">Bloque #14.892</span>
-  </div>
-
-  <!-- DERECHA: PÓRTICO, VITRINA, VOZ, CARRETE -->
-  <div class="flex items-center gap-2 pointer-events-auto">
-    <a href="index.html" class="glass hover:bg-white/10 text-xs px-3 py-1.5 rounded-full mono transition text-slate-300 border-white/10 flex items-center gap-1">
+<header id="flight-hud-header" class="fixed top-0 left-0 right-0 z-30 py-3 px-6 md:px-10 flex flex-wrap justify-between items-center pointer-events-none transition-opacity duration-500 gap-3">
+  <div class="flex items-center gap-4 pointer-events-auto">
+    <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest bg-[#08080a]/80 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border">
       <span>←</span>
-      <span class="hidden md:inline">Pórtico</span>
+      <span>Pórtico</span>
     </a>
-    <a href="shop.html" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 shadow-sm">
-      <span>🛍️</span>
-      <span class="hidden sm:inline">Vitrina Boutique</span>
+    <div class="flex items-center gap-2.5 bg-[#08080a]/80 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+      <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">ROTONDA 3D</span>
+    </div>
+  </div>
+
+  <!-- MONITOR DE RED ENJAMBRE NAI -->
+  <div class="hidden xl:flex items-center gap-3 bg-[#101014]/90 backdrop-blur-md px-4 py-1.5 rounded-full luxury-border text-[11px] mono pointer-events-auto shadow-2xl">
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span class="text-[#a1a1aa]">Nodo <strong id="swarm-node-id" class="text-[#f4f1ea]">#CL-7482</strong></span>
+    <span class="text-white/20">|</span>
+    <span class="text-[#a1a1aa]">Potencia: <span id="swarm-local-throughput" class="text-[#c5a059] font-bold">480.000</span> evals/s</span>
+    <span class="text-white/20">|</span>
+    <span class="text-emerald-400">142 Nodos en Red</span>
+    <span class="text-white/20">|</span>
+    <span class="text-[#dfc285]">Timonel F2 Activo</span>
+  </div>
+
+  <!-- DERECHA: MESA 2D, VITRINA 3D, VOZ, CARRETE -->
+  <div class="flex items-center gap-2 pointer-events-auto">
+    <a href="studio.html" class="bg-[#101014]/90 hover:bg-white/10 text-xs px-3 py-1.5 rounded-full mono transition text-[#a1a1aa] hover:text-[#f4f1ea] luxury-border flex items-center gap-1.5">
+      <span>Mesa 2D</span>
     </a>
-    <button id="btn-global-voice-toggle" onclick="toggleVoiceGuide()" class="glass hover:bg-white/10 text-xs px-2.5 py-1.5 rounded-full mono transition flex items-center gap-1 border-purple-500/20">
-      <span id="voice-status-icon">🔊</span>
+    <a href="shop.html" class="bg-[#c5a059]/10 hover:bg-[#c5a059]/20 border border-[#c5a059]/30 text-[#dfc285] text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 shadow-sm">
+      <span>Vitrina 3D</span>
+    </a>
+    <button id="btn-global-voice-toggle" onclick="toggleVoiceGuide()" class="bg-[#101014]/90 hover:bg-white/10 text-xs px-2.5 py-1.5 rounded-full mono transition flex items-center gap-1 luxury-border text-[#a1a1aa]">
+      <span id="voice-status-icon">Audio</span>
     </button>
-    <button onclick="toggleDiscoveryDrawer()" class="glass hover:bg-white/10 border-cyan-500/30 text-cyan-200 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5">
-      <span>📜</span>
-      <span class="hidden sm:inline">Bitácora</span>
-      <span id="discovery-counter-badge" class="bg-cyan-600/40 text-cyan-200 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+    <button onclick="toggleDiscoveryDrawer()" class="bg-[#101014]/90 hover:bg-white/10 luxury-border text-[#a1a1aa] hover:text-[#f4f1ea] text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5">
+      <span>Bitácora</span>
+      <span id="discovery-counter-badge" class="bg-white/10 text-[#dfc285] px-1.5 py-0.2 rounded-full text-[10px]">0</span>
     </button>
-    <button onclick="toggleCameraRoll()" class="glass hover:bg-white/10 border-purple-500/30 text-purple-200 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5">
-      <span>📷</span>
-      <span class="hidden sm:inline">Carrete</span>
-      <span id="roll-counter-badge" class="bg-purple-600/40 text-purple-200 px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
-    </button>
-    <button onclick="enterShopMode()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/25 flex items-center gap-1.5">
-      <span>🔭</span>
-      <span class="hidden sm:inline">Bahía 3D</span>
+    <button onclick="toggleCameraRoll()" class="bg-[#101014]/90 hover:bg-white/10 luxury-border text-[#a1a1aa] hover:text-[#f4f1ea] text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5">
+      <span>Carrete</span>
+      <span id="roll-counter-badge" class="bg-white/10 text-[#dfc285] px-1.5 py-0.2 rounded-full text-[10px]">0/30</span>
     </button>
   </div>
 </header>
@@ -208,76 +233,74 @@
 <!-- ========================================================================= -->
 <!-- HUD LATERAL DE PROXIMIDAD: TELEMETRÍA DE TIMONEL & RELATO DE NAI           -->
 <!-- ========================================================================= -->
-<div id="orbital-hud-card" class="fixed top-20 right-6 z-30 max-w-sm glass rounded-2xl p-4 border-purple-500/30 shadow-2xl transition-all duration-500 opacity-0 translate-x-8 pointer-events-auto">
-  <div class="flex justify-between items-center text-[10px] mono text-purple-400 mb-1">
-    <span id="hud-cat">TEORÍA DEL CAOS · 1963</span>
-    <span id="hud-solver" class="text-cyan-400">Timonel: Res ≤ 1e-6</span>
+<div id="orbital-hud-card" class="fixed top-20 right-6 z-30 max-w-sm bg-[#101014]/95 backdrop-blur-xl rounded-xl p-5 luxury-border shadow-2xl transition-all duration-500 opacity-0 translate-x-8 pointer-events-auto">
+  <div class="flex justify-between items-center text-[10px] mono text-[#c5a059] mb-1.5">
+    <span id="hud-cat" class="uppercase tracking-wider">TEORÍA DEL CAOS · 1963</span>
+    <span id="hud-solver" class="text-[#71717a]">Timonel: Res ≤ 1e-6</span>
   </div>
-  <h2 id="hud-title" class="text-lg serif font-bold text-white mb-0.5">El Vuelo de Lorenz</h2>
-  <p id="hud-sub" class="text-[11px] text-purple-300/70 mono mb-3">Atractor Caótico Aperiodico</p>
+  <h2 id="hud-title" class="text-xl serif font-bold text-[#f4f1ea] mb-0.5">El Vuelo de Lorenz</h2>
+  <p id="hud-sub" class="text-[11px] text-[#a1a1aa] mono mb-3">Atractor Caótico Aperiodico</p>
 
-  <div class="bg-black/60 rounded-lg p-2 border border-white/10 mb-3">
-    <div class="text-[9px] uppercase tracking-wider text-slate-400 mono mb-0.5">Ecuación & Confinamiento de Hilos</div>
-    <div id="hud-eq" class="text-[11px] mono text-cyan-300 leading-tight"></div>
+  <div class="bg-[#08080a] rounded-lg p-3 border border-white/[0.08] mb-3">
+    <div class="text-[9px] uppercase tracking-widest text-[#71717a] mono mb-1">Ecuación & Hilos de Confinamiento</div>
+    <div id="hud-eq" class="text-[11px] mono text-[#dfc285] leading-relaxed"></div>
   </div>
 
-  <p id="hud-hist" class="text-xs text-slate-300 leading-relaxed font-light mb-3 line-clamp-3"></p>
+  <p id="hud-hist" class="text-xs text-[#a1a1aa] leading-relaxed font-light mb-3 line-clamp-3"></p>
 
   <!-- BARRA DE AUTO-RESOLUCIÓN & CONTROL DE ENTROPÍA (TIMONEL F2) -->
-  <div class="bg-black/60 rounded-xl p-2.5 border border-purple-500/25 mb-3 space-y-1.5">
+  <div class="bg-[#08080a] rounded-lg p-3 border border-white/[0.08] mb-3 space-y-1.5">
     <div class="flex justify-between items-center text-[10px] mono">
-      <span class="text-slate-400">ESTADO RELAJACIÓN:</span>
-      <span id="hud-relax-state" class="text-cyan-300 font-bold">CRISTALIZADO</span>
+      <span class="text-[#71717a]">ESTADO RELAJACIÓN:</span>
+      <span id="hud-relax-state" class="text-[#dfc285] font-bold">CRISTALIZADO</span>
     </div>
-    <div class="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
-      <div id="hud-relax-progress" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-full w-full transition-all duration-300"></div>
+    <div class="w-full bg-[#16161c] rounded-full h-1.5 overflow-hidden">
+      <div id="hud-relax-progress" class="bg-gradient-to-r from-[#c5a059] to-[#dfc285] h-full w-full transition-all duration-300"></div>
     </div>
-    <div class="flex justify-between items-center text-[9px] mono text-slate-400">
-      <span>Residuo: <strong id="hud-residual-val" class="text-purple-300">0.002</strong></span>
+    <div class="flex justify-between items-center text-[9px] mono text-[#71717a]">
+      <span>Residuo: <strong id="hud-residual-val" class="text-[#dfc285]">0.002</strong></span>
       <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">0.998</strong></span>
     </div>
   </div>
 
-  <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-1.5 px-3 bg-gradient-to-r from-amber-600/30 to-purple-600/30 hover:from-amber-600/50 hover:to-purple-600/50 border border-amber-400/40 rounded-xl text-[11px] mono text-amber-200 transition flex items-center justify-center gap-2 mb-3 shadow-lg">
-    <span>⚡</span>
-    <span>Liberar Forma (Ver Auto-Resolución)</span>
+  <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2.5 shadow-sm">
+    <span>Perturbar Métrica (Ver Auto-Resolución)</span>
   </button>
 
-  <div class="flex items-center gap-2 pt-2 border-t border-white/10">
-    <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white py-1.5 rounded-xl font-mono text-xs flex items-center justify-center gap-1.5 transition border border-purple-400/30">
-      <span>📸</span>
+  <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
+    <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#f4f1ea] py-2 rounded-lg font-mono text-xs flex items-center justify-center gap-1.5 transition border border-white/10">
       <span>Capturar al Carrete</span>
     </button>
-    <button onclick="toggleAudioGuide()" id="btn-audio-guide-toggle" class="glass px-3 py-1.5 rounded-xl text-xs mono text-cyan-300 hover:text-white transition">
-      🔊
+    <button onclick="navigateToActiveShop()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] py-2 px-3 rounded-lg font-mono text-xs font-semibold flex items-center justify-center transition">
+      Vitrina →
     </button>
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- SUSURRO ESPACIAL DE NAI & SALTO DIRECTO A CUALQUIERA DE LAS 24 FÓRMULAS   -->
+<!-- COMPAÑERO NAI & SELECTOR RÁPIDO DE 24 ASTROS                              -->
 <!-- ========================================================================= -->
 <div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-md">
-  <div class="glass p-3 rounded-2xl border-purple-500/30 shadow-2xl flex items-start gap-3">
-    <div class="w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 bg-black/60 relative">
+  <div class="bg-[#101014]/90 backdrop-blur-xl p-3.5 rounded-xl luxury-border shadow-2xl flex items-start gap-3">
+    <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-black/60 relative">
       <img src="assets/nai_avatar.png" alt="NAI" class="w-full h-full object-cover scale-125" />
-      <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-cyan-400 border border-black animate-pulse"></span>
+      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-[#c5a059] border border-black animate-pulse"></span>
     </div>
     <div class="flex-1 min-w-0">
       <div class="flex justify-between items-center mb-1">
-        <span class="text-[11px] font-bold serif text-purple-300">NAI & Timonel · 24 Leyes Vivas</span>
-        <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-3.5">
-          <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0s"></span>
-          <span class="w-1 bg-purple-400 sound-bar" style="animation-delay:0.2s"></span>
-          <span class="w-1 bg-cyan-400 sound-bar" style="animation-delay:0.4s"></span>
+        <span class="text-[11px] font-bold serif text-[#f4f1ea]">NAI & Timonel · 24 Leyes Vivas</span>
+        <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-3">
+          <span class="w-0.5 bg-[#c5a059] sound-bar" style="animation-delay:0s"></span>
+          <span class="w-0.5 bg-[#dfc285] sound-bar" style="animation-delay:0.2s"></span>
+          <span class="w-0.5 bg-[#c5a059] sound-bar" style="animation-delay:0.4s"></span>
         </div>
       </div>
-      <p id="nai-dialogue-text" class="text-xs text-slate-300 leading-snug font-light">
+      <p id="nai-dialogue-text" class="text-xs text-[#a1a1aa] leading-snug font-light">
         24 anillos de Timonel confinan las leyes del universo. Los hilos se retuercen y buscan desenredarse en silicio.
       </p>
       
       <!-- Selector de Salto Rápido a los 24 Astros -->
-      <div id="nai-astro-selector" class="flex gap-1 mt-2 pt-2 border-t border-white/5 overflow-x-auto pb-1 max-w-sm">
+      <div id="nai-astro-selector" class="flex gap-1.5 mt-2 pt-2 border-t border-white/5 overflow-x-auto pb-1 max-w-sm">
         <!-- Generado dinámicamente con los 24 botones de salto -->
       </div>
     </div>
@@ -290,89 +313,86 @@
 <div id="shop-bay-overlay" class="fixed inset-0 z-40 pointer-events-none hidden transition-opacity duration-700 opacity-0">
   
   <div class="fixed top-6 left-6 right-6 flex flex-wrap justify-between items-center gap-4 pointer-events-auto">
-    <button onclick="exitShopMode()" class="glass hover:bg-white/10 text-white text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2 border-purple-500/30 shadow-2xl">
+    <button onclick="exitShopMode()" class="bg-[#101014]/90 hover:bg-white/10 text-[#f4f1ea] text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2 luxury-border shadow-2xl">
       <span>←</span>
-      <span>Volver al Cosmos de 24 Ecuaciones</span>
+      <span>Volver a la Rotonda de 24 Ecuaciones</span>
     </button>
 
-    <div class="glass px-3 py-1.5 rounded-full border-white/15 flex items-center gap-2 shadow-2xl">
-      <button onclick="switch3DProduct('frame_wood')" id="btn-prod-frame-wood" class="px-3 py-1 rounded-full text-xs mono font-bold bg-purple-600 text-white transition">
-        🖼️ Cuadro Madera 50×70
+    <div class="bg-[#101014]/90 px-3 py-1.5 rounded-full luxury-border flex items-center gap-2 shadow-2xl">
+      <button onclick="switch3DProduct('frame_wood')" id="btn-prod-frame-wood" class="px-3 py-1 rounded-full text-xs mono font-bold bg-[#c5a059] text-[#08080a] transition">
+        Cuadro Madera 50×70
       </button>
-      <button onclick="switch3DProduct('frame_acrylic')" id="btn-prod-frame-acrylic" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
-        ✨ Acrílico Luxury 40×60
+      <button onclick="switch3DProduct('frame_acrylic')" id="btn-prod-frame-acrylic" class="px-3 py-1 rounded-full text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition">
+        Acrílico Luxury 40×60
       </button>
-      <button onclick="switch3DProduct('mug')" id="btn-prod-mug" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
-        ☕ Taza Cerámica Mate
+      <button onclick="switch3DProduct('mug')" id="btn-prod-mug" class="px-3 py-1 rounded-full text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition">
+        Taza Cerámica
       </button>
-      <button onclick="switch3DProduct('notebook')" id="btn-prod-notebook" class="px-3 py-1 rounded-full text-xs mono text-slate-400 hover:text-white transition">
-        📓 Cuaderno de Campo
+      <button onclick="switch3DProduct('notebook')" id="btn-prod-notebook" class="px-3 py-1 rounded-full text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition">
+        Cuaderno de Campo
       </button>
     </div>
 
-    <div class="glass px-3.5 py-1.5 rounded-full text-[11px] mono text-cyan-300 border-cyan-500/30 hidden lg:block">
-      Arrastra el ratón para rotar el objeto 360° en gravedad cero
+    <div class="bg-[#101014]/90 px-3.5 py-1.5 rounded-full text-[11px] mono text-[#a1a1aa] luxury-border hidden lg:block">
+      Arrastra para rotar la pieza 360° en la bahía
     </div>
   </div>
 
-  <div class="fixed top-24 right-6 w-full max-w-sm glass rounded-2xl p-5 border-purple-500/30 shadow-2xl space-y-4 pointer-events-auto max-h-[82vh] overflow-y-auto">
-    <div class="flex justify-between items-start pb-3 border-b border-white/10">
+  <div class="fixed top-24 right-6 w-full max-w-sm bg-[#101014]/95 backdrop-blur-xl rounded-xl p-5 luxury-border shadow-2xl space-y-4 pointer-events-auto max-h-[82vh] overflow-y-auto">
+    <div class="flex justify-between items-start pb-3 border-b border-white/[0.08]">
       <div>
-        <span id="shop-prod-category" class="text-[10px] mono text-purple-400 block">EDICIÓN DE GALERÍA FIRMADA</span>
-        <h3 id="shop-prod-title" class="text-base serif font-bold text-white">Cuadro Fine Art 50×70 cm</h3>
+        <span id="shop-prod-category" class="text-[10px] mono text-[#c5a059] block">EDICIÓN DE GALERÍA FIRMADA</span>
+        <h3 id="shop-prod-title" class="text-base serif font-bold text-[#f4f1ea]">Cuadro Fine Art 50×70 cm</h3>
       </div>
-      <div id="shop-prod-price" class="text-right font-mono font-bold text-base text-amber-300">
+      <div id="shop-prod-price" class="text-right font-mono font-bold text-base text-[#dfc285]">
         $68.000 CLP
       </div>
     </div>
 
-    <div class="bg-black/50 p-3 rounded-xl border border-white/10 text-[11px] space-y-1.5 font-light">
-      <div class="font-bold text-white flex items-center gap-1.5 text-purple-300">
-        <span>🛡️</span> Confección Artesanal a Pedido
+    <div class="bg-[#08080a] p-3.5 rounded-lg border border-white/[0.08] text-[11px] space-y-1.5 font-light">
+      <div class="font-bold text-[#f4f1ea] flex items-center gap-1.5 text-[#c5a059]">
+        <span>•</span> Confección Artesanal a Pedido
       </div>
-      <p class="text-slate-300 leading-snug">
-        Impresión fine art pigmentada sobre papel de algodón de 310g con paspartú libre de ácido y marco de madera. Certificado oficial sellado y firmado por Matías Cortés.
+      <p class="text-[#a1a1aa] leading-snug">
+        Impresión fine art pigmentada sobre papel Hahnemühle 308g de algodón con paspartú libre de ácido y marco de madera maciza. Certificado oficial sellado y firmado por Matías Cortés Figueroa.
       </p>
-      <div class="text-[10px] mono text-cyan-300 pt-1 flex items-center gap-1">
-        <span>📦</span> Plazo de manufactura y despacho: <strong>10 a 15 días hábiles</strong> (máximo 20 días garantizado).
+      <div class="text-[10px] mono text-[#c5a059] pt-1">
+        Plazo de manufactura: 10 a 15 días hábiles.
       </div>
     </div>
 
     <div class="space-y-2.5 pt-1">
       <div>
-        <label class="text-[10px] mono text-slate-400 block mb-1">Nombre Completo:</label>
-        <input type="text" id="order-name" placeholder="Tu nombre" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+        <label class="text-[10px] mono text-[#71717a] block mb-1">Nombre Completo:</label>
+        <input type="text" id="order-name" placeholder="Tu nombre" class="w-full bg-[#08080a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono" />
       </div>
       <div>
-        <label class="text-[10px] mono text-slate-400 block mb-1">Dirección de Despacho (Chile o Internacional):</label>
-        <input type="text" id="order-address" placeholder="Calle, Número, Comuna, Ciudad" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+        <label class="text-[10px] mono text-[#71717a] block mb-1">Dirección de Despacho (Chile o Internacional):</label>
+        <input type="text" id="order-address" placeholder="Calle, Número, Comuna, Ciudad" class="w-full bg-[#08080a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono" />
       </div>
       <div>
-        <label class="text-[10px] mono text-slate-400 block mb-1">WhatsApp de Notificación:</label>
-        <input type="tel" id="order-phone" placeholder="+56 9 1234 5678" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500 mono" />
+        <label class="text-[10px] mono text-[#71717a] block mb-1">WhatsApp de Notificación:</label>
+        <input type="tel" id="order-phone" placeholder="+56 9 1234 5678" class="w-full bg-[#08080a] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-[#f4f1ea] focus:outline-none focus:border-[#c5a059] mono" />
       </div>
     </div>
 
     <div class="pt-2">
-      <button onclick="processDirectCheckout()" class="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-mono text-xs py-3 rounded-xl font-bold transition shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2">
-        <span>💳</span>
+      <button onclick="processDirectCheckout()" class="w-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-mono text-xs py-3 rounded-lg font-bold transition shadow-lg flex items-center justify-center gap-2">
         <span>Confirmar Pedido & Pagar con Tarjeta</span>
       </button>
-      <p class="text-[9px] mono text-slate-500 text-center mt-2">
-        Pago 100% asegurado. Recibirás tu comprobante y seguimiento de manufactura vía WhatsApp.
+      <p class="text-[9px] mono text-[#71717a] text-center mt-2">
+        Pago seguro Webpay / Stripe. Recibirás comprobante y seguimiento vía WhatsApp.
       </p>
     </div>
   </div>
 
-  <div class="fixed bottom-6 left-6 right-6 md:right-auto md:max-w-2xl glass rounded-2xl p-3 border-purple-500/30 shadow-2xl pointer-events-auto space-y-2">
+  <div class="fixed bottom-6 left-6 right-6 md:right-auto md:max-w-2xl bg-[#101014]/90 backdrop-blur-xl rounded-xl p-3 luxury-border shadow-2xl pointer-events-auto space-y-2">
     <div class="flex justify-between items-center text-[11px] mono">
-      <span class="text-white font-bold flex items-center gap-1.5">
-        <span>🪄</span> Proyectar Textura en el Objeto 3D:
-      </span>
-      <span class="text-slate-400 text-[10px]">24 Leyes de la Ciencia + Tus Fotos</span>
+      <span class="text-[#f4f1ea] font-bold">Proyectar Textura en la Pieza:</span>
+      <span class="text-[#71717a] text-[10px]">24 Leyes de la Ciencia + Tus Fotos</span>
     </div>
     <div id="texture-tray-carousel" class="flex gap-2.5 overflow-x-auto pb-1 pt-0.5">
-      <!-- Generado dinámicamente con las 24 obras maestras + fotos del carrete -->
+      <!-- Generado dinámicamente -->
     </div>
   </div>
 
@@ -381,82 +401,71 @@
 <!-- ========================================================================= -->
 <!-- DRAWERS: CARRETE DE FOTOS                                                 -->
 <!-- ========================================================================= -->
-<div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#05030b]/95 backdrop-blur-2xl z-50 border-l border-white/10 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
+<div id="roll-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-[#08080a]/95 backdrop-blur-2xl z-50 border-l border-white/[0.08] p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-400 shadow-2xl">
   <div>
-    <div class="flex justify-between items-center pb-4 border-b border-white/10 mb-4">
+    <div class="flex justify-between items-center pb-4 border-b border-white/[0.08] mb-4">
       <div>
-        <h3 class="serif text-lg font-bold text-white flex items-center gap-2"><span>📷</span> Tu Carrete Fotográfico</h3>
-        <p class="text-xs text-slate-400 mono">Instantes cazados en gravedad cero</p>
+        <h3 class="serif text-lg font-bold text-[#f4f1ea]">Tu Carrete Fotográfico</h3>
+        <p class="text-xs text-[#a1a1aa] mono">Instantes cazados en la rotonda 3D</p>
       </div>
-      <button onclick="toggleCameraRoll()" class="text-slate-400 hover:text-white text-lg mono p-1">✕</button>
+      <button onclick="toggleCameraRoll()" class="text-[#a1a1aa] hover:text-[#f4f1ea] text-lg mono p-1">✕</button>
     </div>
-    <div class="glass p-3 rounded-xl mb-4 flex items-center justify-between text-xs mono text-purple-300">
-      <span>Capacidad gratuita:</span>
-      <span id="roll-capacity-text" class="font-bold text-white">0 / 30 fotos</span>
+    <div class="bg-[#101014] p-3 rounded-lg mb-4 flex items-center justify-between text-xs mono text-[#dfc285] luxury-border">
+      <span>Capacidad:</span>
+      <span id="roll-capacity-text" class="font-bold text-[#f4f1ea]">0 / 30 fotos</span>
     </div>
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
-      <div id="roll-empty-state" class="col-span-2 text-center py-12 text-slate-500 text-xs mono">
-        Aún no has tomado fotografías.<br>Acércate a cualquiera de las 24 leyes y dispara el obturador.
+      <div id="roll-empty-state" class="col-span-2 text-center py-12 text-[#71717a] text-xs mono">
+        Aún no has tomado fotografías.<br>Acércate a cualquiera de las 24 leyes y pulsa 'Capturar al Carrete'.
       </div>
     </div>
   </div>
-  <div class="pt-4 border-t border-white/10 space-y-2">
-    <div class="text-[11px] mono text-slate-400 text-center mb-1">Exportación en Ultra HD (4K):</div>
-    <div class="grid grid-cols-2 gap-2">
-      <button onclick="alert('Redirigiendo a checkout de $5 USD por 10 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
-        <div class="font-bold text-sm text-cyan-300">$5 USD</div>
-        <div class="text-[10px] mono text-slate-300">Pack 10 Fotos 4K</div>
-      </button>
-      <button onclick="alert('Redirigiendo a checkout de $10 USD por 25 capturas en 4K...')" class="glass hover:bg-purple-900/30 border-purple-500/30 text-white text-xs p-2.5 rounded-xl text-center transition">
-        <div class="font-bold text-sm text-amber-300">$10 USD</div>
-        <div class="text-[10px] mono text-slate-300">Pack 25 Fotos 4K</div>
-      </button>
-    </div>
-    <button onclick="clearCameraRoll()" class="w-full text-center text-[10px] text-slate-500 hover:text-red-400 mono transition pt-1">
+  <div class="pt-4 border-t border-white/[0.08] space-y-2">
+    <button onclick="clearCameraRoll()" class="w-full text-center text-xs text-[#71717a] hover:text-red-400 mono transition py-2">
       Vaciar carrete
     </button>
   </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- TOAST DE NOTIFICACIÓN DE NAI CENTINELA (HALLAZGOS DE CANDIDATOS)          -->
+<!-- TOAST DE NOTIFICACIÓN DE NAI CENTINELA                                     -->
 <!-- ========================================================================= -->
-<div id="discovery-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 glass px-5 py-3 rounded-2xl border-cyan-400/50 shadow-2xl transition-all duration-500 opacity-0 -translate-y-8 pointer-events-none flex items-center gap-3">
-  <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping shrink-0"></div>
+<div id="discovery-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#101014]/95 backdrop-blur-xl px-5 py-3 rounded-xl border border-[#c5a059]/40 shadow-2xl transition-all duration-500 opacity-0 -translate-y-8 pointer-events-none flex items-center gap-3">
+  <div class="w-2 h-2 rounded-full bg-[#c5a059] animate-ping shrink-0"></div>
   <div>
-    <div class="text-[10px] mono text-cyan-300 uppercase tracking-widest font-bold">✨ NAI CENTINELA · CANDIDATO REGISTRADO</div>
-    <div id="toast-message" class="text-xs text-white font-medium">Candidato detectado en Navier-Stokes con residuo 2.14e-6</div>
+    <div class="text-[10px] mono text-[#c5a059] uppercase tracking-widest font-bold">NAI CENTINELA · CANDIDATO REGISTRADO</div>
+    <div id="toast-message" class="text-xs text-[#f4f1ea] font-medium">Candidato detectado en Navier-Stokes con residuo 2.14e-6</div>
   </div>
 </div>
 
 <!-- ========================================================================= -->
 <!-- CAJÓN LATERAL: BITÁCORA DE CANDIDATOS & TELEMETRÍA TIMONEL F2              -->
 <!-- ========================================================================= -->
-<div id="discovery-drawer" class="fixed top-0 right-0 w-full max-w-md h-full glass border-l border-cyan-500/30 shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col pointer-events-auto">
-  <div class="p-5 border-b border-white/10 flex justify-between items-center">
+<div id="discovery-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-[#08080a]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl z-50 transform translate-x-full transition-transform duration-500 flex flex-col pointer-events-auto">
+  <div class="p-5 border-b border-white/[0.08] flex justify-between items-center">
     <div>
-      <h3 class="text-base serif font-bold text-white flex items-center gap-2">
-        <span>📜</span> Bitácora de Candidatos Timonel F2
+      <h3 class="text-base serif font-bold text-[#f4f1ea]">
+        Bitácora de Candidatos Timonel F2
       </h3>
-      <span id="discovery-count-text" class="text-xs mono text-cyan-400">0 candidatos archivados</span>
+      <span id="discovery-count-text" class="text-xs mono text-[#dfc285]">0 candidatos archivados</span>
     </div>
-    <button onclick="toggleDiscoveryDrawer()" class="text-slate-400 hover:text-white p-2 text-sm">✕</button>
+    <button onclick="toggleDiscoveryDrawer()" class="text-[#a1a1aa] hover:text-[#f4f1ea] p-2 text-sm">✕</button>
   </div>
 
-  <div class="p-3 bg-black/40 border-b border-white/5 flex gap-2">
-    <button onclick="exportDiscoveryLedger()" class="flex-1 glass hover:bg-white/10 text-cyan-300 text-xs py-2 px-3 rounded-xl mono transition border-cyan-500/20 flex items-center justify-center gap-1.5">
-      <span>📥</span> Exportar JSON
+  <div class="p-3 bg-[#101014] border-b border-white/[0.08] flex gap-2">
+    <button onclick="exportDiscoveryLedger()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#dfc285] text-xs py-2 px-3 rounded-lg mono transition border border-white/10 flex items-center justify-center gap-1.5">
+      <span>Exportar JSON</span>
     </button>
-    <button onclick="clearDiscoveryLedger()" class="glass hover:bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-xl mono transition border-rose-500/20">
-      🗑️ Limpiar
+    <button onclick="clearDiscoveryLedger()" class="bg-[#16161c] hover:bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-lg mono transition border border-rose-500/20">
+      Limpiar
     </button>
-    <button onclick="simulateDiscoveryCandidate()" class="glass hover:bg-purple-500/20 text-purple-300 text-xs py-2 px-3 rounded-xl mono transition border-purple-500/20" title="Probar Alerta de NAI">
-      ⚡ Test NAI
+    <button onclick="simulateDiscoveryCandidate()" class="bg-[#16161c] hover:bg-white/10 text-[#c5a059] text-xs py-2 px-3 rounded-lg mono transition border border-[#c5a059]/30" title="Probar Alerta de NAI">
+      Test NAI
     </button>
   </div>
 
   <div id="discovery-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-    <div id="discovery-empty-state" class="text-center py-16 text-slate-500 mono text-xs">
+    <div id="discovery-empty-state" class="text-center py-16 text-[#71717a] mono text-xs">
       No hay candidatos anómalos registrados.<br>Las leyes abiertas están explorando el espacio.
     </div>
   </div>
@@ -759,11 +768,16 @@ function simulateDiscoveryCandidate() {
   recordDiscoveryCandidate(astro, "Candidato de Prueba: Bisección entre extremos positivos y negativos. Residuo convergente.", "Prueba de Alerta Vocal NAI");
 }
 
+function navigateToActiveShop() {
+  const artId = currentFocusedAstro ? currentFocusedAstro.data.id : 20;
+  window.location.href = `shop.html?art=${artId}`;
+}
+
 function initAtlasCosmico() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x010004);
-  scene.fog = new THREE.FogExp2(0x010004, 0.012);
+  scene.background = new THREE.Color(0x08080a);
+  scene.fog = new THREE.FogExp2(0x08080a, 0.009);
 
   camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
   camera.position.set(0, 0, 4);
@@ -777,6 +791,7 @@ function initAtlasCosmico() {
   loadDiscoveryLedger();
 
   buildCosmicVoid();
+  buildTectonicRotunda();
   buildNaiSovereignEntity();
   buildShopBay3D();
   setup6DOFControls();
@@ -787,7 +802,7 @@ function initAtlasCosmico() {
 
 // ── VACÍO CÓSMICO & CONFINAMIENTO DE LOS 24 HILOS DE TIMONEL ──────
 function buildCosmicVoid() {
-  scene.add(new THREE.AmbientLight(0x1a1228, 0.8));
+  scene.add(new THREE.AmbientLight(0x0e0d14, 0.95));
 
   // Campo Estelar Esférico Omnidireccional (1.800 estrellas en el vacío 3D)
   const starGeo = new THREE.BufferGeometry();
@@ -801,13 +816,162 @@ function buildCosmicVoid() {
     starPos[i*3+2] = r * Math.cos(ph) * Math.cos(th);
   }
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.035, transparent: true, opacity: 0.5 }));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xf4f1ea, size: 0.032, transparent: true, opacity: 0.45 }));
   scene.add(stars);
 
   // Instanciar los 24 Astros Matemáticos con sus Modelos Nativos y Motor de Auto-Resolución
   ARTWORKS_24.forEach((data, index) => {
     createLivingMathematicalAstro(data, index);
   });
+}
+
+// ── ROTONDA TECTÓNICA & PLATAFORMA DE OBSERVACIÓN DE TIMONEL ───────
+function buildTectonicRotunda() {
+  const rotundaGroup = new THREE.Group();
+  rotundaGroup.position.set(0, -1.8, 0);
+
+  // 1. Plataforma Monumental de Basalto Escalonado (R = 10m)
+  const baseFloorGeo = new THREE.CylinderGeometry(10.0, 10.4, 0.35, 64);
+  const baseFloorMat = new THREE.MeshStandardMaterial({
+    color: 0x0c0c10,
+    roughness: 0.85,
+    metalness: 0.15
+  });
+  const baseFloor = new THREE.Mesh(baseFloorGeo, baseFloorMat);
+  baseFloor.position.y = -0.175;
+  rotundaGroup.add(baseFloor);
+
+  // Zócalo inferior de granito oscuro
+  const subPlinthGeo = new THREE.CylinderGeometry(11.2, 11.5, 0.2, 64);
+  const subPlinthMat = new THREE.MeshStandardMaterial({
+    color: 0x070709,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  const subPlinth = new THREE.Mesh(subPlinthGeo, subPlinthMat);
+  subPlinth.position.y = -0.45;
+  rotundaGroup.add(subPlinth);
+
+  // Anillos concéntricos de bronce incrustados en el pavimento
+  const bronzeMat = new THREE.MeshStandardMaterial({
+    color: 0xc5a059,
+    roughness: 0.28,
+    metalness: 0.85
+  });
+  [3.2, 6.4, 9.2].forEach(r => {
+    const ringGeo = new THREE.TorusGeometry(r, 0.025, 16, 64);
+    const ringMesh = new THREE.Mesh(ringGeo, bronzeMat);
+    ringMesh.rotation.x = Math.PI / 2;
+    ringMesh.position.y = 0.01;
+    rotundaGroup.add(ringMesh);
+  });
+
+  // Juntas radiales de piedra (12 ejes de brújula astronómica)
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    const jointGeo = new THREE.BoxGeometry(0.03, 0.02, 6.0);
+    const jointMesh = new THREE.Mesh(jointGeo, bronzeMat);
+    jointMesh.position.set(Math.sin(angle) * 6.2, 0.01, Math.cos(angle) * 6.2);
+    jointMesh.rotation.y = angle;
+    rotundaGroup.add(jointMesh);
+  }
+
+  // 2. Medallón Central de Astrolabio / Rosa de los Vientos de Timonel
+  const medallionGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.04, 48);
+  const medallionMat = new THREE.MeshStandardMaterial({
+    color: 0x14141c,
+    roughness: 0.5,
+    metalness: 0.8
+  });
+  const medallion = new THREE.Mesh(medallionGeo, medallionMat);
+  medallion.position.y = 0.02;
+  rotundaGroup.add(medallion);
+
+  // Anillo exterior del medallón en bronce
+  const medRingGeo = new THREE.TorusGeometry(2.2, 0.04, 16, 48);
+  const medRing = new THREE.Mesh(medRingGeo, bronzeMat);
+  medRing.rotation.x = Math.PI / 2;
+  medRing.position.y = 0.04;
+  rotundaGroup.add(medRing);
+
+  // Cruz central de ejes coordenados Timonel F2
+  const axisX = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.02, 0.04), bronzeMat);
+  axisX.position.y = 0.045;
+  rotundaGroup.add(axisX);
+  const axisZ = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 3.6), bronzeMat);
+  axisZ.position.y = 0.045;
+  rotundaGroup.add(axisZ);
+
+  // 3. Balaustrada Perimetral Minimalista (Acero oscuro & Bronce)
+  const steelMat = new THREE.MeshStandardMaterial({
+    color: 0x16161c,
+    roughness: 0.45,
+    metalness: 0.75
+  });
+  // Pasamanos circular perimetral a 0.85m de altura
+  const handrailGeo = new THREE.TorusGeometry(9.6, 0.04, 16, 64);
+  const handrail = new THREE.Mesh(handrailGeo, bronzeMat);
+  handrail.rotation.x = Math.PI / 2;
+  handrail.position.y = 0.85;
+  rotundaGroup.add(handrail);
+
+  // 12 Columnas Estructurales hacia el Óculo Cenital
+  const oculusRingGeo = new THREE.TorusGeometry(4.2, 0.06, 16, 64);
+  const oculusRing = new THREE.Mesh(oculusRingGeo, bronzeMat);
+  oculusRing.rotation.x = Math.PI / 2;
+  oculusRing.position.y = 11.5;
+  rotundaGroup.add(oculusRing);
+
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    const px = Math.sin(angle) * 9.6;
+    const pz = Math.cos(angle) * 9.6;
+
+    // Balautra inferior
+    const postGeo = new THREE.CylinderGeometry(0.035, 0.045, 0.85, 16);
+    const post = new THREE.Mesh(postGeo, bronzeMat);
+    post.position.set(px, 0.425, pz);
+    rotundaGroup.add(post);
+
+    // Costilla arquitectónica curva que asciende al óculo cenital
+    const curvePoints = [];
+    const steps = 14;
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const cy = t * 11.5;
+      const cr = 9.6 * (1 - t) + 4.2 * t + Math.sin(t * Math.PI) * 0.8;
+      curvePoints.push(new THREE.Vector3(Math.sin(angle) * cr, cy, Math.cos(angle) * cr));
+    }
+    const ribCurve = new THREE.CatmullRomCurve3(curvePoints);
+    const ribGeo = new THREE.TubeGeometry(ribCurve, 20, 0.05, 8, false);
+    const rib = new THREE.Mesh(ribGeo, steelMat);
+    rotundaGroup.add(rib);
+
+    // Foco de suelo empotrado (3200K Galería)
+    if (i % 2 === 0) {
+      const spot = new THREE.SpotLight(0xffeedd, 1.2, 14, Math.PI / 5, 0.45);
+      spot.position.set(px * 0.9, 0.1, pz * 0.9);
+      spot.target.position.set(px * 0.5, 5.0, pz * 0.5);
+      rotundaGroup.add(spot);
+      rotundaGroup.add(spot.target);
+
+      // Aro de luminaria empotrada
+      const fixtureGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 16);
+      const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
+      const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+      fixture.position.set(px * 0.9, 0.02, pz * 0.9);
+      rotundaGroup.add(fixture);
+    }
+  }
+
+  // Foco cenital sobre el medallón central
+  const centerSpot = new THREE.SpotLight(0xffeedd, 1.8, 12, Math.PI / 6, 0.4);
+  centerSpot.position.set(0, 8.0, 0);
+  centerSpot.target.position.set(0, 0, 0);
+  rotundaGroup.add(centerSpot);
+  rotundaGroup.add(centerSpot.target);
+
+  scene.add(rotundaGroup);
 }
 
 // ── CREACIÓN DE ASTRO CON ANILLO DE TIMONEL & MODELO MATEMÁTICO REAL ─
@@ -820,14 +984,14 @@ function createLivingMathematicalAstro(data, index) {
   const z = -data.radius * Math.cos(data.phi) * Math.cos(data.theta);
   astroGroup.position.set(x, y, z);
 
-  // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m)
+  // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m) en bronce / oro
   const ringGeo = new THREE.RingGeometry(1.58, 1.62, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xc5a059, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
   const timonelRing = new THREE.Mesh(ringGeo, ringMat);
   astroGroup.add(timonelRing);
 
-  // 2. Luz de Resonancia Cuántica
-  const pointLight = new THREE.PointLight(0x8b5cf6, 1.1, 5.0);
+  // 2. Luz de Resonancia Cálida
+  const pointLight = new THREE.PointLight(0xdfc285, 1.2, 5.5);
   astroGroup.add(pointLight);
 
   // 3. Sistema Matemático Físico Real de la Ley
@@ -1973,15 +2137,15 @@ function processDirectCheckout() {
   const prodName = document.getElementById('shop-prod-title').textContent;
   const price = document.getElementById('shop-prod-price').textContent;
   const msg = encodeURIComponent(
-    `🏛️ *NUEVO PEDIDO ATELIER MATEMÁTICO*\n\n` +
-    `👤 *Cliente:* ${name}\n` +
-    `📍 *Despacho:* ${address}\n` +
-    `📱 *WhatsApp:* ${phone}\n` +
-    `🖼️ *Producto:* ${prodName}\n` +
-    `💰 *Total a Pagar:* ${price}\n` +
-    `🛰️ *Nodo Donante:* #${swarmNodeId}\n` +
-    `⏳ *Plazo:* Confección a pedido (10-15 días hábiles)\n\n` +
-    `Hola Matías! He configurado mi pedido desde el Observatorio de 24 Leyes. ¿Cómo procedo al pago del 100% para iniciar la confección?`
+    `*ATELIER MATEMÁTICO — ENCARGO DE AUTOR*\n\n` +
+    `· Cliente: ${name}\n` +
+    `· Despacho: ${address}\n` +
+    `· WhatsApp: ${phone}\n` +
+    `· Obra: ${prodName}\n` +
+    `· Inversión: ${price}\n` +
+    `· Nodo Timonel: #${swarmNodeId}\n` +
+    `· Plazo estimado: Confección a pedido (10-15 días hábiles)\n\n` +
+    `Hola Matías, he configurado mi encargo desde la Rotonda del Atelier Matemático. Deseo coordinar el anticipo para iniciar la manufactura.`
   );
   window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
 }
@@ -2329,9 +2493,14 @@ function enterCapsule(enableVoice) {
   voiceGuideEnabled = enableVoice;
   updateVoiceStatusUI();
   const foyer = document.getElementById('foyer-screen');
-  foyer.style.opacity = '0';
-  setTimeout(() => foyer.classList.add('hidden'), 1000);
-  speakNai("Bienvenido al Atlas Cósmico. 24 leyes de la ciencia se están desenredando en el espacio.");
+  if (foyer) {
+    foyer.style.opacity = '0';
+    setTimeout(() => {
+      foyer.style.setProperty('display', 'none', 'important');
+      foyer.classList.add('hidden');
+    }, 800);
+  }
+  speakNai("Bienvenido a la Rotonda de Timonel. 24 leyes de la ciencia se están desenredando en silicio.");
 }
 
 function toggleVoiceGuide() {
@@ -2341,8 +2510,10 @@ function toggleVoiceGuide() {
 }
 
 function updateVoiceStatusUI() {
-  document.getElementById('voice-status-icon').textContent = voiceGuideEnabled ? '🔊' : '🔇';
-  document.getElementById('voice-status-text').textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
+  const icon = document.getElementById('voice-status-icon');
+  if (icon) icon.textContent = voiceGuideEnabled ? 'Audio On' : 'Audio Off';
+  const txt = document.getElementById('voice-status-text');
+  if (txt) txt.textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
 }
 
 function speakNai(text) {
@@ -2428,9 +2599,24 @@ function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => ite
 function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll = []; updateRollUI(); } }
 function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
 
-window.addEventListener('DOMContentLoaded', () => {
+function bootAtlas() {
   initAtlasCosmico();
-});
+  if (window.location.href.includes('skip_foyer') || window.location.href.includes('enter') || window.location.hash.includes('enter')) {
+    const foyer = document.getElementById('foyer-screen');
+    if (foyer) {
+      foyer.style.setProperty('display', 'none', 'important');
+      foyer.classList.add('hidden');
+      foyer.remove();
+    }
+    voiceGuideEnabled = false;
+  }
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootAtlas);
+} else {
+  bootAtlas();
+}
 </script>
 </body>
 </html>

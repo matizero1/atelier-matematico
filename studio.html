@@ -3,194 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Atelier Matemático — 24 Obras & Problemas del Milenio</title>
+<title>Mesa de Trazado Técnico — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#030308; --card:rgba(10,10,24,0.78); --border:rgba(140,120,255,0.15); }
-  body { background:var(--bg); color:#e2e8f0; font-family:'Plus Jakarta Sans',sans-serif; overflow-x:hidden; }
-  .serif  { font-family:'Cinzel',serif; }
-  .mono   { font-family:'Space Mono',monospace; }
-  .glass  { background:var(--card); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--border); }
-  .glow:hover { border-color:rgba(168,85,247,.45); box-shadow:0 0 25px rgba(139,92,246,.25); }
-  ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-thumb { background:rgba(139,92,246,.3); border-radius:3px; }
+  :root {
+    --bg-base: #08080a;
+    --bg-surface: #101014;
+    --bg-elevated: #16161c;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(197, 160, 89, 0.3);
+    --gold: #c5a059;
+    --gold-light: #dfc285;
+    --text-primary: #f4f1ea;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background-color: var(--bg-base) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    margin: 0; padding: 0;
+    overflow-x: hidden;
+  }
+  .serif { font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
+  .mono  { font-family: 'Space Mono', monospace; }
+  .luxury-border { border: 1px solid var(--border-subtle); }
+  .luxury-gold-border { border: 1px solid var(--border-gold); }
+  
+  /* Scrollbar fina */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* ========================================================================= */
+  /* TRANSICIONES CINEMÁTICAS NATIVAS (VIEW TRANSITIONS API W3C)               */
+  /* ========================================================================= */
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root) {
+    animation: luxury-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  ::view-transition-new(root) {
+    animation: luxury-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  @keyframes luxury-fade-out {
+    0% { opacity: 1; transform: scale(1); filter: blur(0px); }
+    100% { opacity: 0; transform: scale(0.99); filter: blur(3px); }
+  }
+  @keyframes luxury-fade-in {
+    0% { opacity: 0; transform: scale(1.01); filter: blur(3px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0px); }
+  }
+
   @keyframes recordPulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.3; transform:scale(1.2); } }
   .recording-indicator { animation: recordPulse 1s infinite ease-in-out; }
 </style>
 </head>
-<body class="selection:bg-purple-900 selection:text-purple-100">
+<body class="selection:bg-amber-900 selection:text-amber-100 min-h-screen flex flex-col bg-[#08080a]">
 
-<!-- NAVBAR -->
-<header class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5 py-3 px-6 md:px-10 flex justify-between items-center transition-all">
-  <div class="flex items-center gap-3">
-    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-500 to-cyan-400 p-[1px] shadow-lg shadow-purple-500/20">
-      <div class="w-full h-full bg-[#070614] rounded-full flex items-center justify-center text-purple-300 text-xs mono">∑</div>
+  <!-- ========================================================================= -->
+  <!-- 1. HEADER EDITORIAL DISCRETO                                              -->
+  <!-- ========================================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#08080a]/90 backdrop-blur-md border-b border-white/[0.08] px-6 md:px-10 py-3.5 flex justify-between items-center transition-all">
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest">
+        <span>←</span>
+        <span>Pórtico</span>
+      </a>
+      <span class="text-white/20">|</span>
+      <div class="flex items-center gap-2.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span class="serif text-xs md:text-sm tracking-[0.2em] text-[#f4f1ea] font-medium">SALA III · MESA DE TRAZADO</span>
+        <span class="hidden md:inline-block text-[9px] mono uppercase tracking-widest px-2 py-0.5 rounded border border-[#c5a059]/30 text-[#c5a059]">
+          Silicio Nativo 60 FPS
+        </span>
+      </div>
     </div>
-    <div>
-      <span class="serif tracking-[.2em] text-white text-sm font-semibold block">ATELIER MATEMÁTICO</span>
-      <span class="text-[9px] text-purple-300/60 uppercase tracking-widest mono block">24 Obras · Problemas del Milenio · v4.0</span>
+
+    <!-- ACCESOS RÁPIDOS -->
+    <div class="flex items-center gap-3">
+      <a href="shop.html" class="text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
+        Vitrina 3D
+      </a>
+      <a href="museum.html" class="text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition hidden sm:inline-block">
+        Rotonda 3D
+      </a>
+      <button onclick="downloadArtwork()" class="text-xs mono uppercase tracking-wider font-semibold text-[#08080a] bg-[#c5a059] hover:bg-[#dfc285] px-4 py-1.5 rounded-full transition shadow-sm flex items-center gap-1.5">
+        <span>Lámina HD</span>
+      </button>
     </div>
-  </div>
-  
-  <!-- ACCIONES DE NAVEGACIÓN Y DESCARGA -->
-  <div class="flex items-center gap-2">
-    <a href="index.html" class="text-xs text-slate-300 hover:text-white transition px-2.5 py-1.5 rounded-lg hover:bg-white/5 mono">← Pórtico</a>
-    <a href="shop.html" class="text-xs text-amber-300 hover:text-amber-200 transition px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mono">Vitrina Boutique</a>
-    <a href="museum.html" class="text-xs text-cyan-300 hover:text-cyan-200 transition px-2.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 mono hidden sm:block">Observatorio 3D</a>
-    <span class="h-4 w-[1px] bg-white/10 hidden sm:block"></span>
-    
-    <!-- Botón Grabación Reel 15s -->
-    <button onclick="startVideoRecording(15)" id="btn-rec-15" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 text-xs px-3 py-1.5 rounded-full font-mono transition group">
-      <span class="w-2 h-2 rounded-full bg-red-500 group-hover:scale-125 transition"></span>
-      <span>Reel 15s</span>
-    </button>
+  </header>
 
-    <!-- Botón Grabación Reel 30s -->
-    <button onclick="startVideoRecording(30)" id="btn-rec-30" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 text-xs px-3 py-1.5 rounded-full font-mono transition group">
-      <span class="w-2 h-2 rounded-full bg-red-400 group-hover:scale-125 transition"></span>
-      <span>Reel 30s</span>
-    </button>
+  <!-- ========================================================================= -->
+  <!-- 2. CONTENIDO PRINCIPAL: WORKBENCH SUIZO DE PRECISIÓN                      -->
+  <!-- ========================================================================= -->
+  <main class="pt-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col gap-8 pb-16 w-full">
 
-    <!-- Botón Exportar Imagen HD -->
-    <button onclick="downloadArtwork()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs px-3.5 py-1.5 rounded-full font-medium transition shadow-md shadow-purple-600/30">
-      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-      <span class="hidden md:inline">Lámina HD</span>
-    </button>
-  </div>
-</header>
-
-<main class="pt-20 px-4 md:px-10 max-w-7xl mx-auto flex flex-col gap-8 pb-16">
-
-  <!-- HERO -->
-  <div class="text-center max-w-3xl mx-auto pt-3">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs mono mb-3">
-      <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-      24 Ecuaciones · Problemas del Milenio & Caos Puro
+    <!-- HERO EDITORIAL SOBRIO -->
+    <div class="text-center max-w-3xl mx-auto pt-4 mb-1">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101014] border border-[#c5a059]/30 text-[#dfc285] text-xs mono mb-3">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span>Mesa de Trazado Técnico · 24 Leyes & Problemas del Milenio</span>
+      </div>
+      <h1 class="text-2xl md:text-4xl serif font-bold tracking-tight text-[#f4f1ea] leading-tight mb-2.5">
+        Donde las ecuaciones del cosmos se convierten en forma y luz
+      </h1>
+      <p class="text-xs md:text-sm text-[#a1a1aa] font-light leading-relaxed max-w-2xl mx-auto">
+        De la Hipótesis de Riemann y la Conjetura de Beal al atractor de Lorenz y Navier-Stokes. Simulación en tiempo real a 60 FPS con captura inercial de video y láminas de alta resolución.
+      </p>
     </div>
-    <h1 class="text-3xl md:text-5xl serif font-bold tracking-tight text-white leading-tight mb-2.5">
-      Donde los enigmas del cosmos<br>
-      <span class="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">se convierten en forma y luz</span>
-    </h1>
-    <p class="text-sm text-slate-400 font-light leading-relaxed">
-      De la Hipótesis de Riemann y la Conjetura de Beal al atractor de Lorenz y Navier-Stokes. Grabación directa en video HD a 60 FPS con un solo clic.
-    </p>
-  </div>
 
-  <!-- VISOR + TARJETA EDITORIAL -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+    <!-- WORKBENCH: VISOR DE DIBUJO TÉCNICO + DOSSIER CURATORIAL -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-    <!-- Canvas -->
-    <div class="lg:col-span-8 glass rounded-2xl p-2 relative flex flex-col min-h-[520px] md:min-h-[640px] shadow-2xl overflow-hidden">
-      <canvas id="stage" class="w-full h-full rounded-xl cursor-grab active:cursor-grabbing bg-[#04020c] block flex-1"></canvas>
+      <!-- MESA DE DIBUJO / CANVAS -->
+      <div class="lg:col-span-8 bg-[#101014] rounded-xl p-2 relative flex flex-col min-h-[520px] md:min-h-[640px] luxury-border shadow-2xl overflow-hidden group">
+        
+        <!-- Canvas Stage -->
+        <canvas id="stage" class="w-full h-full rounded-lg cursor-grab active:cursor-grabbing bg-[#08080a] block flex-1"></canvas>
 
-      <!-- Barra superior flotante del canvas -->
-      <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
-        <div class="glass px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto border-white/10">
-          <span class="text-xs text-purple-300 mono" id="badge">OBRA 21</span>
-          <span class="text-slate-500 text-xs">·</span>
-          <span class="text-xs text-white/90 font-medium" id="title-mini">Los Ceros de Riemann</span>
-        </div>
-
-        <div class="flex gap-2 pointer-events-auto items-center">
-          <!-- Indicador de Grabación Activa -->
-          <div id="rec-banner" class="hidden glass px-3 py-1.5 rounded-full flex items-center gap-2 border-red-500/40 bg-red-950/30 text-red-300 text-xs mono">
-            <span class="w-2.5 h-2.5 rounded-full bg-red-500 recording-indicator"></span>
-            <span id="rec-countdown">GRABANDO 15s</span>
+        <!-- Barra Superior Flotante del Banco de Trabajo -->
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+          <div class="bg-[#101014]/90 backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center gap-2.5 pointer-events-auto luxury-border">
+            <span class="text-xs text-[#c5a059] mono font-bold" id="badge">OBRA 21</span>
+            <span class="text-white/20 text-xs">|</span>
+            <span class="serif text-xs text-[#f4f1ea] tracking-wider" id="title-mini">Los Ceros de Riemann</span>
           </div>
 
-          <button onclick="togglePalette()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">
-            <span class="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-amber-400"></span>Paleta
-          </button>
-          <button onclick="restartArtwork()" class="glass hover:bg-white/10 text-white/80 rounded-full border-white/10 text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono">↻ Reiniciar</button>
+          <div class="flex gap-2 pointer-events-auto items-center">
+            <!-- Indicador de Grabación Activa -->
+            <div id="rec-banner" class="hidden bg-red-950/80 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 border border-red-500/40 text-red-200 text-xs mono">
+              <span class="w-2 h-2 rounded-full bg-red-500 recording-indicator"></span>
+              <span id="rec-countdown">GRABANDO 15s</span>
+            </div>
+
+            <button onclick="togglePalette()" class="bg-[#16161c]/90 backdrop-blur-md hover:bg-white/10 text-[#f4f1ea] rounded-full luxury-border text-[11px] flex items-center gap-1.5 px-3 py-1.5 mono transition">
+              <span class="w-2 h-2 rounded-full bg-[#c5a059]"></span>
+              <span>Paleta</span>
+            </button>
+            <button onclick="restartArtwork()" class="bg-[#16161c]/90 backdrop-blur-md hover:bg-white/10 text-[#a1a1aa] hover:text-[#f4f1ea] rounded-full luxury-border text-[11px] px-3 py-1.5 mono transition">
+              Reiniciar ↻
+            </button>
+          </div>
+        </div>
+
+        <!-- Indicador Inferior de Parámetros -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#101014]/90 backdrop-blur-md px-4 py-1.5 rounded-full pointer-events-none luxury-border text-[11px] text-[#a1a1aa] mono flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+          <span id="hint">Arrastra para rotar la espiral crítica en 3D</span>
         </div>
       </div>
 
-      <!-- Hint inferior -->
-      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass px-4 py-1.5 rounded-full pointer-events-none border-white/10 text-[11px] text-purple-200/70 mono flex items-center gap-2">
-        <svg class="w-3 h-3 text-cyan-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-        <span id="hint">Arrastra para rotar la espiral crítica en 3D</span>
+      <!-- DOSSIER CURATORIAL DE LA OBRA ACTIVA -->
+      <div class="lg:col-span-4 bg-[#101014] rounded-xl p-6 flex flex-col justify-between luxury-border relative overflow-hidden">
+        <div>
+          <div class="flex justify-between text-xs text-[#c5a059] mono mb-2">
+            <span id="category" class="tracking-wider uppercase">PROBLEMA DEL MILENIO · 1859</span>
+            <span id="solver" class="text-[#71717a]">Riemann-Siegel</span>
+          </div>
+          <h2 id="art-title" class="text-2xl serif font-bold text-[#f4f1ea] mb-1">Los Ceros de Riemann</h2>
+          <p id="art-sub" class="text-xs text-[#a1a1aa] mono mb-4">El enigma de un millón de dólares en la línea crítica</p>
+
+          <!-- Ecuación Fundamental -->
+          <div class="bg-[#08080a] rounded-lg p-3.5 border border-white/[0.08] mb-4">
+            <span class="text-[9px] uppercase tracking-widest text-[#71717a] mono block mb-1.5">Ecuación Fundamental</span>
+            <div id="art-eq" class="text-xs mono text-[#dfc285] leading-relaxed whitespace-nowrap overflow-x-auto"></div>
+          </div>
+
+          <!-- Origen Histórico -->
+          <div class="mb-4">
+            <h3 class="text-[10px] uppercase mono tracking-widest text-[#c5a059] mb-1.5 flex items-center gap-1.5">
+              <span class="w-1 h-1 rounded-full bg-[#c5a059]"></span>
+              <span>Origen Histórico</span>
+            </h3>
+            <p id="art-hist" class="text-xs text-[#a1a1aa] leading-relaxed font-light"></p>
+          </div>
+
+          <!-- Interpretación del Artista -->
+          <div class="mb-4">
+            <h3 class="text-[10px] uppercase mono tracking-widest text-[#dfc285] mb-1.5 flex items-center gap-1.5">
+              <span class="w-1 h-1 rounded-full bg-[#dfc285]"></span>
+              <span>Interpretación Visual</span>
+            </h3>
+            <p id="art-poem" class="text-xs text-[#f4f1ea]/90 leading-relaxed italic font-light border-l-2 border-[#c5a059]/40 pl-3"></p>
+          </div>
+        </div>
+        
+        <!-- Acciones de Grabación & Inspección en Tienda -->
+        <div class="pt-4 border-t border-white/[0.08] flex flex-col gap-2.5">
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="startVideoRecording(15)" id="btn-rec-15" class="bg-[#16161c] hover:bg-white/5 border border-white/10 hover:border-red-500/40 text-[#f4f1ea] text-xs py-2 rounded-lg transition flex items-center justify-center gap-1.5 mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              <span>Reel 15s (HD)</span>
+            </button>
+            <button onclick="startVideoRecording(30)" id="btn-rec-30" class="bg-[#16161c] hover:bg-white/5 border border-white/10 hover:border-red-500/40 text-[#f4f1ea] text-xs py-2 rounded-lg transition flex items-center justify-center gap-1.5 mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+              <span>Reel 30s (HD)</span>
+            </button>
+          </div>
+
+          <button onclick="inspectInShop()" class="w-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs py-2.5 rounded-lg font-medium transition flex items-center justify-center gap-2 mono shadow-sm">
+            <span>Inspeccionar en Vitrina 3D Enmarcada →</span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Tarjeta Editorial -->
-    <div class="lg:col-span-4 glass rounded-2xl p-6 flex flex-col justify-between border-white/10 relative overflow-hidden">
-      <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div>
-        <div class="flex justify-between text-xs text-purple-400 mono mb-2">
-          <span id="category">PROBLEMA DEL MILENIO · 1859</span>
-          <span id="solver">Riemann-Siegel Formula</span>
+    <!-- CATÁLOGO 24 OBRAS -->
+    <div id="cat" class="pt-8">
+      <div class="flex justify-between items-end mb-6 border-b border-white/[0.08] pb-4">
+        <div>
+          <span class="text-xs uppercase tracking-widest text-[#c5a059] mono block mb-1">Colección Permanente</span>
+          <h2 class="text-2xl serif font-bold text-[#f4f1ea]">Las 24 Dimensiones de la Materia</h2>
         </div>
-        <h2 id="art-title" class="text-2xl serif font-bold text-white mb-1">Los Ceros de Riemann</h2>
-        <p id="art-sub" class="text-xs text-purple-300/70 mono mb-4">El enigma de un millón de dólares en la línea crítica</p>
-
-        <div class="bg-black/40 rounded-xl p-3 border border-white/5 mb-4">
-          <span class="text-[10px] uppercase tracking-wider text-slate-400 mono block mb-1">Ecuación Fundamental</span>
-          <div id="art-eq" class="text-xs mono text-cyan-300/90 leading-relaxed whitespace-nowrap overflow-x-auto"></div>
-        </div>
-
-        <div class="mb-4">
-          <h3 class="text-[10px] uppercase mono tracking-wider text-purple-300 mb-1.5 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>El Origen Histórico
-          </h3>
-          <p id="art-hist" class="text-xs text-slate-300 leading-relaxed font-light"></p>
-        </div>
-
-        <div class="mb-4">
-          <h3 class="text-[10px] uppercase mono tracking-wider text-cyan-300 mb-1.5 flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>Interpretación del Artista
-          </h3>
-          <p id="art-poem" class="text-xs text-slate-300/90 leading-relaxed italic font-light border-l-2 border-purple-500/40 pl-3"></p>
-        </div>
+        <p class="text-xs text-[#71717a] mono hidden md:block">Haz clic en cualquier obra para cargarla en la mesa</p>
       </div>
-      
-      <!-- Botones de Acción Directa -->
-      <div class="pt-3 border-t border-white/5 flex flex-col gap-2">
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="startVideoRecording(15)" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-200 text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 mono">
-            <span class="w-2 h-2 rounded-full bg-red-400"></span>
-            Video 15s (Reel)
-          </button>
-          <button onclick="startVideoRecording(30)" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-200 text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 mono">
-            <span class="w-2 h-2 rounded-full bg-red-400"></span>
-            Video 30s (TikTok)
-          </button>
-        </div>
-        <button onclick="downloadArtwork()" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2 mono">
-          <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          Exportar Lámina HD (PNG)
-        </button>
-      </div>
+      <div id="catalog-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
     </div>
-  </div>
 
-  <!-- CATÁLOGO 24 OBRAS -->
-  <div id="cat" class="pt-10">
-    <div class="flex justify-between items-end mb-6 border-b border-white/5 pb-4">
-      <div>
-        <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-1">Colección Permanente</span>
-        <h2 class="text-2xl serif font-bold text-white">Las 24 Dimensiones de la Materia & Enigmas del Milenio</h2>
-      </div>
-      <p class="text-xs text-slate-400 mono hidden md:block">Haz clic en cualquier obra para cargarla</p>
+    <!-- MANIFIESTO EDITORIAL DEL ATELIER -->
+    <div class="my-6 bg-[#101014] rounded-xl p-8 luxury-border max-w-3xl">
+      <span class="text-xs uppercase tracking-widest text-[#c5a059] mono block mb-2">Manifiesto del Atelier</span>
+      <h2 class="text-xl md:text-2xl serif font-bold text-[#f4f1ea] mb-3 leading-snug">"El arte más puro no imita la naturaleza: habla su mismo lenguaje matemático."</h2>
+      <p class="text-xs md:text-sm text-[#a1a1aa] font-light leading-relaxed mb-3">
+        Veinticuatro capítulos de la historia de la ciencia y la matemática, incluyendo los grandes Enigmas del Milenio: Bernhard Riemann, Grigori Perelman, Claude Navier y Andrew Beal. Cada cuadro es una simulación física real en silicio.
+      </p>
+      <p class="text-[#c5a059] font-medium text-xs mono">Desarrollado por Matías Cortés Figueroa · Timonel Suite · Santiago de Chile.</p>
     </div>
-    <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
-  </div>
 
-  <!-- MANIFIESTO -->
-  <div class="my-8 glass rounded-2xl p-8 border-white/10 max-w-3xl">
-    <span class="text-xs uppercase tracking-widest text-purple-400 mono block mb-2">Manifiesto del Atelier</span>
-    <h2 class="text-2xl serif font-bold text-white mb-4 leading-snug">"El arte más puro no imita la naturaleza: habla su mismo lenguaje matemático."</h2>
-    <p class="text-sm text-slate-300 font-light leading-relaxed mb-3">
-      Veinticuatro capítulos de la historia de la ciencia y la matemática, incluyendo los grandes Enigmas del Milenio: Bernhard Riemann, Grigori Perelman, Claude Navier y Andrew Beal. Cada cuadro es una simulación física real en silicio.
-    </p>
-    <p class="text-purple-300 font-medium text-xs mono">Obra desarrollada por Matías Cortés Figueroa · Timonel Suite · Santiago de Chile.</p>
-  </div>
+  </main>
 
-</main>
-
-<footer class="border-t border-white/5 py-6 text-center text-xs text-slate-500 mono">
-  Atelier Matemático © 2026 · Creado para imprimir, contemplar y regalar · Santiago, Chile
-</footer>
+  <footer class="border-t border-white/[0.08] py-8 text-center text-xs text-[#71717a] mono bg-[#08080a]">
+    Atelier Matemático © 2026 · Creado para imprimir, contemplar y regalar · Santiago de Chile
+  </footer>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -1280,6 +1331,10 @@ const STEPS =[step01,step02,step03,step04,step05,step06,step07,step08,step09,ste
 
 function togglePalette(){ currentPal=(currentPal+1)%4; restartArtwork(); }
 
+function inspectInShop() {
+  window.location.href = `shop.html?art=${currentArt}`;
+}
+
 function selectArtwork(idx){
   currentArt=idx;
   const d=ARTWORKS[idx];
@@ -1294,15 +1349,16 @@ function selectArtwork(idx){
   document.getElementById('art-poem').textContent=d.poem;
   document.getElementById('hint').textContent=d.hint;
   document.querySelectorAll('#catalog-grid > div').forEach((c,i)=>{
-    c.classList.toggle('border-purple-500/60',i===idx);
-    c.classList.toggle('bg-purple-900/20',i===idx);
+    c.classList.toggle('border-[#c5a059]', i===idx);
+    c.classList.toggle('bg-[#c5a059]/10', i===idx);
+    c.classList.toggle('border-white/[0.08]', i!==idx);
   });
   restartArtwork();
 }
 
 function restartArtwork(){
   cancelAnimationFrame(animId);
-  ctx.fillStyle='#04020c'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#08080a'; ctx.fillRect(0,0,W,H);
   INITS[currentArt]();
   loop();
 }
@@ -1357,17 +1413,18 @@ function downloadArtwork(){
 
 function buildCatalog(){
   const grid=document.getElementById('catalog-grid');
+  grid.innerHTML = '';
   ARTWORKS.forEach((d,i)=>{
     const el=document.createElement('div');
     const isMillennium = i >= 20;
-    el.className=`glass glow rounded-xl p-3 cursor-pointer transition transform hover:-translate-y-0.5 relative group ${isMillennium ? 'border-amber-500/30 bg-amber-950/10' : ''}`;
+    el.className=`bg-[#101014] hover:bg-[#16161c] rounded-lg p-3 cursor-pointer transition border border-white/[0.08] relative group ${isMillennium ? 'border-[#c5a059]/40' : ''}`;
     el.innerHTML=`
-      <div class="flex justify-between items-center text-[9px] ${isMillennium ? 'text-amber-400 font-bold' : 'text-slate-400'} mono mb-1.5">
+      <div class="flex justify-between items-center text-[10px] ${isMillennium ? 'text-[#c5a059] font-bold' : 'text-[#71717a]'} mono mb-1.5">
         <span>OBRA ${d.badge}</span>
-        ${isMillennium ? '<span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[8px]">$1M</span>' : ''}
+        ${isMillennium ? '<span class="px-1.5 py-0.2 rounded border border-[#c5a059]/30 text-[#dfc285] text-[9px]">MILLENNIUM</span>' : ''}
       </div>
-      <h3 class="serif font-bold text-white text-xs mb-0.5 group-hover:text-purple-300 transition leading-tight truncate">${d.title}</h3>
-      <div class="text-[9px] mono ${isMillennium ? 'text-amber-300/80' : 'text-cyan-400/70'} mt-1 truncate">${d.cat.split('·')[0].trim()}</div>`;
+      <h3 class="serif font-semibold text-[#f4f1ea] text-xs mb-0.5 group-hover:text-[#dfc285] transition leading-tight truncate">${d.title}</h3>
+      <div class="text-[9px] mono ${isMillennium ? 'text-[#c5a059]/80' : 'text-[#a1a1aa]/70'} mt-1 truncate">${d.cat.split('·')[0].trim()}</div>`;
     el.onclick=()=>selectArtwork(i);
     grid.appendChild(el);
   });
@@ -1376,7 +1433,67 @@ function buildCatalog(){
 window.addEventListener('resize',()=>{ resize(); restartArtwork(); });
 resize();
 buildCatalog();
-selectArtwork(20); // Arranca mostrando Los Ceros de Riemann
+
+// Leer parámetro ?art= de la URL si existe
+const urlParams = new URLSearchParams(window.location.search);
+const initialArt = parseInt(urlParams.get('art'));
+if (!isNaN(initialArt) && initialArt >= 0 && initialArt < ARTWORKS.length) {
+  selectArtwork(initialArt);
+} else {
+  selectArtwork(20); // Arranca mostrando Los Ceros de Riemann
+}
+</script>
+
+<!-- CURSOR CINÉTICO DE BRONCE (SUTIL) -->
+<div id="kinetic-cursor" class="fixed pointer-events-none z-[100] w-6 h-6 rounded-full border border-[#c5a059]/60 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-out opacity-0 hidden md:block"></div>
+
+<!-- SCRIPT LENIS SMOOTH SCROLL & MICRO-INTERACCIONES -->
+<script src="js/lenis.min.js"></script>
+<script>
+  if (typeof Lenis !== 'undefined') {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 0.85
+    });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  }
+  const cursor = document.getElementById('kinetic-cursor');
+  if (cursor && window.matchMedia('(pointer: fine)').matches) {
+    cursor.classList.remove('opacity-0');
+    let mouseX = -100, mouseY = -100;
+    let cursorX = -100, cursorY = -100;
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    function renderCursor() {
+      cursorX += (mouseX - cursorX) * 0.18;
+      cursorY += (mouseY - cursorY) * 0.18;
+      cursor.style.left = `${cursorX}px`;
+      cursor.style.top = `${cursorY}px`;
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+    document.querySelectorAll('a, button, [onclick], input, select').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1.6)';
+        cursor.style.borderColor = '#dfc285';
+        cursor.style.backgroundColor = 'rgba(197, 160, 89, 0.08)';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        cursor.style.borderColor = 'rgba(197, 160, 89, 0.6)';
+        cursor.style.backgroundColor = 'transparent';
+      });
+    });
+  }
 </script>
 </body>
 </html>

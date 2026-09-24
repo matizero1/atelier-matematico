@@ -135,13 +135,6 @@
   </div>
 </div>
 
-<!-- BOTÓN FLOTANTE SUPERIOR: REGRESAR AL TELESCOPIO DE LA ROTONDA -->
-<div id="confinement-return-bar" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-  <button onclick="returnToRotunda()" class="bg-[#101014]/95 hover:bg-[#16161c] text-[#dfc285] hover:text-[#f4f1ea] text-xs px-5 py-2.5 rounded-full luxury-gold-border mono transition flex items-center gap-2 shadow-2xl backdrop-blur-md">
-    <span>← Regresar a la Rotonda de Basalto (Telescopio)</span>
-  </button>
-</div>
-
 <!-- CANVAS PRINCIPAL 3D -->
 <canvas id="webgl-canvas"></canvas>
 
@@ -169,24 +162,24 @@
   <div class="max-w-4xl w-full mx-auto my-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
     <div class="w-64 md:w-80 relative shrink-0">
       <div class="absolute -inset-6 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none"></div>
-      <img src="assets/nai_foyer.jpg" alt="NAI" class="w-full rounded-2xl shadow-2xl border border-white/10 nai-pulse" />
+      <img src="assets/atelier_architectural_pavilion.jpg" alt="Pabellón Arquitectónico" class="w-full aspect-[4/3] object-cover rounded-2xl shadow-2xl border border-white/10" />
       <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#101014]/90 backdrop-blur-md px-3.5 py-1 rounded-full text-[10px] mono text-[#dfc285] luxury-border flex items-center gap-2 whitespace-nowrap shadow-xl">
-        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059] animate-pulse"></span>
-        <span>NAI & Timonel · Guía & Auditor</span>
+        <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+        <span>Atelier Matemático · Pabellón 3D</span>
       </div>
     </div>
 
     <div class="flex-1 text-center md:text-left">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101014] border border-[#c5a059]/30 text-[#dfc285] text-xs mono mb-3">
         <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
-        <span>Observatorio Arquitectónico en 3D</span>
+        <span>Rotonda de Observación Telescópica</span>
       </div>
-      <h1 class="text-2xl md:text-4xl serif font-bold text-[#f4f1ea] mb-4 leading-tight">
-        "Cada fórmula es un ovillo de luz.<br>
-        <span class="text-[#c5a059]">Buscando desenredarse en el vacío."</span>
+      <h1 class="text-2xl md:text-4xl serif font-normal text-[#f4f1ea] mb-4 leading-tight">
+        "La matemática es la única memoria<br>
+        <span class="text-[#c5a059]">que el universo no puede olvidar."</span>
       </h1>
       <p class="text-xs md:text-sm text-[#a1a1aa] font-light leading-relaxed mb-6">
-        Veinticuatro leyes fundamentales de la humanidad confinadas métricamente por Timonel F2. Desde esta rotonda de basalto puedes orbitar las esculturas matemáticas, explorar su auto-resolución o ingresar a la vitrina física de enmarcado.
+        Veinticuatro leyes fundamentales de la física y la topología confinadas en silicio nativo. Desde esta cubierta de basalto, barre el cosmos a través del telescopio colimador o adéntrate en la órbita inercial de cada escultura matemática.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
@@ -194,7 +187,7 @@
           <span>Entrar al Observatorio 3D →</span>
         </button>
         <a href="shop.html" class="bg-[#101014] hover:bg-white/10 text-[#f4f1ea] text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 luxury-border">
-          <span>Vitrina de Enmarcado 3D</span>
+          <span>Vitrina en Pared</span>
         </a>
       </div>
     </div>
@@ -221,7 +214,7 @@
   </div>
 
   <!-- MONITOR DE RED ENJAMBRE NAI -->
-  <div class="hidden xl:flex items-center gap-3 bg-[#101014]/90 backdrop-blur-md px-4 py-1.5 rounded-full luxury-border text-[11px] mono pointer-events-auto shadow-2xl">
+  <div id="swarm-telemetry-pill" class="hidden xl:flex items-center gap-3 bg-[#101014]/90 backdrop-blur-md px-4 py-1.5 rounded-full luxury-border text-[11px] mono pointer-events-auto shadow-2xl">
     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
     <span class="text-[#a1a1aa]">Nodo <strong id="swarm-node-id" class="text-[#f4f1ea]">#CL-7482</strong></span>
     <span class="text-white/20">|</span>
@@ -230,6 +223,13 @@
     <span class="text-emerald-400">142 Nodos en Red</span>
     <span class="text-white/20">|</span>
     <span class="text-[#dfc285]">Timonel F2 Activo</span>
+  </div>
+
+  <!-- BOTÓN DE RETORNO AL TELESCOPIO (SOLO EN MODO ESFERA S², CENTRADO SIN COLISIONAR) -->
+  <div id="confinement-return-bar" class="hidden pointer-events-auto">
+    <button onclick="returnToRotunda()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold px-5 py-2 rounded-full mono transition flex items-center gap-2 shadow-2xl whitespace-nowrap">
+      <span>← Regresar a la Rotonda de Basalto (Telescopio)</span>
+    </button>
   </div>
 
   <!-- DERECHA: MESA 2D, VITRINA 3D, VOZ, CARRETE -->
@@ -257,78 +257,59 @@
 <!-- ========================================================================= -->
 <!-- HUD LATERAL DE PROXIMIDAD: TELEMETRÍA DE TIMONEL & RELATO DE NAI           -->
 <!-- ========================================================================= -->
-<div id="orbital-hud-card" class="fixed top-20 right-6 z-30 max-w-sm bg-[#101014]/95 backdrop-blur-xl rounded-xl p-5 luxury-border shadow-2xl transition-all duration-500 opacity-0 translate-x-8 pointer-events-auto">
+<div id="orbital-hud-card" class="fixed top-20 right-6 z-30 max-w-sm bg-[#0e0e12]/85 backdrop-blur-2xl rounded-2xl p-5 luxury-gold-border shadow-2xl transition-all duration-500 opacity-0 translate-x-8 pointer-events-auto">
   <div class="flex justify-between items-center text-[10px] mono text-[#c5a059] mb-1.5">
     <span id="hud-cat" class="uppercase tracking-wider">TEORÍA DEL CAOS · 1963</span>
-    <span id="hud-solver" class="text-[#71717a]">Timonel: Res ≤ 1e-6</span>
-  </div>
-  <h2 id="hud-title" class="text-xl serif font-bold text-[#f4f1ea] mb-0.5">El Vuelo de Lorenz</h2>
-  <p id="hud-sub" class="text-[11px] text-[#a1a1aa] mono mb-3">Atractor Caótico Aperiodico</p>
-
-  <div class="bg-[#08080a] rounded-lg p-3 border border-white/[0.08] mb-3">
-    <div class="text-[9px] uppercase tracking-widest text-[#71717a] mono mb-1">Ecuación & Hilos de Confinamiento</div>
-    <div id="hud-eq" class="text-[11px] mono text-[#dfc285] leading-relaxed"></div>
-  </div>
-
-  <p id="hud-hist" class="text-xs text-[#a1a1aa] leading-relaxed font-light mb-3 line-clamp-3"></p>
-
-  <!-- BARRA DE AUTO-RESOLUCIÓN & CONTROL DE ENTROPÍA (TIMONEL F2) -->
-  <div class="bg-[#08080a] rounded-lg p-3 border border-white/[0.08] mb-3 space-y-1.5">
-    <div class="flex justify-between items-center text-[10px] mono">
-      <span class="text-[#71717a]">ESTADO RELAJACIÓN:</span>
-      <span id="hud-relax-state" class="text-[#dfc285] font-bold">CRISTALIZADO</span>
-    </div>
-    <div class="w-full bg-[#16161c] rounded-full h-1.5 overflow-hidden">
-      <div id="hud-relax-progress" class="bg-gradient-to-r from-[#c5a059] to-[#dfc285] h-full w-full transition-all duration-300"></div>
-    </div>
-    <div class="flex justify-between items-center text-[9px] mono text-[#71717a]">
-      <span>Residuo: <strong id="hud-residual-val" class="text-[#dfc285]">0.002</strong></span>
-      <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">0.998</strong></span>
-    </div>
-  </div>
-
-  <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2.5 shadow-sm">
-    <span>Perturbar Métrica (Ver Auto-Resolución)</span>
-  </button>
-
-  <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
-    <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#f4f1ea] py-2 rounded-lg font-mono text-xs flex items-center justify-center gap-1.5 transition border border-white/10">
-      <span>Capturar al Carrete</span>
+    <button onclick="toggleHudCardMinimize()" id="btn-toggle-hud" class="text-[#a1a1aa] hover:text-[#f4f1ea] text-[10px] mono px-2 py-0.5 rounded border border-white/10 hover:border-white/20 transition">
+      Ocultar ✕
     </button>
-    <button onclick="navigateToActiveShop()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] py-2 px-3 rounded-lg font-mono text-xs font-semibold flex items-center justify-center transition">
-      Vitrina →
+  </div>
+  <div id="hud-card-content">
+    <h2 id="hud-title" class="text-xl serif font-bold text-[#f4f1ea] mb-0.5">El Vuelo de Lorenz</h2>
+    <p id="hud-sub" class="text-[11px] text-[#a1a1aa] mono mb-3">Atractor Caótico Aperiodico</p>
+
+    <div class="bg-[#08080a]/90 rounded-lg p-3 border border-white/[0.08] mb-3">
+      <div class="text-[9px] uppercase tracking-widest text-[#71717a] mono mb-1">Ecuación & Hilos de Confinamiento</div>
+      <div id="hud-eq" class="text-[11px] mono text-[#dfc285] leading-relaxed"></div>
+    </div>
+
+    <p id="hud-hist" class="text-xs text-[#a1a1aa] leading-relaxed font-light mb-3 line-clamp-3"></p>
+
+    <!-- BARRA DE AUTO-RESOLUCIÓN & CONTROL DE ENTROPÍA (TIMONEL F2) -->
+    <div class="bg-[#08080a]/90 rounded-lg p-3 border border-white/[0.08] mb-3 space-y-1.5">
+      <div class="flex justify-between items-center text-[10px] mono">
+        <span class="text-[#71717a]">ESTADO RELAJACIÓN:</span>
+        <span id="hud-relax-state" class="text-[#dfc285] font-bold">CRISTALIZADO</span>
+      </div>
+      <div class="w-full bg-[#16161c] rounded-full h-1.5 overflow-hidden">
+        <div id="hud-relax-progress" class="bg-gradient-to-r from-[#c5a059] to-[#dfc285] h-full w-full transition-all duration-300"></div>
+      </div>
+      <div class="flex justify-between items-center text-[9px] mono text-[#71717a]">
+        <span>Residuo: <strong id="hud-residual-val" class="text-[#dfc285]">0.002</strong></span>
+        <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">0.998</strong></span>
+      </div>
+    </div>
+
+    <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2.5 shadow-sm">
+      <span>Perturbar Métrica (Ver Auto-Resolución)</span>
     </button>
+
+    <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
+      <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#f4f1ea] py-2 rounded-lg font-mono text-xs flex items-center justify-center gap-1.5 transition border border-white/10">
+        <span>Capturar al Carrete</span>
+      </button>
+      <button onclick="navigateToActiveShop()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] py-2 px-3 rounded-lg font-mono text-xs font-semibold flex items-center justify-center transition">
+        Vitrina →
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- COMPAÑERO NAI & SELECTOR RÁPIDO DE 24 ASTROS                              -->
-<!-- ========================================================================= -->
-<div id="nai-companion-widget" class="fixed bottom-6 left-6 z-30 pointer-events-auto transition-all duration-300 max-w-md">
-  <div class="bg-[#101014]/90 backdrop-blur-xl p-3.5 rounded-xl luxury-border shadow-2xl flex items-start gap-3">
-    <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-black/60 relative">
-      <img src="assets/nai_avatar.png" alt="NAI" class="w-full h-full object-cover scale-125" />
-      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-[#c5a059] border border-black animate-pulse"></span>
-    </div>
-    <div class="flex-1 min-w-0">
-      <div class="flex justify-between items-center mb-1">
-        <span class="text-[11px] font-bold serif text-[#f4f1ea]">NAI & Timonel · 24 Leyes Vivas</span>
-        <div id="nai-voice-waves" class="hidden flex items-end gap-0.5 h-3">
-          <span class="w-0.5 bg-[#c5a059] sound-bar" style="animation-delay:0s"></span>
-          <span class="w-0.5 bg-[#dfc285] sound-bar" style="animation-delay:0.2s"></span>
-          <span class="w-0.5 bg-[#c5a059] sound-bar" style="animation-delay:0.4s"></span>
-        </div>
-      </div>
-      <p id="nai-dialogue-text" class="text-xs text-[#a1a1aa] leading-snug font-light">
-        24 anillos de Timonel confinan las leyes del universo. Los hilos se retuercen y buscan desenredarse en silicio.
-      </p>
-      
-      <!-- Selector de Salto Rápido a los 24 Astros -->
-      <div id="nai-astro-selector" class="flex gap-1.5 mt-2 pt-2 border-t border-white/5 overflow-x-auto pb-1 max-w-sm">
-        <!-- Generado dinámicamente con los 24 botones de salto -->
-      </div>
-    </div>
-  </div>
+<!-- BOTÓN MINIMALISTA PARA REABRIR FICHA CUANDO ESTÁ OCULTA -->
+<div id="btn-reopen-hud" class="hidden fixed top-20 right-6 z-30 pointer-events-auto">
+  <button onclick="toggleHudCardMinimize()" class="bg-[#0e0e12]/90 hover:bg-[#16161c] text-[#dfc285] hover:text-[#f4f1ea] text-xs px-4 py-2 rounded-full luxury-gold-border mono transition flex items-center gap-2 shadow-xl backdrop-blur-md">
+    <span>Ver Ficha de la Obra +</span>
+  </button>
 </div>
 
 <!-- ========================================================================= -->
@@ -2032,7 +2013,6 @@ function enterShopMode() {
 
   document.getElementById('flight-hud-header').style.opacity = '0';
   document.getElementById('orbital-hud-card').classList.add('opacity-0');
-  document.getElementById('nai-companion-widget').classList.add('opacity-0');
   document.getElementById('capsule-reticle').style.opacity = '0';
   document.getElementById('foyer-screen').classList.add('hidden');
 
@@ -2053,7 +2033,6 @@ function exitShopMode() {
   setTimeout(() => { overlay.classList.add('hidden'); shopBayGroup.visible = false; }, 700);
 
   document.getElementById('flight-hud-header').style.opacity = '1';
-  document.getElementById('nai-companion-widget').classList.remove('opacity-0');
   document.getElementById('capsule-reticle').style.opacity = '1';
 
   velocity.set(0, 0, 0);
@@ -2177,6 +2156,7 @@ function processDirectCheckout() {
 // ── SELECTOR DE SALTO RÁPIDO A LOS 24 ASTROS ──────────────────────
 function populateNaiAstroSelector() {
   const container = document.getElementById('nai-astro-selector');
+  if (!container) return;
   container.innerHTML = '';
   ARTWORKS_24.forEach((astro, idx) => {
     const btn = document.createElement('button');
@@ -2185,6 +2165,21 @@ function populateNaiAstroSelector() {
     btn.onclick = () => propelToAstro(idx);
     container.appendChild(btn);
   });
+}
+
+// ── MINIMIZAR / EXPANDIR FICHA DE LA OBRA ──────────────────────────
+let isHudMinimized = false;
+function toggleHudCardMinimize() {
+  isHudMinimized = !isHudMinimized;
+  const hudCard = document.getElementById('orbital-hud-card');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (isHudMinimized) {
+    if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
+    if (reopenBtn) reopenBtn.classList.remove('hidden');
+  } else {
+    if (hudCard) hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
+    if (reopenBtn) reopenBtn.classList.add('hidden');
+  }
 }
 
 // ── MODOS DE OPERACIÓN DEL OBSERVATORIO ASTRONÓMICO ───────────────
@@ -2263,6 +2258,7 @@ function warpToTargetAstro(idx) {
   activeConfinementAstro = astro;
   currentFocusedAstro = astro;
   currentMuseumMode = MODE_SPHERE_CONFINEMENT;
+  isHudMinimized = false;
 
   // Orientación esférica inicial desde el vector actual para entrada suave
   const rel = new THREE.Vector3().subVectors(camera.position, astro.worldPos);
@@ -2278,6 +2274,10 @@ function warpToTargetAstro(idx) {
   if (colCard) colCard.classList.add('hidden');
   const returnBar = document.getElementById('confinement-return-bar');
   if (returnBar) returnBar.classList.remove('hidden');
+  const swarmPill = document.getElementById('swarm-telemetry-pill');
+  if (swarmPill) swarmPill.classList.add('hidden');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (reopenBtn) reopenBtn.classList.add('hidden');
 
   // Mostrar tarjeta de telemetría de la ley
   const hudCard = document.getElementById('orbital-hud-card');
@@ -2289,7 +2289,7 @@ function warpToTargetAstro(idx) {
     document.getElementById('hud-sub').textContent = d.sub;
     document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
     document.getElementById('hud-hist').textContent = d.hist;
-    hudCard.classList.remove('opacity-0', 'translate-x-8');
+    hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
   }
 
   speakNai(`Telescopio colimado. Confinando órbita de ${astro.data.title}.`);
@@ -2303,8 +2303,12 @@ function returnToRotunda() {
 
   const returnBar = document.getElementById('confinement-return-bar');
   if (returnBar) returnBar.classList.add('hidden');
+  const swarmPill = document.getElementById('swarm-telemetry-pill');
+  if (swarmPill) swarmPill.classList.remove('hidden');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (reopenBtn) reopenBtn.classList.add('hidden');
   const hudCard = document.getElementById('orbital-hud-card');
-  if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8');
+  if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
 
   speakNai("Regresando a la plataforma de observación de la rotonda.");
 }
@@ -2312,7 +2316,7 @@ function returnToRotunda() {
 // ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
 function setup6DOFControls() {
   window.addEventListener('mousedown', (e) => {
-    if (e.target.closest('header, #foyer-screen, #nai-companion-widget, #orbital-hud-card, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar')) return;
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar')) return;
     isDragging = true;
     dragPrev = { x: e.clientX, y: e.clientY };
   });

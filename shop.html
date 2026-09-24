@@ -107,13 +107,13 @@
   <main class="flex-1 pt-14 flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-3.5rem)] relative">
     
     <!-- ÁREA 1: ESCENARIO ARQUITECTÓNICO 3D (EL CUADRO INMÓVIL EN PARED CON PARALAJE HUMANO) -->
-    <div class="w-full lg:w-7/12 h-[560px] lg:h-full relative bg-[#0a0a0d] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
+    <div class="w-full lg:w-7/12 xl:w-2/3 h-[580px] lg:h-full relative bg-[#09090c] overflow-hidden flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]" style="view-transition-name: artwork-shared;">
       
       <!-- Canvas Three.js -->
       <canvas id="vitrina-canvas" class="w-full h-full block cursor-crosshair"></canvas>
 
       <!-- BARRA SUPERIOR IZQUIERDA: Selector de Iluminación de Galería -->
-      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#101014]/85 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono">
+      <div class="absolute top-5 left-5 z-20 flex items-center gap-1.5 bg-[#0e0e12]/90 backdrop-blur-md px-3 py-1.5 rounded-full luxury-border text-[11px] mono shadow-lg">
         <span class="text-[#71717a] uppercase tracking-wider mr-1">Luz:</span>
         <button onclick="setLighting('warm')" id="btn-light-warm" class="px-2 py-0.5 rounded text-[#c5a059] bg-[#c5a059]/10 font-medium">Galería 3200K</button>
         <button onclick="setLighting('neutral')" id="btn-light-neutral" class="px-2 py-0.5 rounded text-[#a1a1aa] hover:text-[#f4f1ea]">Estudio 4500K</button>
@@ -122,54 +122,27 @@
 
       <!-- BARRA SUPERIOR DERECHA: Ángulos de Contemplación del Observador (Paralaje) -->
       <div class="absolute top-5 right-5 z-20 flex items-center gap-1.5">
-        <button onclick="setObserverPreset('front')" id="btn-cam-front" class="bg-[#101014]/85 backdrop-blur-md text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition font-medium">Frontal</button>
-        <button onclick="setObserverPreset('left')" id="btn-cam-left" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perfil Izq. 20°</button>
-        <button onclick="setObserverPreset('right')" id="btn-cam-right" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Perfil Der. 20°</button>
-        <button onclick="setObserverPreset('macro')" id="btn-cam-macro" class="bg-[#101014]/85 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition">Macro 1:1</button>
+        <button onclick="setObserverPreset('front')" id="btn-cam-front" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#c5a059] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition font-medium shadow-lg">Frontal</button>
+        <button onclick="setObserverPreset('left')" id="btn-cam-left" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Perfil Izq. 20°</button>
+        <button onclick="setObserverPreset('right')" id="btn-cam-right" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Perfil Der. 20°</button>
+        <button onclick="setObserverPreset('macro')" id="btn-cam-macro" class="bg-[#0e0e12]/90 backdrop-blur-md text-[#a1a1aa] hover:text-[#f4f1ea] text-[11px] px-2.5 py-1.5 rounded-lg luxury-border mono transition shadow-lg">Macro 1:1</button>
       </div>
 
       <!-- BANNER FLOTANTE DE GRABACIÓN DE REEL -->
-      <div id="rec-banner" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-30 bg-red-950/85 backdrop-blur-md px-4 py-2 rounded-full border border-red-500/50 text-red-200 text-xs mono flex items-center gap-2.5">
+      <div id="rec-banner" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-30 bg-red-950/85 backdrop-blur-md px-4 py-2 rounded-full border border-red-500/50 text-red-200 text-xs mono flex items-center gap-2.5 shadow-2xl">
         <span class="w-2.5 h-2.5 rounded-full bg-red-500 recording-indicator"></span>
         <span id="rec-countdown" class="font-bold">GRABANDO REEL 15s (60 FPS)</span>
       </div>
 
-      <!-- BARRA FLOTANTE INFERIOR: DIALES DE FÍSICA EN VIVO & TELEMETRÍA TIMONEL -->
-      <div class="absolute bottom-5 left-5 right-5 z-20 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 pointer-events-none">
-        
-        <!-- Ficha Rápida del Cuadro Inmóvil -->
-        <div class="bg-[#101014]/90 backdrop-blur-md px-4 py-3 rounded-xl luxury-border pointer-events-auto max-w-md w-full sm:w-auto space-y-1">
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#c5a059] font-medium flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span> Lienzo Vivo en Silicio (60 FPS)
-            </span>
-            <span class="text-[9px] mono text-emerald-400">Timonel Paralaje Activo</span>
-          </div>
-          <div class="text-xs text-[#f4f1ea] font-medium" id="vitrina-product-badge">
-            Cuadro Fine Art 50×70 cm · Montado en Pared de Estuco
-          </div>
-          <div class="text-[11px] text-[#a1a1aa] font-light truncate" id="vitrina-formula-badge">
-            Obra 21: Los Ceros de Riemann (Bernard Riemann, 1859)
-          </div>
-          
-          <!-- DIAL DE PARÁMETROS VIVOS SEGÚN LA LEY ACTIVA -->
-          <div class="pt-2 border-t border-white/[0.08] flex items-center gap-2 text-[10px] mono text-[#c8c4bb]" id="dynamic-param-bar">
-            <!-- Inyectado dinámicamente por JavaScript -->
-          </div>
-        </div>
-
-        <!-- Indicador de Interacción de Paralaje -->
-        <div class="bg-[#101014]/90 backdrop-blur-md px-3.5 py-2 rounded-xl luxury-border pointer-events-auto text-right hidden md:block">
-          <span class="text-[9px] mono uppercase tracking-[0.2em] text-[#71717a] block">Física de Observación</span>
-          <span class="text-[11px] mono text-[#c5a059]">Mueve el cursor para cambiar tu punto de vista</span>
-        </div>
-
+      <!-- MARCA DE AGUA DISCRETA EN LA BASE DE LA PARED (SIN TAPAR EL CUADRO) -->
+      <div class="absolute bottom-4 left-6 pointer-events-none text-[10px] mono text-[#52525b] uppercase tracking-widest hidden sm:block">
+        Muro de Galería · Perspectiva Humana Activa (Mueve el cursor)
       </div>
 
     </div>
 
-    <!-- ÁREA 2: PANEL EDITORIAL DEL ATELIER & CONFIGURACIÓN FÍSICA -->
-    <div class="w-full lg:w-5/12 h-auto lg:h-full bg-[#0c0c0f] flex flex-col overflow-y-auto p-6 md:p-8 space-y-7">
+    <!-- ÁREA 2: ESTANTERÍA ARQUITECTÓNICA DE MATERIALES & ENMARCADO -->
+    <div class="w-full lg:w-5/12 xl:w-1/3 h-auto lg:h-full bg-[#0d0d11] flex flex-col overflow-y-auto p-6 md:p-8 space-y-6">
       
       <!-- CABECERA DE OBRA & METADATA -->
       <div class="space-y-1.5 border-b border-white/[0.08] pb-5">
@@ -187,6 +160,27 @@
         <p class="text-xs text-[#a1a1aa] font-light leading-relaxed" id="shop-subtitle">
           El enigma de un millón de dólares en la línea crítica · Bernard Riemann, 1859.
         </p>
+      </div>
+
+      <!-- ESTANTERÍA TÉCNICA: LIENZO VIVO EN SILICIO (60 FPS) -->
+      <div class="bg-[#121217] p-4 rounded-xl luxury-gold-border space-y-2.5 shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] mono uppercase tracking-widest text-[#c5a059] flex items-center gap-1.5 font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#c5a059] animate-pulse"></span>
+            Lienzo Vivo en Silicio (60 FPS)
+          </span>
+          <span class="text-[9px] mono text-emerald-400">Timonel Paralaje Activo</span>
+        </div>
+        <div class="text-xs text-[#f4f1ea] font-medium" id="vitrina-product-badge">
+          Cuadro Fine Art 50×70 cm · Montado en Pared
+        </div>
+        <div class="text-[11px] text-[#a1a1aa] font-light truncate" id="vitrina-formula-badge">
+          Obra 21: Los Ceros de Riemann (Bernard Riemann, 1859)
+        </div>
+        <!-- DIAL DE PARÁMETROS VIVOS SEGÚN LA LEY ACTIVA -->
+        <div class="pt-2 border-t border-white/[0.08] flex items-center gap-2 text-[10px] mono text-[#c8c4bb]" id="dynamic-param-bar">
+          <!-- Inyectado dinámicamente por JavaScript -->
+        </div>
       </div>
 
       <!-- PASO 1: SELECCIÓN DE OBRA (24 LEYES) -->

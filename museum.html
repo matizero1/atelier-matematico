@@ -748,8 +748,8 @@ function clearDiscoveryLedger() {
 }
 
 function simulateDiscoveryCandidate() {
-  const astro = astros24[22] || astros24[0]; // Navier-Stokes o primero
-  recordDiscoveryCandidate(astro, "Singularidad 3D acotada: Enstrofía Ω(t) disipó coherentemente sin estallido.", "Prueba de alerta NAI");
+  const astro = astros24[21] || astros24[0]; // Beal
+  recordDiscoveryCandidate(astro, "Candidato de Prueba: Bisección entre extremos positivos y negativos. Residuo convergente.", "Prueba de Alerta Vocal NAI");
 }
 
 function initAtlasCosmico() {
@@ -850,32 +850,34 @@ function createLivingMathematicalAstro(data, index) {
 // ── MODELOS MATEMÁTICOS REALES DE LAS 24 LEYES CON AUTO-RESOLUCIÓN ───
 // ── FRONTERAS MONÓTONAS DE EXPLORACIÓN (SIN REPETICIÓN DE CASOS) ───
 const UNRESOLVED_FRONTIERS = {
-  // Riemann: marcha monótona por la línea crítica t -> infinito sin bucles
+  // Riemann: Búsqueda por bisección entre crestas positivas Z(t) > 0 y valles negativos Z(t) < 0
   riemann: {
     currentT: 14.0,
+    lastZVal: 0.1,
+    maxPositiveDeviation: 0.0,
+    maxNegativeDeviation: 0.0,
     zerosCatalog: [
       14.1347, 21.0220, 25.0108, 30.4248, 32.9350, 37.5861, 40.9187, 43.3270,
       48.0051, 49.7738, 52.9703, 56.4462, 59.3470, 60.8317, 65.1125, 67.0798,
       69.5464, 72.0671, 75.7046, 77.1448, 79.3374, 82.9103, 84.7354, 87.4252
     ],
     verifiedZeroIndex: 0,
-    lastMilestoneReported: 0,
     anomaliesFound: 0
   },
-  // Beal: generador diofántico sistemático creciente (A, B, C, x, y, z)
+  // Beal: Bisección diofántica entre extremos positivos (Aˣ+Bʸ > Cᶻ) y negativos (Aˣ+Bʸ < Cᶻ)
   beal: {
     testedCount: 0,
     currentBase: 3,
-    lastMilestoneReported: 0,
-    solutionsFound: 0
+    maxPositiveDiff: 0,
+    minNegativeDiff: 0,
+    solutionFound: false
   },
-  // Navier-Stokes: barrido ascendente de Reynolds Re -> 10^6
+  // Navier-Stokes: Monitoreo de singularidad de enstrofía extrema
   navier: {
     reynolds: 1200,
     cycleCount: 0,
-    maxReynoldsTested: 1200,
-    singularitiesDetected: 0,
-    lastMilestoneReported: 0
+    maxEnstrophyRatio: 1.0,
+    singularityFound: false
   }
 };
 
@@ -2230,51 +2232,42 @@ function animate() {
     astro.timonelRing.material.color.setHex(ringColor);
 
 
-    // ── NAI CENTINELA: FILTRO ESTRICTO DE SOLUCIONES & HITOS DE FRONTERA ───
-    // Cero autoengaño: NO registrar redundancias conocidas. Solo registrar:
-    // 1) Hitos de frontera crecientes no repetidos (t > 50, Re > 2500, etc.)
-    // 2) Verdaderos contraejemplos o soluciones (cero fuera de la recta, terna Beal coprima, singularidad NS)
+    // ── NAI CENTINELA: FILTRO ULTRA-ESTRICTO DE CERO ABSOLUTO & SOLUCIÓN REAL ───
+    // CERO AUTOENGAÑO: Vetadas 100% las alertas de rutina o pasos intermedios.
+    // Solo y únicamente se emite alerta cuando se encuentra LA SOLUCIÓN DEFINITIVA:
+    // 1) BEAL: Cero absoluto entero exacto (Aˣ + Bʸ - Cᶻ === 0 con mcd=1)
+    // 2) RIEMANN: Cero real fuera de la línea crítica (contraejemplo a la conjetura)
+    // 3) NAVIER-STOKES: Singularidad real demostrada donde la enstrofía supere la cota de ruptura
     if (phase === 'CRYSTALLIZED' && astro.cycleT > 7.5 && astro.cycleT < 7.7) {
-      if (astro.data.id === 20) {
-        // RIEMANN: Solo alertar al alcanzar hitos de frontera de ceros (cada 5 ceros verificados únicos)
-        const rf = UNRESOLVED_FRONTIERS.riemann;
-        const currentMilestone = Math.floor(rf.verifiedZeroIndex / 5) * 5;
-        if (currentMilestone >= 5 && currentMilestone > rf.lastMilestoneReported) {
-          rf.lastMilestoneReported = currentMilestone;
-          const heightT = rf.currentT.toFixed(1);
+      if (astro.data.id === 21) {
+        // BEAL: Auditoría de Cero Absoluto
+        const bf = UNRESOLVED_FRONTIERS.beal;
+        if (bf.solutionFound) {
           recordDiscoveryCandidate(
             astro,
-            `Hito de Frontera: ${currentMilestone} ceros no triviales verificados estrictamente en Re(s)=1/2 hasta altura t=${heightT}. Sin contraejemplos.`,
-            `Frontera ascendente t=${heightT}`
+            "¡SOLUCIÓN DEFINITIVA DE BEAL ENCONTRADA! Terna coprima exacta Aˣ + Bʸ = Cᶻ con residuo 0.0000000.",
+            "CONTRAEJEMPLO DE BEAL CERTIFICADO"
           );
         }
-      } else if (astro.data.id === 21) {
-        // BEAL: Solo alertar al auditar bloques masivos únicos (cada 5.000 combinaciones) o si encuentra contraejemplo
-        const bf = UNRESOLVED_FRONTIERS.beal;
-        const currentMilestone = Math.floor(bf.testedCount / 5000) * 5000;
-        if (currentMilestone >= 5000 && currentMilestone > bf.lastMilestoneReported) {
-          bf.lastMilestoneReported = currentMilestone;
+      } else if (astro.data.id === 20) {
+        // RIEMANN: Solo alertar si se detecta un cero fuera de la línea Re(s) = 1/2
+        const rf = UNRESOLVED_FRONTIERS.riemann;
+        if (rf.anomaliesFound > 0) {
           recordDiscoveryCandidate(
             astro,
-            `Bloque Auditado: ${currentMilestone.toLocaleString()} ternas coprimas evaluadas sin colisión (Base máxima A,B,C hasta ${bf.currentBase}). Conjetura preservada.`,
-            `Espacio diofántico evaluado: ${currentMilestone}`
+            "¡CONTRAEJEMPLO A LA HIPÓTESIS DE RIEMANN DETECTADO! Cero no trivial con Re(s) ≠ 1/2.",
+            "RUPTURA DE RIEMANN CERTIFICADA"
           );
         }
       } else if (astro.data.id === 22) {
-        // NAVIER-STOKES: Al cristalizar, incrementa el número de Reynolds y solo alerta en nuevos órdenes de magnitud
+        // NAVIER-STOKES: Solo alertar si ocurre una singularidad infinita real
         const nf = UNRESOLVED_FRONTIERS.navier;
-        if (astro.cycleT > 7.5 && astro.cycleT < 7.55) {
-          nf.cycleCount++;
-          nf.reynolds = Math.floor(1200 * Math.pow(1.22, nf.cycleCount));
-          const currentMilestone = Math.floor(nf.reynolds / 2500) * 2500;
-          if (currentMilestone >= 2500 && currentMilestone > nf.lastMilestoneReported) {
-            nf.lastMilestoneReported = currentMilestone;
-            recordDiscoveryCandidate(
-              astro,
-              `Régimen Certificado: Flujo suave verificado a Reynolds Re=${nf.reynolds.toLocaleString()}. Vorticidad disipada sin blow-up.`,
-              `Límite de tensión Re=${nf.reynolds}`
-            );
-          }
+        if (nf.singularityFound) {
+          recordDiscoveryCandidate(
+            astro,
+            "¡SINGULARIDAD DE NAVIER-STOKES DETECTADA! Explosión de enstrofía en tiempo finito.",
+            "BLOW-UP DE FLUIDO CERTIFICADO"
+          );
         }
       }
     }

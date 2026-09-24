@@ -629,11 +629,11 @@
       const normX = ((e.clientX - r.left) / r.width) * 2 - 1;   // [-1, 1]
       const normY = ((e.clientY - r.top)  / r.height) * 2 - 1;  // [-1, 1]
 
-      // Cono de visión humano natural:
-      // Movimiento lateral: ±0.52 m
-      // Movimiento vertical: ±0.24 m
-      targetEyePos.x = normX * 0.52;
-      targetEyePos.y = 0.12 - normY * 0.24;
+      // Cono de visión humano natural y fluido:
+      // Movimiento lateral: ±0.65 m
+      // Movimiento vertical: ±0.32 m
+      targetEyePos.x = normX * 0.65;
+      targetEyePos.y = 0.12 - normY * 0.32;
       targetEyePos.z = 2.85;
     }
 
@@ -1006,14 +1006,14 @@
         artworkTexture.needsUpdate = true;
       }
 
-      // 2. Interpolar posición del ojo del observador (Paralaje físico suave)
-      eyePos.x += (targetEyePos.x - eyePos.x) * 0.08;
-      eyePos.y += (targetEyePos.y - eyePos.y) * 0.08;
-      eyePos.z += (targetEyePos.z - eyePos.z) * 0.08;
+      // 2. Interpolar posición del ojo del observador (Paralaje físico ultra fluido)
+      eyePos.x += (targetEyePos.x - eyePos.x) * 0.18;
+      eyePos.y += (targetEyePos.y - eyePos.y) * 0.18;
+      eyePos.z += (targetEyePos.z - eyePos.z) * 0.18;
 
       camera.position.copy(eyePos);
-      // Siempre enfoca el centro del cuadro colgado
-      camera.lookAt(0, 0.12, 0);
+      // Enfoca el centro del cuadro con sutil compensación óptica
+      camera.lookAt(eyePos.x * 0.08, 0.12 + (eyePos.y - 0.12) * 0.05, 0);
 
       renderer.render(scene, camera);
     }

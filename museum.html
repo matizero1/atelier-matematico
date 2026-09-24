@@ -2330,16 +2330,16 @@ function setup6DOFControls() {
       targetProductRotation.y += dx * 0.01;
       targetProductRotation.x += dy * 0.01;
     } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-      // El usuario barre el cielo con el telescopio desde la rotonda de basalto
+      // El usuario barre el cielo con el telescopio desde la rotonda de basalto (más reactivo y fluido)
       userInertiaTimer = 0;
-      targetOrientation.yaw -= dx * 0.0028;
-      targetOrientation.pitch -= dy * 0.0028;
+      targetOrientation.yaw -= dx * 0.0040;
+      targetOrientation.pitch -= dy * 0.0040;
       targetOrientation.pitch = Math.max(-0.4, Math.min(1.48, targetOrientation.pitch)); // Permite mirar arriba al óculo
     } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
       // ¡EL OBSERVADOR SE DESPLAZA LIBREMENTE EN S²! LA FÓRMULA NO SE TOCA:
       userInertiaTimer = 0;
-      targetSphereTheta -= dx * 0.0045;
-      targetSpherePhi   -= dy * 0.0045;
+      targetSphereTheta -= dx * 0.0060;
+      targetSpherePhi   -= dy * 0.0060;
       targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
     }
   });
@@ -2426,8 +2426,8 @@ function animate() {
     // 1. MODO ROTONDA: La cámara está de pie en la plataforma de basalto
     camera.position.lerp(rotundaBasePos, 0.08);
 
-    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.12;
-    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.12;
+    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.18;
+    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.18;
     camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
 
     // Calcular colimación astronómica con la lente del telescopio
@@ -2451,9 +2451,9 @@ function animate() {
 
   } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT && activeConfinementAstro) {
     // 2. MODO BURBUJA S²: El observador se desplaza sobre la superficie esférica
-    sphereTheta  += (targetSphereTheta - sphereTheta) * 0.1;
-    spherePhi    += (targetSpherePhi - spherePhi) * 0.1;
-    sphereRadius += (targetSphereRadius - sphereRadius) * 0.1;
+    sphereTheta  += (targetSphereTheta - sphereTheta) * 0.18;
+    spherePhi    += (targetSpherePhi - spherePhi) * 0.18;
+    sphereRadius += (targetSphereRadius - sphereRadius) * 0.15;
 
     const center = activeConfinementAstro.worldPos;
     const targetCam = new THREE.Vector3(

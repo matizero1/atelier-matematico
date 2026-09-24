@@ -160,31 +160,32 @@
       </a>
     </div>
 
-    <!-- PABELLÓN ARQUITECTÓNICO MONUMENTAL CON LUZ NATURAL -->
-    <div class="w-full max-w-5xl rounded-2xl overflow-hidden luxury-border bg-[#0d0d11] relative shadow-[0_30px_90px_rgba(0,0,0,0.85)] group cursor-pointer" onclick="window.location.href='shop.html?art=20'">
+    <!-- PABELLÓN ARQUITECTÓNICO MONUMENTAL CON LUZ NATURAL & PROFUNDIDAD ESPACIAL 3D -->
+    <div id="pavilion-3d-stage" class="w-full max-w-5xl rounded-2xl overflow-hidden luxury-border bg-[#0d0d11] relative shadow-[0_30px_90px_rgba(0,0,0,0.85)] cursor-pointer group select-none" onclick="window.location.href='shop.html?art=20'" style="perspective: 1400px;">
       
-      <!-- Fondo: Fotografía de Arquitectura de Museo con Luz Natural -->
-      <div class="relative w-full aspect-[16/9] md:aspect-[21/9] flex items-center justify-center p-8 md:p-14 overflow-hidden">
+      <!-- Capa 1: Fotografía de Arquitectura de Fondo con Paralafe Óptico Inverso -->
+      <div id="pavilion-bg-layer" class="relative w-full aspect-[16/9] md:aspect-[21/9] flex items-center justify-center p-8 md:p-14 overflow-hidden" style="transform-style: preserve-3d;">
         
-        <img src="assets/atelier_architectural_pavilion.jpg" alt="Pabellón de Galería en Travertino con Luz Natural" class="absolute inset-0 w-full h-full object-cover brightness-[0.72] contrast-[1.08] saturate-[0.85] group-hover:scale-105 transition-transform duration-1000 ease-out" />
+        <img id="pavilion-bg-img" src="assets/atelier_architectural_pavilion.jpg" alt="Pabellón de Galería en Travertino con Luz Natural" class="absolute inset-0 w-full h-full object-cover brightness-[0.72] contrast-[1.08] saturate-[0.85] pointer-events-none scale-110 will-change-transform" />
         
-        <!-- Degradado atmosférico de penumbra mineral -->
-        <div class="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-black/25 to-black/40 pointer-events-none"></div>
+        <!-- Haz de Luz Natural Cenital & Penumbra de Museo -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-black/20 to-black/35 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_45%_30%,rgba(255,250,240,0.12)_0%,transparent_65%)] pointer-events-none"></div>
 
-        <!-- Muro de galería con cuadro enmarcado colgado con luz rasante -->
-        <div class="relative z-10 flex flex-col items-center">
+        <!-- Capa 2: Cuadro Físico Colgado en la Pared en Perspectiva 3D Real -->
+        <div id="framed-artwork-3d" class="relative z-10 flex flex-col items-center will-change-transform" style="transform-style: preserve-3d;">
           
-          <!-- Sombra proyectada multicapa detrás del marco -->
-          <div class="relative p-2 md:p-3 bg-[#0a0a0c]/90 rounded-sm shadow-[0_35px_80px_-15px_rgba(0,0,0,0.95)] border border-white/15 max-w-md md:max-w-xl group-hover:border-[#c5a059]/40 transition duration-500" style="view-transition-name: artwork-shared;">
+          <!-- Marco de Madera Maciza con Relieve, Bisel y Sombra Dinámica en Muro -->
+          <div id="artwork-frame-body" class="relative p-2.5 md:p-3.5 bg-[#0a0a0c] rounded-sm border border-white/20 max-w-md md:max-w-xl group-hover:border-[#c5a059]/40 transition-colors duration-300" style="transform: translateZ(45px); box-shadow: 0 35px 80px -15px rgba(0,0,0,0.95), 0 0 0 1px rgba(255,255,255,0.08); view-transition-name: artwork-shared;">
             
-            <!-- Marco exterior de madera negra maciza -->
-            <div class="bg-[#121215] p-4 md:p-6 border border-white/5 shadow-inner">
+            <!-- Moldura de Ébano con textura de bisel físico y profundidad de canto -->
+            <div class="bg-[#121215] p-4 md:p-6 border-2 border-[#1c1c22] shadow-[inset_0_2px_4px_rgba(255,255,255,0.08),inset_0_-2px_4px_rgba(0,0,0,0.8)] relative">
               
-              <!-- Paspartú biselado 5 cm -->
-              <div class="bg-[#f2efe9] p-6 md:p-10 shadow-[inset_0_2px_8px_rgba(0,0,0,0.35)] relative">
+              <!-- Paspartú Biselado 5 cm (Corte a 45° con sombra interior) -->
+              <div class="bg-[#f4f1ea] p-6 md:p-10 shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.4)] relative">
                 
                 <!-- Lámina de la Obra (Riemann) -->
-                <div class="w-48 h-64 md:w-72 md:h-96 bg-[#080612] p-3 flex flex-col justify-between items-center shadow-sm relative overflow-hidden">
+                <div class="w-48 h-64 md:w-72 md:h-96 bg-[#080612] p-3 flex flex-col justify-between items-center shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)] relative overflow-hidden">
                   
                   <!-- Diagrama geométrico Riemann en alta definición -->
                   <svg viewBox="0 0 200 280" class="w-full h-full opacity-90">
@@ -203,19 +204,22 @@
                   </div>
                 </div>
 
+                <!-- Reflejo óptico dinámico del vidrio de museo -->
+                <div id="artwork-glass-sheen" class="absolute inset-0 pointer-events-none opacity-40 bg-gradient-to-tr from-transparent via-white/10 to-transparent"></div>
+
               </div>
 
             </div>
 
           </div>
 
-          <!-- Pie de foto arquitectónico -->
-          <div class="mt-4 text-center bg-[#0e0e12]/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
-            <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#dfc285] inline-block mr-2">
+          <!-- Cartela / Placa de Museo al pie del cuadro -->
+          <div class="mt-4 text-center bg-[#0e0e12]/85 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-lg" style="transform: translateZ(20px);">
+            <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#dfc285] inline-block mr-2 font-medium">
               Obra 21 · Los Ceros de Riemann
             </span>
             <span class="text-[10px] text-[#a1a1aa] font-light">
-              50×70 cm en Ébano Mate · Haz clic para entrar a la Vitrina Viva
+              Fine Art 50×70 cm en Ébano Mate · Entrar a la Vitrina Viva →
             </span>
           </div>
 
@@ -748,20 +752,17 @@
       <span>© 2026 Atelier Matemático. Todos los derechos reservados.</span>
       <span>Impreso en papel Hahnemühle 308g con tintas Epson UltraChrome Pro.</span>
     </div>
-  <!-- CURSOR CINÉTICO DE BRONCE (SUTIL) -->
-  <div id="kinetic-cursor" class="fixed pointer-events-none z-[100] w-6 h-6 rounded-full border border-[#c5a059]/60 -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-out opacity-0 hidden md:block"></div>
-
-  <!-- SCRIPT LENIS SMOOTH SCROLL & MICRO-INTERACCIONES -->
+  <!-- SCRIPT LENIS SMOOTH SCROLL & PARALAJE ESPACIAL 3D -->
   <script src="js/lenis.min.js"></script>
   <script>
-    // 1. Lenis Smooth Scroll con física inercial de lujo
+    // 1. Lenis Smooth Scroll ultra-reactivo (Cero fricción ni sensación de freno)
     if (typeof Lenis !== 'undefined') {
       const lenis = new Lenis({
-        duration: 1.2,
+        duration: 0.75,
         easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         orientation: 'vertical',
         smoothWheel: true,
-        wheelMultiplier: 0.85
+        wheelMultiplier: 1.15
       });
       function raf(time) {
         lenis.raf(time);
@@ -770,40 +771,61 @@
       requestAnimationFrame(raf);
     }
 
-    // 2. Cursor cinético sutil
-    const cursor = document.getElementById('kinetic-cursor');
-    if (cursor && window.matchMedia('(pointer: fine)').matches) {
-      cursor.classList.remove('opacity-0');
-      let mouseX = -100, mouseY = -100;
-      let cursorX = -100, cursorY = -100;
+    // 2. Motor de Profundidad Espacial 3D: Cuadro en Pared con Paralaje Real (60 FPS)
+    const stage = document.getElementById('pavilion-3d-stage');
+    const bgImg = document.getElementById('pavilion-bg-img');
+    const frameBody = document.getElementById('framed-artwork-3d');
+    const frameBox = document.getElementById('artwork-frame-body');
+    const glassSheen = document.getElementById('artwork-glass-sheen');
+
+    if (stage && frameBody) {
+      let targetNormX = 0, targetNormY = 0;
+      let currentNormX = 0, currentNormY = 0;
 
       window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      });
+        const rect = stage.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        targetNormX = (e.clientX - centerX) / (window.innerWidth / 2);
+        targetNormY = (e.clientY - centerY) / (window.innerHeight / 2);
+        targetNormX = Math.max(-1, Math.min(1, targetNormX));
+        targetNormY = Math.max(-1, Math.min(1, targetNormY));
+      }, { passive: true });
 
-      function renderCursor() {
-        cursorX += (mouseX - cursorX) * 0.18;
-        cursorY += (mouseY - cursorY) * 0.18;
-        cursor.style.left = `${cursorX}px`;
-        cursor.style.top = `${cursorY}px`;
-        requestAnimationFrame(renderCursor);
+      function renderSpatialParallax() {
+        // Amortiguación armónica rápida y continua (lerp 0.12 para respuesta inmediata sin parones)
+        currentNormX += (targetNormX - currentNormX) * 0.12;
+        currentNormY += (targetNormY - currentNormY) * 0.12;
+
+        // 1. Inclinación física del cuadro (Perspectiva humana tridimensional)
+        const rotateY = currentNormX * 14;  // ±14° horizontales
+        const rotateX = -currentNormY * 10; // ±10° verticales
+        frameBody.style.transform = `rotateY(${rotateY.toFixed(2)}deg) rotateX(${rotateX.toFixed(2)}deg)`;
+
+        // 2. Paralafe óptico inverso del fondo arquitectónico (Sensación de lejanía de sala)
+        if (bgImg) {
+          const bgX = -currentNormX * 22;
+          const bgY = -currentNormY * 14;
+          bgImg.style.transform = `translate3d(${bgX.toFixed(1)}px, ${bgY.toFixed(1)}px, 0) scale(1.10)`;
+        }
+
+        // 3. Sombra dinámica proyectada sobre el muro de travertino
+        if (frameBox) {
+          const shadowX = -currentNormX * 36;
+          const shadowY = 28 - currentNormY * 18;
+          frameBox.style.boxShadow = `${shadowX.toFixed(1)}px ${shadowY.toFixed(1)}px 60px rgba(0,0,0,0.75), 0 45px 90px -15px rgba(0,0,0,0.95)`;
+        }
+
+        // 4. Desplazamiento del brillo del vidrio
+        if (glassSheen) {
+          const sheenAngle = 135 + currentNormX * 30;
+          const sheenAlpha = 0.35 + Math.abs(currentNormX) * 0.25;
+          glassSheen.style.background = `linear-gradient(${sheenAngle}deg, transparent 20%, rgba(255,255,255,${sheenAlpha.toFixed(2)}) 50%, transparent 80%)`;
+        }
+
+        requestAnimationFrame(renderSpatialParallax);
       }
-      requestAnimationFrame(renderCursor);
-
-      // Efecto hover magnético en enlaces y botones
-      document.querySelectorAll('a, button, [onclick]').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-          cursor.style.transform = 'translate(-50%, -50%) scale(1.6)';
-          cursor.style.borderColor = '#dfc285';
-          cursor.style.backgroundColor = 'rgba(197, 160, 89, 0.08)';
-        });
-        el.addEventListener('mouseleave', () => {
-          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-          cursor.style.borderColor = 'rgba(197, 160, 89, 0.6)';
-          cursor.style.backgroundColor = 'transparent';
-        });
-      });
+      requestAnimationFrame(renderSpatialParallax);
     }
   </script>
 </body>

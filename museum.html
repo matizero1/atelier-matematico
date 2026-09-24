@@ -2036,8 +2036,21 @@ function updateOrbitalProximity() {
 
 // ── BUCLE PRINCIPAL DE ANIMACIÓN Y SILICIO ─────────────────────────
 let prevTime = performance.now();
+let isTabVisible = true;
+let frameCounter = 0;
+
+// ── DISCIPLINA TÉRMICA APPLE SILICON: SUSPENSIÓN CUANDO LA PESTAÑA NO ESTÁ VISIBLE ──
+document.addEventListener('visibilitychange', () => {
+  isTabVisible = !document.hidden;
+  if (isTabVisible) {
+    prevTime = performance.now();
+    requestAnimationFrame(animate);
+  }
+});
 
 function animate() {
+  if (!isTabVisible) return; // 0% CPU/GPU en segundo plano
+  frameCounter++;
   requestAnimationFrame(animate);
 
   const time = performance.now();
@@ -2118,8 +2131,17 @@ function animate() {
     updateOrbitalProximity();
   }
 
-  // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución
+  // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución y Culling Térmico
+  const camPos = camera.position;
   astros24.forEach((astro) => {
+    const distToCam = astro.worldPos.distanceTo(camPos);
+
+    // CULLING TÉRMICO: Silicio ultra-frío en Apple Silicon
+    // Si el astro está a más de 38m, no calcular física de partículas
+    if (distToCam > 38.0) return;
+    // Si está entre 20m y 38m, entrelazar actualización (30 FPS)
+    if (distToCam > 20.0 && ((frameCounter + astro.index) % 2 !== 0)) return;
+
     astro.cycleT += delta;
 
     let phase, relaxFactor, residual, ringColor;

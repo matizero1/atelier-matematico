@@ -164,7 +164,7 @@
     <div id="pavilion-3d-stage" class="w-full max-w-5xl rounded-2xl overflow-hidden luxury-border bg-[#0d0d11] relative shadow-[0_30px_90px_rgba(0,0,0,0.85)] cursor-pointer group select-none" onclick="window.location.href='shop.html?art=20'" style="perspective: 1400px;">
       
       <!-- Capa 1: Fotografía de Arquitectura de Fondo con Paralafe Óptico Inverso -->
-      <div id="pavilion-bg-layer" class="relative w-full aspect-[16/9] md:aspect-[21/9] flex items-center justify-center p-8 md:p-14 overflow-hidden" style="transform-style: preserve-3d;">
+      <div id="pavilion-bg-layer" class="relative w-full min-h-[560px] md:min-h-[660px] flex flex-col items-center justify-center py-10 px-4 md:px-8 overflow-hidden" style="transform-style: preserve-3d;">
         
         <img id="pavilion-bg-img" src="assets/atelier_architectural_pavilion.jpg" alt="Pabellón de Galería en Travertino con Luz Natural" class="absolute inset-0 w-full h-full object-cover brightness-[0.72] contrast-[1.08] saturate-[0.85] pointer-events-none scale-110 will-change-transform" />
         
@@ -176,16 +176,16 @@
         <div id="framed-artwork-3d" class="relative z-10 flex flex-col items-center will-change-transform" style="transform-style: preserve-3d;">
           
           <!-- Marco de Madera Maciza con Relieve, Bisel y Sombra Dinámica en Muro -->
-          <div id="artwork-frame-body" class="relative p-2.5 md:p-3.5 bg-[#0a0a0c] rounded-sm border border-white/20 max-w-md md:max-w-xl group-hover:border-[#c5a059]/40 transition-colors duration-300" style="transform: translateZ(45px); box-shadow: 0 35px 80px -15px rgba(0,0,0,0.95), 0 0 0 1px rgba(255,255,255,0.08); view-transition-name: artwork-shared;">
+          <div id="artwork-frame-body" class="relative p-2 md:p-3 bg-[#0a0a0c] rounded-sm border border-white/20 group-hover:border-[#c5a059]/40 transition-colors duration-300" style="transform: translateZ(45px); box-shadow: 0 35px 80px -15px rgba(0,0,0,0.95), 0 0 0 1px rgba(255,255,255,0.08); view-transition-name: artwork-shared;">
             
             <!-- Moldura de Ébano con textura de bisel físico y profundidad de canto -->
-            <div class="bg-[#121215] p-4 md:p-6 border-2 border-[#1c1c22] shadow-[inset_0_2px_4px_rgba(255,255,255,0.08),inset_0_-2px_4px_rgba(0,0,0,0.8)] relative">
+            <div class="bg-[#121215] p-3 md:p-4 border-2 border-[#1c1c22] shadow-[inset_0_2px_4px_rgba(255,255,255,0.08),inset_0_-2px_4px_rgba(0,0,0,0.8)] relative">
               
-              <!-- Paspartú Biselado 5 cm (Corte a 45° con sombra interior) -->
-              <div class="bg-[#f4f1ea] p-6 md:p-10 shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.4)] relative">
+              <!-- Paspartú Biselado 5 cm (Corte a 45° con sombra interior en papel algodón) -->
+              <div class="bg-[#f4f1ea] p-5 md:p-8 shadow-[inset_0_3px_10px_rgba(0,0,0,0.4),0_1px_2px_rgba(255,255,255,0.4)] relative">
                 
-                <!-- Lámina de la Obra (Riemann) -->
-                <div class="w-48 h-64 md:w-72 md:h-96 bg-[#080612] p-3 flex flex-col justify-between items-center shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)] relative overflow-hidden">
+                <!-- Lámina de la Obra (Riemann en proporción 50x70 cm: 5 a 7) -->
+                <div class="w-44 h-[246px] md:w-60 md:h-[336px] bg-[#080612] p-3 flex flex-col justify-between items-center shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)] relative overflow-hidden">
                   
                   <!-- Diagrama geométrico Riemann en alta definición -->
                   <svg viewBox="0 0 200 280" class="w-full h-full opacity-90">
@@ -213,8 +213,8 @@
 
           </div>
 
-          <!-- Cartela / Placa de Museo al pie del cuadro -->
-          <div class="mt-4 text-center bg-[#0e0e12]/85 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 shadow-lg" style="transform: translateZ(20px);">
+          <!-- Cartela / Placa de Museo al pie del cuadro colgado -->
+          <div class="mt-5 text-center bg-[#0e0e12]/85 backdrop-blur-md px-5 py-2 rounded-full border border-white/15 shadow-xl transition-transform duration-300 group-hover:scale-105" style="transform: translateZ(25px);">
             <span class="text-[11px] mono uppercase tracking-[0.2em] text-[#dfc285] inline-block mr-2 font-medium">
               Obra 21 · Los Ceros de Riemann
             </span>

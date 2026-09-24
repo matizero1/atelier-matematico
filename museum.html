@@ -211,6 +211,26 @@
 
   <p id="hud-hist" class="text-xs text-slate-300 leading-relaxed font-light mb-3 line-clamp-3"></p>
 
+  <!-- BARRA DE AUTO-RESOLUCIÓN & CONTROL DE ENTROPÍA (TIMONEL F2) -->
+  <div class="bg-black/60 rounded-xl p-2.5 border border-purple-500/25 mb-3 space-y-1.5">
+    <div class="flex justify-between items-center text-[10px] mono">
+      <span class="text-slate-400">ESTADO RELAJACIÓN:</span>
+      <span id="hud-relax-state" class="text-cyan-300 font-bold">CRISTALIZADO</span>
+    </div>
+    <div class="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+      <div id="hud-relax-progress" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-full w-full transition-all duration-300"></div>
+    </div>
+    <div class="flex justify-between items-center text-[9px] mono text-slate-400">
+      <span>Residuo: <strong id="hud-residual-val" class="text-purple-300">0.002</strong></span>
+      <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">0.998</strong></span>
+    </div>
+  </div>
+
+  <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-1.5 px-3 bg-gradient-to-r from-amber-600/30 to-purple-600/30 hover:from-amber-600/50 hover:to-purple-600/50 border border-amber-400/40 rounded-xl text-[11px] mono text-amber-200 transition flex items-center justify-center gap-2 mb-3 shadow-lg">
+    <span>⚡</span>
+    <span>Liberar Forma (Ver Auto-Resolución)</span>
+  </button>
+
   <div class="flex items-center gap-2 pt-2 border-t border-white/10">
     <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white py-1.5 rounded-xl font-mono text-xs flex items-center justify-center gap-1.5 transition border border-purple-400/30">
       <span>📸</span>
@@ -594,17 +614,17 @@ function buildCosmicVoid() {
   const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.035, transparent: true, opacity: 0.5 }));
   scene.add(stars);
 
-  // Instanciar los 24 Astros Matemáticos con Hilos Topológicos
+  // Instanciar los 24 Astros Matemáticos con sus Modelos Nativos y Motor de Auto-Resolución
   ARTWORKS_24.forEach((data, index) => {
-    createTopologicalKnotAstro(data, index);
+    createLivingMathematicalAstro(data, index);
   });
 }
 
-// ── ASTRO CON ANILLO DE TIMONEL & HILO TOPOLÓGICO DE RELAJACIÓN ───
-function createTopologicalKnotAstro(data, index) {
+// ── CREACIÓN DE ASTRO CON ANILLO DE TIMONEL & MODELO MATEMÁTICO REAL ─
+function createLivingMathematicalAstro(data, index) {
   const astroGroup = new THREE.Group();
   
-  // Calcular posición esférica 3D
+  // Posición esférica 3D
   const x = data.radius * Math.cos(data.phi) * Math.sin(data.theta);
   const y = data.radius * Math.sin(data.phi);
   const z = -data.radius * Math.cos(data.phi) * Math.cos(data.theta);
@@ -612,7 +632,7 @@ function createTopologicalKnotAstro(data, index) {
 
   // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m)
   const ringGeo = new THREE.RingGeometry(1.58, 1.62, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
   const timonelRing = new THREE.Mesh(ringGeo, ringMat);
   astroGroup.add(timonelRing);
 
@@ -620,88 +640,855 @@ function createTopologicalKnotAstro(data, index) {
   const pointLight = new THREE.PointLight(0x8b5cf6, 1.1, 5.0);
   astroGroup.add(pointLight);
 
-  // 3. El Hilo Topológico que se Desenreda en Silicio
-  const knotFilament = buildKnotFilament(data.id);
-  astroGroup.add(knotFilament);
+  // 3. Sistema Matemático Físico Real de la Ley
+  const mathModel = buildBespokeAstroModel(data.id);
+  astroGroup.add(mathModel.group);
 
   scene.add(astroGroup);
+
+  // Desfasar el temporizador inicial para que el cosmos respire de forma asíncrona
+  const initialCycleT = (index * 0.72) % 13.0;
+
   astros24.push({
     data,
+    index,
     group: astroGroup,
     worldPos: new THREE.Vector3(x, y, z),
-    timonelRing
+    timonelRing,
+    pointLight,
+    model: mathModel,
+    cycleT: initialCycleT,
+    phase: 'RELAXATION',
+    relaxFactor: 0.5,
+    residual: 0.05
   });
 }
 
-// ── MOTOR DE HILOS TOPOLÓGICOS (KNOT RELAXATION FLOW EN 3D) ───────
-function buildKnotFilament(id) {
-  const N = 180; // Nodos del hilo topológico
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(N * 3);
-  const cols = new Float32Array(N * 3);
+// ── MODELOS MATEMÁTICOS REALES DE LAS 24 LEYES CON AUTO-RESOLUCIÓN ───
+function buildBespokeAstroModel(id) {
+  const group = new THREE.Group();
+  let updater = null;
 
-  // Inicializar hilo cerrado en forma de nudo toroidal (p=2, q=3) con perturbación
-  for (let i = 0; i < N; i++) {
-    const t = (i / N) * Math.PI * 2;
-    const r = 0.65 + Math.sin(t * 3) * 0.22;
-    pos[i*3]   = Math.cos(t * 2) * r;
-    pos[i*3+1] = Math.sin(t * 3) * 0.38;
-    pos[i*3+2] = Math.sin(t * 2) * r;
+  switch(id) {
+    case 0: { // 01. EL VUELO DE LORENZ (Caos RK4)
+      const N = 1600;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      const state = [];
+      for (let i = 0; i < N; i++) {
+        state.push({
+          x: (Math.random() - 0.5) * 2,
+          y: (Math.random() - 0.5) * 2,
+          z: 20 + (Math.random() - 0.5) * 5,
+          age: Math.random() * 500,
+          dx_noise: (Math.random() - 0.5) * 25,
+          dy_noise: (Math.random() - 0.5) * 25,
+          dz_noise: (Math.random() - 0.5) * 25
+        });
+        cols[i*3] = 0.95; cols[i*3+1] = 0.2 + (i/N)*0.6; cols[i*3+2] = 0.95;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
 
-    // Color del gradiente de tensión
-    cols[i*3]   = 0.4 + (i / N) * 0.6;
-    cols[i*3+1] = 0.2 + Math.sin(i / N * Math.PI) * 0.7;
-    cols[i*3+2] = 0.95;
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const pArr = pts.geometry.attributes.position.array;
+        const sigma = 10, rho = 28, beta = 8/3, h = 0.007;
+        const entropy = 1.0 - relaxFactor;
+        for (let i = 0; i < N; i++) {
+          const s = state[i];
+          s.x += sigma * (s.y - s.x) * h;
+          s.y += (s.x * (rho - s.z) - s.y) * h;
+          s.z += (s.x * s.y - beta * s.z) * h;
+          s.age++;
+          if (s.age > 700 || Math.abs(s.x) > 38) {
+            s.x = (Math.random() - 0.5) * 0.4; s.y = (Math.random() - 0.5) * 0.4; s.z = 20; s.age = 0;
+          }
+          const basePx = s.x * 0.035, basePy = (s.z - 24) * 0.035, basePz = s.y * 0.035;
+          pArr[i*3]   = basePx + s.dx_noise * 0.04 * entropy * Math.sin(cycleT * 3 + i);
+          pArr[i*3+1] = basePy + s.dy_noise * 0.04 * entropy * Math.cos(cycleT * 3 + i);
+          pArr[i*3+2] = basePz + s.dz_noise * 0.04 * entropy * Math.sin(cycleT * 2 + i);
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.006;
+      };
+      break;
+    }
+    case 1: { // 02. EL UMBRAL DE LA MATERIA (Elasticidad Tensorial Von Mises)
+      const geo = new THREE.IcosahedronGeometry(0.7, 1);
+      const posAttr = geo.attributes.position;
+      const origPos = new Float32Array(posAttr.count * 3);
+      for (let i = 0; i < posAttr.count * 3; i++) origPos[i] = posAttr.array[i];
+      const mat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.85 });
+      const mesh = new THREE.Mesh(geo, mat);
+      group.add(mesh);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const pArr = mesh.geometry.attributes.position.array;
+        const entropy = 1.0 - relaxFactor;
+        for (let i = 0; i < posAttr.count; i++) {
+          const ox = origPos[i*3], oy = origPos[i*3+1], oz = origPos[i*3+2];
+          const strain = Math.sin(cycleT * 4 + i) * 0.35 * entropy;
+          pArr[i*3]   = ox * (1.0 + strain);
+          pArr[i*3+1] = oy * (1.0 - strain * 0.5);
+          pArr[i*3+2] = oz * (1.0 + strain * 0.8);
+        }
+        mesh.geometry.attributes.position.needsUpdate = true;
+        mat.color.setHex(relaxFactor > 0.9 ? 0x38bdf8 : (relaxFactor < 0.3 ? 0xf43f5e : 0xa855f7));
+        group.rotation.x += 0.005; group.rotation.y += 0.007;
+      };
+      break;
+    }
+    case 2: { // 03. LA DANZA DE YOSHIDA (Integrador Simpléctico)
+      const N = 3;
+      const bodies = [];
+      for (let b = 0; b < N; b++) {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), new THREE.MeshBasicMaterial({ color: b===0?0xf59e0b:b===1?0x06b6d4:0xa855f7 }));
+        group.add(m);
+        bodies.push(m);
+      }
+      const trailN = 250;
+      const trailGeo = new THREE.BufferGeometry();
+      const trailPos = new Float32Array(trailN * 3);
+      trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+      const trail = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.7 }));
+      group.add(trail);
+      let tSim = 0;
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        tSim += dt * 1.5;
+        const entropy = 1.0 - relaxFactor;
+        const pArr = trail.geometry.attributes.position.array;
+        for (let b = 0; b < N; b++) {
+          const phaseOffset = b * (Math.PI * 2 / 3);
+          const wob = Math.sin(cycleT * 5 + b) * 0.5 * entropy;
+          const x = Math.sin(tSim + phaseOffset) * (0.8 + wob);
+          const y = Math.sin(2 * (tSim + phaseOffset)) * (0.4 + wob * 0.5);
+          const z = Math.cos(tSim + phaseOffset) * (0.3 + wob);
+          bodies[b].position.set(x, y, z);
+        }
+        for (let i = 0; i < trailN; i++) {
+          const tP = tSim - i * 0.02;
+          pArr[i*3]   = Math.sin(tP) * 0.8;
+          pArr[i*3+1] = Math.sin(2 * tP) * 0.4;
+          pArr[i*3+2] = Math.cos(tP) * 0.3;
+        }
+        trail.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 3: { // 04. LOS RÍOS INVISIBLES (Números Duales de Clifford)
+      const N = 120;
+      const helixGeo = new THREE.BufferGeometry();
+      const hPos = new Float32Array(N * 3);
+      helixGeo.setAttribute('position', new THREE.BufferAttribute(hPos, 3));
+      const helix = new THREE.Line(helixGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9 }));
+      group.add(helix);
+
+      const tanGeo = new THREE.BufferGeometry();
+      const tanPos = new Float32Array(30 * 6);
+      tanGeo.setAttribute('position', new THREE.BufferAttribute(tanPos, 3));
+      const tangents = new THREE.LineSegments(tanGeo, new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.6 }));
+      group.add(tangents);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = helix.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const t = (i / N) * Math.PI * 4 + cycleT * 0.5;
+          const r = 0.55;
+          pArr[i*3]   = Math.cos(t) * r;
+          pArr[i*3+1] = (i / N - 0.5) * 1.5;
+          pArr[i*3+2] = Math.sin(t) * r;
+        }
+        helix.geometry.attributes.position.needsUpdate = true;
+
+        const tArr = tangents.geometry.attributes.position.array;
+        for (let i = 0; i < 30; i++) {
+          const idx = Math.floor(i * (N / 30));
+          const px = pArr[idx*3], py = pArr[idx*3+1], pz = pArr[idx*3+2];
+          const t = (idx / N) * Math.PI * 4 + cycleT * 0.5;
+          const noiseAngle = Math.sin(cycleT * 6 + i) * entropy * Math.PI;
+          const tx = -Math.sin(t + noiseAngle) * 0.25;
+          const ty = 0.08 * (1.0 - entropy);
+          const tz = Math.cos(t + noiseAngle) * 0.25;
+
+          tArr[i*6]   = px; tArr[i*6+1] = py; tArr[i*6+2] = pz;
+          tArr[i*6+3] = px + tx; tArr[i*6+4] = py + ty; tArr[i*6+5] = pz + tz;
+        }
+        tangents.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.007;
+      };
+      break;
+    }
+    case 4: { // 05. LOS CANTOS DE CHLADNI (Cimática Acústica)
+      const N = 1500;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const sand = [];
+      for (let i = 0; i < N; i++) {
+        sand.push({
+          u: (Math.random() - 0.5) * 2.2,
+          v: (Math.random() - 0.5) * 2.2,
+          vu: 0, vv: 0
+        });
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xf5d061, size: 0.022, transparent: true, opacity: 0.92 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const n = 3, m = 5;
+        const pArr = pts.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const p = sand[i];
+          const val = Math.sin(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - Math.sin(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
+          const gu = n * Math.cos(n * Math.PI * p.u) * Math.sin(m * Math.PI * p.v) - m * Math.cos(m * Math.PI * p.u) * Math.sin(n * Math.PI * p.v);
+          const gv = m * Math.sin(n * Math.PI * p.u) * Math.cos(m * Math.PI * p.v) - n * Math.sin(m * Math.PI * p.u) * Math.cos(n * Math.PI * p.v);
+
+          const thermal = (Math.random() - 0.5) * 0.06 * entropy;
+          p.vu = p.vu * 0.85 - Math.sign(val) * gu * 0.018 * relaxFactor + thermal;
+          p.vv = p.vv * 0.85 - Math.sign(val) * gv * 0.018 * relaxFactor + thermal;
+          p.u += p.vu; p.v += p.vv;
+          if (Math.hypot(p.u, p.v) > 1.1) {
+            p.u = (Math.random() - 0.5) * 1.8; p.v = (Math.random() - 0.5) * 1.8;
+          }
+          pArr[i*3]   = p.u * 0.65;
+          pArr[i*3+1] = Math.abs(val) * 0.08 * (1.0 - entropy * 0.8);
+          pArr[i*3+2] = p.v * 0.65;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.004;
+      };
+      break;
+    }
+    case 5: { // 06. EL TELAR DE TURING (Reacción-Difusión)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const angle = (i / N) * Math.PI * 8 + cycleT * 0.2;
+          const rad = Math.sqrt(i / N) * 0.8;
+          const pattern = Math.sin(rad * 14 - angle * 3) * Math.cos(angle * 5);
+          const noise = (Math.random() - 0.5) * 0.5 * entropy;
+          const rFinal = rad + noise * 0.3;
+          pArr[i*3]   = Math.cos(angle) * rFinal;
+          pArr[i*3+1] = (pattern * 0.15) * relaxFactor + noise * 0.1;
+          pArr[i*3+2] = Math.sin(angle) * rFinal;
+
+          cArr[i*3]   = 0.2 + (pattern > 0 ? 0.7 : 0.1) * relaxFactor;
+          cArr[i*3+1] = 0.8;
+          cArr[i*3+2] = 0.9;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        pts.geometry.attributes.color.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 6: { // 07. LA CINTA DEL PANADERO (Atractor de Rössler)
+      const N = 1400;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      const state = [];
+      for (let i = 0; i < N; i++) {
+        state.push({ x: (Math.random()-0.5)*2, y: (Math.random()-0.5)*2, z: Math.random()*2, age: Math.random()*400 });
+        cols[i*3] = 0.95; cols[i*3+1] = 0.3 + (i/N)*0.6; cols[i*3+2] = 0.2;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const pArr = pts.geometry.attributes.position.array;
+        const a = 0.2, b = 0.2, c = 5.7, h = 0.016;
+        const entropy = 1.0 - relaxFactor;
+        for (let i = 0; i < N; i++) {
+          const s = state[i];
+          s.x += (-s.y - s.z) * h;
+          s.y += (s.x + a * s.y) * h;
+          s.z += (b + s.z * (s.x - c)) * h;
+          s.age++;
+          if (s.age > 600 || Math.abs(s.x) > 25) {
+            s.x = (Math.random()-0.5)*0.5; s.y = (Math.random()-0.5)*0.5; s.z = 0.2; s.age = 0;
+          }
+          const wob = Math.sin(cycleT * 4 + i) * 0.4 * entropy;
+          pArr[i*3]   = s.x * 0.06 + wob;
+          pArr[i*3+1] = s.z * 0.05 - 0.3 + wob;
+          pArr[i*3+2] = s.y * 0.06 + wob;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.007;
+      };
+      break;
+    }
+    case 7: { // 08. LAS ESFERAS DE APOLONIO
+      const rings = [];
+      const N_RINGS = 6;
+      for (let i = 0; i < N_RINGS; i++) {
+        const ringM = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.015, 12, 48), new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.85 }));
+        group.add(ringM);
+        rings.push(ringM);
+      }
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        rings.forEach((r, idx) => {
+          const targetR = 0.25 + (idx / N_RINGS) * 0.55;
+          const noise = Math.sin(cycleT * 4 + idx) * 0.3 * entropy;
+          r.scale.set(targetR + noise, targetR + noise, targetR + noise);
+          r.rotation.x = (idx * Math.PI / 3) + cycleT * 0.2 * relaxFactor + noise;
+          r.rotation.y = (idx * Math.PI / 4) + cycleT * 0.3 * relaxFactor;
+        });
+        group.rotation.y += 0.004;
+      };
+      break;
+    }
+    case 8: { // 09. EL ESPEJO DE JULIA (Fractal Complejo)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const th = (i / N) * Math.PI * 2 + cycleT * 0.1;
+          const rBase = 0.5 + Math.sin(th * 3 + cycleT) * 0.25;
+          const noise = (Math.random() - 0.5) * 0.6 * entropy;
+          pArr[i*3]   = Math.cos(th) * (rBase * relaxFactor + (0.5 + noise) * entropy);
+          pArr[i*3+1] = (Math.sin(th * 6) * 0.15) * relaxFactor + noise * 0.2;
+          pArr[i*3+2] = Math.sin(th) * (rBase * relaxFactor + (0.5 + noise) * entropy);
+
+          cArr[i*3]   = 0.6 + Math.sin(th * 2) * 0.3;
+          cArr[i*3+1] = 0.2;
+          cArr[i*3+2] = 0.95;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 9: { // 10. LA AUTOPISTA DEL CAOS (Langton 3D)
+      const N = 260;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.9 }));
+      group.add(line);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = line.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const progress = i / N;
+          const highwayX = (progress - 0.5) * 1.6 + Math.sin(i * 0.3) * 0.05;
+          const highwayY = (progress - 0.5) * 1.6 + Math.cos(i * 0.3) * 0.05;
+          const highwayZ = Math.sin(i * 0.2) * 0.15;
+
+          const chaosX = Math.sin(i * 0.7 + cycleT) * 0.6;
+          const chaosY = Math.cos(i * 0.9 + cycleT) * 0.6;
+          const chaosZ = Math.sin(i * 1.1 + cycleT) * 0.6;
+
+          pArr[i*3]   = highwayX * relaxFactor + chaosX * entropy;
+          pArr[i*3+1] = highwayY * relaxFactor + chaosY * entropy;
+          pArr[i*3+2] = highwayZ * relaxFactor + chaosZ * entropy;
+        }
+        line.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.006;
+      };
+      break;
+    }
+    case 10: { // 11. LA OLA ETERNA (Solitones de KdV)
+      const N = 240;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const line = new THREE.LineLoop(geo, new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.92 }));
+      group.add(line);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = line.geometry.attributes.position.array;
+        const waveT = cycleT * 2.0;
+        for (let i = 0; i < N; i++) {
+          const theta = (i / N) * Math.PI * 2;
+          const distFromPeak = Math.atan2(Math.sin(theta - waveT), Math.cos(theta - waveT));
+          const sech = 1.0 / Math.cosh(distFromPeak * 5.0);
+          const solitaryHeight = sech * sech * 0.45;
+          const dispersiveRipples = Math.sin(theta * 12 + cycleT * 8) * 0.18 * entropy;
+
+          const r = 0.7 + (solitaryHeight * relaxFactor) + dispersiveRipples;
+          pArr[i*3]   = Math.cos(theta) * r;
+          pArr[i*3+1] = (solitaryHeight * 0.6) * relaxFactor + dispersiveRipples * 0.5;
+          pArr[i*3+2] = Math.sin(theta) * r;
+        }
+        line.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.004;
+      };
+      break;
+    }
+    case 11: { // 12. LA PIEL DE LA JIRAFA (Teselación de Voronoi)
+      const geo = new THREE.DodecahedronGeometry(0.65, 1);
+      const posAttr = geo.attributes.position;
+      const origPos = new Float32Array(posAttr.count * 3);
+      for (let i = 0; i < posAttr.count * 3; i++) origPos[i] = posAttr.array[i];
+      const mat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, wireframe: true, transparent: true, opacity: 0.85 });
+      const mesh = new THREE.Mesh(geo, mat);
+      group.add(mesh);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = mesh.geometry.attributes.position.array;
+        for (let i = 0; i < posAttr.count; i++) {
+          const ox = origPos[i*3], oy = origPos[i*3+1], oz = origPos[i*3+2];
+          const lloydNoise = Math.sin(cycleT * 5 + i) * 0.25 * entropy;
+          pArr[i*3]   = ox * (1.0 + lloydNoise);
+          pArr[i*3+1] = oy * (1.0 - lloydNoise * 0.5);
+          pArr[i*3+2] = oz * (1.0 + lloydNoise);
+        }
+        mesh.geometry.attributes.position.needsUpdate = true;
+        group.rotation.x += 0.004; group.rotation.y += 0.006;
+      };
+      break;
+    }
+    case 12: { // 13. LOS RÍOS DE NEWTON (Cuencas Fractales)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const rootIdx = i % 3;
+          const rootAngle = (rootIdx * Math.PI * 2 / 3);
+          const rad = (i / N) * 0.75;
+          const noise = (Math.random() - 0.5) * 0.6 * entropy;
+
+          const xIdeal = Math.cos(rootAngle) * rad;
+          const yIdeal = Math.sin(rootAngle) * rad;
+          const zIdeal = Math.sin(rad * 8 + cycleT) * 0.08;
+
+          pArr[i*3]   = xIdeal * relaxFactor + Math.sin(i + cycleT) * 0.5 * entropy;
+          pArr[i*3+1] = zIdeal * relaxFactor + noise * 0.3;
+          pArr[i*3+2] = yIdeal * relaxFactor + Math.cos(i + cycleT) * 0.5 * entropy;
+
+          cArr[i*3]   = rootIdx === 0 ? 0.95 : 0.2;
+          cArr[i*3+1] = rootIdx === 1 ? 0.95 : 0.3;
+          cArr[i*3+2] = rootIdx === 2 ? 0.95 : 0.4;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 13: { // 14. LAS CELDAS DEL SOL (Rayleigh-Bénard)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        const tConv = cycleT * 2.0;
+        for (let i = 0; i < N; i++) {
+          const theta = (i / N) * Math.PI * 6 + tConv * 0.2;
+          const rBase = 0.55;
+          const rollAngle = theta * 2 + tConv;
+          const rollR = 0.2;
+
+          const x = (rBase + Math.cos(rollAngle) * rollR) * Math.cos(theta);
+          const z = (rBase + Math.cos(rollAngle) * rollR) * Math.sin(theta);
+          const y = Math.sin(rollAngle) * rollR;
+
+          const noise = (Math.random() - 0.5) * 0.5 * entropy;
+          pArr[i*3]   = x * relaxFactor + noise;
+          pArr[i*3+1] = y * relaxFactor + noise * 0.5;
+          pArr[i*3+2] = z * relaxFactor + noise;
+
+          cArr[i*3]   = 0.95;
+          cArr[i*3+1] = 0.3 + (y + 0.2) * 1.5;
+          cArr[i*3+2] = 0.1;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 14: { // 15. LA FIBRACIÓN DE HOPF (Topología 4D)
+      const tori = [];
+      for (let i = 0; i < 5; i++) {
+        const torus = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.02, 16, 64), new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x06b6d4 : 0xec4899, wireframe: true }));
+        torus.rotation.x = (i * Math.PI) / 5;
+        torus.rotation.y = (i * Math.PI) / 3;
+        group.add(torus);
+        tori.push(torus);
+      }
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        tori.forEach((t, i) => {
+          const noise = Math.sin(cycleT * 5 + i) * 0.4 * entropy;
+          t.rotation.x = ((i * Math.PI) / 5) + cycleT * 0.3 * relaxFactor + noise;
+          t.rotation.y = ((i * Math.PI) / 3) + cycleT * 0.4 * relaxFactor + noise;
+          const s = 1.0 + Math.sin(cycleT * 2 + i) * 0.08 * (1.0 - entropy);
+          t.scale.set(s, s, s);
+        });
+        group.rotation.z += 0.003;
+      };
+      break;
+    }
+    case 15: { // 16. EL JUEGO DEL CAOS (Helecho de Barnsley)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      const fernPts = [];
+      let bx = 0, by = 0;
+      for (let i = 0; i < N; i++) {
+        const r = Math.random();
+        if (r < 0.01) { bx = 0; by = 0.16 * by; }
+        else if (r < 0.86) { const nx = 0.85*bx + 0.04*by, ny = -0.04*bx + 0.85*by + 1.6; bx = nx; by = ny; }
+        else if (r < 0.93) { const nx = 0.2*bx - 0.26*by, ny = 0.23*bx + 0.22*by + 1.6; bx = nx; by = ny; }
+        else { const nx = -0.15*bx + 0.28*by, ny = 0.26*bx + 0.24*by + 0.44; bx = nx; by = ny; }
+        fernPts.push({ x: bx * 0.14, y: (by - 5) * 0.14, z: (Math.random()-0.5)*0.08 });
+        cols[i*3] = 0.1; cols[i*3+1] = 0.9; cols[i*3+2] = 0.4;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.024, vertexColors: true, transparent: true, opacity: 0.92 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const f = fernPts[i];
+          const noiseX = Math.sin(i * 0.3 + cycleT * 4) * 0.6 * entropy;
+          const noiseY = Math.cos(i * 0.4 + cycleT * 4) * 0.6 * entropy;
+          pArr[i*3]   = f.x * relaxFactor + noiseX;
+          pArr[i*3+1] = f.y * relaxFactor + noiseY;
+          pArr[i*3+2] = f.z * relaxFactor + noiseX * 0.5;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 16: { // 17. LAS FLORES DEL GIRASOL (Fibonacci)
+      const N = 700;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.92 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        const goldenAngle = (137.507764 * Math.PI / 180);
+        const badAngle = (128.0 * Math.PI / 180);
+        const currentAngle = goldenAngle * relaxFactor + badAngle * entropy;
+
+        for (let i = 0; i < N; i++) {
+          const theta = i * currentAngle;
+          const r = Math.sqrt(i / N) * 0.75;
+          pArr[i*3]   = Math.cos(theta) * r;
+          pArr[i*3+1] = (Math.sin(r * 10 + cycleT) * 0.06) * relaxFactor;
+          pArr[i*3+2] = Math.sin(theta) * r;
+
+          cArr[i*3]   = 0.95;
+          cArr[i*3+1] = 0.7 + (i / N) * 0.25;
+          cArr[i*3+2] = 0.15;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.004;
+      };
+      break;
+    }
+    case 17: { // 18. LAS ESPIRALES QUÍMICAS (Belousov-Zhabotinsky)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.026, vertexColors: true, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        const bzTime = cycleT * 2.2;
+        for (let i = 0; i < N; i++) {
+          const arm = i % 2;
+          const u = (i / N) * Math.PI * 8 + bzTime;
+          const r = 0.1 + (i / N) * 0.68;
+          const theta = u + arm * Math.PI;
+
+          const noise = (Math.random() - 0.5) * 0.4 * entropy;
+          pArr[i*3]   = Math.cos(theta) * (r + noise * 0.3);
+          pArr[i*3+1] = (Math.sin(theta * 3 + bzTime) * 0.08) * relaxFactor + noise * 0.2;
+          pArr[i*3+2] = Math.sin(theta) * (r + noise * 0.3);
+
+          cArr[i*3]   = 0.1;
+          cArr[i*3+1] = 0.95;
+          cArr[i*3+2] = 0.6 + Math.sin(theta) * 0.35;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.006;
+      };
+      break;
+    }
+    case 18: { // 19. EL COLAPSO CUÁNTICO (Ecuación de Schrödinger)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true, opacity: 0.92 }));
+      group.add(pts);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const lobe = i % 2 === 0 ? 1 : -1;
+          const th = (i / N) * Math.PI * 4;
+          const rLobe = Math.sqrt(Math.random()) * 0.45;
+          const idealX = Math.cos(th) * rLobe * 0.6;
+          const idealZ = Math.sin(th) * rLobe * 0.6;
+          const idealY = lobe * (0.2 + rLobe * 0.8);
+
+          const noise = (Math.random() - 0.5) * 0.8 * entropy;
+          pArr[i*3]   = idealX * relaxFactor + noise;
+          pArr[i*3+1] = idealY * relaxFactor + noise;
+          pArr[i*3+2] = idealZ * relaxFactor + noise;
+
+          cArr[i*3]   = 0.3 + (lobe > 0 ? 0.6 : 0.1);
+          cArr[i*3+1] = 0.4;
+          cArr[i*3+2] = 0.95;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.007;
+      };
+      break;
+    }
+    case 19: { // 20. EL LABERINTO PERFECTO (Regla 110 de Wolfram)
+      const N = 300;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.88 }));
+      group.add(line);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = line.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const step = Math.floor(i / 10);
+          const sub = i % 10;
+          const regularX = (sub - 5) * 0.08 + (step % 2) * 0.04;
+          const regularY = (step - 15) * 0.05;
+          const regularZ = (sub % 3) * 0.06;
+
+          const chaos = Math.sin(i * 1.5 + cycleT * 5) * 0.5 * entropy;
+          pArr[i*3]   = regularX * relaxFactor + chaos;
+          pArr[i*3+1] = regularY * relaxFactor + chaos;
+          pArr[i*3+2] = regularZ * relaxFactor + chaos;
+        }
+        line.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 20: { // 21. LOS CEROS DE RIEMANN (Espiral en s = 1/2 + it)
+      const N = 1200;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.92 }));
+      group.add(line);
+
+      let tBase = 12;
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        tBase += dt * 0.8;
+        const entropy = 1.0 - relaxFactor;
+        const pArr = line.geometry.attributes.position.array;
+        const cArr = line.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const t = tBase + (i / N) * 35;
+          const th = (t / 2) * Math.log(t / (2 * Math.PI)) - t / 2;
+          const rBase = Math.sin(t * 0.75) * Math.cos(t * 0.28) * 0.55;
+          const noise = Math.sin(cycleT * 5 + i) * 0.3 * entropy;
+
+          const r = rBase * relaxFactor + noise;
+          pArr[i*3]   = Math.cos(th) * r;
+          pArr[i*3+1] = (i / N - 0.5) * 1.6;
+          pArr[i*3+2] = Math.sin(th) * r;
+
+          const isZero = Math.abs(r) < 0.05 && relaxFactor > 0.8;
+          cArr[i*3]   = isZero ? 1.0 : 0.85;
+          cArr[i*3+1] = isZero ? 0.95 : 0.65;
+          cArr[i*3+2] = isZero ? 0.2 : 0.15;
+        }
+        line.geometry.attributes.position.needsUpdate = true;
+        line.geometry.attributes.color.needsUpdate = true;
+        group.rotation.y += 0.006;
+      };
+      break;
+    }
+    case 21: { // 22. EL DESIERTO DE BEAL
+      const N = 400;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xef4444, size: 0.032, transparent: true, opacity: 0.9 }));
+      group.add(pts);
+
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), new THREE.MeshBasicMaterial({ color: 0x6366f1, wireframe: true, transparent: true, opacity: 0.4 }));
+      group.add(core);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        for (let i = 0; i < N; i++) {
+          const theta = (i / N) * Math.PI * 4;
+          const phi = (i / N) * Math.PI;
+          const rStrict = 0.35 + (i / N) * 0.55;
+          const rViolated = 0.1 + (i / N) * 0.8;
+          const r = rStrict * relaxFactor + rViolated * entropy;
+
+          pArr[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+          pArr[i*3+1] = r * Math.cos(phi);
+          pArr[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y += 0.005;
+      };
+      break;
+    }
+    case 22: { // 23. VÓRTICES DE NAVIER-STOKES
+      const N = 1400;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+      const vortex = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.028, vertexColors: true, transparent: true, opacity: 0.92 }));
+      group.add(vortex);
+
+      let vorT = 0;
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        vorT += dt * 1.6;
+        const entropy = 1.0 - relaxFactor;
+        const pArr = vortex.geometry.attributes.position.array;
+        const cArr = vortex.geometry.attributes.color.array;
+        for (let i = 0; i < N; i++) {
+          const u = (i / N) * Math.PI * 10 + vorT;
+          const rCoherent = 0.12 + Math.sin(u * 0.3 + vorT) * 0.35;
+          const noise = (Math.random() - 0.5) * 0.6 * entropy;
+
+          const r = rCoherent * relaxFactor + (0.4 + noise) * entropy;
+          pArr[i*3]   = Math.cos(u) * r;
+          pArr[i*3+1] = ((i / N) - 0.5) * 1.5 + noise * 0.3;
+          pArr[i*3+2] = Math.sin(u) * r;
+
+          cArr[i*3]   = 0.2 + (i / N) * 0.8;
+          cArr[i*3+1] = 0.7;
+          cArr[i*3+2] = 0.95;
+        }
+        vortex.geometry.attributes.position.needsUpdate = true;
+        group.rotation.y -= 0.01;
+      };
+      break;
+    }
+    case 23: { // 24. EL FLUJO DE RICCI DE POINCARÉ
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 24), new THREE.MeshStandardMaterial({ color: 0x9333ea, emissive: 0x4c1d95, wireframe: true }));
+      group.add(mesh);
+
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        const entropy = 1.0 - relaxFactor;
+        const pos = mesh.geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const v = new THREE.Vector3().fromBufferAttribute(pos, i).normalize();
+          const wrinkle = Math.sin(v.x * 8 + cycleT * 3) * Math.cos(v.y * 8 + cycleT * 3) * 0.25 * entropy;
+          v.multiplyScalar(0.55 + wrinkle);
+          pos.setXYZ(i, v.x, v.y, v.z);
+        }
+        pos.needsUpdate = true;
+        mesh.rotation.y += 0.007;
+      };
+      break;
+    }
   }
 
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-  const line = new THREE.LineLoop(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9 }));
-
-  // Dinámica viva de relajación topológica cuadro a cuadro
-  let cycleTime = Math.random() * 100;
-  knotFilamentUpdaters.push((dt) => {
-    cycleTime += dt * 0.8;
-    const pArr = line.geometry.attributes.position.array;
-    const isSolved = (id !== 20 && id !== 22 && id !== 23); // Riemann, Navier y Beal juegan a buscar sin fin
-
-    const tensionRate = isSolved ? 0.04 : 0.02;
-    const unknotProgress = (Math.sin(cycleTime * 0.3) + 1) * 0.5; // Oscila entre ovillo y desenredo
-
-    for (let i = 0; i < N; i++) {
-      const idx = i * 3;
-      const prevIdx = ((i - 1 + N) % N) * 3;
-      const nextIdx = ((i + 1) % N) * 3;
-
-      // 1. Tensión de acortamiento de curva (Curve Shortening Flow)
-      const avgX = (pArr[prevIdx] + pArr[nextIdx]) * 0.5;
-      const avgY = (pArr[prevIdx+1] + pArr[nextIdx+1]) * 0.5;
-      const avgZ = (pArr[prevIdx+2] + pArr[nextIdx+2]) * 0.5;
-
-      pArr[idx]   += (avgX - pArr[idx]) * tensionRate;
-      pArr[idx+1] += (avgY - pArr[idx+1]) * tensionRate;
-      pArr[idx+2] += (avgZ - pArr[idx+2]) * tensionRate;
-
-      // 2. Modulación según la naturaleza matemática de la ley
-      const phase = (i / N) * Math.PI * 2 + cycleTime;
-      const wave = Math.sin(phase * 4 + id) * 0.08 * (1.0 - unknotProgress * 0.7);
-      pArr[idx+1] += wave;
-
-      // 3. Confinamiento Métrico de Timonel (No puede cruzar el anillo R = 1.4m)
-      const dist = Math.hypot(pArr[idx], pArr[idx+1], pArr[idx+2]);
-      if (dist > 1.35) {
-        const factor = 1.35 / dist;
-        pArr[idx] *= factor; pArr[idx+1] *= factor; pArr[idx+2] *= factor;
-      }
-    }
-
-    line.geometry.attributes.position.needsUpdate = true;
-    line.rotation.y += 0.005;
-    line.rotation.x += 0.003;
-  });
-
-  return line;
+  return { group, update: updater };
 }
+
+// ── CONTROL DE PERTURBACIÓN & AUTO-RESOLUCIÓN BAJO DEMANDA ─────────
+function perturbCurrentAstro() {
+  if (currentFocusedAstro) {
+    perturbAstro(currentFocusedAstro);
+  } else {
+    const curAstro = astros24[nai3D.currentIndex] || astros24[0];
+    if (curAstro) perturbAstro(curAstro);
+  }
+}
+
+function perturbAstro(astro) {
+  astro.cycleT = 0; // Desatar choque de entropía inmediato
+  astro.timonelRing.scale.set(1.22, 1.22, 1.22);
+  setTimeout(() => astro.timonelRing.scale.set(1, 1, 1), 350);
+  speakNai("Forma liberada hacia el caos. Observa cómo la ley matemática combate el desorden y vuelve a cristalizar.");
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') {
+    if (!isInShopMode) perturbCurrentAstro();
+  }
+});
 
 // ── NAI SOBERANA EN SILICIO 3D ─────────────────────────────────────
 function buildNaiSovereignEntity() {
@@ -1148,8 +1935,82 @@ function animate() {
     updateOrbitalProximity();
   }
 
-  // Actualizar los 24 hilos de relajación topológica
-  knotFilamentUpdaters.forEach(fn => fn(delta));
+  // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución
+  astros24.forEach((astro) => {
+    astro.cycleT += delta;
+
+    let phase, relaxFactor, residual, ringColor;
+    if (astro.cycleT < 2.5) {
+      // 1. Fase de Entropía Alta / Dispersión
+      phase = 'DISPERSION';
+      relaxFactor = 0.0;
+      residual = 0.75 + Math.sin(astro.cycleT * 4) * 0.12;
+      ringColor = 0xf43f5e; // Rojo advertencia
+      astro.timonelRing.material.opacity = 0.65 + Math.sin(astro.cycleT * 8) * 0.3;
+    } else if (astro.cycleT < 7.5) {
+      // 2. Fase de Relajación por Operador Diferencial
+      phase = 'RELAXATION';
+      const progress = (astro.cycleT - 2.5) / 5.0;
+      relaxFactor = progress;
+      residual = 0.75 * (1.0 - progress) + 0.003;
+      ringColor = progress > 0.65 ? 0x38bdf8 : (progress > 0.3 ? 0xa855f7 : 0xf43f5e);
+      astro.timonelRing.material.opacity = 0.45;
+    } else if (astro.cycleT < 13.0) {
+      // 3. Fase Cristalizada: Forma Matemática Pura (Certificada por Timonel)
+      phase = 'CRYSTALLIZED';
+      relaxFactor = 1.0;
+      residual = 0.002 + Math.sin(astro.cycleT * 2) * 0.0008;
+      ringColor = 0x38bdf8;
+      astro.timonelRing.material.opacity = 0.5 + Math.sin(astro.cycleT * 3) * 0.2;
+    } else {
+      astro.cycleT = 0;
+      phase = 'DISPERSION';
+      relaxFactor = 0.0;
+      residual = 0.75;
+      ringColor = 0xf43f5e;
+    }
+
+    astro.phase = phase;
+    astro.relaxFactor = relaxFactor;
+    astro.residual = residual;
+    astro.timonelRing.material.color.setHex(ringColor);
+
+    if (astro.model && astro.model.update) {
+      astro.model.update(delta, astro.cycleT, phase, relaxFactor);
+    }
+  });
+
+  // Actualizar telemetría de auto-resolución en la tarjeta HUD si hay astro enfocado
+  if (currentFocusedAstro) {
+    const stateEl = document.getElementById('hud-relax-state');
+    const progEl = document.getElementById('hud-relax-progress');
+    const resEl = document.getElementById('hud-residual-val');
+    const slackEl = document.getElementById('hud-slack-val');
+
+    if (stateEl && progEl && resEl && slackEl) {
+      if (currentFocusedAstro.phase === 'DISPERSION') {
+        stateEl.textContent = 'ENTROPÍA ALTA · DISPERSANDO';
+        stateEl.className = 'text-rose-400 font-bold';
+        progEl.style.width = '18%';
+        progEl.className = 'bg-rose-500 h-full transition-all duration-300';
+      } else if (currentFocusedAstro.phase === 'RELAXATION') {
+        stateEl.textContent = 'RELAJACIÓN EN SILICIO';
+        stateEl.className = 'text-purple-300 font-bold';
+        const pct = Math.floor(currentFocusedAstro.relaxFactor * 100);
+        progEl.style.width = pct + '%';
+        progEl.className = 'bg-gradient-to-r from-purple-500 to-cyan-400 h-full transition-all duration-300';
+      } else {
+        stateEl.textContent = 'CRISTALIZADO · CERTIFICADO';
+        stateEl.className = 'text-cyan-300 font-bold';
+        progEl.style.width = '100%';
+        progEl.className = 'bg-gradient-to-r from-cyan-400 to-emerald-400 h-full transition-all duration-300';
+      }
+
+      resEl.textContent = currentFocusedAstro.residual.toFixed(4);
+      const slack = Math.max(0, 1.0 - currentFocusedAstro.residual);
+      slackEl.textContent = slack.toFixed(3);
+    }
+  }
   renderer.render(scene, camera);
 }
 

@@ -4318,4 +4318,8 @@ root.AtelierMath = {
     }
   }
 };
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { AtelierMath: root.AtelierMath };
+}
 })(typeof window !== "undefined" ? window : global);

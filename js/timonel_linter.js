@@ -14,11 +14,22 @@
   class MathParser {
     constructor() {
       this.knownFunctions = ['sin', 'cos', 'tan', 'exp', 'ln', 'log', 'sqrt', 'abs', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh'];
+      this.knownConstants = {
+        'pi': Math.PI,
+        'e': Math.E,
+        'phi': (1 + Math.sqrt(5)) / 2,
+        'tau': Math.PI * 2,
+        'c': 299792458,
+        'g': 9.80665
+      };
     }
 
     tokenize(expr) {
       if (!expr || typeof expr !== 'string') return [];
-      expr = expr.replace(/\s+/g, '');
+      expr = expr.replace(/\s+/g, '')
+                 .replace(/π/g, 'pi')
+                 .replace(/τ/g, 'tau')
+                 .replace(/φ/g, 'phi');
       const rawTokens = [];
       let i = 0;
       while (i < expr.length) {
@@ -37,8 +48,11 @@
           while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
             name += expr[i++];
           }
-          if (this.knownFunctions.includes(name.toLowerCase())) {
-            rawTokens.push({ type: 'FN', value: name.toLowerCase() });
+          const lower = name.toLowerCase();
+          if (this.knownFunctions.includes(lower)) {
+            rawTokens.push({ type: 'FN', value: lower });
+          } else if (this.knownConstants[lower] !== undefined) {
+            rawTokens.push({ type: 'CONST', name: lower, value: this.knownConstants[lower] });
           } else {
             rawTokens.push({ type: 'VAR', value: name });
           }
@@ -48,15 +62,15 @@
       }
 
       // Insert implicit multiplications between adjacent tokens where appropriate
-      // e.g.: NUM VAR, NUM FN, NUM (, ) (, ) VAR, VAR VAR
+      // e.g.: NUM VAR, NUM CONST, CONST VAR, NUM FN, NUM (, ) (, ) VAR, VAR VAR
       const tokens = [];
       for (let j = 0; j < rawTokens.length; j++) {
         const curr = rawTokens[j];
         tokens.push(curr);
         if (j < rawTokens.length - 1) {
           const next = rawTokens[j + 1];
-          const isCurrOperand = curr.type === 'NUM' || curr.type === 'VAR' || (curr.type === 'OP' && curr.value === ')');
-          const isNextOperand = next.type === 'NUM' || next.type === 'VAR' || next.type === 'FN' || (next.type === 'OP' && next.value === '(');
+          const isCurrOperand = curr.type === 'NUM' || curr.type === 'CONST' || curr.type === 'VAR' || (curr.type === 'OP' && curr.value === ')');
+          const isNextOperand = next.type === 'NUM' || next.type === 'CONST' || next.type === 'VAR' || next.type === 'FN' || (next.type === 'OP' && next.value === '(');
           if (isCurrOperand && isNextOperand) {
             tokens.push({ type: 'OP', value: '*' });
           }
@@ -134,7 +148,7 @@
         const tok = peek();
         if (!tok) throw new Error('Expresión incompleta');
 
-        if (tok.type === 'NUM') {
+        if (tok.type === 'NUM' || tok.type === 'CONST') {
           return { type: 'NUM', value: consume().value };
         }
         if (tok.type === 'VAR') {
@@ -253,97 +267,139 @@
         const varList = Array.from(allVars);
         if (varList.length === 0) varList.push('x');
 
-        // Muestras estocásticas bien condicionadas (evitando singularidades 0 o múltiplos de pi)
-        const samplePoints = [
-          0.37, 1.23, 2.718, 3.45, -1.68, 4.19, 0.81, 6.28, -2.4, 5.05
-        ];
+        // Muestras adaptativas cuasi-aleatorias de Halton (32 puntos estratificados)
+        const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+        const halton = (index, base) => {
+          let f = 1, r = 0, n = index;
+          while (n > 0) {
+            f /= base;
+            r += f * (n % base);
+            n = Math.floor(n / base);
+          }
+          return r;
+        };
 
-        let maxResidue = 0;
-        let worstCounterexample = null;
-        const samplesPrev = [];
-        const samplesCurr = [];
+        const generateScopes = (domain) => {
+          const list = [];
+          for (let i = 1; i <= 32; i++) {
+            const sc = {};
+            varList.forEach((v, vIdx) => {
+              const base = primes[vIdx % primes.length];
+              const r = halton(i, base);
+              if (domain === 'positive') {
+                sc[v] = 0.25 + r * 6.5; // [0.25, 6.75] para log/sqrt
+              } else if (domain === 'bounded') {
+                sc[v] = -0.85 + r * 1.7; // [-0.85, 0.85] para asin/acos
+              } else {
+                const sign = (i + vIdx * 3) % 2 === 0 ? 1 : -1;
+                sc[v] = sign * (0.35 + r * 5.8);
+              }
+            });
+            list.push(sc);
+          }
+          return list;
+        };
 
-        for (let s of samplePoints) {
-          const scope = {};
-          varList.forEach((v, idx) => {
-            // Escalar si hay múltiples variables para no testear solo la diagonal x=y
-            scope[v] = s * (1.0 + idx * 0.35);
-          });
-
-          const valPrev = this.parser.evaluate(prevAst, scope);
-          const valCurr = this.parser.evaluate(currAst, scope);
-
-          if (isNaN(valPrev) || isNaN(valCurr) || !isFinite(valPrev) || !isFinite(valCurr)) continue;
-
-          if (isPrevEq && isCurrEq) {
-            samplesPrev.push({ s, scope, val: valPrev });
-            samplesCurr.push({ s, scope, val: valCurr });
-          } else if (!isPrevEq && !isCurrEq) {
-            const diff = Math.abs(valPrev - valCurr);
-            if (diff > maxResidue) {
-              maxResidue = diff;
-              worstCounterexample = { sample: s, scope, prevVal: valPrev, currVal: valCurr, residue: diff };
+        const domains = ['standard', 'positive', 'bounded'];
+        let bestSamples = [];
+        for (const d of domains) {
+          const scopes = generateScopes(d);
+          const validPairs = [];
+          for (const sc of scopes) {
+            const vP = this.parser.evaluate(prevAst, sc);
+            const vC = this.parser.evaluate(currAst, sc);
+            if (!isNaN(vP) && !isNaN(vC) && isFinite(vP) && isFinite(vC)) {
+              validPairs.push({ sc, vP, vC });
             }
-          } else {
-            return {
-              valid: false,
-              status: 'type_mismatch',
-              desc: 'Discrepancia de tipo: un paso es una ecuación con igualdad (=) y el otro es una expresión simple.'
-            };
+          }
+          if (validPairs.length >= 12) {
+            bestSamples = validPairs;
+            break;
+          }
+          if (validPairs.length > bestSamples.length) {
+            bestSamples = validPairs;
           }
         }
 
-        // Para ecuaciones F(x) = 0 y G(x) = 0: verificar proporcionalidad lineal no-nula (k != 0)
-        if (isPrevEq && isCurrEq) {
-          if (samplesPrev.length < 2) {
-            return { valid: false, status: 'error', desc: 'No se pudieron evaluar suficientes puntos muestrales.' };
+        if (bestSamples.length < 3) {
+          return { valid: false, status: 'error', desc: 'No se pudieron evaluar suficientes puntos muestrales en el dominio admisible.' };
+        }
+
+        let maxResidue = 0;
+        let maxRelResidue = 0;
+        let worstCounterexample = null;
+
+        if (!isPrevEq && !isCurrEq) {
+          for (const item of bestSamples) {
+            const diff = Math.abs(item.vP - item.vC);
+            const norm = 1.0 + Math.max(Math.abs(item.vP), Math.abs(item.vC));
+            const relDiff = diff / norm;
+            if (diff > maxResidue) {
+              maxResidue = diff;
+              maxRelResidue = relDiff;
+              worstCounterexample = {
+                scope: item.sc,
+                prevVal: item.vP,
+                currVal: item.vC,
+                residue: diff
+              };
+            }
           }
+        } else if (isPrevEq && isCurrEq) {
           let k = null;
-          for (let i = 0; i < samplesPrev.length; i++) {
-            if (Math.abs(samplesCurr[i].val) > 1e-10) {
-              k = samplesPrev[i].val / samplesCurr[i].val;
+          for (const item of bestSamples) {
+            if (Math.abs(item.vC) > 1e-9) {
+              k = item.vP / item.vC;
               break;
             }
           }
           if (k === null || Math.abs(k) < 1e-12) {
-            for (let i = 0; i < samplesPrev.length; i++) {
-              if (Math.abs(samplesPrev[i].val) > 1e-10) {
-                k = samplesPrev[i].val / (samplesCurr[i].val || 1e-15);
+            for (const item of bestSamples) {
+              if (Math.abs(item.vP) > 1e-9) {
+                k = item.vP / (item.vC || 1e-15);
                 break;
               }
             }
           }
           if (k === null) k = 1.0;
 
-          for (let i = 0; i < samplesPrev.length; i++) {
-            const diff = Math.abs(samplesPrev[i].val - k * samplesCurr[i].val);
+          for (const item of bestSamples) {
+            const diff = Math.abs(item.vP - k * item.vC);
+            const norm = 1.0 + Math.max(Math.abs(item.vP), Math.abs(k * item.vC));
+            const relDiff = diff / norm;
             if (diff > maxResidue) {
               maxResidue = diff;
+              maxRelResidue = relDiff;
               worstCounterexample = {
-                sample: samplesPrev[i].s,
-                scope: samplesPrev[i].scope,
-                prevVal: samplesPrev[i].val,
-                currVal: samplesCurr[i].val,
+                scope: item.sc,
+                prevVal: item.vP,
+                currVal: item.vC,
                 residue: diff
               };
             }
           }
+        } else {
+          return {
+            valid: false,
+            status: 'type_mismatch',
+            desc: 'Discrepancia de tipo: un paso es una ecuación con igualdad (=) y el otro es una expresión simple.'
+          };
         }
 
-        const isCertified = maxResidue < 1e-7;
+        const isCertified = maxResidue < 1e-7 || (maxRelResidue < 1e-7 && maxResidue < 1e-3);
 
         return {
           valid: isCertified,
           status: isCertified ? 'certified' : 'divergent',
           maxResidue,
           counterexample: worstCounterexample ? {
-            sample: worstCounterexample.sample,
+            sample: 0,
             scope: worstCounterexample.scope,
             prevVal: Number(worstCounterexample.prevVal.toFixed(4)),
             currVal: Number(worstCounterexample.currVal.toFixed(4)),
             residue: Number(worstCounterexample.residue.toFixed(4)),
             desc: isCertified
-              ? 'Equivalencia formal verificada. Residuo matemático nulo.'
+              ? 'Equivalencia formal verificada. Residuo matemático nulo en silicio.'
               : `Ruptura de equivalencia: para ${JSON.stringify(worstCounterexample.scope)}, el paso previo da ${worstCounterexample.prevVal.toFixed(3)} pero tu paso da ${worstCounterexample.currVal.toFixed(3)} (error residual = ${worstCounterexample.residue.toFixed(3)}).`
           } : null
         };

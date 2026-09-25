@@ -120,6 +120,10 @@
 
     <!-- CTAS PRINCIPALES -->
     <div class="flex items-center gap-3">
+      <button onclick="openDesktopModal()" class="hidden md:flex items-center gap-1.5 text-xs mono uppercase tracking-wider text-[#f4f1ea] hover:text-[#c5a059] px-4 py-2 border border-white/20 rounded-full hover:border-[#c5a059] transition bg-white/[0.03]">
+        <span>📥</span>
+        <span>App Desktop</span>
+      </button>
       <a href="museum.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-4 py-2 border border-white/10 rounded-full hover:border-white/20 transition">
         Observatorio 3D
       </a>
@@ -699,5 +703,6 @@
 
   <!-- SCRIPT PARALAJE ESPACIAL 3D & LIENZO VIVO EN MURO DE TRAVERTINO (60 FPS NATIVO) -->
   <script src="js/controllers/index_controller.js"></script>
+  <script src="js/controllers/desktop_modal.js"></script>
 </body>
 </html>

@@ -96,9 +96,10 @@
       <a href="studio.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
         Sala III · Mesa Suizo
       </a>
-      <a href="museum.html" class="hidden sm:inline-block text-xs mono uppercase tracking-wider text-[#a1a1aa] hover:text-[#f4f1ea] px-3.5 py-1.5 border border-white/10 rounded-full hover:border-white/20 transition">
-        Sala IV · Rotonda 3D
-      </a>
+      <button onclick="openDesktopModal()" class="hidden md:flex items-center gap-1.5 text-xs mono uppercase tracking-wider text-[#f4f1ea] hover:text-[#c5a059] px-3.5 py-1.5 border border-white/20 rounded-full hover:border-[#c5a059] transition bg-white/[0.03]">
+        <span>📥</span>
+        <span>App Desktop</span>
+      </button>
       <button onclick="openCheckoutModal()" class="text-xs mono uppercase tracking-wider font-semibold text-[#08080a] bg-[#c5a059] hover:bg-[#dfc285] px-4 py-1.5 rounded-full transition shadow-sm">
         Encargar Obra
       </button>
@@ -437,7 +438,14 @@
       <div class="pt-2 border-t border-white/[0.08] space-y-4">
         <div class="flex justify-between items-baseline">
           <div>
-            <span class="text-[10px] mono text-[#71717a] uppercase tracking-wider block">Inversión Final:</span>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] mono text-[#71717a] uppercase tracking-wider block">Inversión Final:</span>
+              <div class="flex items-center gap-1">
+                <button id="curr-btn-clp" onclick="setCurrency('CLP')" class="px-2 py-0.5 rounded border border-[#c5a059] text-[#c5a059] bg-[#c5a059]/10 font-bold text-[10px] mono">CLP</button>
+                <button id="curr-btn-usd" onclick="setCurrency('USD')" class="px-2 py-0.5 rounded border border-white/10 text-[#71717a] hover:text-[#a1a1aa] text-[10px] mono">USD</button>
+                <button id="curr-btn-eur" onclick="setCurrency('EUR')" class="px-2 py-0.5 rounded border border-white/10 text-[#71717a] hover:text-[#a1a1aa] text-[10px] mono">EUR</button>
+              </div>
+            </div>
             <span class="text-xs text-[#a1a1aa]">Despacho en Santiago / Envíos a todo Chile</span>
           </div>
           <div class="text-right">
@@ -450,6 +458,10 @@
         <div class="space-y-2.5">
           <button onclick="openCheckoutModal()" class="w-full bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-3.5 px-6 rounded-full text-xs uppercase tracking-widest mono transition shadow-sm">
             Adquirir Pieza — Pago Seguro
+          </button>
+          <button onclick="downloadCertificate()" class="w-full border border-[#c5a059]/30 hover:border-[#c5a059] text-[#dfc285] hover:text-white py-2.5 px-4 rounded-full text-[11px] uppercase tracking-wider mono transition bg-[#c5a059]/5 flex items-center justify-center gap-2">
+            <span>📜</span>
+            <span>Certificado Criptográfico de Autenticidad</span>
           </button>
           <button onclick="orderViaWhatsApp()" class="w-full border border-white/15 hover:border-white/30 text-[#f4f1ea] font-medium py-3 px-6 rounded-full text-xs uppercase tracking-widest mono transition">
             Consultar por WhatsApp Concierge
@@ -534,5 +546,6 @@
   <!-- 4. LÓGICA DE SILICIO NATIVO, THREE.JS & PARALAJE DE TIMONEL               -->
   <!-- ========================================================================= -->
   <script src="js/controllers/shop_controller.js"></script>
+  <script src="js/controllers/desktop_modal.js"></script>
 </body>
 </html>

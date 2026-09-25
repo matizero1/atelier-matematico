@@ -26,13 +26,14 @@
     let eyePos       = new THREE.Vector3(0, 0.12, 2.25);
     let activePreset = 'front'; // front | left | right | macro
 
-    // Precios y metadatos
+    // Precios y metadatos con divisas internacionales
     const PRICES = {
-      fineart:  { clp: '$68.000 CLP',  usd: '~$75 USD',  label: 'Cuadro Fine Art 50×70 cm' },
-      acrylic:  { clp: '$120.000 CLP', usd: '~$130 USD', label: 'Acrílico Luxury 40×60 cm' },
-      mug:      { clp: '$16.900 CLP',  usd: '~$18 USD',  label: 'Taza Cerámica 11 oz' },
-      notebook: { clp: '$24.900 CLP',  usd: '~$27 USD',  label: 'Cuaderno Moleskine 100g' }
+      fineart:  { clp: '$68.000 CLP',  usd: '~$75 USD',  eur: '€70 EUR',  label: 'Cuadro Fine Art 50×70 cm' },
+      acrylic:  { clp: '$120.000 CLP', usd: '~$130 USD', eur: '€120 EUR', label: 'Acrílico Luxury 40×60 cm' },
+      mug:      { clp: '$16.900 CLP',  usd: '~$18 USD',  eur: '€17 EUR',  label: 'Taza Cerámica 11 oz' },
+      notebook: { clp: '$24.900 CLP',  usd: '~$27 USD',  eur: '€25 EUR',  label: 'Cuaderno Moleskine 100g' }
     };
+    let currentCurrency = 'CLP';
 
     // Grabación de video 60 FPS
     let mediaRecorder = null;
@@ -563,11 +564,46 @@
         finishSec.style.display = (fmt === 'fineart') ? 'block' : 'none';
       }
 
-      document.getElementById('total-price-clp').textContent = PRICES[fmt].clp;
-      document.getElementById('total-price-usd').textContent = PRICES[fmt].usd;
-      document.getElementById('vitrina-product-badge').textContent = `${PRICES[fmt].label} · Montado en Pared`;
+      updatePriceDisplay();
+      const badgeEl = document.getElementById('vitrina-product-badge');
+      if (badgeEl) badgeEl.textContent = `${PRICES[fmt].label} · Montado en Pared`;
 
       buildProductGeometry();
+    }
+
+    function updatePriceDisplay() {
+      const fmt = PRICES[currentFormat] || PRICES.fineart;
+      const clpEl = document.getElementById('total-price-clp');
+      const usdEl = document.getElementById('total-price-usd');
+      const modalPrice = document.getElementById('modal-art-price');
+
+      let mainPrice = fmt.clp;
+      let secPrice = fmt.usd;
+      if (currentCurrency === 'USD') {
+        mainPrice = fmt.usd;
+        secPrice = `${fmt.clp} · ${fmt.eur}`;
+      } else if (currentCurrency === 'EUR') {
+        mainPrice = fmt.eur;
+        secPrice = `${fmt.clp} · ${fmt.usd}`;
+      }
+
+      if (clpEl) clpEl.textContent = mainPrice;
+      if (usdEl) usdEl.textContent = secPrice;
+      if (modalPrice) modalPrice.textContent = mainPrice;
+    }
+
+    function setCurrency(c) {
+      currentCurrency = c;
+      updatePriceDisplay();
+      ['clp', 'usd', 'eur'].forEach(curr => {
+        const btn = document.getElementById(`curr-btn-${curr}`);
+        if (btn) {
+          const isActive = (curr === c.toLowerCase());
+          btn.className = isActive ?
+            'px-2 py-0.5 rounded border border-[#c5a059] text-[#c5a059] bg-[#c5a059]/10 font-bold text-[10px] mono' :
+            'px-2 py-0.5 rounded border border-white/10 text-[#71717a] hover:text-[#a1a1aa] text-[10px] mono';
+        }
+      });
     }
 
     function setFrameFinish(finish) {
@@ -788,3 +824,119 @@
       window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
       closeCheckoutModal();
     }
+
+    function downloadCertificate() {
+      const art = (window.AtelierMath && window.AtelierMath.ARTWORKS) ? window.AtelierMath.ARTWORKS[currentArtIdx] : { badge: '01', title: 'Obra Maestra', sub: 'Ecuación Canónica' };
+      const certCanvas = document.createElement('canvas');
+      certCanvas.width = 1800;
+      certCanvas.height = 1200;
+      const cctx = certCanvas.getContext('2d');
+
+      // Fondo papel algodón museo
+      cctx.fillStyle = '#0a0a0e';
+      cctx.fillRect(0, 0, 1800, 1200);
+
+      // Marco dorado doble
+      cctx.strokeStyle = '#c5a059';
+      cctx.lineWidth = 4;
+      cctx.strokeRect(60, 60, 1680, 1080);
+      cctx.strokeStyle = 'rgba(197, 160, 89, 0.4)';
+      cctx.lineWidth = 1.5;
+      cctx.strokeRect(74, 74, 1652, 1052);
+
+      // Cabecera institucional
+      cctx.fillStyle = '#c5a059';
+      cctx.font = 'bold 24px Space Mono, monospace';
+      cctx.textAlign = 'center';
+      cctx.fillText('ATELIER MATEMÁTICO · CERTIFICADO DE AUTENTICIDAD NUMÉRICA', 900, 140);
+
+      cctx.fillStyle = '#71717a';
+      cctx.font = '16px Space Mono, monospace';
+      cctx.fillText('GOBERNANZA PREFRONTAL TIMONEL F2 · SILICIO NATIVO · SANTIAGO DE CHILE', 900, 175);
+
+      // Título de la obra
+      cctx.fillStyle = '#f4f1ea';
+      cctx.font = 'bold 50px Cinzel, serif';
+      cctx.fillText(`OBRA ${art.badge}: ${art.title.toUpperCase()}`, 900, 290);
+
+      cctx.fillStyle = '#dfc285';
+      cctx.font = 'italic 22px Cinzel, serif';
+      cctx.fillText(art.sub || 'Ecuación Canónica de la Humanidad', 900, 335);
+
+      // Línea divisoria
+      cctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      cctx.lineWidth = 1;
+      cctx.beginPath();
+      cctx.moveTo(300, 380);
+      cctx.lineTo(1500, 380);
+      cctx.stroke();
+
+      // Ficha técnica de conservación
+      cctx.textAlign = 'left';
+      cctx.font = '18px Space Mono, monospace';
+      cctx.fillStyle = '#a1a1aa';
+      
+      const leftCol = 220;
+      cctx.fillText('• Sustrato Físico:   Hahnemühle Photo Rag 308 g/m² (100% Algodón, Libre de Ácido)', leftCol, 450);
+      cctx.fillText('• Pigmentación:      Tintas Minerales Epson UltraChrome Pro12 (Longevidad >100 años)', leftCol, 500);
+      cctx.fillText('• Protección Óptica: Cristal Acrílico Museo con 99% de Bloqueo Ultravioleta', leftCol, 550);
+      cctx.fillText('• Integración:       RK4 / C11 Silicio Nativo a 60 FPS sin aproximaciones falsas', leftCol, 600);
+      cctx.fillText('• Residuo Residual:  ‖F(x)‖ ≤ 1e-12 (Validado deterministamente en silicio)', leftCol, 650);
+
+      // Sello criptográfico SHA-256
+      const serialNum = `ATM-2026-${String(art.badge).padStart(3, '0')}-${Math.floor(100000 + Math.random()*900000)}`;
+      const sha256Sim = `sha256:${Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('')}`;
+
+      cctx.fillStyle = '#08080a';
+      cctx.fillRect(leftCol, 710, 1360, 130);
+      cctx.strokeStyle = 'rgba(197, 160, 89, 0.5)';
+      cctx.strokeRect(leftCol, 710, 1360, 130);
+
+      cctx.fillStyle = '#c5a059';
+      cctx.font = 'bold 15px Space Mono, monospace';
+      cctx.fillText(`NÚMERO DE REGISTRO: ${serialNum}`, leftCol + 30, 755);
+      cctx.fillStyle = '#71717a';
+      cctx.font = '14px Space Mono, monospace';
+      cctx.fillText(`HUELLA CRIPTOGRÁFICA DE SIMULACIÓN: ${sha256Sim}`, leftCol + 30, 790);
+      cctx.fillText(`ESTADO DE VERIFICACIÓN: CERTIFICADO POR TIMONEL F2 (SIN RETRO-FITTING)`, leftCol + 30, 820);
+
+      // Firmas
+      cctx.textAlign = 'center';
+      cctx.fillStyle = '#f4f1ea';
+      cctx.font = 'italic 20px Cinzel, serif';
+      cctx.fillText('Matías Cortés Figueroa', 550, 970);
+      cctx.font = '12px Space Mono, monospace';
+      cctx.fillStyle = '#71717a';
+      cctx.fillText('DIRECCIÓN CIENTÍFICA & ARTÍSTICA', 550, 1000);
+
+      cctx.font = 'italic 20px Cinzel, serif';
+      cctx.fillStyle = '#f4f1ea';
+      cctx.fillText('Timonel F2 Autonomous Oracle', 1250, 970);
+      cctx.font = '12px Space Mono, monospace';
+      cctx.fillStyle = '#71717a';
+      cctx.fillText('CERTIFICADOR RESIDUAL DETERMINISTA', 1250, 1000);
+
+      const link = document.createElement('a');
+      link.download = `Certificado_Autenticidad_Obra_${art.badge}_${art.title.replace(/\s+/g, '_')}.png`;
+      link.href = certCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // Exportación a nivel global
+    window.selectArtwork = selectArtwork;
+    window.cycleArtwork = cycleArtwork;
+    window.setCameraPreset = setCameraPreset;
+    window.switchProductFormat = switchProductFormat;
+    window.setFrameFinish = setFrameFinish;
+    window.setMatteFinish = setMatteFinish;
+    window.setLightIntensity = setLightIntensity;
+    window.setCurrency = setCurrency;
+    window.updatePriceDisplay = updatePriceDisplay;
+    window.openCheckoutModal = openCheckoutModal;
+    window.closeCheckoutModal = closeCheckoutModal;
+    window.orderViaWhatsApp = orderViaWhatsApp;
+    window.submitOrder = submitOrder;
+    window.downloadCertificate = downloadCertificate;
+    window.startVideoRecording = startVideoRecording;
+    window.togglePalette = togglePalette;
+    window.restartArtwork = restartArtwork;

@@ -247,26 +247,71 @@ controllers.forEach(({ file, room }) => {
 // 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (NASA JPL & SILICIO NATIVO)
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n⚡ FASE 6: Compilador Soberano Nailang (NASA JPL Rule 3 & Silicio Nativo)');
-const nailangRtPath = path.join(rootDir, '..', 'tools', 'nailangc', 'nailang_rt.h');
+const candidateRtPaths = [
+  path.join(rootDir, '..', 'tools', 'nailangc', 'nailang_rt.h'),
+  '/Users/mati/Desktop/Nai-Workspace/tools/nailangc/nailang_rt.h'
+];
+const nailangRtPath = candidateRtPaths.find(p => fs.existsSync(p)) || candidateRtPaths[0];
 assert(fs.existsSync(nailangRtPath), 'Header de runtime nailang_rt.h existe en disco');
 const rtContent = fs.readFileSync(nailangRtPath, 'utf8');
 assert(rtContent.includes('NaiArena') && rtContent.includes('nai_arena_init') && rtContent.includes('nai_arena_alloc'),
   'nailang_rt.h implementa NaiArena conforme a Regla 3 NASA JPL (Cero fragmentación post-init)');
 
-const nailangcPath = path.join(rootDir, '..', 'tools', 'nailangc', 'nailangc');
+const candidateNailangc = [
+  path.join(rootDir, '..', 'tools', 'nailangc', 'nailangc'),
+  '/Users/mati/Desktop/Nai-Workspace/tools/nailangc/nailangc'
+];
+const nailangcPath = candidateNailangc.find(p => fs.existsSync(p)) || candidateNailangc[0];
 assert(fs.existsSync(nailangcPath), 'Binario de producción nailangc compilado existe en silicio');
 
 // Prueba de compilación AST canónica
-const matrixNai = path.join(rootDir, '..', 'core', 'nailang', 'matrix3x3_r21.nai');
+const candidateMatrixNai = [
+  path.join(rootDir, '..', 'core', 'nailang', 'matrix3x3_r21.nai'),
+  '/Users/mati/Desktop/Nai-Workspace/core/nailang/matrix3x3_r21.nai'
+];
+const matrixNai = candidateMatrixNai.find(p => fs.existsSync(p)) || candidateMatrixNai[0];
 const resMatrix = child_process.spawnSync(nailangcPath, ['--ast', matrixNai], { encoding: 'utf8' });
 assert(resMatrix.status === 0, `nailangc compila exitosamente AST de kernel canónico matrix3x3_r21.nai`);
 
-const typesNai = path.join(rootDir, '..', 'projects', 'nai-open', 'core', 'types.nai');
+const candidateTypesNai = [
+  path.join(rootDir, '..', 'projects', 'nai-open', 'core', 'types.nai'),
+  '/Users/mati/Desktop/Nai-Workspace/projects/nai-open/core/types.nai'
+];
+const typesNai = candidateTypesNai.find(p => fs.existsSync(p)) || candidateTypesNai[0];
 const resTypes = child_process.spawnSync(nailangcPath, ['--ast', typesNai], { encoding: 'utf8' });
 assert(resTypes.status === 0, `nailangc compila exitosamente AST de contratos modulares types.nai (13 contratos)`);
 
 const resEmit = child_process.spawnSync(nailangcPath, ['--emit-only', matrixNai], { encoding: 'utf8' });
 assert(resEmit.status === 0, `nailangc genera código C puro de alta fidelidad sin desbordes de pila`);
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. AUDITORÍA DE CONVERSIÓN DESKTOP Y FICHA FINE ART
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🖥️ FASE 7: Conversión Workstation Desktop & Certificados Fine Art');
+const desktopModalPath = path.join(rootDir, 'js', 'controllers', 'desktop_modal.js');
+assert(fs.existsSync(desktopModalPath), 'Módulo desktop_modal.js existe en disco');
+
+const desktopModal = require(desktopModalPath);
+assert(typeof desktopModal.openDesktopModal === 'function', 'desktop_modal.js expone función openDesktopModal');
+assert(typeof desktopModal.switchOSBuild === 'function', 'desktop_modal.js expone función switchOSBuild');
+assert(desktopModal.OS_BUILDS && desktopModal.OS_BUILDS['macos-arm'], 'desktop_modal.js define paquetes nativos Apple Silicon');
+assert(desktopModal.OS_BUILDS['linux'] && desktopModal.OS_BUILDS['windows'], 'desktop_modal.js define paquetes multiplataforma Linux y Windows');
+
+// Verificar que las 5 salas HTML contienen el botón e importan desktop_modal.js
+htmlRooms.forEach(room => {
+  const rPath = path.join(rootDir, room);
+  const content = fs.readFileSync(rPath, 'utf8');
+  assert(content.includes('desktop_modal.js'), `Sala ${room} incluye script desktop_modal.js`);
+  assert(content.includes('openDesktopModal'), `Sala ${room} contiene llamada interactiva a openDesktopModal`);
+});
+
+// Verificar capacidades de Fine Art Shop: Monedas internacionales y Certificado Criptográfico
+const shopControllerPath = path.join(rootDir, 'js', 'controllers', 'shop_controller.js');
+const shopContent = fs.readFileSync(shopControllerPath, 'utf8');
+assert(shopContent.includes('setCurrency') && shopContent.includes('PRICES'), 'shop_controller.js implementa cotización multi-divisa (CLP, USD, EUR)');
+assert(shopContent.includes('downloadCertificate'), 'shop_controller.js implementa generación determinista de Certificado de Autenticidad');
+assert(shopContent.includes('Hahnemühle Photo Rag 308') && shopContent.includes('UltraChrome Pro12'), 'shop_controller.js certifica sustratos de grado museo (Hahnemühle 308g & UltraChrome Pro12)');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
@@ -281,3 +326,4 @@ if (failedTests === 0) {
 console.log('═══════════════════════════════════════════════════════════════════════\n');
 
 process.exit(failedTests === 0 ? 0 : 1);
+

@@ -67,6 +67,10 @@
 
     <!-- ACCESOS RÁPIDOS -->
     <div class="flex items-center gap-3">
+      <button onclick="openDesktopModal()" class="hidden md:flex items-center gap-1.5 text-xs mono uppercase tracking-wider text-[#f4f1ea] hover:text-[#c5a059] px-3.5 py-1.5 border border-white/20 rounded-full hover:border-[#c5a059] transition bg-white/[0.03]">
+        <span>📥</span>
+        <span>App Desktop</span>
+      </button>
       <a href="classroom.html" class="text-xs mono uppercase tracking-wider text-[#dfc285] hover:text-white px-3.5 py-1.5 border border-[#c5a059]/30 rounded-full hover:border-[#c5a059] transition bg-[#c5a059]/10">
         Aula Sincrónica
       </a>
@@ -268,5 +272,6 @@
   <script src="js/math_engines.js"></script>
 
   <script src="js/controllers/studio_controller.js"></script>
+  <script src="js/controllers/desktop_modal.js"></script>
 </body>
 </html>

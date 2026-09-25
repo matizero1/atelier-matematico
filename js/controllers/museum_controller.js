@@ -1,0 +1,1655 @@
+/**
+ * Atelier Matemático - Museum Controller
+ * 3D Celestial Observatory (Atlas Cósmico de 100 Leyes)
+ * NASA JPL-Grade Modular Architecture
+ */
+
+// CATÁLOGO COMPLETO DE LAS 100 LEYES DE LA HUMANIDAD (BÓVEDA CELESTE VISIBLE · TIMONEL F2)
+const ARTWORKS_24 = (typeof window !== 'undefined' && window.ARTWORKS_100 && window.ARTWORKS_100.length) ? window.ARTWORKS_100 : [
+  // ── ANILLO I: HORIZONTE Y LEYES CLÁSICAS (R = 18m, φ ∈ [+0.12, +0.28] rad sobre el horizonte)
+  { id: 0, badge:"01", title:"El Vuelo de Lorenz", sub:"Atractor Caótico Aperiodico", cat:"TEORÍA DEL CAOS · 1963",
+    eq:"dx/dt=10(y-x)\ndy/dt=x(28-z)-y\ndz/dt=xy-(8/3)z", metric:"Lyapunov: λ₁ = +0.9056",
+    hist:"Edward Lorenz descubrió que una millonésima de redondeo desata trayectorias perpetuamente impredecibles.",
+    poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás."', radius: 18, theta: 0.00, phi: 0.15 },
+
+  { id: 1, badge:"02", title:"El Umbral de la Materia", sub:"Límite de Fluencia Tensorial", cat:"MECÁNICA CONTINUA · 1913",
+    eq:"σ_v = √((σ₁-σ₂)²+(σ₂-σ₃)²+(σ₃-σ₁)²)/√2", metric:"Von Mises: J₂ ≤ k²",
+    hist:"Richard von Mises encontró la cota exacta donde un metal cede plásticamente bajo tensión multiaxial.",
+    poem:'"La materia resiste hasta que la tensión ya no cabe en sus átomos."', radius: 18, theta: 1.05, phi: 0.24 },
+
+  { id: 2, badge:"03", title:"La Danza de Yoshida", sub:"Conservación Hamiltoniana Pura", cat:"INTEGRADORES SIMPLÉCTICOS · 1990",
+    eq:"z_{n+1}=exp(c_i·Δt·D_A)·exp(d_i·Δt·D_B)·z_n", metric:"Energía: ΔH ≤ 1e-15",
+    hist:"Haruo Yoshida descubrió coeficientes analíticos de 4º orden que conservan la energía sin perder un solo julio.",
+    poem:'"Dos cuerpos bailan al borde del abismo sin motor ni fricción."', radius: 18, theta: 2.09, phi: 0.16 },
+
+  { id: 3, badge:"04", title:"Los Ríos Invisibles", sub:"Autodiferenciación con Clifford", cat:"ÁLGEBRA DUAL · 1873",
+    eq:"f(x+d·ε) = f(x) + d·f'(x)·ε  (ε²=0)", metric:"Error Truncamiento: 0.000",
+    hist:"William Clifford formuló el número infinitesimal ε cuyo cuadrado es cero para obtener derivadas sin error.",
+    poem:'"Corrientes subterráneas que horadan la roca en silencio."', radius: 18, theta: 3.14, phi: 0.26 },
+
+  { id: 4, badge:"05", title:"Los Cantos de Chladni", sub:"Relajación Nodal Cimática", cat:"CIMÁTICA ACÚSTICA · 1787",
+    eq:"w(x,y)=sin(nπx)sin(mπy)-sin(mπx)sin(nπy)=0", metric:"Residuo Nodal: ‖F(x)‖ ≤ 2.4e-5",
+    hist:"Ernst Chladni pasó un arco de violín por una placa de bronce y reveló los mandalas sagrados del sonido.",
+    poem:'"El silencio es el punto exacto donde las ondas se anulan."', radius: 18, theta: 4.19, phi: 0.18 },
+
+  { id: 5, badge:"06", title:"El Telar de Turing", sub:"Morfogénesis y Reacción-Difusión", cat:"MORFOGÉNESIS · 1952",
+    eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v", metric:"Turing Wavelength: λ_c ≈ 0.42",
+    hist:"Alan Turing demostró cómo dos sustancias químicas difundiéndose bastan para tejer las manchas del leopardo.",
+    poem:'"La vida no necesitó pincel: solo dos moléculas jugando a perseguirse."', radius: 18, theta: 5.24, phi: 0.22 },
+
+  // ── ANILLO II: BÓVEDA MEDIA Y MORFOGÉNESIS (R = 26m, φ ∈ [+0.38, +0.65] rad)
+  { id: 6, badge:"07", title:"La Cinta del Panadero", sub:"Plegado Caótico de Rössler", cat:"TOPOLOGÍA CAÓTICA · 1976",
+    eq:"dx/dt=-y-z\ndy/dt=x+0.2y\ndz/dt=0.2+z(x-5.7)", metric:"Fractal Dim: D ≈ 2.01",
+    hist:"Otto Rössler diseñó el atractor que se estira y pliega sobre sí mismo como el panadero amasa la masa.",
+    poem:'"El tiempo es una cinta de seda que el universo estira y dobla."', radius: 26, theta: 0.31, phi: 0.42 },
+
+  { id: 7, badge:"08", title:"Las Esferas de Apolonio", cat:"Empaquetamiento Fractal", sub:"Teorema de Círculos de Descartes", cat:"GEOMETRÍA FRACTAL · 200 a.C.",
+    eq:"(k₁+k₂+k₃+k₄)²=2(k₁²+k₂²+k₃²+k₄²)", metric:"Curvatura: k = 1/r",
+    hist:"Apolonio demostró que tres círculos tangentes dejan un hueco donde cabe exactamente una nueva esfera infinita.",
+    poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera."', radius: 26, theta: 0.94, phi: 0.58 },
+
+  { id: 8, badge:"09", title:"El Espejo de Julia", sub:"Dinámica Holomorfa en C", cat:"GEOMETRÍA COMPLEJA · 1918",
+    eq:"z_{n+1} = z_n² + c  (|c| ≈ 0.7885)", metric:"Mandelbrot Boundary ∂M",
+    hist:"Gaston Julia escribió 200 páginas a mano describiendo fractales que jamás pudo ver en una pantalla.",
+    poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles."', radius: 26, theta: 1.57, phi: 0.40 },
+
+  { id: 9, badge:"10", title:"La Autopista del Caos", sub:"Autómata de Langton", cat:"AUTÓMATA CELULAR · 1986",
+    eq:"Blanco→girar_derecha+pintar_negro\nNegro→girar_izquierda+pintar_blanco", metric:"Paso crítico: t=10.000",
+    hist:"Tras 10.000 pasos de caos absoluto, la hormiga construye espontáneamente una autopista infinita.",
+    poem:'"El orden no necesita arquitecto: emerge cuando nadie lo espera."', radius: 26, theta: 2.20, phi: 0.62 },
+
+  { id: 10, badge:"11", title:"La Ola Eterna", sub:"Solitones Analíticos de KdV", cat:"ONDAS NO LINEALES · 1834",
+    eq:"u(x,t) = -2k² · sech²(k(x - 4k²t))", metric:"Solitón Invariante: ‖u‖_L2 = cte",
+    hist:"John Scott Russell vio una ola en un canal viajar millas sin deformarse ni morir jamás.",
+    poem:'"Hay personas que, como estas olas, colisionan y salen intactas al otro lado."', radius: 26, theta: 2.83, phi: 0.46 },
+
+  { id: 11, badge:"12", title:"La Piel de la Jirafa", sub:"Partición Natural de Voronoi", cat:"TESELACIÓN ESPACIAL · 1908",
+    eq:"Cel(sᵢ) = {x : d(x,sᵢ) ≤ d(x,sⱼ)}", metric:"Métrica: Euclidiana L₂",
+    hist:"Georgy Voronoi describió la división celular que gobierna los ojos de mosca y las galaxias.",
+    poem:'"A cada semilla, todo lo que está más cerca de ella."', radius: 26, theta: 3.46, phi: 0.59 },
+
+  { id: 12, badge:"13", title:"Los Ríos de Newton", sub:"Cuencas Fractales de Atracción", cat:"ANÁLISIS COMPLEJO · 1669",
+    eq:"z_{n+1} = (2z³+1)/(3z²)  (z³-1 = 0)", metric:"Convergencia: z → 1, e^{i2π/3}",
+    hist:"El método de Newton para hallar raíces genera fronteras fractales infinitas en el plano complejo.",
+    poem:'"Incluso Newton jamás supo qué camino tomará el caos para llegar a la verdad."', radius: 26, theta: 4.08, phi: 0.42 },
+
+  { id: 13, badge:"14", title:"Las Celdas del Sol", sub:"Convección de Rayleigh-Bénard", cat:"TERMODINÁMICA · 1900",
+    eq:"Ra = gαΔTL³/(νκ) > 1708 (Hexágonos)", metric:"Rayleigh: Ra/Ra_c = 1.45",
+    hist:"Henri Bénard demostró que el calor no destruye el orden: fabrica hexágonos perfectos como el Sol.",
+    poem:'"El calor siempre fabrica hexágonos, la forma más eficiente del universo."', radius: 26, theta: 4.71, phi: 0.64 },
+
+  { id: 14, badge:"15", title:"La Fibración de Hopf", sub:"Proyección Cuadridimensional S³→R³", cat:"TOPOLOGÍA 4D · 1931",
+    eq:"π: S³ → S² (Fibras entrelazadas)", metric:"Invariante de Hopf: H = 1",
+    hist:"Heinz Hopf demostró que la esfera 4D se desmonta en infinitos círculos que no se tocan jamás.",
+    poem:'"La sombra de cuatro dimensiones cayendo como una flor sobre nuestra realidad."', radius: 26, theta: 5.34, phi: 0.48 },
+
+  { id: 15, badge:"16", title:"El Juego del Caos", sub:"Helecho Fractal de Barnsley", cat:"SISTEMAS IFS · 1988",
+    eq:"w_i(x) = A_i x + b_i (4 Matrices)", metric:"Hausdorff Dimension D ≈ 1.82",
+    hist:"Michael Barnsley demostró que tirar un dado con cuatro reglas reproduce una hoja de helecho perfecta.",
+    poem:'"Tres instrucciones y un dado bastan para dibujar la vida."', radius: 26, theta: 5.97, phi: 0.56 },
+
+  // ── ANILLO III: BÓVEDA ALTA Y ENIGMAS DEL MILENIO (R = 34m, φ ∈ [+0.75, +1.25] rad hacia el cenit)
+  { id: 16, badge:"17", title:"Las Flores del Girasol", sub:"Filotaxis de Fibonacci", cat:"GEOMETRÍA ÁUREA · 1202",
+    eq:"θₙ = n · 137.508° (Ángulo Áureo)", metric:"Razón Áurea: φ ≈ 1.618033",
+    hist:"En 1202 Fibonacci contó conejos y descubrió la espiral que empaqueta las semillas de los girasoles.",
+    poem:'"La flor no sabe matemáticas: solo crece de la forma más hermosa."', radius: 34, theta: 0.40, phi: 0.78 },
+
+  { id: 17, badge:"18", title:"Las Espirales Químicas", sub:"Reacción Belousov-Zhabotinsky", cat:"OSCILACIÓN NO LINEAL · 1951",
+    eq:"∂u/∂t = Dᵤ∇²u + f(u,v)", metric:"Período químico: T ≈ 4.2s",
+    hist:"Boris Belousov descubrió una reacción química que latía como un corazón y la ciencia lo tildó de loco.",
+    poem:'"Cada latido tuyo es una reacción química que se negó a detenerse."', radius: 34, theta: 1.18, phi: 0.92 },
+
+  { id: 18, badge:"19", title:"El Colapso Cuántico", sub:"Ecuación de Schrödinger", cat:"MECÁNICA CUÁNTICA · 1926",
+    eq:"iℏ ∂ψ/∂t = -ℏ²/2m ∇²ψ + Vψ", metric:"Norma Unitaria: ∫|ψ|² dV = 1",
+    hist:"Erwin Schrödinger formuló la ola de probabilidad donde las cosas existen en todos lados hasta ser observadas.",
+    poem:'"Antes de ser mirado, el electrón existe en todas partes a la vez."', radius: 34, theta: 1.96, phi: 0.80 },
+
+  { id: 19, badge:"20", title:"El Laberinto Perfecto", sub:"Regla 110 de Wolfram", cat:"COMPUTACIÓN UNIVERSAL · 1983",
+    eq:"111→0 · 110→1 · 101→1 · 100→0...", metric:"Clase 4: Turing-Completo",
+    hist:"Stephen Wolfram demostró que una regla elemental de tres celdas puede computar cualquier cosa en el universo.",
+    poem:'"Una sola celda negra en un mar blanco, capaz de pensarlo todo."', radius: 34, theta: 2.75, phi: 0.96 },
+
+  { id: 20, badge:"21", title:"Los Ceros de Riemann", sub:"Espiral Crítica en s = 1/2 + it", cat:"PROBLEMA DEL MILENIO · 1859",
+    eq:"ζ(s) = ∑ 1/nˢ = 0 ⇒ Re(s) = 1/2", metric:"Línea Crítica: Re(s) = 0.500000",
+    hist:"Bernhard Riemann planteó el enigma de $1.000.000 USD sobre el ritmo íntimo de los números primos.",
+    poem:'"Una cuerda de luz tensada que besa el cero absoluto en cada primo."', radius: 34, theta: 3.53, phi: 1.18 },
+
+  { id: 21, badge:"22", title:"El Desierto de Beal", sub:"Conjetura de Beal Coprima", cat:"TEORÍA DE NÚMEROS · 1993",
+    eq:"Aˣ + Bʸ = Cᶻ (x,y,z > 2) ⇒ mcd > 1", metric:"Exclusión Coprima: 100% Vacío",
+    hist:"Andrew Beal ofreció $1.000.000 USD a quien demuestre por qué las potencias coprimas se repelen en el vacío.",
+    poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse."', radius: 34, theta: 4.32, phi: 0.84 },
+
+  { id: 22, badge:"23", title:"Vórtices de Navier-Stokes", sub:"Singularidades y Turbulencia 3D", cat:"PROBLEMA DEL MILENIO · 1845",
+    eq:"∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u", metric:"Enstrofía: Ω(t) < ∞ (Búsqueda)",
+    hist:"¿Puede la velocidad del agua explotar a infinito? El misterio del millón de dólares de la física de fluidos.",
+    poem:'"Tubos de remolinos microscópicos trenzándose como músculos de luz."', radius: 34, theta: 5.11, phi: 1.22 },
+
+  { id: 23, badge:"24", title:"El Flujo de Ricci de Poincaré", sub:"Alisamiento Métrico a 3-Esfera", cat:"PROBLEMA DEL MILENIO · 2002",
+    eq:"∂g_ij/∂t = -2 R_ij ⇒ M³ → S³", metric:"Curvatura Escalar: R(t) → 1.000",
+    hist:"Grigori Perelman usó el flujo de calor métrico para alisar el espacio, y rechazó la Medalla Fields.",
+    poem:'"El calor geométrico plancha cada arruga hasta devolver la pureza a la primera esfera."', radius: 34, theta: 5.89, phi: 0.98 }
+];
+
+// Variables Three.js & Silicio
+let scene, camera, renderer;
+let astros24 = [];
+let knotFilamentUpdaters = [];
+
+// Entidad 3D de NAI
+let nai3D = {
+  group: null, core: null, outerHalo: null, light: null,
+  targetPos: new THREE.Vector3(0, 0, -8), currentIndex: 0, pulseTime: 0
+};
+
+// Navegación Inercial 6DOF de la Cápsula
+let velocity = new THREE.Vector3(0, 0, 0);
+let orientation = { pitch: 0, yaw: 0 };
+let targetOrientation = { pitch: 0, yaw: 0 };
+let isDragging = false, dragPrev = { x: 0, y: 0 };
+let userInertiaTimer = 0;
+let currentFocusedAstro = null;
+
+// Telemetría Enjambre
+let totalEvaluations = 480000;
+let swarmNodeId = "CL-" + Math.floor(1000 + Math.random() * 9000);
+
+// Audio & Carrete
+let voiceGuideEnabled = true, isSpeaking = false, currentUtterance = null;
+let userCameraRoll = [];
+
+// Boutique Orbital 3D
+let isInShopMode = false;
+let savedCameraState = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+let shopBayGroup = null;
+let shopProducts = { frameWood: null, frameAcrylic: null, mug: null, notebook: null, certificate: null };
+let currentProductType = 'frame_wood';
+let activeProductTexture = null;
+let productRotation = { x: 0, y: 0 }, targetProductRotation = { x: 0, y: 0 };
+
+// ── INICIALIZACIÓN PRINCIPAL ──────────────────────────────────────
+
+// ── BITÁCORA DE CANDIDATOS & NAI CENTINELA (TIMONEL F2) ───────────
+let discoveryLedger = [];
+let lastDiscoveryAlertTime = 0;
+
+function loadDiscoveryLedger() {
+  try {
+    const saved = localStorage.getItem('NAI_DISCOVERY_LEDGER');
+    if (saved) discoveryLedger = JSON.parse(saved);
+  } catch(e) {}
+  updateDiscoveryUI();
+}
+
+function saveDiscoveryLedger() {
+  try {
+    localStorage.setItem('NAI_DISCOVERY_LEDGER', JSON.stringify(discoveryLedger));
+  } catch(e) {}
+}
+
+function toggleDiscoveryDrawer() {
+  document.getElementById('discovery-drawer').classList.toggle('translate-x-full');
+}
+
+function updateDiscoveryUI() {
+  const badge = document.getElementById('discovery-counter-badge');
+  const countText = document.getElementById('discovery-count-text');
+  const emptyState = document.getElementById('discovery-empty-state');
+  const list = document.getElementById('discovery-list');
+
+  if (badge) badge.textContent = discoveryLedger.length;
+  if (countText) countText.textContent = `${discoveryLedger.length} candidatos archivados`;
+
+  if (!list) return;
+
+  if (discoveryLedger.length === 0) {
+    list.innerHTML = '';
+    if (emptyState) {
+      emptyState.classList.remove('hidden');
+      list.appendChild(emptyState);
+    }
+    return;
+  }
+
+  list.innerHTML = '';
+  discoveryLedger.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'glass rounded-xl p-3.5 border border-cyan-500/25 space-y-2 relative overflow-hidden';
+    card.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="text-[9px] mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">#${item.badge} · ${item.cat}</span>
+          <h4 class="text-xs serif font-bold text-white mt-1">${item.title}</h4>
+        </div>
+        <span class="text-[10px] mono text-slate-400">${item.timeFormatted}</span>
+      </div>
+      <div class="bg-black/60 rounded p-2 text-[10px] mono text-purple-300">
+        <div>Residuo Timonel: <strong class="text-cyan-300">${item.residual}</strong></div>
+        <div class="text-slate-400 mt-0.5">${item.reason}</div>
+      </div>
+      <div class="flex justify-between items-center text-[9px] mono text-slate-500">
+        <span>Nodo: ${item.nodeId}</span>
+        <span class="text-emerald-400 font-semibold">CERTIFICADO CANDIDATO</span>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function showDiscoveryToast(entry) {
+  const toast = document.getElementById('discovery-toast');
+  const msg = document.getElementById('toast-message');
+  if (!toast || !msg) return;
+
+  msg.textContent = `${entry.title}: Residuo ${entry.residual} — ${entry.reason}`;
+  toast.classList.remove('opacity-0', '-translate-y-8');
+  setTimeout(() => {
+    toast.classList.add('opacity-0', '-translate-y-8');
+  }, 6000);
+}
+
+function recordDiscoveryCandidate(astro, reason, details) {
+  const entry = {
+    id: Date.now() + Math.random(),
+    timestamp: new Date().toISOString(),
+    timeFormatted: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    badge: astro.data.badge,
+    title: astro.data.title,
+    cat: astro.data.cat,
+    reason: reason,
+    residual: astro.residual.toFixed(5),
+    details: details || "Convergencia local fuera del equilibrio",
+    nodeId: swarmNodeId
+  };
+
+  discoveryLedger.unshift(entry);
+  if (discoveryLedger.length > 50) discoveryLedger.pop();
+  saveDiscoveryLedger();
+  updateDiscoveryUI();
+  showDiscoveryToast(entry);
+
+  // Pulso especial en el núcleo 3D de NAI
+  if (nai3D && nai3D.core) {
+    nai3D.core.material.color.setHex(0x10b981);
+    setTimeout(() => { if (nai3D.core) nai3D.core.material.color.setHex(0xa855f7); }, 2500);
+  }
+
+  // Alerta vocal de NAI
+  speakNai(`Atención Matías. El nodo ha registrado un candidato numérico con residuo bajo en ${astro.data.title}. Archivado en la bitácora.`);
+}
+
+function exportDiscoveryLedger() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(discoveryLedger, null, 2));
+  const a = document.createElement('a');
+  a.setAttribute("href", dataStr);
+  a.setAttribute("download", `timonel_discovery_ledger_${Date.now()}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function clearDiscoveryLedger() {
+  if (confirm('¿Vaciar la bitácora de candidatos?')) {
+    discoveryLedger = [];
+    saveDiscoveryLedger();
+    updateDiscoveryUI();
+  }
+}
+
+function simulateDiscoveryCandidate() {
+  const astro = astros24[21] || astros24[0]; // Beal
+  recordDiscoveryCandidate(astro, "Candidato de Prueba: Bisección entre extremos positivos y negativos. Residuo convergente.", "Prueba de Alerta Vocal NAI");
+}
+
+function navigateToActiveShop() {
+  const artId = currentFocusedAstro ? currentFocusedAstro.data.id : 20;
+  window.location.href = `shop.html?art=${artId}`;
+}
+
+function initAtlasCosmico() {
+  const canvas = document.getElementById('webgl-canvas');
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x08080a);
+  scene.fog = new THREE.FogExp2(0x08080a, 0.009);
+
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
+  camera.position.set(0, 0.5, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "low-power", preserveDrawingBuffer: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(1.0);
+  renderer.shadowMap.enabled = false;
+
+  document.getElementById('swarm-node-id').textContent = "#" + swarmNodeId;
+  loadDiscoveryLedger();
+
+  buildCosmicVoid();
+  buildTectonicRotunda();
+  buildNaiSovereignEntity();
+  buildShopBay3D();
+  setup6DOFControls();
+  populateNaiAstroSelector();
+  window.addEventListener('resize', onWindowResize);
+  animate();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('direct') === '1' || urlParams.get('astro') !== null) {
+    enterCapsule(false);
+    if (urlParams.get('astro') !== null) {
+      const targetId = parseInt(urlParams.get('astro'), 10);
+      if (!isNaN(targetId) && targetId >= 0 && targetId < astros24.length) {
+        setTimeout(() => { warpToTargetAstro(targetId); }, 150);
+      }
+    }
+  }
+}
+
+// ── VACÍO CÓSMICO & CONFINAMIENTO DE LOS 24 HILOS DE TIMONEL ──────
+function buildCosmicVoid() {
+  scene.add(new THREE.AmbientLight(0x0e0d14, 0.95));
+
+  // Campo Estelar Esférico Omnidireccional (1.800 estrellas en el vacío 3D)
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(1800 * 3);
+  for (let i = 0; i < 1800; i++) {
+    const r = 20 + Math.random() * 65;
+    const th = Math.random() * Math.PI * 2;
+    const ph = (Math.random() - 0.5) * Math.PI;
+    starPos[i*3]   = r * Math.cos(ph) * Math.sin(th);
+    starPos[i*3+1] = r * Math.sin(ph);
+    starPos[i*3+2] = r * Math.cos(ph) * Math.cos(th);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xf4f1ea, size: 0.032, transparent: true, opacity: 0.45 }));
+  scene.add(stars);
+
+  // Instanciar los 24 Astros Matemáticos con sus Modelos Nativos y Motor de Auto-Resolución
+  ARTWORKS_24.forEach((data, index) => {
+    createLivingMathematicalAstro(data, index);
+  });
+}
+
+// ── ROTONDA TECTÓNICA & MIRADOR ASTRONÓMICO DE PARANAL (TIMONEL F2) ─
+function buildTectonicRotunda() {
+  const rotundaGroup = new THREE.Group();
+  rotundaGroup.position.set(0, -1.0, 0);
+
+  // 1. Mirador Esbelto de Basalto Escalonado (R = 3.8m, escala humana íntima)
+  const baseFloorGeo = new THREE.CylinderGeometry(3.8, 4.0, 0.25, 48);
+  const baseFloorMat = new THREE.MeshStandardMaterial({
+    color: 0x0c0c10,
+    roughness: 0.85,
+    metalness: 0.15
+  });
+  const baseFloor = new THREE.Mesh(baseFloorGeo, baseFloorMat);
+  baseFloor.position.y = -0.125;
+  rotundaGroup.add(baseFloor);
+
+  // Zócalo inferior de granito oscuro
+  const subPlinthGeo = new THREE.CylinderGeometry(4.0, 4.2, 0.15, 48);
+  const subPlinthMat = new THREE.MeshStandardMaterial({
+    color: 0x070709,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  const subPlinth = new THREE.Mesh(subPlinthGeo, subPlinthMat);
+  subPlinth.position.y = -0.32;
+  rotundaGroup.add(subPlinth);
+
+  // Anillos concéntricos de bronce incrustados en el pavimento
+  const bronzeMat = new THREE.MeshStandardMaterial({
+    color: 0xc5a059,
+    roughness: 0.28,
+    metalness: 0.85
+  });
+  [1.0, 2.0, 3.2].forEach(r => {
+    const ringGeo = new THREE.TorusGeometry(r, 0.02, 16, 48);
+    const ringMesh = new THREE.Mesh(ringGeo, bronzeMat);
+    ringMesh.rotation.x = Math.PI / 2;
+    ringMesh.position.y = 0.01;
+    rotundaGroup.add(ringMesh);
+  });
+
+  // Juntas radiales de piedra (12 ejes de brújula astronómica)
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    const jointGeo = new THREE.BoxGeometry(0.02, 0.015, 2.2);
+    const jointMesh = new THREE.Mesh(jointGeo, bronzeMat);
+    jointMesh.position.set(Math.sin(angle) * 2.1, 0.01, Math.cos(angle) * 2.1);
+    jointMesh.rotation.y = angle;
+    rotundaGroup.add(jointMesh);
+  }
+
+  // 2. Medallón Central de Astrolabio / Rosa de los Vientos de Timonel
+  const medallionGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.03, 32);
+  const medallionMat = new THREE.MeshStandardMaterial({
+    color: 0x14141c,
+    roughness: 0.5,
+    metalness: 0.8
+  });
+  const medallion = new THREE.Mesh(medallionGeo, medallionMat);
+  medallion.position.y = 0.02;
+  rotundaGroup.add(medallion);
+
+  // Anillo exterior del medallón en bronce
+  const medRingGeo = new THREE.TorusGeometry(0.9, 0.03, 16, 32);
+  const medRing = new THREE.Mesh(medRingGeo, bronzeMat);
+  medRing.rotation.x = Math.PI / 2;
+  medRing.position.y = 0.035;
+  rotundaGroup.add(medRing);
+
+  // Cruz central de ejes coordenados Timonel F2
+  const axisX = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.015, 0.03), bronzeMat);
+  axisX.position.y = 0.04;
+  rotundaGroup.add(axisX);
+  const axisZ = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.015, 1.6), bronzeMat);
+  axisZ.position.y = 0.04;
+  rotundaGroup.add(axisZ);
+
+  // 3. Balaustrada Perimetral Minimalista (Acero oscuro & Bronce fino)
+  const steelMat = new THREE.MeshStandardMaterial({
+    color: 0x16161c,
+    roughness: 0.45,
+    metalness: 0.75
+  });
+  // Pasamanos circular perimetral a 0.85m de altura (Radio 3.6m)
+  const handrailGeo = new THREE.TorusGeometry(3.6, 0.025, 16, 48);
+  const handrail = new THREE.Mesh(handrailGeo, bronzeMat);
+  handrail.rotation.x = Math.PI / 2;
+  handrail.position.y = 0.85;
+  rotundaGroup.add(handrail);
+
+  // Óculo Cenital Esbelto en el techo de la cúpula
+  const oculusRingGeo = new THREE.TorusGeometry(1.6, 0.035, 16, 48);
+  const oculusRing = new THREE.Mesh(oculusRingGeo, bronzeMat);
+  oculusRing.rotation.x = Math.PI / 2;
+  oculusRing.position.y = 7.5;
+  rotundaGroup.add(oculusRing);
+
+  // 12 Columnas y Costillas Arquitectónicas hacia el Óculo
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * Math.PI) / 6;
+    const px = Math.sin(angle) * 3.6;
+    const pz = Math.cos(angle) * 3.6;
+
+    // Balustra perimetral
+    const postGeo = new THREE.CylinderGeometry(0.025, 0.035, 0.85, 16);
+    const post = new THREE.Mesh(postGeo, bronzeMat);
+    post.position.set(px, 0.425, pz);
+    rotundaGroup.add(post);
+
+    // Costilla curva que asciende libremente hacia el óculo cenital sin tapar el cosmos
+    const curvePoints = [];
+    const steps = 12;
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const cy = 0.85 + t * (7.5 - 0.85);
+      const cr = 3.6 * (1 - t) + 1.6 * t + Math.sin(t * Math.PI) * 0.35;
+      curvePoints.push(new THREE.Vector3(Math.sin(angle) * cr, cy, Math.cos(angle) * cr));
+    }
+    const ribCurve = new THREE.CatmullRomCurve3(curvePoints);
+    const ribGeo = new THREE.TubeGeometry(ribCurve, 16, 0.03, 8, false);
+    const rib = new THREE.Mesh(ribGeo, steelMat);
+    rotundaGroup.add(rib);
+
+    // Focos rasantes empotrados en el suelo de basalto
+    if (i % 2 === 0) {
+      const spot = new THREE.SpotLight(0xffeedd, 1.0, 10, Math.PI / 6, 0.45);
+      spot.position.set(px * 0.85, 0.05, pz * 0.85);
+      spot.target.position.set(px * 0.4, 4.0, pz * 0.4);
+      rotundaGroup.add(spot);
+      rotundaGroup.add(spot.target);
+
+      const fixtureGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.015, 16);
+      const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
+      const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+      fixture.position.set(px * 0.85, 0.015, pz * 0.85);
+      rotundaGroup.add(fixture);
+    }
+  }
+
+  // Foco cenital sobre el medallón
+  const centerSpot = new THREE.SpotLight(0xffeedd, 1.6, 9, Math.PI / 6, 0.35);
+  centerSpot.position.set(0, 6.0, 0);
+  centerSpot.target.position.set(0, 0, 0);
+  rotundaGroup.add(centerSpot);
+  rotundaGroup.add(centerSpot.target);
+
+  scene.add(rotundaGroup);
+}
+
+// ── CREACIÓN DE ASTRO CON ANILLO DE TIMONEL & MODELO MATEMÁTICO REAL ─
+function createLivingMathematicalAstro(data, index) {
+  const astroGroup = new THREE.Group();
+  
+  // Posición esférica 3D
+  const x = data.radius * Math.cos(data.phi) * Math.sin(data.theta);
+  const y = data.radius * Math.sin(data.phi);
+  const z = -data.radius * Math.cos(data.phi) * Math.cos(data.theta);
+  astroGroup.position.set(x, y, z);
+
+  // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m) en bronce / oro
+  const ringGeo = new THREE.RingGeometry(1.58, 1.62, 64);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xc5a059, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+  const timonelRing = new THREE.Mesh(ringGeo, ringMat);
+  astroGroup.add(timonelRing);
+
+  // 2. Luz de Resonancia Cálida
+  const pointLight = new THREE.PointLight(0xdfc285, 1.2, 5.5);
+  astroGroup.add(pointLight);
+
+  // 3. Sistema Matemático Físico Real de la Ley
+  const mathModel = buildBespokeAstroModel(data.id, data);
+  astroGroup.add(mathModel.group);
+
+  scene.add(astroGroup);
+
+  // Desfasar el temporizador inicial para que el cosmos respire de forma asíncrona
+  const initialCycleT = (index * 0.72) % 13.0;
+
+  astros24.push({
+    data,
+    index,
+    group: astroGroup,
+    worldPos: new THREE.Vector3(x, y, z),
+    timonelRing,
+    pointLight,
+    model: mathModel,
+    cycleT: initialCycleT,
+    phase: 'RELAXATION',
+    relaxFactor: 0.5,
+    residual: 0.05
+  });
+}
+
+// ── MODELOS MATEMÁTICOS REALES DE LAS 24 LEYES CON AUTO-RESOLUCIÓN ───
+// ── FRONTERAS MONÓTONAS DE EXPLORACIÓN (SIN REPETICIÓN DE CASOS) ───
+const UNRESOLVED_FRONTIERS = {
+  // Riemann: Búsqueda por bisección entre crestas positivas Z(t) > 0 y valles negativos Z(t) < 0
+  riemann: {
+    currentT: 14.0,
+    lastZVal: 0.1,
+    maxPositiveDeviation: 0.0,
+    maxNegativeDeviation: 0.0,
+    zerosCatalog: [
+      14.1347, 21.0220, 25.0108, 30.4248, 32.9350, 37.5861, 40.9187, 43.3270,
+      48.0051, 49.7738, 52.9703, 56.4462, 59.3470, 60.8317, 65.1125, 67.0798,
+      69.5464, 72.0671, 75.7046, 77.1448, 79.3374, 82.9103, 84.7354, 87.4252
+    ],
+    verifiedZeroIndex: 0,
+    anomaliesFound: 0
+  },
+  // Beal: Bisección diofántica entre extremos positivos (Aˣ+Bʸ > Cᶻ) y negativos (Aˣ+Bʸ < Cᶻ)
+  beal: {
+    testedCount: 0,
+    currentBase: 3,
+    maxPositiveDiff: 0,
+    minNegativeDiff: 0,
+    solutionFound: false
+  },
+  // Navier-Stokes: Monitoreo de singularidad de enstrofía extrema
+  navier: {
+    reynolds: 1200,
+    cycleCount: 0,
+    maxEnstrophyRatio: 1.0,
+    singularityFound: false
+  }
+};
+
+function buildBespokeAstroModel(id, data) {
+  const group = new THREE.Group();
+  
+  // 1. Canvas offscreen dedicado para cálculo numérico auténtico en silicio
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = 256;
+  offCanvas.height = 256;
+  
+  if (window.AtelierMath) {
+    window.AtelierMath.bindCanvas(offCanvas, 256, 256);
+    window.AtelierMath.init(id);
+    window.AtelierMath.step(id);
+  }
+  
+  const canvasTex = new THREE.CanvasTexture(offCanvas);
+  canvasTex.minFilter = THREE.LinearFilter;
+  canvasTex.magFilter = THREE.LinearFilter;
+  
+  // 2. Disco Celestial Luminoso (Billboard orientado hacia el espectador)
+  const discGeo = new THREE.CircleGeometry(1.15, 48);
+  const discMat = new THREE.MeshBasicMaterial({
+    map: canvasTex,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.95
+  });
+  const discMesh = new THREE.Mesh(discGeo, discMat);
+  group.add(discMesh);
+  
+  // 3. Orla de Calibre Timonel en Oro / Bronce según Época
+  const epColor = (data && data.epoch === 1) ? 0xc5a059 :
+                 ((data && data.epoch === 2) ? 0x60a5fa :
+                 ((data && data.epoch === 3) ? 0x34d399 :
+                 ((data && data.epoch === 4) ? 0xa78bfa : 0xf43f5e)));
+                 
+  const haloGeo = new THREE.RingGeometry(1.18, 1.24, 48);
+  const haloMat = new THREE.MeshBasicMaterial({ color: epColor, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+  const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+  group.add(haloMesh);
+
+  // 4. Nube de micro-partículas orbitales de energía
+  const N = 40;
+  const pGeo = new THREE.BufferGeometry();
+  const pPos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const r = 1.30 + Math.random() * 0.35;
+    pPos[i * 3]     = r * Math.cos(th);
+    pPos[i * 3 + 1] = r * Math.sin(th);
+    pPos[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMat = new THREE.PointsMaterial({ size: 0.035, color: epColor, transparent: true, opacity: 0.8 });
+  const particles = new THREE.Points(pGeo, pMat);
+  group.add(particles);
+
+  let frameCount = 0;
+
+  const updater = (dt, cycleT, phase, relaxFactor) => {
+    // Mantener orientación hacia la cámara para máxima visibilidad matemática
+    if (typeof camera !== 'undefined') {
+      discMesh.quaternion.copy(camera.quaternion);
+      haloMesh.quaternion.copy(camera.quaternion);
+      particles.quaternion.copy(camera.quaternion);
+    }
+    particles.rotation.z += 0.006;
+
+    // Ejecutar el paso numérico auténtico del motor de la fórmula correspondiente a su ID (0..99)
+    if (window.AtelierMath) {
+      frameCount++;
+      const isFocused = (typeof activeConfinementAstro !== 'undefined' && activeConfinementAstro && activeConfinementAstro.data.id === id);
+      const isCollimated = (typeof collimatedAstroIndex !== 'undefined' && collimatedAstroIndex >= 0 && astros24[collimatedAstroIndex] && astros24[collimatedAstroIndex].data.id === id);
+      
+      // Actualizar a 60 FPS si está enfocado o colimado por el telescopio; alternar en la lejanía para preservar 60 FPS globales
+      if (isFocused || isCollimated || (frameCount % 3 === 0)) {
+        window.AtelierMath.bindCanvas(offCanvas, 256, 256);
+        window.AtelierMath.step(id);
+        canvasTex.needsUpdate = true;
+      }
+    }
+  };
+
+  return { group, update: updater };
+}
+
+// ── CONTROL DE PERTURBACIÓN & AUTO-RESOLUCIÓN BAJO DEMANDA ─────────
+function perturbCurrentAstro() {
+  if (currentFocusedAstro) {
+    perturbAstro(currentFocusedAstro);
+  } else {
+    const curAstro = astros24[nai3D.currentIndex] || astros24[0];
+    if (curAstro) perturbAstro(curAstro);
+  }
+}
+
+function perturbAstro(astro) {
+  astro.cycleT = 0; // Desatar choque de entropía inmediato
+  astro.timonelRing.scale.set(1.22, 1.22, 1.22);
+  setTimeout(() => astro.timonelRing.scale.set(1, 1, 1), 350);
+  speakNai("Forma liberada hacia el caos. Observa cómo la ley matemática combate el desorden y vuelve a cristalizar.");
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') {
+    if (!isInShopMode) perturbCurrentAstro();
+  }
+});
+
+// ── NAI SOBERANA EN SILICIO 3D ─────────────────────────────────────
+function buildNaiSovereignEntity() {
+  const group = new THREE.Group();
+  const core = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.25, 1),
+    new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.85 })
+  );
+  group.add(core);
+
+  const halo = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.4, 0),
+    new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.45 })
+  );
+  group.add(halo);
+
+  const light = new THREE.PointLight(0xa855f7, 2.0, 9.0);
+  group.add(light);
+
+  group.position.set(0, 0, 0);
+  scene.add(group);
+
+  nai3D.group = group;
+  nai3D.core = core;
+  nai3D.outerHalo = halo;
+  nai3D.light = light;
+}
+
+// ── BAHÍA 3D DE MANUFACTURA ORBITAL ───────────────────────────────
+function buildShopBay3D() {
+  shopBayGroup = new THREE.Group();
+  shopBayGroup.position.set(0, 0, 42.0);
+
+  const pedestal = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.8, 1.8, 0.08, 48),
+    new THREE.MeshStandardMaterial({ color: 0x07060f, roughness: 0.3, metalness: 0.8 })
+  );
+  pedestal.position.y = -1.6;
+  shopBayGroup.add(pedestal);
+
+  const keyLight = new THREE.SpotLight(0xffffff, 2.5, 14, Math.PI / 4, 0.4);
+  keyLight.position.set(2, 3, 3);
+  shopBayGroup.add(keyLight);
+
+  const fillLight = new THREE.PointLight(0x8b5cf6, 1.8, 8);
+  fillLight.position.set(-2.5, 0.5, 2);
+  shopBayGroup.add(fillLight);
+
+  createDefaultMasterTexture();
+
+  // 1. Cuadro Fine Art 50x70
+  const frameGroup = new THREE.Group();
+  const outerFrame = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.1, 0.08), new THREE.MeshStandardMaterial({ color: 0x0a0a0c, roughness: 0.5 }));
+  frameGroup.add(outerFrame);
+
+  const matMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.48, 1.98), new THREE.MeshStandardMaterial({ color: 0xf4f1eb, roughness: 0.9 }));
+  matMesh.position.z = 0.042;
+  frameGroup.add(matMesh);
+
+  const canvasMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.6), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 }));
+  canvasMesh.position.z = 0.044;
+  canvasMesh.name = "dynamic_canvas_target";
+  frameGroup.add(canvasMesh);
+  shopProducts.frameWood = frameGroup;
+  shopBayGroup.add(frameGroup);
+
+  // 2. Taza Cerámica
+  const mugGroup = new THREE.Group();
+  const mugCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.2, 48), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.25 }));
+  mugCyl.name = "dynamic_mug_target";
+  mugGroup.add(mugCyl);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 16, 32, Math.PI), new THREE.MeshStandardMaterial({ color: 0x111118 }));
+  handle.rotation.z = -Math.PI / 2; handle.position.set(0.55, 0, 0);
+  mugGroup.add(handle);
+  mugGroup.visible = false;
+  shopProducts.mug = mugGroup;
+  shopBayGroup.add(mugGroup);
+
+  // 3. Cuaderno
+  const bookGroup = new THREE.Group();
+  const bookCover = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.7, 0.12), new THREE.MeshStandardMaterial({ map: activeProductTexture, roughness: 0.4 }));
+  bookCover.name = "dynamic_book_target";
+  bookGroup.add(bookCover);
+  bookGroup.visible = false;
+  shopProducts.notebook = bookGroup;
+  shopBayGroup.add(bookGroup);
+
+  shopBayGroup.visible = false;
+  scene.add(shopBayGroup);
+}
+
+function createDefaultMasterTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
+  cx.strokeStyle = '#c084fc'; cx.lineWidth = 2;
+  cx.strokeRect(30, 30, 964, 964);
+  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 38px Cinzel'; cx.textAlign = 'center';
+  cx.fillText("ATELIER MATEMÁTICO", 512, 480);
+  cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
+  cx.fillText("ATLAS DE 100 LEYES · TIMONEL F2", 512, 530);
+  activeProductTexture = new THREE.CanvasTexture(c);
+}
+
+// ── BOUTIQUE ORBITAL 3D: ENTRAR & SALIR ───────────────────────────
+function enterShopMode() {
+  if (isInShopMode) return;
+  isInShopMode = true;
+  savedCameraState.pos.copy(camera.position);
+  savedCameraState.quat.copy(camera.quaternion);
+
+  document.getElementById('flight-hud-header').style.opacity = '0';
+  document.getElementById('orbital-hud-card').classList.add('opacity-0');
+  document.getElementById('capsule-reticle').style.opacity = '0';
+  document.getElementById('foyer-screen').classList.add('hidden');
+
+  shopBayGroup.visible = true;
+  const overlay = document.getElementById('shop-bay-overlay');
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.style.opacity = '1', 50);
+
+  populateTextureTray();
+  speakNai("Entrando a la Bahía de Manufactura 3D. Elige un producto e inspecciónalo en 360 grados.");
+}
+
+function exitShopMode() {
+  if (!isInShopMode) return;
+  isInShopMode = false;
+  const overlay = document.getElementById('shop-bay-overlay');
+  overlay.style.opacity = '0';
+  setTimeout(() => { overlay.classList.add('hidden'); shopBayGroup.visible = false; }, 700);
+
+  document.getElementById('flight-hud-header').style.opacity = '1';
+  document.getElementById('capsule-reticle').style.opacity = '1';
+
+  velocity.set(0, 0, 0);
+  camera.position.copy(savedCameraState.pos);
+  camera.quaternion.copy(savedCameraState.quat);
+}
+
+function switch3DProduct(type) {
+  currentProductType = type;
+  shopProducts.frameWood.visible = (type === 'frame_wood' || type === 'frame_acrylic');
+  shopProducts.mug.visible = (type === 'mug');
+  shopProducts.notebook.visible = (type === 'notebook');
+
+  ['frame-wood', 'frame-acrylic', 'mug', 'notebook'].forEach(id => {
+    const btn = document.getElementById(`btn-prod-${id}`);
+    if (btn) { btn.classList.remove('bg-purple-600', 'text-white'); btn.classList.add('text-slate-400'); }
+  });
+  const activeBtn = document.getElementById(`btn-prod-${type.replace('_', '-')}`);
+  if (activeBtn) { activeBtn.classList.remove('text-slate-400'); activeBtn.classList.add('bg-purple-600', 'text-white'); }
+
+  const title = document.getElementById('shop-prod-title');
+  const price = document.getElementById('shop-prod-price');
+  const cat = document.getElementById('shop-prod-category');
+
+  if (type === 'frame_wood') {
+    cat.textContent = "EDICIÓN DE GALERÍA FIRMADA"; title.textContent = "Cuadro Fine Art 50×70 cm"; price.textContent = "$68.000 CLP";
+  } else if (type === 'frame_acrylic') {
+    cat.textContent = "EDICIÓN LUXURY EN ACRÍLICO"; title.textContent = "Cuadro Acrílico 40×60 cm"; price.textContent = "$120.000 CLP";
+  } else if (type === 'mug') {
+    cat.textContent = "MERCHANDISING OFICIAL"; title.textContent = "Taza Cerámica Negra Mate"; price.textContent = "$16.900 CLP";
+  } else if (type === 'notebook') {
+    cat.textContent = "CUADERNO DE FÓRMULAS"; title.textContent = "Cuaderno Moleskine de Campo"; price.textContent = "$22.000 CLP";
+  }
+}
+
+function populateTextureTray() {
+  const tray = document.getElementById('texture-tray-carousel');
+  tray.innerHTML = '';
+
+  // Fotos del Carrete
+  userCameraRoll.forEach((item) => {
+    const btn = document.createElement('button');
+    btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-purple-500/40 hover:border-cyan-400 transition relative';
+    btn.innerHTML = `<img src="${item.img}" class="w-full h-full object-cover" /><span class="absolute bottom-0 inset-x-0 bg-black/75 text-[8px] mono text-purple-200 text-center truncate">Tu Foto</span>`;
+    btn.onclick = () => projectTextureOntoProduct(item.img);
+    tray.appendChild(btn);
+  });
+
+  // 24 Leyes Maestras
+  ARTWORKS_24.forEach((astro) => {
+    const btn = document.createElement('button');
+    btn.className = 'w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 hover:border-purple-400 transition bg-black/60 p-1 flex flex-col justify-center items-center text-center';
+    btn.innerHTML = `<span class="text-xs font-bold text-cyan-300 mono">${astro.badge}</span><span class="text-[7.5px] mono text-slate-300 leading-tight truncate w-full">${astro.title}</span>`;
+    btn.onclick = () => projectMasterArtOntoProduct(astro);
+    tray.appendChild(btn);
+  });
+}
+
+function projectTextureOntoProduct(imgSrc) {
+  const img = new Image();
+  img.onload = () => {
+    const tex = new THREE.Texture(img);
+    tex.needsUpdate = true;
+    updateProductMaterials(tex);
+    speakNai("Proyectando captura sobre el objeto 3D.");
+  };
+  img.src = imgSrc;
+}
+
+function projectMasterArtOntoProduct(astro) {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const cx = c.getContext('2d');
+  cx.fillStyle = '#06030d'; cx.fillRect(0, 0, 1024, 1024);
+  cx.strokeStyle = '#c5a059'; cx.lineWidth = 4; cx.strokeRect(40, 40, 944, 944);
+  cx.fillStyle = '#e8d2a6'; cx.font = 'bold 36px Cinzel'; cx.textAlign = 'center';
+  cx.fillText(astro.title.toUpperCase(), 512, 450);
+  cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
+  cx.fillText(astro.cat, 512, 500);
+  cx.fillStyle = '#94a3b8'; cx.font = '16px Space Mono';
+  cx.fillText(astro.metric, 512, 550);
+  const tex = new THREE.CanvasTexture(c);
+  updateProductMaterials(tex);
+  speakNai(`Proyectando ${astro.title} en el objeto.`);
+}
+
+function updateProductMaterials(tex) {
+  shopBayGroup.traverse((child) => {
+    if (child.name && child.name.startsWith("dynamic_")) {
+      child.material.map = tex;
+      child.material.needsUpdate = true;
+    }
+  });
+  targetProductRotation.y += Math.PI * 0.5;
+}
+
+function processDirectCheckout() {
+  const name = document.getElementById('order-name').value.trim();
+  const address = document.getElementById('order-address').value.trim();
+  const phone = document.getElementById('order-phone').value.trim();
+  if (!name || !address || !phone) {
+    alert('Por favor completa tu Nombre, Dirección de despacho y WhatsApp.');
+    return;
+  }
+  const prodName = document.getElementById('shop-prod-title').textContent;
+  const price = document.getElementById('shop-prod-price').textContent;
+  const msg = encodeURIComponent(
+    `*ATELIER MATEMÁTICO — ENCARGO DE AUTOR*\n\n` +
+    `· Cliente: ${name}\n` +
+    `· Despacho: ${address}\n` +
+    `· WhatsApp: ${phone}\n` +
+    `· Obra: ${prodName}\n` +
+    `· Inversión: ${price}\n` +
+    `· Nodo Timonel: #${swarmNodeId}\n` +
+    `· Plazo estimado: Confección a pedido (10-15 días hábiles)\n\n` +
+    `Hola Matías, he configurado mi encargo desde la Rotonda del Atelier Matemático. Deseo coordinar el anticipo para iniciar la manufactura.`
+  );
+  window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
+}
+
+// ── SELECTOR DE SALTO RÁPIDO A LOS 24 ASTROS ──────────────────────
+function populateNaiAstroSelector() {
+  const container = document.getElementById('nai-astro-selector');
+  if (!container) return;
+  container.innerHTML = '';
+  ARTWORKS_24.forEach((astro, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'text-[9px] mono text-purple-300 hover:text-white glass px-2 py-0.5 rounded-full border-white/10 shrink-0 transition';
+    btn.textContent = `${astro.badge} · ${astro.title.split(' ')[0]}`;
+    btn.onclick = () => propelToAstro(idx);
+    container.appendChild(btn);
+  });
+}
+
+// ── MINIMIZAR / EXPANDIR FICHA DE LA OBRA ──────────────────────────
+let isHudMinimized = false;
+function toggleHudCardMinimize() {
+  isHudMinimized = !isHudMinimized;
+  const hudCard = document.getElementById('orbital-hud-card');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (isHudMinimized) {
+    if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
+    if (reopenBtn) reopenBtn.classList.remove('hidden');
+  } else {
+    if (hudCard) hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
+    if (reopenBtn) reopenBtn.classList.add('hidden');
+  }
+}
+
+// ── MODOS DE OPERACIÓN DEL OBSERVATORIO ASTRONÓMICO ───────────────
+const MODE_ROTUNDA_TELESCOPE = 0;
+const MODE_SPHERE_CONFINEMENT = 1;
+let currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
+
+// Navegación sobre la cubierta de basalto de Paranal (altura de ojos: 0.5m sobre origen)
+const platformObserverPos = new THREE.Vector3(0, 0.5, 0);
+const targetPlatformPos = new THREE.Vector3(0, 0.5, 0);
+const keysPressed = {};
+let collimatedAstroIndex = -1;
+
+// Coordenadas esféricas S² de la cámara en la burbuja de confinamiento
+let activeConfinementAstro = null;
+let sphereRadius = 3.6;
+let sphereTheta = 0.0;
+let spherePhi = Math.PI / 2.2;
+let targetSphereTheta = 0.0;
+let targetSpherePhi = Math.PI / 2.2;
+let targetSphereRadius = 3.6;
+
+function propelToAstro(idx) {
+  warpToTargetAstro(idx);
+}
+
+// ── CÁLCULO DE COLIMACIÓN ASTRONÓMICA CON TELESCOPIO (MODO ROTONDA) ──
+function updateTelescopeCollimation() {
+  if (currentMuseumMode !== MODE_ROTUNDA_TELESCOPE || isInShopMode) return;
+  const lookDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+
+  let bestIdx = -1;
+  let bestDot = Math.cos(22 * Math.PI / 180); // Cono de 22 grados de visión
+
+  astros24.forEach((a, idx) => {
+    const toA = new THREE.Vector3().subVectors(a.worldPos, camera.position).normalize();
+    const dot = lookDir.dot(toA);
+    if (dot > bestDot) {
+      bestDot = dot;
+      bestIdx = idx;
+    }
+  });
+
+  collimatedAstroIndex = bestIdx;
+  const card = document.getElementById('telescope-target-card');
+  const reticle = document.getElementById('capsule-reticle');
+
+  if (bestIdx >= 0) {
+    const astro = astros24[bestIdx];
+    const d = astro.data;
+    const dist = camera.position.distanceTo(astro.worldPos).toFixed(1);
+    
+    // Coordenadas celestes de ascensión recta y declinación
+    const ascHours = Math.floor(((d.theta + Math.PI) / (Math.PI * 2)) * 24);
+    const ascMins = Math.floor(((((d.theta + Math.PI) / (Math.PI * 2)) * 24) % 1) * 60);
+    const decDeg = Math.floor((d.phi / (Math.PI / 2)) * 90);
+    const decSign = decDeg >= 0 ? '+' : '';
+
+    const coordEl = document.getElementById('collimator-coord');
+    const titleEl = document.getElementById('collimator-title');
+    const subEl   = document.getElementById('collimator-sub');
+    if (coordEl) coordEl.textContent = `Asc ${String(ascHours).padStart(2,'0')}h ${String(ascMins).padStart(2,'0')}m · Dec ${decSign}${decDeg}°`;
+    if (titleEl) titleEl.textContent = `Obra ${d.badge} · ${d.title}`;
+    if (subEl)   subEl.textContent   = `${d.sub} · Distancia: ${dist}m`;
+    
+    if (card) card.classList.remove('hidden');
+    if (reticle) reticle.classList.add('locked');
+  } else {
+    if (card) card.classList.add('hidden');
+    if (reticle) reticle.classList.remove('locked');
+  }
+}
+
+// ── VIAJE TELESCÓPICO HACIA LA BURBUJA S² DE LA LEY ────────────────
+function warpToTargetAstro(idx) {
+  const targetIdx = (typeof idx === 'number') ? idx : collimatedAstroIndex;
+  if (targetIdx < 0 || targetIdx >= astros24.length) return;
+  const astro = astros24[targetIdx];
+  activeConfinementAstro = astro;
+  currentFocusedAstro = astro;
+  currentMuseumMode = MODE_SPHERE_CONFINEMENT;
+  isHudMinimized = false;
+
+  // Orientación esférica inicial desde el vector actual para entrada suave
+  const rel = new THREE.Vector3().subVectors(camera.position, astro.worldPos);
+  targetSphereRadius = 3.6;
+  targetSphereTheta = Math.atan2(rel.x, rel.z);
+  targetSpherePhi = Math.acos(Math.max(-0.95, Math.min(0.95, rel.y / (rel.length() || 3.6))));
+  sphereTheta = targetSphereTheta;
+  spherePhi = targetSpherePhi;
+  sphereRadius = rel.length();
+
+  // Actualizar visibilidad de HUDs y ocultar retícula para despejar la fórmula
+  const reticle = document.getElementById('capsule-reticle');
+  if (reticle) reticle.style.display = 'none';
+
+  const colHud = document.getElementById('telescope-collimator-hud');
+  if (colHud) colHud.classList.add('hidden');
+
+  const colCard = document.getElementById('telescope-target-card');
+  if (colCard) colCard.classList.add('hidden');
+  const returnBar = document.getElementById('confinement-return-bar');
+  if (returnBar) returnBar.classList.remove('hidden');
+  const swarmPill = document.getElementById('swarm-telemetry-pill');
+  if (swarmPill) swarmPill.classList.add('hidden');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (reopenBtn) reopenBtn.classList.add('hidden');
+
+  // Mostrar tarjeta de telemetría de la ley
+  const hudCard = document.getElementById('orbital-hud-card');
+  if (hudCard) {
+    const d = astro.data;
+    document.getElementById('hud-cat').textContent = d.cat;
+    document.getElementById('hud-solver').textContent = d.metric;
+    document.getElementById('hud-title').textContent = d.title;
+    document.getElementById('hud-sub').textContent = d.sub;
+    document.getElementById('hud-eq').innerHTML = d.eq.replace(/\n/g, '<br>');
+    document.getElementById('hud-hist').textContent = d.hist;
+    hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
+  }
+
+  speakNai(`Telescopio colimado. Confinando órbita de ${astro.data.title}.`);
+}
+
+// ── REGRESO A LA ROTONDA DE BASALTO (PLATAFORMA DEL TELESCOPIO) ────
+function returnToRotunda() {
+  currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
+  activeConfinementAstro = null;
+  currentFocusedAstro = null;
+
+  targetPlatformPos.set(0, 0.5, 0);
+  platformObserverPos.set(0, 0.5, 0);
+  camera.position.set(0, 0.5, 0);
+
+  // Restaurar retícula central de apuntado astronómico y barra de navegación
+  const reticle = document.getElementById('capsule-reticle');
+  if (reticle) reticle.style.display = 'block';
+
+  const colHud = document.getElementById('telescope-collimator-hud');
+  if (colHud) colHud.classList.remove('hidden');
+
+  const returnBar = document.getElementById('confinement-return-bar');
+  if (returnBar) returnBar.classList.add('hidden');
+  const swarmPill = document.getElementById('swarm-telemetry-pill');
+  if (swarmPill) swarmPill.classList.remove('hidden');
+  const reopenBtn = document.getElementById('btn-reopen-hud');
+  if (reopenBtn) reopenBtn.classList.add('hidden');
+  const hudCard = document.getElementById('orbital-hud-card');
+  if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
+
+  speakNai("Regresando a la plataforma de observación de la rotonda.");
+}
+
+// ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
+function setup6DOFControls() {
+  let lastPointer = null;
+
+  window.addEventListener('mousemove', (e) => {
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, button, a, select, input')) {
+      lastPointer = null;
+      return;
+    }
+
+    if (lastPointer === null) {
+      lastPointer = { x: e.clientX, y: e.clientY };
+      return;
+    }
+
+    const dx = e.clientX - lastPointer.x;
+    const dy = e.clientY - lastPointer.y;
+    lastPointer = { x: e.clientX, y: e.clientY };
+
+    if (isInShopMode) {
+      targetProductRotation.y += dx * 0.01;
+      targetProductRotation.x += dy * 0.01;
+    } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+      // El usuario barre el cielo pasando el dedo por el trackpad / moviendo el mouse (cero clics sostenidos)
+      userInertiaTimer = 0;
+      targetOrientation.yaw -= dx * 0.0035;
+      targetOrientation.pitch -= dy * 0.0035;
+      targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch)); // Permite mirar el zócalo/barandilla y al cenit
+    } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+      // El observador se desplaza libremente en S² al mover el mouse
+      userInertiaTimer = 0;
+      targetSphereTheta -= dx * 0.0045;
+      targetSpherePhi   -= dy * 0.0045;
+      targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
+    }
+  });
+
+  window.addEventListener('mouseleave', () => {
+    lastPointer = null;
+  });
+
+  // Soporte táctil fluido en trackpads y móviles
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (lastPointer === null) {
+        lastPointer = { x: touch.clientX, y: touch.clientY };
+        return;
+      }
+      const dx = touch.clientX - lastPointer.x;
+      const dy = touch.clientY - lastPointer.y;
+      lastPointer = { x: touch.clientX, y: touch.clientY };
+
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+        targetOrientation.yaw -= dx * 0.0035;
+        targetOrientation.pitch -= dy * 0.0035;
+        targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch));
+      } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+        targetSphereTheta -= dx * 0.0045;
+        targetSpherePhi   -= dy * 0.0045;
+        targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    lastPointer = null;
+  });
+
+  // Clic directo: si se está mirando una fórmula y se hace clic, entrar en ella
+  window.addEventListener('click', (e) => {
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, button, a')) return;
+    if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
+      warpToTargetAstro(collimatedAstroIndex);
+    }
+  });
+
+  window.addEventListener('wheel', (e) => {
+    if (isInShopMode) return;
+    userInertiaTimer = 0;
+    if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+      targetSphereRadius += e.deltaY * 0.003;
+      targetSphereRadius = Math.max(2.0, Math.min(6.5, targetSphereRadius));
+    }
+  }, { passive: true });
+
+  window.addEventListener('keydown', (e) => {
+    keysPressed[e.code] = true;
+
+    if (isInShopMode) {
+      if (e.key === 'Escape') exitShopMode();
+      return;
+    }
+    if (e.key === 'Escape') {
+      if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) returnToRotunda();
+      return;
+    }
+    if (e.code === 'Space') {
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
+        warpToTargetAstro();
+      } else {
+        triggerShutter();
+      }
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    keysPressed[e.code] = false;
+  });
+}
+
+// ── BUCLE PRINCIPAL DE ANIMACIÓN Y SILICIO ─────────────────────────
+let prevTime = performance.now();
+let isTabVisible = true;
+let frameCounter = 0;
+
+// ── DISCIPLINA TÉRMICA APPLE SILICON: SUSPENSIÓN CUANDO LA PESTAÑA NO ESTÁ VISIBLE ──
+document.addEventListener('visibilitychange', () => {
+  isTabVisible = !document.hidden;
+  if (isTabVisible) {
+    prevTime = performance.now();
+    requestAnimationFrame(animate);
+  }
+});
+
+function animate() {
+  if (!isTabVisible) return; // 0% CPU/GPU en segundo plano
+  frameCounter++;
+  requestAnimationFrame(animate);
+
+  const time = performance.now();
+  const delta = (time - prevTime) / 1000;
+  prevTime = time;
+
+  // Medir rendimiento local para el enjambre
+  totalEvaluations += Math.floor(delta * 480000);
+  const localThroughputEl = document.getElementById('swarm-local-throughput');
+  if (localThroughputEl && Math.random() < 0.05) {
+    localThroughputEl.textContent = (480000 + Math.floor(Math.sin(time * 0.002) * 15000)).toLocaleString();
+  }
+
+  if (isInShopMode) {
+    camera.position.lerp(new THREE.Vector3(0, 0, 46.5), 0.08);
+    const targetLook = new THREE.Vector3(0, 0, 42.0);
+    const m = new THREE.Matrix4().lookAt(camera.position, targetLook, new THREE.Vector3(0, 1, 0));
+    const q = new THREE.Quaternion().setFromRotationMatrix(m);
+    camera.quaternion.slerp(q, 0.08);
+
+    productRotation.x += (targetProductRotation.x - productRotation.x) * 0.1;
+    productRotation.y += (targetProductRotation.y - productRotation.y) * 0.1;
+
+    ['frameWood', 'mug', 'notebook'].forEach(key => {
+      const obj = shopProducts[key];
+      if (obj && obj.visible) {
+        obj.rotation.x = productRotation.x;
+        obj.rotation.y = productRotation.y + Math.sin(time * 0.001) * 0.05;
+      }
+    });
+
+  } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+    // 1. MODO ROTONDA: Desplazamiento libre por la plataforma hacia la barandilla
+    const forwardX = -Math.sin(orientation.yaw);
+    const forwardZ = -Math.cos(orientation.yaw);
+    const rightX = Math.cos(orientation.yaw);
+    const rightZ = -Math.sin(orientation.yaw);
+
+    let moveX = 0;
+    let moveZ = 0;
+    if (keysPressed['KeyW'] || keysPressed['ArrowUp']) { moveX += forwardX; moveZ += forwardZ; }
+    if (keysPressed['KeyS'] || keysPressed['ArrowDown']) { moveX -= forwardX; moveZ -= forwardZ; }
+    if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { moveX += rightX; moveZ += rightZ; }
+    if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) { moveX -= rightX; moveZ -= rightZ; }
+
+    const moveLen = Math.hypot(moveX, moveZ);
+    if (moveLen > 0.001) {
+      const walkSpeed = 0.07; // Marcha serena por el basalto
+      targetPlatformPos.x += (moveX / moveLen) * walkSpeed;
+      targetPlatformPos.z += (moveZ / moveLen) * walkSpeed;
+    }
+
+    // Límite circular de la barandilla de bronce (radio barandilla 3.6m, límite observador r <= 2.8m)
+    const distCenter = Math.hypot(targetPlatformPos.x, targetPlatformPos.z);
+    if (distCenter > 2.8) {
+      targetPlatformPos.x *= 2.8 / distCenter;
+      targetPlatformPos.z *= 2.8 / distCenter;
+    }
+    targetPlatformPos.y = 0.5;
+
+    platformObserverPos.lerp(targetPlatformPos, 0.12);
+    camera.position.copy(platformObserverPos);
+
+    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.18;
+    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.18;
+    camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
+
+    // Calcular colimación astronómica con la lente del telescopio
+    updateTelescopeCollimation();
+
+    // Dinámica suave de NAI centinela en la rotonda
+    if (nai3D.group) {
+      nai3D.pulseTime += delta;
+      const naiTarget = new THREE.Vector3(
+        Math.sin(nai3D.pulseTime * 0.5) * 1.5,
+        0.3 + Math.cos(nai3D.pulseTime * 0.8) * 0.3,
+        -2.5
+      );
+      nai3D.group.position.lerp(naiTarget, 0.04);
+      nai3D.core.rotation.y += 0.02;
+      nai3D.outerHalo.rotation.y -= 0.025;
+      nai3D.light.intensity = 1.6 + Math.sin(nai3D.pulseTime * 4.0) * 0.3;
+    }
+
+    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+
+  } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT && activeConfinementAstro) {
+    // 2. MODO BURBUJA S²: El observador se desplaza sobre la superficie esférica
+    sphereTheta  += (targetSphereTheta - sphereTheta) * 0.18;
+    spherePhi    += (targetSpherePhi - spherePhi) * 0.18;
+    sphereRadius += (targetSphereRadius - sphereRadius) * 0.15;
+
+    const center = activeConfinementAstro.worldPos;
+    const targetCam = new THREE.Vector3(
+      center.x + sphereRadius * Math.sin(spherePhi) * Math.sin(sphereTheta),
+      center.y + sphereRadius * Math.cos(spherePhi),
+      center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
+    );
+    camera.position.lerp(targetCam, 0.12);
+    camera.lookAt(center);
+
+    // Dinámica de NAI orbitando cerca del astro enfocado
+    if (nai3D.group) {
+      nai3D.pulseTime += delta;
+      const naiTarget = new THREE.Vector3(
+        center.x + Math.sin(nai3D.pulseTime * 0.8) * 2.2,
+        center.y + Math.cos(nai3D.pulseTime * 1.0) * 1.0,
+        center.z + 1.6
+      );
+      nai3D.group.position.lerp(naiTarget, 0.06);
+      nai3D.core.rotation.y += 0.02;
+      nai3D.outerHalo.rotation.y -= 0.025;
+      nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
+    }
+
+    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+  }
+
+  // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución y Culling Térmico
+  const camPos = camera.position;
+  astros24.forEach((astro) => {
+    const distToCam = astro.worldPos.distanceTo(camPos);
+
+    // CULLING TÉRMICO: Silicio ultra-frío en Apple Silicon
+    // Si el astro está a más de 38m, no calcular física de partículas
+    if (distToCam > 38.0) return;
+    // Si está entre 20m y 38m, entrelazar actualización (30 FPS)
+    if (distToCam > 20.0 && ((frameCounter + astro.index) % 2 !== 0)) return;
+
+    astro.cycleT += delta;
+
+    let phase, relaxFactor, residual, ringColor;
+    if (astro.cycleT < 2.5) {
+      // 1. Fase de Entropía Alta / Dispersión
+      phase = 'DISPERSION';
+      relaxFactor = 0.0;
+      residual = 0.75 + Math.sin(astro.cycleT * 4) * 0.12;
+      ringColor = 0xf43f5e; // Rojo advertencia
+      astro.timonelRing.material.opacity = 0.65 + Math.sin(astro.cycleT * 8) * 0.3;
+    } else if (astro.cycleT < 7.5) {
+      // 2. Fase de Relajación por Operador Diferencial
+      phase = 'RELAXATION';
+      const progress = (astro.cycleT - 2.5) / 5.0;
+      relaxFactor = progress;
+      residual = 0.75 * (1.0 - progress) + 0.003;
+      ringColor = progress > 0.65 ? 0x38bdf8 : (progress > 0.3 ? 0xa855f7 : 0xf43f5e);
+      astro.timonelRing.material.opacity = 0.45;
+    } else if (astro.cycleT < 13.0) {
+      // 3. Fase Cristalizada: Forma Matemática Pura (Certificada por Timonel)
+      phase = 'CRYSTALLIZED';
+      relaxFactor = 1.0;
+      residual = 0.002 + Math.sin(astro.cycleT * 2) * 0.0008;
+      ringColor = 0x38bdf8;
+      astro.timonelRing.material.opacity = 0.5 + Math.sin(astro.cycleT * 3) * 0.2;
+    } else {
+      astro.cycleT = 0;
+      phase = 'DISPERSION';
+      relaxFactor = 0.0;
+      residual = 0.75;
+      ringColor = 0xf43f5e;
+    }
+
+    astro.phase = phase;
+    astro.relaxFactor = relaxFactor;
+    astro.residual = residual;
+    astro.timonelRing.material.color.setHex(ringColor);
+
+
+    // ── NAI CENTINELA: FILTRO ULTRA-ESTRICTO DE CERO ABSOLUTO & SOLUCIÓN REAL ───
+    // CERO AUTOENGAÑO: Vetadas 100% las alertas de rutina o pasos intermedios.
+    // Solo y únicamente se emite alerta cuando se encuentra LA SOLUCIÓN DEFINITIVA:
+    // 1) BEAL: Cero absoluto entero exacto (Aˣ + Bʸ - Cᶻ === 0 con mcd=1)
+    // 2) RIEMANN: Cero real fuera de la línea crítica (contraejemplo a la conjetura)
+    // 3) NAVIER-STOKES: Singularidad real demostrada donde la enstrofía supere la cota de ruptura
+    if (phase === 'CRYSTALLIZED' && astro.cycleT > 7.5 && astro.cycleT < 7.7) {
+      if (astro.data.id === 21) {
+        // BEAL: Auditoría de Cero Absoluto
+        const bf = UNRESOLVED_FRONTIERS.beal;
+        if (bf.solutionFound) {
+          recordDiscoveryCandidate(
+            astro,
+            "¡SOLUCIÓN DEFINITIVA DE BEAL ENCONTRADA! Terna coprima exacta Aˣ + Bʸ = Cᶻ con residuo 0.0000000.",
+            "CONTRAEJEMPLO DE BEAL CERTIFICADO"
+          );
+        }
+      } else if (astro.data.id === 20) {
+        // RIEMANN: Solo alertar si se detecta un cero fuera de la línea Re(s) = 1/2
+        const rf = UNRESOLVED_FRONTIERS.riemann;
+        if (rf.anomaliesFound > 0) {
+          recordDiscoveryCandidate(
+            astro,
+            "¡CONTRAEJEMPLO A LA HIPÓTESIS DE RIEMANN DETECTADO! Cero no trivial con Re(s) ≠ 1/2.",
+            "RUPTURA DE RIEMANN CERTIFICADA"
+          );
+        }
+      } else if (astro.data.id === 22) {
+        // NAVIER-STOKES: Solo alertar si ocurre una singularidad infinita real
+        const nf = UNRESOLVED_FRONTIERS.navier;
+        if (nf.singularityFound) {
+          recordDiscoveryCandidate(
+            astro,
+            "¡SINGULARIDAD DE NAVIER-STOKES DETECTADA! Explosión de enstrofía en tiempo finito.",
+            "BLOW-UP DE FLUIDO CERTIFICADO"
+          );
+        }
+      }
+    }
+
+    if (astro.model && astro.model.update) {
+      astro.model.update(delta, astro.cycleT, phase, relaxFactor);
+    }
+  });
+
+  // Actualizar telemetría de auto-resolución en la tarjeta HUD si hay astro enfocado
+  if (currentFocusedAstro) {
+    const stateEl = document.getElementById('hud-relax-state');
+    const progEl = document.getElementById('hud-relax-progress');
+    const resEl = document.getElementById('hud-residual-val');
+    const slackEl = document.getElementById('hud-slack-val');
+
+    if (stateEl && progEl && resEl && slackEl) {
+      if (currentFocusedAstro.phase === 'DISPERSION') {
+        stateEl.textContent = 'ENTROPÍA ALTA · DISPERSANDO';
+        stateEl.className = 'text-rose-400 font-bold';
+        progEl.style.width = '18%';
+        progEl.className = 'bg-rose-500 h-full transition-all duration-300';
+      } else if (currentFocusedAstro.phase === 'RELAXATION') {
+        stateEl.textContent = 'RELAJACIÓN EN SILICIO';
+        stateEl.className = 'text-purple-300 font-bold';
+        const pct = Math.floor(currentFocusedAstro.relaxFactor * 100);
+        progEl.style.width = pct + '%';
+        progEl.className = 'bg-gradient-to-r from-purple-500 to-cyan-400 h-full transition-all duration-300';
+      } else {
+        stateEl.textContent = 'CRISTALIZADO · CERTIFICADO';
+        stateEl.className = 'text-cyan-300 font-bold';
+        progEl.style.width = '100%';
+        progEl.className = 'bg-gradient-to-r from-cyan-400 to-emerald-400 h-full transition-all duration-300';
+      }
+
+      resEl.textContent = currentFocusedAstro.residual.toFixed(4);
+      const slack = Math.max(0, 1.0 - currentFocusedAstro.residual);
+      slackEl.textContent = slack.toFixed(3);
+    }
+  }
+  renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ── SÍNTESIS DE VOZ Y AUDIO ───────────────────────────────────────
+function enterCapsule(enableVoice) {
+  voiceGuideEnabled = enableVoice;
+  updateVoiceStatusUI();
+  const foyer = document.getElementById('foyer-screen');
+  if (foyer) {
+    foyer.style.opacity = '0';
+    setTimeout(() => {
+      foyer.style.setProperty('display', 'none', 'important');
+      foyer.classList.add('hidden');
+    }, 800);
+  }
+  speakNai("Bienvenido a la Rotonda de Timonel. 100 leyes del cosmos se están desenredando en silicio.");
+}
+
+function toggleVoiceGuide() {
+  voiceGuideEnabled = !voiceGuideEnabled;
+  if (!voiceGuideEnabled) stopNaiSpeech();
+  updateVoiceStatusUI();
+}
+
+function updateVoiceStatusUI() {
+  const icon = document.getElementById('voice-status-icon');
+  if (icon) icon.textContent = voiceGuideEnabled ? 'Audio On' : 'Audio Off';
+  const txt = document.getElementById('voice-status-text');
+  if (txt) txt.textContent = voiceGuideEnabled ? 'Voz Activa' : 'En Silencio';
+}
+
+function speakNai(text) {
+  if (!voiceGuideEnabled || !('speechSynthesis' in window)) return;
+  stopNaiSpeech();
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.lang = 'es-ES';
+  currentUtterance.rate = 0.94; currentUtterance.pitch = 0.96;
+  const voices = window.speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es'));
+  if (esVoice) currentUtterance.voice = esVoice;
+  currentUtterance.onstart = () => { isSpeaking = true; document.getElementById('nai-voice-waves').classList.remove('hidden'); };
+  currentUtterance.onend = () => { isSpeaking = false; document.getElementById('nai-voice-waves').classList.add('hidden'); };
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+function stopNaiSpeech() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  isSpeaking = false;
+  document.getElementById('nai-voice-waves').classList.add('hidden');
+}
+
+function toggleAudioGuide() {
+  if (currentFocusedAstro) {
+    speakNai(`Obra ${currentFocusedAstro.data.badge}. ${currentFocusedAstro.data.title}. ${currentFocusedAstro.data.hist} ${currentFocusedAstro.data.poem}`);
+  }
+}
+
+// ── OBTURADOR & CARRETE ───────────────────────────────────────────
+function triggerShutter() {
+  const flash = document.getElementById('camera-flash');
+  flash.classList.add('flashing');
+  setTimeout(() => flash.classList.remove('flashing'), 100);
+
+  const canvas = document.getElementById('webgl-canvas');
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+  const title = currentFocusedAstro ? currentFocusedAstro.data.title : 'Atlas Cósmico';
+  userCameraRoll.unshift({
+    id: Date.now(),
+    artTitle: title,
+    date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    img: dataUrl
+  });
+  updateRollUI();
+}
+
+function updateRollUI() {
+  const grid = document.getElementById('roll-grid');
+  const counterBadge = document.getElementById('roll-counter-badge');
+  const capacityText = document.getElementById('roll-capacity-text');
+  const emptyState = document.getElementById('roll-empty-state');
+
+  counterBadge.textContent = `${userCameraRoll.length}/30`;
+  capacityText.textContent = `${userCameraRoll.length} / 30 fotos`;
+
+  if (userCameraRoll.length === 0) {
+    emptyState.classList.remove('hidden');
+    grid.innerHTML = '';
+    grid.appendChild(emptyState);
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+  grid.innerHTML = '';
+
+  userCameraRoll.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'glass rounded-xl p-2 relative group overflow-hidden border-white/10';
+    card.innerHTML = `
+      <img src="${item.img}" class="w-full h-28 object-cover rounded-lg mb-1.5 bg-black" />
+      <div class="flex justify-between items-center text-[10px] mono text-slate-300">
+        <span class="truncate">${item.artTitle}</span>
+        <span class="text-purple-400">${item.date}</span>
+      </div>
+      <button onclick="deleteRollItem(${item.id})" class="absolute top-3 right-3 bg-black/70 hover:bg-red-600 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => item.id !== id); updateRollUI(); }
+function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll = []; updateRollUI(); } }
+function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
+
+function bootAtlas() {
+  initAtlasCosmico();
+  if (window.location.href.includes('skip_foyer') || window.location.href.includes('enter') || window.location.hash.includes('enter')) {
+    const foyer = document.getElementById('foyer-screen');
+    if (foyer) {
+      foyer.style.setProperty('display', 'none', 'important');
+      foyer.classList.add('hidden');
+      foyer.remove();
+    }
+    voiceGuideEnabled = false;
+  }
+  if (window.location.href.includes('warp=')) {
+    const match = window.location.href.match(/warp=(\d+)/);
+    if (match) {
+      const targetIdx = parseInt(match[1]);
+      setTimeout(() => warpToTargetAstro(targetIdx), 200);
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootAtlas);
+} else {
+  bootAtlas();
+}

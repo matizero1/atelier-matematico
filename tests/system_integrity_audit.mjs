@@ -5,6 +5,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import child_process from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -218,6 +219,54 @@ htmlRooms.forEach(room => {
   const content = fs.readFileSync(rPath, 'utf8');
   assert(content.length > 5000, `Sala ${room} tiene contenido íntegro (>5 KB, actual: ${(content.length / 1024).toFixed(1)} KB)`);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. AUDITORÍA DE CONTROLADORES MODULARES (NASA JPL ARCHITECTURE)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🚀 FASE 5: Arquitectura Modular de Controladores NASA JPL');
+const controllers = [
+  { file: 'classroom_controller.js', room: 'classroom.html' },
+  { file: 'museum_controller.js', room: 'museum.html' },
+  { file: 'studio_controller.js', room: 'studio.html' },
+  { file: 'shop_controller.js', room: 'shop.html' },
+  { file: 'index_controller.js', room: 'index.html' }
+];
+
+controllers.forEach(({ file, room }) => {
+  const cPath = path.join(rootDir, 'js', 'controllers', file);
+  assert(fs.existsSync(cPath), `Controlador modular ${file} existe en disco`);
+  const cContent = fs.readFileSync(cPath, 'utf8');
+  assert(cContent.length > 500, `Controlador ${file} tiene contenido sustantivo (>500 B, actual: ${cContent.length} B)`);
+
+  const rPath = path.join(rootDir, room);
+  const rContent = fs.readFileSync(rPath, 'utf8');
+  assert(rContent.includes(`js/controllers/${file}`), `Sala ${room} vincula limpiamente a su controlador js/controllers/${file}`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (NASA JPL & SILICIO NATIVO)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n⚡ FASE 6: Compilador Soberano Nailang (NASA JPL Rule 3 & Silicio Nativo)');
+const nailangRtPath = path.join(rootDir, '..', 'tools', 'nailangc', 'nailang_rt.h');
+assert(fs.existsSync(nailangRtPath), 'Header de runtime nailang_rt.h existe en disco');
+const rtContent = fs.readFileSync(nailangRtPath, 'utf8');
+assert(rtContent.includes('NaiArena') && rtContent.includes('nai_arena_init') && rtContent.includes('nai_arena_alloc'),
+  'nailang_rt.h implementa NaiArena conforme a Regla 3 NASA JPL (Cero fragmentación post-init)');
+
+const nailangcPath = path.join(rootDir, '..', 'tools', 'nailangc', 'nailangc');
+assert(fs.existsSync(nailangcPath), 'Binario de producción nailangc compilado existe en silicio');
+
+// Prueba de compilación AST canónica
+const matrixNai = path.join(rootDir, '..', 'core', 'nailang', 'matrix3x3_r21.nai');
+const resMatrix = child_process.spawnSync(nailangcPath, ['--ast', matrixNai], { encoding: 'utf8' });
+assert(resMatrix.status === 0, `nailangc compila exitosamente AST de kernel canónico matrix3x3_r21.nai`);
+
+const typesNai = path.join(rootDir, '..', 'projects', 'nai-open', 'core', 'types.nai');
+const resTypes = child_process.spawnSync(nailangcPath, ['--ast', typesNai], { encoding: 'utf8' });
+assert(resTypes.status === 0, `nailangc compila exitosamente AST de contratos modulares types.nai (13 contratos)`);
+
+const resEmit = child_process.spawnSync(nailangcPath, ['--emit-only', matrixNai], { encoding: 'utf8' });
+assert(resEmit.status === 0, `nailangc genera código C puro de alta fidelidad sin desbordes de pila`);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN

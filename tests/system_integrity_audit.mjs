@@ -343,6 +343,43 @@ htmlRooms.forEach(room => {
   assert(content.includes('openDesktopModal'), `Sala ${room} contiene llamada interactiva a openDesktopModal`);
 });
 
+// Verificar artefactos del Core Desktop Nativo (Apple Silicon & DMG)
+const candidateDesktop = [
+  path.join(rootDir, 'desktop'),
+  path.join(rootDir, '..', 'desktop'),
+  '/Users/mati/Desktop/Nai-Workspace/desktop'
+];
+const desktopDir = candidateDesktop.find(p => fs.existsSync(p)) || candidateDesktop[0];
+assert(fs.existsSync(path.join(desktopDir, 'main.swift')), 'Código fuente nativo desktop/main.swift existe en disco');
+assert(fs.existsSync(path.join(desktopDir, 'Info.plist')), 'Metadatos desktop/Info.plist existen en disco');
+assert(fs.existsSync(path.join(desktopDir, 'bridge.js')), 'Puente nativo desktop/bridge.js existe en disco');
+
+const candidateScripts = [
+  path.join(rootDir, 'scripts', 'build_desktop_app.sh'),
+  path.join(rootDir, '..', 'scripts', 'build_desktop_app.sh'),
+  '/Users/mati/Desktop/Nai-Workspace/scripts/build_desktop_app.sh'
+];
+const buildDesktopScript = candidateScripts.find(p => fs.existsSync(p)) || candidateScripts[0];
+assert(fs.existsSync(buildDesktopScript), 'Pipeline scripts/build_desktop_app.sh existe en disco');
+
+const candidateAppBundle = [
+  path.join(rootDir, 'build', 'desktop', 'Atelier Matematico.app'),
+  path.join(rootDir, '..', 'build', 'desktop', 'Atelier Matematico.app'),
+  '/Users/mati/Desktop/Nai-Workspace/build/desktop/Atelier Matematico.app'
+];
+const appBundlePath = candidateAppBundle.find(p => fs.existsSync(p)) || candidateAppBundle[0];
+assert(fs.existsSync(appBundlePath), 'Bundle nativo Atelier Matematico.app construido en silicio');
+
+const candidateDmg = [
+  path.join(rootDir, 'downloads', 'Atelier_Matematico_Silicon_arm64.dmg'),
+  path.join(rootDir, 'gallery', 'downloads', 'Atelier_Matematico_Silicon_arm64.dmg'),
+  '/Users/mati/Desktop/Nai-Workspace/gallery/downloads/Atelier_Matematico_Silicon_arm64.dmg'
+];
+const dmgPath = candidateDmg.find(p => fs.existsSync(p)) || candidateDmg[0];
+assert(fs.existsSync(dmgPath), 'Instalador DMG Atelier_Matematico_Silicon_arm64.dmg disponible en descargas web');
+const dmgStats = fs.statSync(dmgPath);
+assert(dmgStats.size > 1000000, `Tamaño de DMG íntegro (>1 MB, actual: ${(dmgStats.size / 1024 / 1024).toFixed(2)} MB)`);
+
 // Verificar capacidades de Fine Art Shop: Monedas internacionales y Certificado Criptográfico
 const shopControllerPath = path.join(rootDir, 'js', 'controllers', 'shop_controller.js');
 const shopContent = fs.readFileSync(shopControllerPath, 'utf8');

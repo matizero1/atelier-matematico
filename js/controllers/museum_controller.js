@@ -309,10 +309,10 @@ function initAtlasCosmico() {
   const canvas = document.getElementById('webgl-canvas');
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x08080a);
-  scene.fog = new THREE.FogExp2(0x08080a, 0.009);
+  scene.fog = new THREE.FogExp2(0x08080a, 0.0022);
 
-  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
-  camera.position.set(0, 0.5, 0);
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 350);
+  camera.position.set(0, 1.65, 0);
 
   renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "low-power", preserveDrawingBuffer: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -365,11 +365,11 @@ function buildCosmicVoid() {
   camera.add(headLight);
   scene.add(camera);
 
-  // Campo Estelar Esférico Omnidireccional (1.800 estrellas en el vacío 3D)
+  // Campo Estelar Esférico Omnidireccional (3.500 estrellas en el vacío 3D profundo)
   const starGeo = new THREE.BufferGeometry();
-  const starPos = new Float32Array(1800 * 3);
-  for (let i = 0; i < 1800; i++) {
-    const r = 20 + Math.random() * 65;
+  const starPos = new Float32Array(3500 * 3);
+  for (let i = 0; i < 3500; i++) {
+    const r = 40 + Math.random() * 200;
     const th = Math.random() * Math.PI * 2;
     const ph = (Math.random() - 0.5) * Math.PI;
     starPos[i*3]   = r * Math.cos(ph) * Math.sin(th);
@@ -377,7 +377,7 @@ function buildCosmicVoid() {
     starPos[i*3+2] = r * Math.cos(ph) * Math.cos(th);
   }
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xf4f1ea, size: 0.032, transparent: true, opacity: 0.45 }));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xf4f1ea, size: 0.038, transparent: true, opacity: 0.55 }));
   scene.add(stars);
 
   // Instanciar los 24 Astros Matemáticos con sus Modelos Nativos y Motor de Auto-Resolución
@@ -389,148 +389,243 @@ function buildCosmicVoid() {
 // ── ROTONDA TECTÓNICA & MIRADOR ASTRONÓMICO DE PARANAL (TIMONEL F2) ─
 function buildTectonicRotunda() {
   const rotundaGroup = new THREE.Group();
-  rotundaGroup.position.set(0, -1.0, 0);
+  rotundaGroup.position.set(0, 0, 0);
 
-  // 1. Mirador Esbelto de Basalto Escalonado (R = 3.8m, escala humana íntima)
-  const baseFloorGeo = new THREE.CylinderGeometry(3.8, 4.0, 0.25, 48);
-  const baseFloorMat = new THREE.MeshStandardMaterial({
-    color: 0x0c0c10,
-    roughness: 0.85,
-    metalness: 0.15
-  });
-  const baseFloor = new THREE.Mesh(baseFloorGeo, baseFloorMat);
-  baseFloor.position.y = -0.125;
-  rotundaGroup.add(baseFloor);
-
-  // Zócalo inferior de granito oscuro
-  const subPlinthGeo = new THREE.CylinderGeometry(4.0, 4.2, 0.15, 48);
-  const subPlinthMat = new THREE.MeshStandardMaterial({
-    color: 0x070709,
-    roughness: 0.9,
+  // Materiales de Grado Observatorio Astronómico
+  const bedrockMat = new THREE.MeshStandardMaterial({
+    color: 0x07070a,
+    roughness: 0.95,
     metalness: 0.1
   });
-  const subPlinth = new THREE.Mesh(subPlinthGeo, subPlinthMat);
-  subPlinth.position.y = -0.32;
-  rotundaGroup.add(subPlinth);
-
-  // Anillos concéntricos de bronce incrustados en el pavimento
+  const basaltMat = new THREE.MeshStandardMaterial({
+    color: 0x0c0c12,
+    roughness: 0.85,
+    metalness: 0.2
+  });
+  const obsidianMat = new THREE.MeshStandardMaterial({
+    color: 0x111118,
+    roughness: 0.65,
+    metalness: 0.3
+  });
+  const graniteMat = new THREE.MeshStandardMaterial({
+    color: 0x161622,
+    roughness: 0.45,
+    metalness: 0.4
+  });
   const bronzeMat = new THREE.MeshStandardMaterial({
     color: 0xc5a059,
     roughness: 0.28,
     metalness: 0.85
   });
-  [1.0, 2.0, 3.2].forEach(r => {
-    const ringGeo = new THREE.TorusGeometry(r, 0.02, 16, 48);
+  const titaniumMat = new THREE.MeshStandardMaterial({
+    color: 0x1e2029,
+    roughness: 0.4,
+    metalness: 0.8
+  });
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x88bbdd,
+    roughness: 0.1,
+    metalness: 0.1,
+    transparent: true,
+    opacity: 0.18,
+    side: THREE.DoubleSide
+  });
+
+  // 1. FUNDACIÓN ROCOSA & TERRAZA DE BASALTO ESCALONADA (R = 14.5m)
+  // Sub-zócalo de roca madre
+  const subPlinthGeo = new THREE.CylinderGeometry(15.2, 16.5, 0.8, 64);
+  const subPlinth = new THREE.Mesh(subPlinthGeo, bedrockMat);
+  subPlinth.position.y = -0.4;
+  rotundaGroup.add(subPlinth);
+
+  // Cubierta Principal de Observación (Radio 14.5m, espesor 0.28m)
+  const terraceGeo = new THREE.CylinderGeometry(14.5, 14.8, 0.28, 64);
+  const terrace = new THREE.Mesh(terraceGeo, basaltMat);
+  terrace.position.y = -0.14;
+  rotundaGroup.add(terrace);
+
+  // Anillo Intermedio de Paseo Astronómico (Radio 9.8m, realzado +0.08m)
+  const midPromenadeGeo = new THREE.CylinderGeometry(9.8, 10.0, 0.12, 64);
+  const midPromenade = new THREE.Mesh(midPromenadeGeo, obsidianMat);
+  midPromenade.position.y = 0.06;
+  rotundaGroup.add(midPromenade);
+
+  // Estrado Central Ecuatorial (Radio 4.8m, realzado +0.16m)
+  const centralDaisGeo = new THREE.CylinderGeometry(4.8, 5.0, 0.16, 48);
+  const centralDais = new THREE.Mesh(centralDaisGeo, graniteMat);
+  centralDais.position.y = 0.20;
+  rotundaGroup.add(centralDais);
+
+  // 2. INCRUSTACIONES ASTRONÓMICAS DE BRONCE (GRADUACIONES & MERIDIANOS)
+  const concentricRadii = [1.8, 3.2, 4.8, 7.2, 9.8, 12.2, 14.2];
+  concentricRadii.forEach(r => {
+    const ringGeo = new THREE.TorusGeometry(r, 0.016, 16, 64);
     const ringMesh = new THREE.Mesh(ringGeo, bronzeMat);
     ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = 0.01;
+    ringMesh.position.y = r < 4.8 ? 0.285 : (r < 9.8 ? 0.125 : 0.01);
     rotundaGroup.add(ringMesh);
   });
 
-  // Juntas radiales de piedra (12 ejes de brújula astronómica)
-  for (let i = 0; i < 12; i++) {
-    const angle = (i * Math.PI) / 6;
-    const jointGeo = new THREE.BoxGeometry(0.02, 0.015, 2.2);
+  // 24 Ejes de Azimut y Declinación (Meridianos del Cielo)
+  for (let i = 0; i < 24; i++) {
+    const angle = (i * Math.PI) / 12;
+    const len = 9.0;
+    const jointGeo = new THREE.BoxGeometry(0.02, 0.015, len);
     const jointMesh = new THREE.Mesh(jointGeo, bronzeMat);
-    jointMesh.position.set(Math.sin(angle) * 2.1, 0.01, Math.cos(angle) * 2.1);
+    jointMesh.position.set(Math.sin(angle) * 9.5, 0.01, Math.cos(angle) * 9.5);
     jointMesh.rotation.y = angle;
     rotundaGroup.add(jointMesh);
   }
 
-  // 2. Medallón Central de Astrolabio / Rosa de los Vientos de Timonel
-  const medallionGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.03, 32);
-  const medallionMat = new THREE.MeshStandardMaterial({
-    color: 0x14141c,
-    roughness: 0.5,
-    metalness: 0.8
-  });
-  const medallion = new THREE.Mesh(medallionGeo, medallionMat);
-  medallion.position.y = 0.02;
+  // Medallón Central de Timonel en el Estrado
+  const medallionGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.03, 32);
+  const medallion = new THREE.Mesh(medallionGeo, titaniumMat);
+  medallion.position.y = 0.29;
   rotundaGroup.add(medallion);
 
-  // Anillo exterior del medallón en bronce
-  const medRingGeo = new THREE.TorusGeometry(0.9, 0.03, 16, 32);
+  const medRingGeo = new THREE.TorusGeometry(1.2, 0.025, 16, 32);
   const medRing = new THREE.Mesh(medRingGeo, bronzeMat);
   medRing.rotation.x = Math.PI / 2;
-  medRing.position.y = 0.035;
+  medRing.position.y = 0.305;
   rotundaGroup.add(medRing);
 
-  // Cruz central de ejes coordenados Timonel F2
-  const axisX = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.015, 0.03), bronzeMat);
-  axisX.position.y = 0.04;
-  rotundaGroup.add(axisX);
-  const axisZ = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.015, 1.6), bronzeMat);
-  axisZ.position.y = 0.04;
-  rotundaGroup.add(axisZ);
+  // 3. PIEDESTAL MONUMENTAL DEL TELESCOPIO ECUATORIAL (ALA SUR)
+  // Pilar de fijación geodésica octogonal
+  const pierGeo = new THREE.CylinderGeometry(1.4, 1.6, 1.2, 8);
+  const pier = new THREE.Mesh(pierGeo, titaniumMat);
+  pier.position.set(0, 0.88, 5.0);
+  rotundaGroup.add(pier);
 
-  // 3. Balaustrada Perimetral Minimalista (Acero oscuro & Bronce fino)
-  const steelMat = new THREE.MeshStandardMaterial({
-    color: 0x16161c,
-    roughness: 0.45,
-    metalness: 0.75
+  // Horquilla ecuatorial inclinada según la latitud celeste (24.6° Paranal)
+  const forkGroup = new THREE.Group();
+  forkGroup.position.set(0, 1.48, 5.0);
+  forkGroup.rotation.x = 24.6 * Math.PI / 180;
+
+  const forkBaseGeo = new THREE.CylinderGeometry(1.1, 1.1, 0.35, 24);
+  const forkBase = new THREE.Mesh(forkBaseGeo, titaniumMat);
+  forkGroup.add(forkBase);
+
+  // Anillo de graduación horaria en bronce
+  const dialGeo = new THREE.TorusGeometry(1.1, 0.04, 16, 48);
+  const dial = new THREE.Mesh(dialGeo, bronzeMat);
+  dial.rotation.x = Math.PI / 2;
+  forkGroup.add(dial);
+
+  // Brazos gemelos de la horquilla
+  [-0.95, 0.95].forEach(xOff => {
+    const armGeo = new THREE.BoxGeometry(0.25, 1.5, 0.35);
+    const arm = new THREE.Mesh(armGeo, titaniumMat);
+    arm.position.set(xOff, 0.75, 0);
+    forkGroup.add(arm);
   });
-  // Pasamanos circular perimetral a 0.85m de altura (Radio 3.6m)
-  const handrailGeo = new THREE.TorusGeometry(3.6, 0.025, 16, 48);
+
+  // Tubo óptico principal del telescopio (OTA) apuntando hacia el cenit cósmico
+  const otaGeo = new THREE.CylinderGeometry(0.44, 0.48, 4.4, 32);
+  const ota = new THREE.Mesh(otaGeo, titaniumMat);
+  ota.position.set(0, 1.45, 0);
+  ota.rotation.x = 0.35; // Inclinación focal
+  forkGroup.add(ota);
+
+  // Tubo buscador astronómico colimador paralelo
+  const finderGeo = new THREE.CylinderGeometry(0.14, 0.14, 3.2, 24);
+  const finder = new THREE.Mesh(finderGeo, bronzeMat);
+  finder.position.set(0.62, 1.45, 0.22);
+  finder.rotation.x = 0.35;
+  forkGroup.add(finder);
+
+  // Contrapeso transversal en acero
+  const counterShaftGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.8, 16);
+  const counterShaft = new THREE.Mesh(counterShaftGeo, titaniumMat);
+  counterShaft.rotation.z = Math.PI / 2;
+  counterShaft.position.set(0, 0.35, -0.6);
+  forkGroup.add(counterShaft);
+
+  [-1.2, 1.2].forEach(cx => {
+    const cweightGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.3, 24);
+    const cweight = new THREE.Mesh(cweightGeo, titaniumMat);
+    cweight.rotation.z = Math.PI / 2;
+    cweight.position.set(cx, 0.35, -0.6);
+    forkGroup.add(cweight);
+  });
+
+  rotundaGroup.add(forkGroup);
+
+  // Luz suave de cabina del telescopio
+  const scopeLight = new THREE.PointLight(0xdfc285, 1.2, 6.0);
+  scopeLight.position.set(0, 2.2, 5.8);
+  rotundaGroup.add(scopeLight);
+
+  // 4. BALAUSTRADA PERIMETRAL DE CRISTAL ESTRUCTURAL & BRONCE (R = 13.8m)
+  // Cero obstrucciones: despeja 100% la línea de visión del observador (altura ojo 1.65m > barandilla 1.05m)
+  const handrailGeo = new THREE.TorusGeometry(13.8, 0.024, 16, 64);
   const handrail = new THREE.Mesh(handrailGeo, bronzeMat);
   handrail.rotation.x = Math.PI / 2;
-  handrail.position.y = 0.85;
+  handrail.position.y = 1.05;
   rotundaGroup.add(handrail);
 
-  // Óculo Cenital Esbelto en el techo de la cúpula
-  const oculusRingGeo = new THREE.TorusGeometry(1.6, 0.035, 16, 48);
-  const oculusRing = new THREE.Mesh(oculusRingGeo, bronzeMat);
-  oculusRing.rotation.x = Math.PI / 2;
-  oculusRing.position.y = 7.5;
-  rotundaGroup.add(oculusRing);
+  const curbRailGeo = new THREE.TorusGeometry(13.8, 0.018, 16, 64);
+  const curbRail = new THREE.Mesh(curbRailGeo, bronzeMat);
+  curbRail.rotation.x = Math.PI / 2;
+  curbRail.position.y = 0.06;
+  rotundaGroup.add(curbRail);
 
-  // 12 Columnas y Costillas Arquitectónicas hacia el Óculo
-  for (let i = 0; i < 12; i++) {
-    const angle = (i * Math.PI) / 6;
-    const px = Math.sin(angle) * 3.6;
-    const pz = Math.cos(angle) * 3.6;
+  // Paneles de cristal laminado transparente
+  const glassGeo = new THREE.CylinderGeometry(13.78, 13.78, 0.95, 64, 1, true);
+  const glassMesh = new THREE.Mesh(glassGeo, glassMat);
+  glassMesh.position.y = 0.55;
+  rotundaGroup.add(glassMesh);
 
-    // Balustra perimetral
-    const postGeo = new THREE.CylinderGeometry(0.025, 0.035, 0.85, 16);
+  // 32 Postes verticales estilizados en el perímetro lejano
+  for (let i = 0; i < 32; i++) {
+    const angle = (i * Math.PI) / 16;
+    const px = Math.sin(angle) * 13.8;
+    const pz = Math.cos(angle) * 13.8;
+
+    const postGeo = new THREE.CylinderGeometry(0.02, 0.025, 1.05, 16);
     const post = new THREE.Mesh(postGeo, bronzeMat);
-    post.position.set(px, 0.425, pz);
+    post.position.set(px, 0.525, pz);
     rotundaGroup.add(post);
 
-    // Costilla curva que asciende libremente hacia el óculo cenital sin tapar el cosmos
-    const curvePoints = [];
-    const steps = 12;
-    for (let s = 0; s <= steps; s++) {
-      const t = s / steps;
-      const cy = 0.85 + t * (7.5 - 0.85);
-      const cr = 3.6 * (1 - t) + 1.6 * t + Math.sin(t * Math.PI) * 0.35;
-      curvePoints.push(new THREE.Vector3(Math.sin(angle) * cr, cy, Math.cos(angle) * cr));
-    }
-    const ribCurve = new THREE.CatmullRomCurve3(curvePoints);
-    const ribGeo = new THREE.TubeGeometry(ribCurve, 16, 0.03, 8, false);
-    const rib = new THREE.Mesh(ribGeo, steelMat);
-    rotundaGroup.add(rib);
-
-    // Focos rasantes empotrados en el suelo de basalto
+    // Iluminación rasante empotrada en el perímetro exterior (16 focos LED ámbar)
     if (i % 2 === 0) {
-      const spot = new THREE.SpotLight(0xffeedd, 1.0, 10, Math.PI / 6, 0.45);
-      spot.position.set(px * 0.85, 0.05, pz * 0.85);
-      spot.target.position.set(px * 0.4, 4.0, pz * 0.4);
+      const spot = new THREE.PointLight(0xdfc285, 0.6, 5.0);
+      spot.position.set(px * 0.96, 0.08, pz * 0.96);
       rotundaGroup.add(spot);
-      rotundaGroup.add(spot.target);
 
-      const fixtureGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.015, 16);
+      const fixtureGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.015, 16);
       const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
       const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
-      fixture.position.set(px * 0.85, 0.015, pz * 0.85);
+      fixture.position.set(px * 0.96, 0.015, pz * 0.96);
       rotundaGroup.add(fixture);
     }
   }
 
-  // Foco cenital sobre el medallón
-  const centerSpot = new THREE.SpotLight(0xffeedd, 1.6, 9, Math.PI / 6, 0.35);
-  centerSpot.position.set(0, 6.0, 0);
-  centerSpot.target.position.set(0, 0, 0);
-  rotundaGroup.add(centerSpot);
-  rotundaGroup.add(centerSpot.target);
+  // 5. ARCOS MONUMENTALES DE LA RANURA DE CÚPULA (R = 26.0m, Y = 22.0m)
+  // Dos arcos colosales que enmarcan la apertura cenital al universo infinito
+  [-7.5, 7.5].forEach(archX => {
+    const archPoints = [];
+    const steps = 24;
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const angle = (t - 0.5) * Math.PI * 0.88;
+      const az = Math.sin(angle) * 26.0;
+      const ay = Math.cos(angle) * 22.0;
+      archPoints.push(new THREE.Vector3(archX, Math.max(0, ay), az));
+    }
+    const archCurve = new THREE.CatmullRomCurve3(archPoints);
+    const archGeo = new THREE.TubeGeometry(archCurve, 32, 0.12, 8, false);
+    const archMesh = new THREE.Mesh(archGeo, titaniumMat);
+    rotundaGroup.add(archMesh);
+
+    // Balizas de señalización astronómica en la cima de los arcos
+    const beacon = new THREE.PointLight(0xf43f5e, 1.2, 12.0);
+    beacon.position.set(archX, 22.0, 0);
+    rotundaGroup.add(beacon);
+
+    const beaconSphere = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), new THREE.MeshBasicMaterial({ color: 0xf43f5e }));
+    beaconSphere.position.set(archX, 22.0, 0);
+    rotundaGroup.add(beaconSphere);
+  });
 
   scene.add(rotundaGroup);
 }
@@ -553,8 +648,8 @@ function createLivingMathematicalAstro(data, index) {
   // Elevación escalonada sobre la rotonda de basalto (25° a 70°)
   const phi = 0.14 * Math.PI + tier * 0.08 * Math.PI;
   
-  // Radio dilatado profundo (55m a 85m) escalonado en profundidad para eliminar oclusiones
-  const radius = 55.0 + (col % 2) * 16.0 + tier * 6.0;
+  // Radio dilatado profundo (62m a 101m) escalonado en profundidad para eliminar oclusiones
+  const radius = 62.0 + (col % 2) * 18.0 + tier * 7.0;
 
   const x = radius * Math.cos(phi) * Math.sin(theta);
   const y = radius * Math.sin(phi);
@@ -1941,9 +2036,10 @@ const MODE_ROTUNDA_TELESCOPE = 0;
 const MODE_SPHERE_CONFINEMENT = 1;
 let currentMuseumMode = MODE_ROTUNDA_TELESCOPE;
 
-// Navegación sobre la cubierta de basalto de Paranal (altura de ojos: 0.5m sobre origen)
-const platformObserverPos = new THREE.Vector3(0, 0.5, 0);
-const targetPlatformPos = new THREE.Vector3(0, 0.5, 0);
+// Navegación sobre la cubierta monumental de basalto de Paranal (altura de ojos: 1.65m sobre origen)
+const platformObserverPos = new THREE.Vector3(0, 1.65, 0);
+const targetPlatformPos = new THREE.Vector3(0, 1.65, 0);
+let isPointerLocked = false;
 const keysPressed = {};
 let collimatedAstroIndex = -1;
 
@@ -2027,6 +2123,9 @@ function warpToTargetAstro(idx) {
   currentFocusedAstro = astro;
   currentMuseumMode = MODE_SPHERE_CONFINEMENT;
   isHudMinimized = false;
+  if (document.pointerLockElement && document.exitPointerLock) {
+    document.exitPointerLock();
+  }
 
   // Orientación esférica inicial desde el vector actual para entrada suave
   const rel = new THREE.Vector3().subVectors(camera.position, astro.worldPos);
@@ -2123,9 +2222,9 @@ function returnToRotunda() {
   activeConfinementAstro = null;
   currentFocusedAstro = null;
 
-  targetPlatformPos.set(0, 0.5, 0);
-  platformObserverPos.set(0, 0.5, 0);
-  camera.position.set(0, 0.5, 0);
+  targetPlatformPos.set(0, 1.65, 0);
+  platformObserverPos.set(0, 1.65, 0);
+  camera.position.set(0, 1.65, 0);
 
   // Restaurar luminosidad y opacidad según el filtro de época activo
   applyEpochFilter(currentActiveEpoch);
@@ -2212,6 +2311,46 @@ if (typeof window !== 'undefined') {
 // ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
 let currentMouseScreenPos = { x: -1, y: -1 };
 
+function togglePointerLock() {
+  const canvas = document.getElementById('webgl-canvas');
+  if (!document.pointerLockElement) {
+    if (canvas && canvas.requestPointerLock) {
+      canvas.requestPointerLock();
+    }
+  } else {
+    if (document.exitPointerLock) {
+      document.exitPointerLock();
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.togglePointerLock = togglePointerLock;
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('pointerlockchange', () => {
+    const canvas = document.getElementById('webgl-canvas');
+    isPointerLocked = (document.pointerLockElement === canvas);
+    const badge = document.getElementById('pointer-lock-badge');
+    const reticle = document.getElementById('capsule-reticle');
+    if (badge) {
+      if (isPointerLocked) {
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+    if (reticle) {
+      if (isPointerLocked) {
+        reticle.classList.add('locked');
+      } else {
+        reticle.classList.remove('locked');
+      }
+    }
+  });
+}
+
 function setup6DOFControls() {
   let lastPointer = null;
   let isPointerDown = false;
@@ -2219,7 +2358,7 @@ function setup6DOFControls() {
   let hasDragged = false;
 
   window.addEventListener('mousedown', (e) => {
-    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input')) return;
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input, #pointer-lock-badge')) return;
     isPointerDown = true;
     hasDragged = false;
     dragStartPos = { x: e.clientX, y: e.clientY };
@@ -2235,7 +2374,17 @@ function setup6DOFControls() {
     currentMouseScreenPos.x = e.clientX;
     currentMouseScreenPos.y = e.clientY;
 
-    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input')) {
+    // 1. MODO POINTER LOCK ACTIVO (100% CONTROL DIRECTO DE MIRA TELESCÓPICA)
+    if (document.pointerLockElement === document.getElementById('webgl-canvas')) {
+      const sens = 0.0022;
+      userInertiaTimer = 0;
+      targetOrientation.yaw -= (e.movementX || 0) * sens;
+      targetOrientation.pitch -= (e.movementY || 0) * sens;
+      targetOrientation.pitch = Math.max(-0.45, Math.min(1.52, targetOrientation.pitch));
+      return;
+    }
+
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input, #pointer-lock-badge')) {
       lastPointer = null;
       return;
     }
@@ -2254,7 +2403,6 @@ function setup6DOFControls() {
     }
 
     // Permite rotación tanto arrastrando (click-drag) como mediante barrido fluido
-    // Al mantener presionado (click-drag) se obtiene respuesta directa 1:1 para girar 360° sin barreras
     const sensitivity = isPointerDown ? 0.0055 : 0.0035;
 
     if (isInShopMode) {
@@ -2264,7 +2412,7 @@ function setup6DOFControls() {
       userInertiaTimer = 0;
       targetOrientation.yaw -= dx * sensitivity;
       targetOrientation.pitch -= dy * sensitivity;
-      targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch)); // Permite mirar el zócalo/barandilla y al cenit
+      targetOrientation.pitch = Math.max(-0.45, Math.min(1.52, targetOrientation.pitch));
     } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
       userInertiaTimer = 0;
       targetSphereTheta -= dx * (isPointerDown ? 0.0065 : 0.0045);
@@ -2295,7 +2443,7 @@ function setup6DOFControls() {
       if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
         targetOrientation.yaw -= dx * 0.0045;
         targetOrientation.pitch -= dy * 0.0045;
-        targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch));
+        targetOrientation.pitch = Math.max(-0.45, Math.min(1.52, targetOrientation.pitch));
       } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
         targetSphereTheta -= dx * 0.0055;
         targetSpherePhi   -= dy * 0.0055;
@@ -2310,10 +2458,14 @@ function setup6DOFControls() {
 
   // Clic directo: si se está mirando una fórmula y se hace clic (sin haber arrastrado), entrar en ella
   window.addEventListener('click', (e) => {
-    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, #epoch-filter-bar, button, a')) return;
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, #epoch-filter-bar, button, a, #pointer-lock-badge')) return;
     if (hasDragged) return; // Si arrastró para rotar la cámara, no entrar por error
-    if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
-      warpToTargetAstro(collimatedAstroIndex);
+    if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+      if (collimatedAstroIndex >= 0) {
+        warpToTargetAstro(collimatedAstroIndex);
+      } else if (!document.pointerLockElement) {
+        togglePointerLock();
+      }
     }
   });
 
@@ -2334,14 +2486,29 @@ function setup6DOFControls() {
       return;
     }
     if (e.key === 'Escape') {
-      if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) returnToRotunda();
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+        return;
+      }
+      if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+        returnToRotunda();
+        return;
+      }
       return;
     }
     if (e.code === 'Space') {
-      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
-        warpToTargetAstro();
-      } else {
+      if (e.target.closest('input, textarea, select')) return;
+      e.preventDefault();
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+        togglePointerLock();
+      } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
         triggerShutter();
+      }
+      return;
+    }
+    if (e.code === 'Enter') {
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
+        warpToTargetAstro(collimatedAstroIndex);
       }
     }
   });
@@ -2421,7 +2588,7 @@ function animate() {
       userInertiaTimer = 0;
     }
     if (keysPressed['ArrowDown'] || keysPressed['KeyF']) {
-      targetOrientation.pitch = Math.max(-0.25, targetOrientation.pitch - 0.022);
+      targetOrientation.pitch = Math.max(-0.45, targetOrientation.pitch - 0.022);
       userInertiaTimer = 0;
     }
 
@@ -2440,18 +2607,18 @@ function animate() {
 
     const moveLen = Math.hypot(moveX, moveZ);
     if (moveLen > 0.001) {
-      const walkSpeed = 0.07; // Marcha serena por el basalto
+      const walkSpeed = 0.11; // Marcha ágil por la monumental cubierta de basalto
       targetPlatformPos.x += (moveX / moveLen) * walkSpeed;
       targetPlatformPos.z += (moveZ / moveLen) * walkSpeed;
     }
 
-    // Límite circular de la barandilla de bronce (radio barandilla 3.6m, límite observador r <= 2.8m)
+    // Límite circular de la barandilla perimetral de bronce (radio barandilla 13.8m, límite observador r <= 12.5m)
     const distCenter = Math.hypot(targetPlatformPos.x, targetPlatformPos.z);
-    if (distCenter > 2.8) {
-      targetPlatformPos.x *= 2.8 / distCenter;
-      targetPlatformPos.z *= 2.8 / distCenter;
+    if (distCenter > 12.5) {
+      targetPlatformPos.x *= 12.5 / distCenter;
+      targetPlatformPos.z *= 12.5 / distCenter;
     }
-    targetPlatformPos.y = 0.5;
+    targetPlatformPos.y = 1.65; // Altura natural del observador de pie
 
     platformObserverPos.lerp(targetPlatformPos, 0.12);
     camera.position.copy(platformObserverPos);
@@ -2479,9 +2646,9 @@ function animate() {
     if (nai3D.group) {
       nai3D.pulseTime += delta;
       const naiTarget = new THREE.Vector3(
-        Math.sin(nai3D.pulseTime * 0.5) * 1.5,
-        0.3 + Math.cos(nai3D.pulseTime * 0.8) * 0.3,
-        -2.5
+        2.6 + Math.sin(nai3D.pulseTime * 0.5) * 0.6,
+        1.65 + Math.cos(nai3D.pulseTime * 0.8) * 0.25,
+        -1.8
       );
       nai3D.group.position.lerp(naiTarget, 0.04);
       nai3D.core.rotation.y += 0.02;

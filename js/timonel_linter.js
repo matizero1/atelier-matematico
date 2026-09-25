@@ -502,9 +502,17 @@
 
   // Exportar al entorno global
   const instance = new TimonelLinter();
+  
+  // Métodos estáticos delegados para máxima compatibilidad
+  TimonelLinter.instance = instance;
+  TimonelLinter.checkEquivalence = function(s1, s2, opts) { return instance.checkEquivalence(s1, s2, opts); };
+  TimonelLinter.auditDerivation = function(steps, opts) { return instance.auditDerivation(steps, opts); };
+  TimonelLinter.getEngineeringPresets = function() { return instance.getEngineeringPresets(); };
+
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = { TimonelLinter, MathParser, instance };
-  } else {
-    root.TimonelLinter = instance;
   }
+  root.TimonelLinter = TimonelLinter;
+  root.Timonel = instance;
 })(typeof window !== 'undefined' ? window : globalThis);
+

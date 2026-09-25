@@ -539,24 +539,43 @@ function buildTectonicRotunda() {
 function createLivingMathematicalAstro(data, index) {
   const astroGroup = new THREE.Group();
   
-  // Posición esférica 3D
-  const x = data.radius * Math.cos(data.phi) * Math.sin(data.theta);
-  const y = data.radius * Math.sin(data.phi);
-  const z = -data.radius * Math.cos(data.phi) * Math.cos(data.theta);
+  // ── DILATACIÓN MÉTRICA Y ARQUITECTURA CELESTIAL POR PABELLONES ──
+  // Distribución armónica en 5 sectores celestes (20 obras por época)
+  const epoch = data.epoch || (Math.floor(index / 20) + 1);
+  const j = index % 20;
+  const col = j % 5;
+  const tier = Math.floor(j / 5);
+  
+  // Azimut base del sector de la época con separación de 30° entre pabellones
+  const epochBaseTheta = (epoch - 1) * (Math.PI * 2 / 5) - Math.PI / 2;
+  const theta = epochBaseTheta + (col - 2) * 0.115 * Math.PI;
+  
+  // Elevación escalonada sobre la rotonda de basalto (25° a 70°)
+  const phi = 0.14 * Math.PI + tier * 0.08 * Math.PI;
+  
+  // Radio dilatado profundo (55m a 85m) escalonado en profundidad para eliminar oclusiones
+  const radius = 55.0 + (col % 2) * 16.0 + tier * 6.0;
+
+  const x = radius * Math.cos(phi) * Math.sin(theta);
+  const y = radius * Math.sin(phi);
+  const z = -radius * Math.cos(phi) * Math.cos(theta);
   astroGroup.position.set(x, y, z);
 
-  // 1. Anillo de Confinamiento Métrico de Timonel (R = 1.6m) en bronce / oro
+  // Escala basal del grupo en reposo (R = 1.0m, reduciendo ruido visual un 40% a la distancia)
+  astroGroup.scale.set(0.85, 0.85, 0.85);
+
+  // 1. Anillo de Confinamiento Métrico de Timonel (esbelto y translúcido en reposo)
   const ringGeo = new THREE.RingGeometry(1.58, 1.62, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0xc5a059, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xc5a059, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
   const timonelRing = new THREE.Mesh(ringGeo, ringMat);
   astroGroup.add(timonelRing);
 
   // 2. Luz de Resonancia Cálida Orbital (Key & Fill exterior)
-  const pointLight = new THREE.PointLight(0xdfc285, 1.8, 7.5);
+  const pointLight = new THREE.PointLight(0xdfc285, 1.4, 8.0);
   pointLight.position.set(1.5, 2.0, 2.2);
   astroGroup.add(pointLight);
 
-  const fillLight = new THREE.PointLight(0x60a5fa, 1.1, 6.0);
+  const fillLight = new THREE.PointLight(0x60a5fa, 0.8, 6.0);
   fillLight.position.set(-1.6, -1.2, -1.5);
   astroGroup.add(fillLight);
 
@@ -572,10 +591,15 @@ function createLivingMathematicalAstro(data, index) {
   astros24.push({
     data,
     index,
+    epoch,
+    theta,
+    phi,
+    radius,
     group: astroGroup,
     worldPos: new THREE.Vector3(x, y, z),
     timonelRing,
     pointLight,
+    fillLight,
     model: mathModel,
     cycleT: initialCycleT,
     phase: 'RELAXATION',
@@ -1942,9 +1966,10 @@ function updateTelescopeCollimation() {
   const lookDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
 
   let bestIdx = -1;
-  let bestDot = Math.cos(22 * Math.PI / 180); // Cono de 22 grados de visión
+  let bestDot = Math.cos(10 * Math.PI / 180); // Cono de 10 grados para apuntado astronómico preciso
 
   astros24.forEach((a, idx) => {
+    if (!a.group.visible) return; // Respetar filtro de época activo
     const toA = new THREE.Vector3().subVectors(a.worldPos, camera.position).normalize();
     const dot = lookDir.dot(toA);
     if (dot > bestDot) {
@@ -2010,17 +2035,48 @@ function warpToTargetAstro(idx) {
   targetSpherePhi = Math.acos(Math.max(-0.95, Math.min(0.95, rel.y / (rel.length() || 3.6))));
   sphereTheta = targetSphereTheta;
   spherePhi = targetSpherePhi;
-  const isDirectNav = (typeof window !== 'undefined' && (window.location.search.includes('warp=') || window.location.search.includes('astro=')));
-  sphereRadius = isDirectNav ? 3.6 : rel.length();
-  if (isDirectNav) {
-    const center = astro.worldPos;
-    camera.position.set(
-      center.x + sphereRadius * Math.sin(spherePhi) * Math.sin(sphereTheta),
-      center.y + sphereRadius * Math.cos(spherePhi),
-      center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
-    );
-    camera.lookAt(center);
-  }
+  sphereRadius = 3.6;
+
+  const center = astro.worldPos;
+  camera.position.set(
+    center.x + sphereRadius * Math.sin(spherePhi) * Math.sin(sphereTheta),
+    center.y + sphereRadius * Math.cos(spherePhi),
+    center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
+  );
+  camera.lookAt(center);
+
+  // ── AISLAMIENTO LUMÍNICO EN MODO CONFINAMIENTO (FOCUS MODE) ──
+  // La ley activa adquiere protagonismo total a escala 1.0.
+  // El resto del cosmos se atenúa al 4% de opacidad y apaga luces para eliminar ruido visual.
+  astro.group.scale.set(1.0, 1.0, 1.0);
+  astros24.forEach(a => {
+    if (a === astro) {
+      a.group.visible = true;
+      a.timonelRing.material.opacity = 0.85;
+      if (a.pointLight) a.pointLight.intensity = 2.0;
+      if (a.fillLight) a.fillLight.intensity = 1.0;
+      if (a.model && a.model.group) {
+        a.model.group.traverse(child => {
+          if (child.material) {
+            child.material.transparent = true;
+            child.material.opacity = 1.0;
+          }
+        });
+      }
+    } else {
+      a.timonelRing.material.opacity = 0.02;
+      if (a.pointLight) a.pointLight.intensity = 0.0;
+      if (a.fillLight) a.fillLight.intensity = 0.0;
+      if (a.model && a.model.group) {
+        a.model.group.traverse(child => {
+          if (child.material) {
+            child.material.transparent = true;
+            child.material.opacity = 0.04;
+          }
+        });
+      }
+    }
+  });
 
   // Actualizar visibilidad de HUDs y ocultar retícula para despejar la fórmula
   const reticle = document.getElementById('capsule-reticle');
@@ -2066,6 +2122,9 @@ function returnToRotunda() {
   platformObserverPos.set(0, 0.5, 0);
   camera.position.set(0, 0.5, 0);
 
+  // Restaurar luminosidad y opacidad según el filtro de época activo
+  applyEpochFilter(currentActiveEpoch);
+
   // Restaurar retícula central de apuntado astronómico y barra de navegación
   const reticle = document.getElementById('capsule-reticle');
   if (reticle) reticle.style.display = 'block';
@@ -2083,6 +2142,61 @@ function returnToRotunda() {
   if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
 
   speakNai("Regresando a la plataforma de observación de la rotonda.");
+}
+
+// ── FILTRO ACTIVO DE ÉPOCAS / CONSTELACIONES CELESTES ──────────────
+let currentActiveEpoch = 0; // 0: Todas (100), 1..5: Épocas I..V
+
+function filterEpoch(epochId) {
+  currentActiveEpoch = epochId;
+  applyEpochFilter(epochId);
+
+  // Actualizar estilos de los botones de filtro
+  for (let e = 0; e <= 5; e++) {
+    const btn = document.getElementById(`epoch-btn-${e}`);
+    if (btn) {
+      if (e === epochId) {
+        btn.className = "epoch-filter-pill active px-3 py-1 rounded-full text-[11px] mono transition bg-[#c5a059] text-[#08080a] font-semibold shadow-md";
+      } else {
+        btn.className = "epoch-filter-pill px-3 py-1 rounded-full text-[11px] mono transition text-[#a1a1aa] hover:text-[#f4f1ea]";
+      }
+    }
+  }
+
+  // Si el usuario está en la rotonda y selecciona una época, rotar la vista suavemente hacia ese sector
+  if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && epochId >= 1) {
+    const epochBaseTheta = (epochId - 1) * (Math.PI * 2 / 5) - Math.PI / 2;
+    if (typeof targetOrientation !== 'undefined' && typeof orientation !== 'undefined') {
+      targetOrientation.yaw = -epochBaseTheta;
+      targetOrientation.pitch = 0.28;
+      orientation.yaw = -epochBaseTheta;
+      orientation.pitch = 0.28;
+    }
+  }
+}
+
+function applyEpochFilter(epochId) {
+  astros24.forEach(a => {
+    const isVisible = (epochId === 0 || a.epoch === epochId);
+    a.group.visible = isVisible;
+    a.group.scale.set(0.85, 0.85, 0.85);
+    a.timonelRing.material.opacity = isVisible ? 0.35 : 0.0;
+    if (a.pointLight) a.pointLight.intensity = isVisible ? 1.4 : 0.0;
+    if (a.fillLight) a.fillLight.intensity = isVisible ? 0.8 : 0.0;
+    if (a.model && a.model.group) {
+      a.model.group.traverse(child => {
+        if (child.material) {
+          child.material.transparent = true;
+          child.material.opacity = isVisible ? 1.0 : 0.0;
+        }
+      });
+    }
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.filterEpoch = filterEpoch;
+  window.applyEpochFilter = applyEpochFilter;
 }
 
 // ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
@@ -2318,10 +2432,10 @@ function animate() {
       center.y + sphereRadius * Math.cos(spherePhi),
       center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
     );
-    if (camera.position.distanceTo(targetCam) > 1.5 && (window.location.search.includes('warp=') || window.location.search.includes('astro='))) {
+    if (camera.position.distanceTo(targetCam) > 4.0) {
       camera.position.copy(targetCam);
     } else {
-      camera.position.lerp(targetCam, 0.12);
+      camera.position.lerp(targetCam, 0.15);
     }
     camera.lookAt(center);
 
@@ -2344,14 +2458,21 @@ function animate() {
 
   // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución y Culling Térmico
   const camPos = camera.position;
+  const isConfinement = (currentMuseumMode === MODE_SPHERE_CONFINEMENT);
+
   astros24.forEach((astro) => {
+    if (!astro.group.visible) return; // Si la época no está activa, 0% CPU
+
     const distToCam = astro.worldPos.distanceTo(camPos);
 
-    // CULLING TÉRMICO: Silicio ultra-frío en Apple Silicon
-    // Si el astro está a más de 38m, no calcular física de partículas
-    if (distToCam > 38.0) return;
-    // Si está entre 20m y 38m, entrelazar actualización (30 FPS)
-    if (distToCam > 20.0 && ((frameCounter + astro.index) % 2 !== 0)) return;
+    // CULLING TÉRMICO CON DILATACIÓN CÓSMICA (55m - 90m):
+    // Si el usuario está en confinamiento y este no es el astro activo, no procesar física de fondo
+    if (isConfinement && astro !== activeConfinementAstro) return;
+
+    // Si está a más de 130m, no calcular
+    if (distToCam > 130.0) return;
+    // Si está entre 50m y 130m, entrelazar actualización (30 FPS)
+    if (distToCam > 50.0 && ((frameCounter + astro.index) % 2 !== 0)) return;
 
     astro.cycleT += delta;
 
@@ -2362,7 +2483,6 @@ function animate() {
       relaxFactor = 0.0;
       residual = 0.75 + Math.sin(astro.cycleT * 4) * 0.12;
       ringColor = 0xf43f5e; // Rojo advertencia
-      astro.timonelRing.material.opacity = 0.65 + Math.sin(astro.cycleT * 8) * 0.3;
     } else if (astro.cycleT < 7.5) {
       // 2. Fase de Relajación por Operador Diferencial
       phase = 'RELAXATION';
@@ -2370,14 +2490,12 @@ function animate() {
       relaxFactor = progress;
       residual = 0.75 * (1.0 - progress) + 0.003;
       ringColor = progress > 0.65 ? 0x38bdf8 : (progress > 0.3 ? 0xa855f7 : 0xf43f5e);
-      astro.timonelRing.material.opacity = 0.45;
     } else if (astro.cycleT < 13.0) {
       // 3. Fase Cristalizada: Forma Matemática Pura (Certificada por Timonel)
       phase = 'CRYSTALLIZED';
       relaxFactor = 1.0;
       residual = 0.002 + Math.sin(astro.cycleT * 2) * 0.0008;
       ringColor = 0x38bdf8;
-      astro.timonelRing.material.opacity = 0.5 + Math.sin(astro.cycleT * 3) * 0.2;
     } else {
       astro.cycleT = 0;
       phase = 'DISPERSION';
@@ -2390,6 +2508,12 @@ function animate() {
     astro.relaxFactor = relaxFactor;
     astro.residual = residual;
     astro.timonelRing.material.color.setHex(ringColor);
+
+    if (!isConfinement) {
+      const isCollimated = (astro.index === collimatedAstroIndex);
+      astro.timonelRing.material.opacity = isCollimated ? 0.8 : 0.32;
+      astro.group.scale.set(isCollimated ? 1.15 : 0.85, isCollimated ? 1.15 : 0.85, isCollimated ? 1.15 : 0.85);
+    }
 
 
     // ── NAI CENTINELA: FILTRO ULTRA-ESTRICTO DE CERO ABSOLUTO & SOLUCIÓN REAL ───

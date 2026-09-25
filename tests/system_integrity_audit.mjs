@@ -207,6 +207,43 @@ for (const [s1, s2] of fallaciesSuite) {
 }
 assert(falRejectedCount === fallaciesSuite.length, `100% de falacias matemáticas rechazadas con contraejemplo exacto (${falRejectedCount}/${fallaciesSuite.length})`);
 
+// Suite CAS: Motor de Álgebra Computacional Simbólica en Silicio (Algebrite + TimonelCAS)
+const algebritePath = path.join(rootDir, 'js', 'algebrite.min.js');
+assert(fs.existsSync(algebritePath), 'Motor Algebrite compilado offline existe en disco (algebrite.min.js)');
+
+const casPath = path.join(rootDir, 'js', 'timonel_cas.js');
+assert(fs.existsSync(casPath), 'Módulo timonel_cas.js existe en disco');
+
+// Cargar Algebrite en entorno global para CAS
+global.window = global;
+require(algebritePath);
+const { instance: TimonelCAS } = require(casPath);
+assert(TimonelCAS && typeof TimonelCAS.solveStepByStep === 'function', 'TimonelCAS expone método solveStepByStep');
+assert(typeof TimonelCAS.factor === 'function', 'TimonelCAS expone método factor');
+assert(typeof TimonelCAS.expand === 'function', 'TimonelCAS expone método expand');
+assert(typeof TimonelCAS.derivative === 'function', 'TimonelCAS expone método derivative');
+assert(typeof TimonelCAS.integral === 'function', 'TimonelCAS expone método integral');
+assert(typeof TimonelCAS.roots === 'function', 'TimonelCAS expone método roots');
+
+// Verificación de operaciones analíticas reales en silicio
+const solvedSteps = TimonelCAS.solveStepByStep('x^2 - 16 = 0').map(s => s.step);
+assert(solvedSteps.length >= 2, 'TimonelCAS resuelve x^2 - 16 = 0 produciendo derivación paso a paso');
+const solvedAudit = Timonel.auditDerivation(solvedSteps);
+const allSolvedValid = solvedAudit.every(a => a.valid);
+assert(allSolvedValid, '100% de los pasos CAS resueltos están formalmente certificados con residuo nulo');
+
+const factoredEq = TimonelCAS.factor('x^2 - 25 = 0');
+assert(factoredEq.includes('(x-5)*(x+5)'), 'TimonelCAS factoriza analíticamente x^2 - 25 = 0 a (x-5)*(x+5) = 0');
+
+const derivedExpr = TimonelCAS.derivative('x^3 - 4*x', 'x');
+assert(derivedExpr.replace(/\s+/g, '') === '3*x^2-4', 'TimonelCAS deriva analíticamente d/dx(x^3 - 4*x) = 3*x^2 - 4');
+
+const integratedExpr = TimonelCAS.integral('3*x^2 - 4', 'x');
+assert(integratedExpr.replace(/\s+/g, '') === 'x^3-4*x', 'TimonelCAS integra analíticamente ∫(3*x^2 - 4)dx = x^3 - 4*x');
+
+const rootsFound = TimonelCAS.roots('x^2 - 9 = 0');
+assert(rootsFound.includes('-3') && rootsFound.includes('3'), 'TimonelCAS halla raíces exactas {-3, 3} para x^2 - 9 = 0');
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. AUDITORÍA DE SALAS Y RECURSOS EN EL ESPACIO DE TRABAJO
 // ─────────────────────────────────────────────────────────────────────────────

@@ -82,6 +82,17 @@
 
       // 9. Configurar modo inicial del visor
       this.switchVisorMode('grapher');
+
+      // 10. Soporte de expresión directa y auto-resolución CAS por URL
+      const exprParam = params.get('expr');
+      if (exprParam) {
+        this.derivationSteps = [decodeURIComponent(exprParam)];
+        this.activeStepIdx = 0;
+        this.renderSteps();
+      }
+      if (params.get('autosolve') === '1') {
+        this.calculateAutoSolve();
+      }
     }
 
     populatePresetSelector() {
@@ -380,6 +391,131 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // MOTOR DE CÁLCULO SIMBÓLICO EN SILICIO (TIMONEL CAS)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    calculateAutoSolve() {
+      const cas = window.TimonelCAS;
+      if (!cas) {
+        alert('Motor Timonel CAS no inicializado.');
+        return;
+      }
+
+      // Tomar el paso activo o la premisa inicial
+      const currentExpr = (this.derivationSteps[this.activeStepIdx] && this.derivationSteps[this.activeStepIdx].trim()) 
+        ? this.derivationSteps[this.activeStepIdx].trim() 
+        : (this.derivationSteps[0] || 'x^2 - 9 = 0');
+
+      const stepsResult = cas.solveStepByStep(currentExpr);
+      if (Array.isArray(stepsResult) && stepsResult.length > 0) {
+        // Reemplazar la derivación con los pasos generados deterministamente
+        this.derivationSteps = stepsResult.map(s => s.step);
+        this.activeStepIdx = this.derivationSteps.length - 1;
+        this.renderSteps();
+
+        // Notificar al aula sincrónica P2P si actúa como docente
+        if (this.currentRole === 'teacher' && window.RoomSync) {
+          window.RoomSync.broadcastStep(this.activeStepIdx, this.derivationSteps[this.activeStepIdx]);
+        }
+      }
+    }
+
+    calculateFactor() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^2 - 9';
+
+      const factored = cas.factor(curr);
+      if (factored && factored !== curr) {
+        this.appendCalculatedStep(factored);
+      }
+    }
+
+    calculateExpand() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || '(x - 3)*(x + 3)';
+
+      const expanded = cas.expand(curr);
+      if (expanded && expanded !== curr) {
+        this.appendCalculatedStep(expanded);
+      }
+    }
+
+    calculateDerivative() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^3 - 4*x';
+
+      const d = cas.derivative(curr, 'x');
+      if (d) {
+        this.appendCalculatedStep(d);
+      }
+    }
+
+    calculateIntegral() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || '3*x^2 - 4';
+
+      const integ = cas.integral(curr, 'x');
+      if (integ) {
+        this.appendCalculatedStep(integ);
+      }
+    }
+
+    calculateRoots() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^2 - 9 = 0';
+
+      const rootsList = cas.roots(curr);
+      if (Array.isArray(rootsList) && rootsList.length > 0) {
+        let solStr = '';
+        if (rootsList.length === 1) {
+          solStr = `x = ${rootsList[0]}`;
+        } else {
+          solStr = rootsList.map((r, i) => `x_${i + 1} = ${r}`).join('  \\lor  ');
+        }
+        this.appendCalculatedStep(solStr);
+      }
+    }
+
+    appendCalculatedStep(newStepText) {
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      // Si el paso activo está vacío, reemplazarlo
+      if (activeIdx >= 0 && (!this.derivationSteps[activeIdx] || !this.derivationSteps[activeIdx].trim())) {
+        this.derivationSteps[activeIdx] = newStepText;
+      } else {
+        // Insertar después del paso activo o al final
+        this.derivationSteps.splice(activeIdx + 1, 0, newStepText);
+        this.activeStepIdx = activeIdx + 1;
+      }
+      this.renderSteps();
+
+      // Foco en el nuevo paso
+      setTimeout(() => {
+        const input = document.getElementById(`input-step-${this.activeStepIdx}`);
+        if (input) input.focus();
+      }, 50);
+
+      // Notificar aula P2P
+      if (this.currentRole === 'teacher' && window.RoomSync) {
+        window.RoomSync.broadcastStep(this.activeStepIdx, this.derivationSteps[this.activeStepIdx]);
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // GRAFICADOR CARTESIANO 2D INTERACTIVO (y = f(x))
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -510,7 +646,9 @@
       // 5. Compilar y graficar el Paso Activo
       const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
       const activeText = this.derivationSteps[activeIdx] || '0';
-      const fnActive = this.compileMathExpr(activeText);
+      const isSolutionStep = activeText.includes('\\lor') || activeText.includes('x_1') || (activeText.includes('x =') && !activeText.includes('^'));
+      const graphText = (isSolutionStep && activeIdx > 0) ? this.derivationSteps[activeIdx - 1] : activeText;
+      const fnActive = this.compileMathExpr(graphText);
 
       // Determinar si el paso activo está certificado por Timonel
       const audit = (window.TimonelLinter && typeof window.TimonelLinter.auditDerivation === 'function') ?
@@ -537,7 +675,11 @@
       ctx.restore();
 
       // 6. Detectar y marcar raíces en el paso activo
-      this.findAndMarkRoots(ctx, fnActive, ox, oy, scale, xMinMath, xMaxMath, dpr);
+      let explicitRoots = null;
+      if (isSolutionStep && window.TimonelLinter && window.TimonelLinter.instance) {
+        explicitRoots = window.TimonelLinter.instance.extractCandidateRoots(activeText);
+      }
+      this.findAndMarkRoots(ctx, fnActive, ox, oy, scale, xMinMath, xMaxMath, dpr, explicitRoots);
     }
 
     compileMathExpr(exprStr) {
@@ -603,26 +745,27 @@
       ctx.stroke();
     }
 
-    findAndMarkRoots(ctx, fn, ox, oy, scale, xMin, xMax, dpr) {
-      const roots = [];
-      const numSamples = 200;
-      const dx = (xMax - xMin) / numSamples;
+    findAndMarkRoots(ctx, fn, ox, oy, scale, xMin, xMax, dpr, explicitRoots = null) {
+      const roots = (Array.isArray(explicitRoots) && explicitRoots.length > 0) ? [...explicitRoots] : [];
 
-      let prevX = xMin;
-      let prevY = fn(prevX);
+      if (roots.length === 0) {
+        const numSamples = 200;
+        const dx = (xMax - xMin) / numSamples;
+        let prevX = xMin;
+        let prevY = fn(prevX);
 
-      for (let i = 1; i <= numSamples; i++) {
-        const currX = xMin + i * dx;
-        const currY = fn(currX);
+        for (let i = 1; i <= numSamples; i++) {
+          const currX = xMin + i * dx;
+          const currY = fn(currX);
 
-        if (isFinite(prevY) && isFinite(currY) && (prevY * currY <= 0) && Math.abs(currY - prevY) < 20) {
-          // Bisección rápida para encontrar la raíz exacta
-          let r = (prevX + currX) / 2;
-          roots.push(r);
-          if (roots.length >= 4) break;
+          if (isFinite(prevY) && isFinite(currY) && (prevY * currY <= 0) && Math.abs(currY - prevY) < 20) {
+            let r = (prevX + currX) / 2;
+            roots.push(r);
+            if (roots.length >= 4) break;
+          }
+          prevX = currX;
+          prevY = currY;
         }
-        prevX = currX;
-        prevY = currY;
       }
 
       // Dibujar puntos de raíces en el canvas
@@ -644,7 +787,7 @@
       const rootsEl = document.getElementById('graph-roots-info');
       if (rootsEl) {
         if (roots.length > 0) {
-          rootsEl.textContent = `Raíces: ${roots.map(r => 'x ≈ ' + r.toFixed(2)).join(', ')}`;
+          rootsEl.textContent = `Raíces: ${roots.map(r => 'x = ' + (typeof r === 'number' ? r.toFixed(2) : r)).join(', ')}`;
         } else {
           rootsEl.textContent = 'Sin raíces reales visibles';
         }
@@ -1004,6 +1147,12 @@
   root.deleteStep = (idx) => controller.deleteStep(idx);
   root.resetSteps = () => controller.resetSteps();
   root.insertMathSymbol = (sym) => controller.insertMathSymbol(sym);
+  root.calculateAutoSolve = () => controller.calculateAutoSolve();
+  root.calculateFactor = () => controller.calculateFactor();
+  root.calculateExpand = () => controller.calculateExpand();
+  root.calculateDerivative = () => controller.calculateDerivative();
+  root.calculateIntegral = () => controller.calculateIntegral();
+  root.calculateRoots = () => controller.calculateRoots();
   root.switchVisorMode = (mode) => controller.switchVisorMode(mode);
   root.zoomGraph = (factor) => controller.zoomGraph(factor);
   root.resetGraphView = () => controller.resetGraphView();

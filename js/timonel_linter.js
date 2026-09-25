@@ -386,7 +386,53 @@
           };
         }
 
-        const isCertified = maxResidue < 1e-7 || (maxRelResidue < 1e-7 && maxResidue < 1e-3);
+        let isCertified = maxResidue < 1e-7 || (maxRelResidue < 1e-7 && maxResidue < 1e-3);
+
+        // Si falló la equivalencia funcional ordinaria pero el paso anterior era una ecuación,
+        // verificar si el paso actual representa el conjunto solución o raíces exactas:
+        if (!isCertified && isPrevEq) {
+          const candidateRoots = this.extractCandidateRoots(currStr);
+          if (candidateRoots.length > 0) {
+            const varName = varList[0] || 'x';
+            let rootsAllValid = true;
+            let worstRootRes = 0;
+            let worstRootVal = null;
+
+            for (const r of candidateRoots) {
+              const resVal = Math.abs(this.parser.evaluate(prevAst, { [varName]: r }));
+              if (isNaN(resVal) || resVal > 1e-6) {
+                rootsAllValid = false;
+                if (resVal > worstRootRes) {
+                  worstRootRes = resVal;
+                  worstRootVal = r;
+                }
+              }
+            }
+
+            if (rootsAllValid) {
+              isCertified = true;
+              maxResidue = 0;
+              worstCounterexample = {
+                sample: 0,
+                scope: { [varName]: candidateRoots[0] },
+                prevVal: 0,
+                currVal: 0,
+                residue: 0,
+                desc: 'Conjunto solución certificado en silicio. Cada raíz anula exactamente la ecuación previa (residuo = 0).'
+              };
+            } else if (worstRootVal !== null) {
+              maxResidue = worstRootRes;
+              worstCounterexample = {
+                sample: 0,
+                scope: { [varName]: worstRootVal },
+                prevVal: worstRootRes,
+                currVal: 0,
+                residue: worstRootRes,
+                desc: `Ruptura de equivalencia: ${varName} = ${worstRootVal} no satisface la ecuación previa (residuo = ${worstRootRes.toFixed(3)} ≠ 0).`
+              };
+            }
+          }
+        }
 
         return {
           valid: isCertified,
@@ -399,17 +445,98 @@
             currVal: Number(worstCounterexample.currVal.toFixed(4)),
             residue: Number(worstCounterexample.residue.toFixed(4)),
             desc: isCertified
-              ? 'Equivalencia formal verificada. Residuo matemático nulo en silicio.'
+              ? (worstCounterexample.desc || 'Equivalencia formal verificada. Residuo matemático nulo en silicio.')
               : `Ruptura de equivalencia: para ${JSON.stringify(worstCounterexample.scope)}, el paso previo da ${worstCounterexample.prevVal.toFixed(3)} pero tu paso da ${worstCounterexample.currVal.toFixed(3)} (error residual = ${worstCounterexample.residue.toFixed(3)}).`
           } : null
         };
       } catch (err) {
+        // Si falló el parsing de currStr (por ej. por símbolos lógicos \\lor en soluciones),
+        // intentar verificar si es un conjunto solución de prevStr si prevStr es ecuación válida:
+        try {
+          const prevTokens = this.parser.tokenize(prevStr);
+          const prevAst = this.parser.parse(prevTokens);
+          if (prevAst && prevAst.type === 'EQ') {
+            const candidateRoots = this.extractCandidateRoots(currStr);
+            if (candidateRoots.length > 0) {
+              const allVars = new Set();
+              this.parser.extractVariables(prevAst, allVars);
+              const varName = Array.from(allVars)[0] || 'x';
+              let rootsAllValid = true;
+              let worstRootRes = 0;
+              let worstRootVal = null;
+
+              for (const r of candidateRoots) {
+                const resVal = Math.abs(this.parser.evaluate(prevAst, { [varName]: r }));
+                if (isNaN(resVal) || resVal > 1e-6) {
+                  rootsAllValid = false;
+                  if (resVal > worstRootRes) {
+                    worstRootRes = resVal;
+                    worstRootVal = r;
+                  }
+                }
+              }
+
+              if (rootsAllValid) {
+                return {
+                  valid: true,
+                  status: 'certified',
+                  maxResidue: 0,
+                  counterexample: {
+                    sample: 0,
+                    scope: { [varName]: candidateRoots[0] },
+                    prevVal: 0,
+                    currVal: 0,
+                    residue: 0,
+                    desc: 'Conjunto solución certificado en silicio. Cada raíz anula exactamente la ecuación previa (residuo = 0).'
+                  }
+                };
+              } else if (worstRootVal !== null) {
+                return {
+                  valid: false,
+                  status: 'divergent',
+                  maxResidue: worstRootRes,
+                  counterexample: {
+                    sample: 0,
+                    scope: { [varName]: worstRootVal },
+                    prevVal: worstRootRes,
+                    currVal: 0,
+                    residue: worstRootRes,
+                    desc: `Ruptura de equivalencia: ${varName} = ${worstRootVal} no satisface la ecuación previa (residuo = ${worstRootRes.toFixed(3)} ≠ 0).`
+                  }
+                };
+              }
+            }
+          }
+        } catch (_) {}
+
         return {
           valid: false,
           status: 'syntax_error',
           desc: `Sintaxis no válida: ${err.message}`
         };
       }
+    }
+
+    /**
+     * Extrae candidatos numéricos de raíces o soluciones algebraicas
+     */
+    extractCandidateRoots(str) {
+      if (!str || typeof str !== 'string') return [];
+      const clean = str.replace(/\\lor/g, ' or ').replace(/\\vee/g, ' or ').replace(/;/g, ',');
+      const parts = clean.split(/or|,/).map(s => s.trim()).filter(Boolean);
+      const roots = [];
+      for (const p of parts) {
+        const eqIdx = p.indexOf('=');
+        if (eqIdx !== -1) {
+          const valStr = p.substring(eqIdx + 1).trim();
+          const val = parseFloat(valStr);
+          if (!isNaN(val)) roots.push(val);
+        } else {
+          const val = parseFloat(p);
+          if (!isNaN(val)) roots.push(val);
+        }
+      }
+      return roots;
     }
 
     /**

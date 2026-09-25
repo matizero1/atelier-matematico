@@ -6,6 +6,7 @@
 <title>Atelier & Vitrina Viva — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
+<script src="js/artworks_catalog.js"></script>
 <script src="js/math_engines.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -151,7 +152,7 @@
       <div class="space-y-1.5 border-b border-white/[0.08] pb-5">
         <div class="flex items-center justify-between">
           <span class="text-[10px] mono uppercase tracking-[0.25em] text-[#c5a059]" id="current-badge-code">
-            Obra 21 de 24
+            Obra 051 de 100
           </span>
           <span class="text-[10px] mono text-[#71717a] uppercase tracking-wider">
             Edición Limitada 100 Piezas
@@ -178,7 +179,7 @@
           Cuadro Fine Art 50×70 cm · Montado en Pared
         </div>
         <div class="text-[11px] text-[#a1a1aa] font-light truncate" id="vitrina-formula-badge">
-          Obra 21: Los Ceros de Riemann (Bernard Riemann, 1859)
+          Obra 051: Los Ceros de Riemann (Bernard Riemann, 1859)
         </div>
         <!-- DIAL DE PARÁMETROS VIVOS SEGÚN LA LEY ACTIVA -->
         <div class="pt-2 border-t border-white/[0.08] flex items-center gap-2 text-[10px] mono text-[#c8c4bb]" id="dynamic-param-bar">
@@ -186,48 +187,127 @@
         </div>
       </div>
 
-      <!-- PASO 1: SELECCIÓN DE OBRA (24 LEYES) -->
+      <!-- PASO 1: SELECCIÓN DE OBRA (100 LEYES DEL COSMOS) -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
           <label class="text-[11px] mono uppercase tracking-[0.2em] text-[#71717a] block font-medium">
-            1. Selección de Obra / Ecuación
+            1. Selección de Obra / Ecuación (100 Leyes)
           </label>
-          <button onclick="togglePalette()" class="text-[10px] mono text-[#c5a059] hover:underline">
+          <button onclick="togglePalette()" class="text-[10px] mono text-[#c5a059] hover:underline cursor-pointer">
             Alternar Paleta ⟳
           </button>
         </div>
         <select id="artwork-select" onchange="onSelectArtwork(parseInt(this.value))" class="w-full bg-[#101014] luxury-border text-[#f4f1ea] text-xs rounded-lg p-3 mono focus:outline-none focus:border-[#c5a059] transition cursor-pointer">
-          <optgroup label="── PROBLEMAS DEL MILENIO & ENIGMAS MATEMÁTICOS ──">
-            <option value="20" selected>Obra 21 · Los Ceros de Riemann (1859)</option>
-            <option value="21">Obra 22 · El Desierto de Beal (1993)</option>
-            <option value="22">Obra 23 · Vórtices de Navier-Stokes (1845)</option>
-            <option value="23">Obra 24 · El Flujo de Ricci de Poincaré (2002)</option>
+
+          <optgroup label="── ÉPOCA I: ANTIGÜEDAD & GEOMETRÍA (001–020) ──">
+            <option value="0">Obra 001 · El Teorema de Pitágoras (~530 a.C.)</option>
+            <option value="1">Obra 002 · La Ley de la Palanca (~250 a.C.)</option>
+            <option value="2">Obra 003 · El Principio de Flotación (~250 a.C.)</option>
+            <option value="3">Obra 004 · La Espiral Áurea de Fibonacci (1202)</option>
+            <option value="4">Obra 005 · La Ley de Caída Libre (1604)</option>
+            <option value="5">Obra 006 · Primera Ley de Kepler (1609)</option>
+            <option value="6">Obra 007 · Segunda Ley de Kepler (1609)</option>
+            <option value="7">Obra 008 · Tercera Ley de Kepler (1619)</option>
+            <option value="8">Obra 009 · La Ley de Refracción de Snell (1621)</option>
+            <option value="9">Obra 010 · Geometría Analítica Cartesiana (1637)</option>
+            <option value="10">Obra 011 · El Último Teorema de Fermat (1637)</option>
+            <option value="11">Obra 012 · Principio de Fermat de Tiempo Mínimo (1662)</option>
+            <option value="12">Obra 013 · La Ley de Elasticidad de Hooke (1676)</option>
+            <option value="13">Obra 014 · Primera Ley de Newton (Inercia) (1687)</option>
+            <option value="14">Obra 015 · Segunda Ley de Newton (F = ma) (1687)</option>
+            <option value="15">Obra 016 · Tercera Ley de Newton (Acción y Reacción) (1687)</option>
+            <option value="16">Obra 017 · Ley de Gravitación Universal (1687)</option>
+            <option value="17">Obra 018 · Ley de Enfriamiento de Newton (1701)</option>
+            <option value="18">Obra 019 · El Teorema Fundamental del Cálculo (1675)</option>
+            <option value="19">Obra 020 · Característica Polihédrica de Euler (1752)</option>
           </optgroup>
-          <optgroup label="── TEORÍA DEL CAOS & SISTEMAS DINÁMICOS ──">
-            <option value="0">Obra 01 · El Vuelo de Lorenz (1963)</option>
-            <option value="6">Obra 07 · La Cinta de Rössler (1976)</option>
-            <option value="9">Obra 10 · La Autopista de Langton (1986)</option>
-            <option value="12">Obra 13 · Los Ríos de Newton (1669)</option>
+          <optgroup label="── ÉPOCA II: ILUSTRACIÓN & ONDAS (021–040) ──">
+            <option value="20">Obra 021 · La Identidad Sagrada de Euler (1748)</option>
+            <option value="21">Obra 022 · La Ecuación de Bernoulli (1738)</option>
+            <option value="22">Obra 023 · Ecuación de Onda Unidimensional (1747)</option>
+            <option value="23">Obra 024 · Ecuaciones de Euler-Lagrange (1788)</option>
+            <option value="24">Obra 025 · Ecuación de Vigas de Euler-Bernoulli (1750)</option>
+            <option value="25">Obra 026 · Ley Electrostática de Coulomb (1785)</option>
+            <option value="26">Obra 027 · Los Cantos de Chladni (1787)</option>
+            <option value="27">Obra 028 · Ley de los Gases Ideales (1834)</option>
+            <option value="28">Obra 029 · La Ecuación de Laplace (1789)</option>
+            <option value="29">Obra 030 · La Ecuación de Poisson (1813)</option>
+            <option value="30">Obra 031 · La Serie y Transformada de Fourier (1822)</option>
+            <option value="31">Obra 032 · La Ecuación de Difusión del Calor (1822)</option>
+            <option value="32">Obra 033 · El Teorema de Carnot (1824)</option>
+            <option value="33">Obra 034 · La Ley de Conducción de Ohm (1827)</option>
+            <option value="34">Obra 035 · Ley de Inducción de Faraday (1831)</option>
+            <option value="35">Obra 036 · El Solitón Hidrodinámico de Russell (KdV) (1834)</option>
+            <option value="36">Obra 037 · Mecánica Canónica de Hamilton (1833)</option>
+            <option value="37">Obra 038 · Álgebra de Cuaterniones de Hamilton (1843)</option>
+            <option value="38">Obra 039 · El Efecto Doppler (1842)</option>
+            <option value="39">Obra 040 · Vórtices de Navier-Stokes (1845)</option>
           </optgroup>
-          <optgroup label="── ONDAS, FÍSICA & CIMÁTICA ──">
-            <option value="4">Obra 05 · Los Cantos de Chladni (1787)</option>
-            <option value="10">Obra 11 · La Ola Eterna de Solitones (1834)</option>
-            <option value="13">Obra 14 · Las Celdas del Sol de Bénard (1900)</option>
-            <option value="18">Obra 19 · El Colapso Cuántico de Schrödinger (1926)</option>
+          <optgroup label="── ÉPOCA III: TERMODINÁMICA & CAMPOS (041–060) ──">
+            <option value="40">Obra 041 · Primera Ecuación de Maxwell (Gauss Eléctrica) (1865)</option>
+            <option value="41">Obra 042 · Segunda Ecuación de Maxwell (Gauss Magnética) (1865)</option>
+            <option value="42">Obra 043 · Tercera Ecuación de Maxwell (Faraday-Maxwell) (1865)</option>
+            <option value="43">Obra 044 · Cuarta Ecuación de Maxwell (Ampère-Maxwell) (1865)</option>
+            <option value="44">Obra 045 · La Velocidad de la Luz en el Vacío (1865)</option>
+            <option value="45">Obra 046 · La Fuerza Electromagnética de Lorentz (1895)</option>
+            <option value="46">Obra 047 · Primera Ley de la Termodinámica (1850)</option>
+            <option value="47">Obra 048 · Segunda Ley de la Termodinámica (Entropía) (1865)</option>
+            <option value="48">Obra 049 · La Entropía Estadística de Boltzmann (1877)</option>
+            <option value="49">Obra 050 · Distribución de Maxwell-Boltzmann (1871)</option>
+            <option value="50" selected>Obra 051 · Los Ceros Críticos de Riemann (1859)</option>
+            <option value="51">Obra 052 · Métrica Riemanniana y Curvatura Tensorial (1854)</option>
+            <option value="52">Obra 053 · Ley de Radiación de Stefan-Boltzmann (1879)</option>
+            <option value="53">Obra 054 · Ley de Desplazamiento de Wien (1893)</option>
+            <option value="54">Obra 055 · Álgebra Dual y Diferenciación Automática (1873)</option>
+            <option value="55">Obra 056 · Las Transformaciones de Lorentz (1899)</option>
+            <option value="56">Obra 057 · Celdas Convectivas de Bénard (1900)</option>
+            <option value="57">Obra 058 · Empaquetamiento Fractal de Apolonio (1936)</option>
+            <option value="58">Obra 059 · Teselación Espacial de Voronoi (1908)</option>
+            <option value="59">Obra 060 · Criterio de Fluencia de Von Mises (1913)</option>
           </optgroup>
-          <optgroup label="── GEOMETRÍA, TOPOLOGÍA & FRACTALES ──">
-            <option value="1">Obra 02 · El Umbral de la Materia (1913)</option>
-            <option value="2">Obra 03 · La Danza de Yoshida (1990)</option>
-            <option value="3">Obra 04 · Los Ríos de Clifford (1873)</option>
-            <option value="5">Obra 06 · El Telar de Turing (1952)</option>
-            <option value="7">Obra 08 · Las Esferas de Apolonio (200 a.C.)</option>
-            <option value="8">Obra 09 · El Espejo de Julia (1918)</option>
-            <option value="11">Obra 12 · La Piel de Voronoi (1908)</option>
-            <option value="14">Obra 15 · La Fibración de Hopf (1931)</option>
-            <option value="15">Obra 16 · El Juego del Caos de Barnsley (1988)</option>
-            <option value="16">Obra 17 · Las Flores de Fibonacci (1202)</option>
-            <option value="17">Obra 18 · Espirales de Belousov-Zhabotinsky (1951)</option>
-            <option value="19">Obra 20 · El Laberinto de la Regla 110 (1983)</option>
+          <optgroup label="── ÉPOCA IV: RELATIVIDAD & CUÁNTICA (061–080) ──">
+            <option value="60">Obra 061 · Cuantización de la Energía de Planck (1900)</option>
+            <option value="61">Obra 062 · El Efecto Fotoeléctrico de Einstein (1905)</option>
+            <option value="62">Obra 063 · Equivalencia Masa-Energía (E = mc²) (1905)</option>
+            <option value="63">Obra 064 · El Intervalo Espaciotemporal de Minkowski (1908)</option>
+            <option value="64">Obra 065 · Ecuación de Campo de la Relatividad General (1915)</option>
+            <option value="65">Obra 066 · El Radio del Agujero Negro de Schwarzschild (1916)</option>
+            <option value="66">Obra 067 · Longitud de Onda Cuántica de De Broglie (1924)</option>
+            <option value="67">Obra 068 · La Ecuación de Onda Cuántica de Schrödinger (1926)</option>
+            <option value="68">Obra 069 · Principio de Incertidumbre de Heisenberg (1927)</option>
+            <option value="69">Obra 070 · La Ecuación Relativista de Dirac (1928)</option>
+            <option value="70">Obra 071 · La Fibración Topológica de Hopf (1931)</option>
+            <option value="71">Obra 072 · La Ley de Expansión Cósmica de Hubble (1929)</option>
+            <option value="72">Obra 073 · Las Ecuaciones Cosmológicas de Friedmann (1922)</option>
+            <option value="73">Obra 074 · El Teorema de Noether (1918)</option>
+            <option value="74">Obra 075 · Principio de Exclusión de Pauli (1925)</option>
+            <option value="75">Obra 076 · El Condensado de Bose-Einstein (1924)</option>
+            <option value="76">Obra 077 · Entropía de Agujeros Negros de Bekenstein-Hawking (1974)</option>
+            <option value="77">Obra 078 · La Radiación Térmica de Hawking (1974)</option>
+            <option value="78">Obra 079 · Teoría de Calibre No Abeliana de Yang-Mills (1954)</option>
+            <option value="79">Obra 080 · El Mecanismo de Higgs y Masa Elemental (1964)</option>
+          </optgroup>
+          <optgroup label="── ÉPOCA V: CAOS & COMPUTACIÓN (081–100) ──">
+            <option value="80">Obra 081 · Teorema de Incompletitud de Gödel (1931)</option>
+            <option value="81">Obra 082 · La Máquina Universal de Turing (1936)</option>
+            <option value="82">Obra 083 · La Entropía de la Información de Shannon (1948)</option>
+            <option value="83">Obra 084 · Capacidad de Canal de Shannon-Hartley (1948)</option>
+            <option value="84">Obra 085 · El Telar de Morfogénesis de Turing (1952)</option>
+            <option value="85">Obra 086 · Reacción Química de Belousov-Zhabotinsky (1951)</option>
+            <option value="86">Obra 087 · El Atractor Caótico de Lorenz (1963)</option>
+            <option value="87">Obra 088 · La Cinta Plegada de Rössler (1976)</option>
+            <option value="88">Obra 089 · El Mapa Logístico y Universalidad de Feigenbaum (1976)</option>
+            <option value="89">Obra 090 · El Conjunto Fractal de Mandelbrot (1980)</option>
+            <option value="90">Obra 091 · Sincronización de Fase de Kuramoto (1975)</option>
+            <option value="91">Obra 092 · La Ecuación Estocástica de Langevin (1908)</option>
+            <option value="92">Obra 093 · Ecuación de Opciones de Black-Scholes (1973)</option>
+            <option value="93">Obra 094 · Autómata Celular Regla 110 (Turing Completo) (1983)</option>
+            <option value="94">Obra 095 · La Hormiga de Langton (1986)</option>
+            <option value="95">Obra 096 · El Integrador Simpléctico de 4º Orden de Yoshida (1990)</option>
+            <option value="96">Obra 097 · El Desierto de la Conjetura de Beal (1993)</option>
+            <option value="97">Obra 098 · El Flujo de Ricci de Perelman (Poincaré) (2002)</option>
+            <option value="98">Obra 099 · P versus NP y Complejidad Computacional (1971)</option>
+            <option value="99">Obra 100 · El Lagrangiano del Modelo Estándar (1970s)</option>
           </optgroup>
         </select>
       </div>
@@ -494,26 +574,35 @@
 
     // ── INICIALIZACIÓN PRINCIPAL ────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Inicializar textura matemática compartida con AtelierMath
-      initMathCanvasTexture();
+      // 1. Poblar selector de las 100 obras maestras
+      populateArtworkSelect();
 
-      // 2. Inicializar Three.js con el cuadro anclado a la pared
-      initThreeScene();
-
-      // 3. Revisar parámetro de URL (?art=X)
+      // 2. Revisar parámetro de URL (?art=X)
+      let defaultArt = 50; // Obra 051: Riemann
       const urlParams = new URLSearchParams(window.location.search);
       const urlArt = parseInt(urlParams.get('art'));
-      if (!isNaN(urlArt) && urlArt >= 0 && urlArt < 24) {
-        currentArtIdx = urlArt;
-        document.getElementById('artwork-select').value = urlArt;
+      if (!isNaN(urlArt) && urlArt >= 0 && urlArt < 100) {
+        defaultArt = urlArt;
       }
+      currentArtIdx = defaultArt;
+
+      // 3. Inicializar textura matemática compartida con AtelierMath
+      initMathCanvasTexture();
+
+      // 4. Inicializar Three.js con el cuadro anclado a la pared
+      try {
+        initThreeScene();
+      } catch (err) {
+        console.warn('Three.js WebGL init notice:', err);
+      }
+
       const urlView = urlParams.get('view');
       if (urlView) setObserverPreset(urlView);
 
-      // 4. Cargar la obra inicial
+      // 5. Cargar la obra inicial
       selectArtwork(currentArtIdx);
 
-      // 5. Iniciar loop de render
+      // 6. Iniciar loop de render
       animate();
     });
 
@@ -881,20 +970,44 @@
     }
 
     // ── 5. SELECCIÓN DE OBRA & RECONFIGURACIÓN DE DIALES ─────────────
+    function populateArtworkSelect() {
+      const select = document.getElementById('artwork-select');
+      if (!select) return;
+      if (select.options && select.options.length >= 100) return;
+      const catalog = window.ARTWORKS_100 || (window.AtelierMath && window.AtelierMath.ARTWORKS) || [];
+      if (!catalog.length) return;
+      const epochs = [
+        { id: 1, name: "── ÉPOCA I: ANTIGÜEDAD & GEOMETRÍA (001–020) ──" },
+        { id: 2, name: "── ÉPOCA II: ILUSTRACIÓN & ONDAS (021–040) ──" },
+        { id: 3, name: "── ÉPOCA III: TERMODINÁMICA & CAMPOS (041–060) ──" },
+        { id: 4, name: "── ÉPOCA IV: RELATIVIDAD & CUÁNTICA (061–080) ──" },
+        { id: 5, name: "── ÉPOCA V: CAOS & COMPUTACIÓN (081–100) ──" }
+      ];
+      select.innerHTML = epochs.map(ep => {
+        const items = catalog.filter(a => a.epoch === ep.id);
+        const options = items.map(a => `<option value="${a.id}">Obra ${a.badge} · ${a.title} (${a.year})</option>`).join('');
+        return `<optgroup label="${ep.name}">${options}</optgroup>`;
+      }).join('');
+    }
+
     function onSelectArtwork(idx) {
       selectArtwork(idx);
     }
 
     function selectArtwork(idx) {
       currentArtIdx = idx;
-      const d = window.AtelierMath.ARTWORKS[idx];
+      const d = (window.ARTWORKS_100 && window.ARTWORKS_100[idx]) || (window.AtelierMath && window.AtelierMath.ARTWORKS[idx]);
       if (!d) return;
 
+      // Actualizar selector desplegable si no coincide
+      const sel = document.getElementById('artwork-select');
+      if (sel && sel.value !== String(idx)) sel.value = String(idx);
+
       // Actualizar UI
-      document.getElementById('current-badge-code').textContent = `Obra ${d.badge} de 24`;
+      document.getElementById('current-badge-code').textContent = `Obra ${d.badge} de 100`;
       document.getElementById('shop-title').textContent = d.title;
-      document.getElementById('shop-subtitle').textContent = `${d.sub} · ${d.cat}`;
-      document.getElementById('vitrina-formula-badge').textContent = `Obra ${d.badge}: ${d.title} (${d.solver})`;
+      document.getElementById('shop-subtitle').textContent = `${d.sub || ''} · ${d.cat || ''}`;
+      document.getElementById('vitrina-formula-badge').textContent = `Obra ${d.badge}: ${d.title} (${d.author || d.solver || 'Timonel'}, ${d.year})`;
 
       // Reiniciar simulación matemática para este índice
       window.AtelierMath.init(idx);
@@ -912,7 +1025,7 @@
 
       // Botón de Pausa / Reanudación
       const btnPause = document.createElement('button');
-      btnPause.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#f4f1ea] transition';
+      btnPause.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#f4f1ea] transition cursor-pointer';
       btnPause.textContent = isSimulationPaused ? 'Reanudar ▶' : 'Pausa ⏸';
       btnPause.onclick = () => {
         isSimulationPaused = !isSimulationPaused;
@@ -922,20 +1035,20 @@
 
       // Botón de Reinicio
       const btnRestart = document.createElement('button');
-      btnRestart.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#a1a1aa] hover:text-white transition';
+      btnRestart.className = 'px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#a1a1aa] hover:text-white transition cursor-pointer';
       btnRestart.textContent = 'Reiniciar ↻';
       btnRestart.onclick = () => window.AtelierMath.init(idx);
       container.appendChild(btnRestart);
 
       // Controles paramétricos específicos según la ley
-      if (idx === 4) { // Chladni
+      if (idx === 26) { // Chladni en el catálogo de 100
         const modes = window.AtelierMath.getChladniModes();
         const span = document.createElement('span');
         span.innerHTML = `Modos: <strong>(${modes.m}, ${modes.n})</strong>`;
         container.appendChild(span);
 
         const btnNextMode = document.createElement('button');
-        btnNextMode.className = 'px-2 py-0.5 rounded bg-[#c5a059]/20 text-[#dfc285] hover:bg-[#c5a059]/30 transition';
+        btnNextMode.className = 'px-2 py-0.5 rounded bg-[#c5a059]/20 text-[#dfc285] hover:bg-[#c5a059]/30 transition cursor-pointer';
         btnNextMode.textContent = 'Siguiente Modo ♫';
         btnNextMode.onclick = () => {
           let nm = (modes.m % 7) + 1;
@@ -945,9 +1058,10 @@
         };
         container.appendChild(btnNextMode);
       } else {
+        const d = (window.ARTWORKS_100 && window.ARTWORKS_100[idx]) || (window.AtelierMath && window.AtelierMath.ARTWORKS[idx]) || {};
         const hintSpan = document.createElement('span');
         hintSpan.className = 'text-[#a1a1aa] truncate';
-        hintSpan.textContent = window.AtelierMath.ARTWORKS[idx].hint || 'Simulación en silicio';
+        hintSpan.textContent = d.hint || d.poem || 'Simulación en silicio nativo (60 FPS)';
         container.appendChild(hintSpan);
       }
     }

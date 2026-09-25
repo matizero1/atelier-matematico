@@ -934,242 +934,1030 @@ function step24() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// METADATOS DE LAS 24 OBRAS
-// ═══════════════════════════════════════════════════════════════════
-const ARTWORKS=[
-  {badge:"01",mini:"Atractor de Lorenz",cat:"TEORÍA DEL CAOS · 1963",solver:"RK4 Integrator",
-   title:"El Vuelo de Lorenz",sub:"El aleteo que gobierna el infinito",
-   eq:"dx/dt = 10(y-x)\ndy/dt = x(28-z)-y\ndz/dt = xy-(8/3)z",
-   hist:"En 1963, Edward Lorenz redondeó 0.506127 a 0.506 en su computadora climática. Aquella millonésima desató un tornado y demostró que sistemas perfectamente deterministas pueden ser perpetuamente impredecibles.",
-   poem:'"Dos alas nacen de un suspiro y giran sin tocarse jamás. Cada decisión ínfima abre una órbita completamente nueva en el tejido del universo."',
-   hint:"Arrastra para rotar el atractor en 3D"},
-  {badge:"02",mini:"Von Mises",cat:"MECÁNICA CONTINUA · 1913",solver:"Cardano Eigensolver",
-   title:"El Umbral de la Materia",sub:"Donde el dolor se vuelve luz",
-   eq:"σ_v = √((σ₁-σ₂)²+(σ₂-σ₃)²+(σ₃-σ₁)²)/√2",
-   hist:"En 1913, Richard von Mises encontró el límite exacto donde un metal cede plásticamente para siempre bajo carga. Su criterio formuló la energía de distorsión con precisión geométrica.",
-   poem:'"La materia resiste hasta que la tensión interna ya no cabe en sus átomos. Azul donde descansa, fuego donde sostiene el peso del mundo."',
-   hint:"Mueve el cursor para deformar la tela elástica"},
-  {badge:"03",mini:"Yoshida Péndulo",cat:"HAMILTONIANO · 1990",solver:"Symplectic 4th Order",
-   title:"La Danza de Yoshida",sub:"La memoria que el tiempo jamás disuelve",
-   eq:"z_{n+1}=exp(c_i·Δt·D_A)·exp(d_i·Δt·D_B)·z_n",
-   hist:"En 1990, Haruo Yoshida descubrió coeficientes analíticos de 4º orden que preservan la energía exacta de cualquier sistema hamiltoniano sin perder jamás un julio.",
-   poem:'"Dos cuerpos bailan al borde del abismo, sin motor ni fricción. Es la música pura de la conservación: lo que nació con energía seguirá cantando por la eternidad."',
-   hint:"Observa las cintas de fase: energía conservada al 100%"},
-  {badge:"04",mini:"Ríos de Clifford",cat:"ÁLGEBRA DIFERENCIAL · 1873",solver:"Dual Numbers Autodiff",
-   title:"Los Ríos Invisibles",sub:"La sombra que revela el gradiente sin error",
-   eq:"f(x+d·ε) = f(x) + d·f'(x)·ε  donde ε²=0",
-   hist:"William Clifford inventó en 1873 un número infinitesimal ε cuyo cuadrado es cero exacto, permitiendo calcular derivadas analíticas sin error de truncamiento.",
-   poem:'"Corrientes subterráneas que horadan la roca en silencio. Las partículas siguen el gradiente sin dudar, tejiendo auroras en las laderas del potencial."',
-   hint:"Líneas de corriente analíticas sin error de truncamiento"},
-  {badge:"05",mini:"Cantos de Chladni",cat:"CIMÁTICA · 1787",solver:"Helmholtz Standing Wave",
-   title:"Los Cantos de Chladni",sub:"La arquitectura que el sonido dibuja en el silencio",
-   eq:"w(x,y)=sin(nπx/L)sin(mπy/L)-sin(mπx/L)sin(nπy/L)=0",
-   hist:"En 1787, Ernst Chladni pasó un arco de violín por una placa metálica con arena fina. El sonido expulsó a la arena hacia las líneas nodales de reposo, revelando mandalas perfectos.",
-   poem:'"El silencio no es vacío; es el punto donde las ondas opuestas se abrazan y se anulan, permitiendo que la arena del mundo descanse en geometría sagrada."',
-   hint:"Mueve el mouse para cambiar los armónicos (m,n) de la placa"},
-  {badge:"06",mini:"Telar de Turing",cat:"MORFOGÉNESIS · 1952",solver:"Reaction-Diffusion PDE",
-   title:"El Telar de Turing",sub:"Cómo el leopardo tejió sus manchas en el caos",
-   eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v",
-   hist:"En su último artículo antes de morir en 1952, Alan Turing demostró que dos sustancias químicas simples, difundiéndose a velocidades desiguales, bastan para generar todas las manchas de los felinos.",
-   poem:'"La vida no necesitó un pincel: solo dos moléculas jugando a perseguirse durante eones, tejiendo corales y pieles en el tiempo."',
-   hint:"Haz clic en el canvas para sembrar nuevos núcleos de morfogénesis"},
-  {badge:"07",mini:"Cinta de Rössler",cat:"TOPOLOGÍA CAÓTICA · 1976",solver:"Smale Horseshoe Attractor",
-   title:"La Cinta del Panadero",sub:"El espacio que se amasa a sí mismo sin romperse",
-   eq:"dx/dt=-y-z\ndy/dt=x+0.2y\ndz/dt=0.2+z(x-5.7)",
-   hist:"Otto Rössler diseñó en 1976 el atractor caótico más simple: un espiral suave que de pronto se dispara y se pliega sobre sí mismo, exactamente como el panadero amasa la masa.",
-   poem:'"El tiempo es una cinta de seda que el universo estira y dobla, devolviéndonos siempre al mismo origen pero en una octava más alta."',
-   hint:"Arrastra para contemplar el pliegue 3D de Rössler"},
-  {badge:"08",mini:"Esferas de Apolonio",cat:"FRACTAL CLÁSICO · 200 a.C.",solver:"Descartes Circle Theorem",
-   title:"Las Esferas de Apolonio",sub:"La infinita compañía que llena todo vacío",
-   eq:"(k₁+k₂+k₃+k₄)²=2(k₁²+k₂²+k₃²+k₄²)\nk=1/r",
-   hist:"Apolonio de Pérgamo y Descartes en 1643 demostraron que siempre existen exactamente dos círculos que tocan a tres dados, permitiendo empacar infinitas esferas en cualquier vacío.",
-   poem:'"En cada vacío que deja la pérdida, la geometría siembra una nueva esfera. El vacío nunca está solo: es una puerta abierta hacia el infinito que nos abraza."',
-   hint:"Observa el fractal de curvatura girando suavemente"},
-  {badge:"09",mini:"Conjuntos de Julia",cat:"GEOMETRÍA COMPLEJA · 1918",solver:"Smooth Escape Coloring",
-   title:"El Espejo de Julia",sub:"Universos infinitos desde una ecuación cuadrática",
-   eq:"z_{n+1} = z_n² + c\n|c| = 0.7885 (órbita lenta)",
-   hist:"Gaston Julia, con 25 años y sin nariz (la perdió en la guerra), escribió 200 páginas a mano describiendo imágenes que nunca pudo ver. Murió sin saber lo que había creado.",
-   poem:'"Un hombre sin rostro imaginó el rostro de todos los universos posibles. Cada valor del parámetro c es un cosmos completo que jamás volvió a repetirse."',
-   hint:"Observa cómo el conjunto muta al orbitar el parámetro c"},
-  {badge:"10",mini:"Hormiga de Langton",cat:"AUTÓMATA CELULAR · 1986",solver:"Deterministic CA Rule",
-   title:"La Autopista del Caos",sub:"El orden que nace espontáneamente de dos reglas",
-   eq:"Blanco→girar_derecha+pintar_negro\nNegro→girar_izquierda+pintar_blanco",
-   hist:"La Hormiga de Langton produce puro caos por 10.000 pasos. En el paso 10.001, de forma completamente inesperada, comienza a construir una autopista periódica infinita sin que nadie se lo dijera.",
-   poem:'"El orden no necesita arquitecto: solo necesita suficiente tiempo perdido en el caos. La autopista emerge cuando nadie la espera."',
-   hint:"Observa el momento exacto en que el caos construye orden perfecto"},
-  {badge:"11",mini:"Solitones KdV",cat:"ONDAS NO LINEALES · 1834",solver:"Analytical 1-Soliton Formula",
-   title:"La Ola Eterna",sub:"La onda que viaja para siempre sin deformarse",
-   eq:"u(x,t) = -2k² · sech²(k(x - 4k²t))\nutₓₓₓ + 6uuₓ + uₜ = 0",
-   hist:"John Scott Russell vio en 1834 una ola de canal viajar millas sin dispersarse. La física oficial lo ignoró por 130 años. Zabusky y Kruskal le dieron la razón en 1965: existen ondas que viajan solas por la eternidad.",
-   poem:'"Hay personas que, como estas olas, cruzan cada tormenta sin perder su forma. Colisionan, se atraviesan como fantasmas y salen intactas al otro lado."',
-   hint:"Observa las olas colisionar y salir intactas"},
-  {badge:"12",mini:"Voronoi",cat:"GEOMETRÍA DE LA JUSTICIA · 1908",solver:"Dirichlet Tessellation",
-   title:"La Piel de la Jirafa",sub:"La partición más justa del espacio",
-   eq:"Cel(sᵢ) = {x ∈ ℝⁿ : d(x,sᵢ) ≤ d(x,sⱼ) ∀j≠i}",
-   hist:"Georgy Voronoi describió la partición perfecta del espacio: cada región contiene todos los puntos más cercanos a su semilla. Sin saber nada de biología, describió la piel de la jirafa, el ojo de mosca y las galaxias.",
-   poem:'"La naturaleza divide el mundo de la forma más justa: a cada semilla, todo lo que está más cerca de ella. El ojo de la mosca lo sabía antes que Voronoi."',
-   hint:"Las semillas se mueven; el espacio se redistribuye en tiempo real"},
-  {badge:"13",mini:"Fractal de Newton",cat:"CUENCAS DE ATRACCIÓN · 1669",solver:"Newton's Method z³-1",
-   title:"Los Ríos de Newton",sub:"Las fronteras del camino más corto a la verdad",
-   eq:"z_{n+1} = (2z³+1)/(3z²)\nf(z) = z³-1 en ℂ",
-   hist:"Newton inventó el método para encontrar raíces de ecuaciones. En el plano complejo, la frontera entre los territorios de cada raíz no es una línea limpia: es un fractal de infinita complejidad.",
-   poem:'"Incluso Newton, que inventó el camino más corto a la verdad, jamás pudo saber qué camino tomará el caos para llegar a ella."',
-   hint:"El fractal se construye progresivamente: cada banda es una nueva frontera"},
-  {badge:"14",mini:"Celdas de Bénard",cat:"CONVECCIÓN TÉRMICA · 1900",solver:"Thermal Buoyancy Simulation",
-   title:"Las Celdas del Sol",sub:"Los hexágonos que el calor dibuja sin querer",
-   eq:"Ra = gαΔTL³/(νκ) > Ra_crit ≈ 1708\nNaturally-emergent hexagonal convection",
-   hist:"Henri Bénard calentó aceite en una bandeja y descubrió que al superar un umbral crítico, el fluido se autoorganizaba en hexágonos perfectos: las mismas formas del panal, la superficie del Sol y los desiertos de piedra.",
-   poem:'"El calor no destruye el orden: lo fabrica, siempre en hexágonos, porque esa es la forma más eficiente que el universo conoce."',
-   hint:"Partículas calientes suben (arriba), frías bajan (abajo): convección natural"},
-  {badge:"15",mini:"Fibración de Hopf",cat:"TOPOLOGÍA 4D · 1931",solver:"Stereographic S³→R³ Projection",
-   title:"La Danza de los Cuatro Mundos",sub:"La esfera de cuatro dimensiones proyectada en luz",
-   eq:"π: S³→S² · Fibras: (η,ξ₁,ξ₂)→círculos de S³\n(x₁,x₂,x₃,x₄)→(x₁,x₂,x₃)/(1-x₄)",
-   hist:"Heinz Hopf demostró en 1931 que la esfera 4D puede desmontarse en círculos perfectos que se entrelazan sin cortarse jamás, de una forma imposible en tres dimensiones.",
-   poem:'"Hay dimensiones que no podemos ver pero cuya sombra, al caer sobre nuestra realidad, es la forma más hermosa que jamás imaginamos."',
-   hint:"Anillos 4D entrelazados proyectados a 3D; giran continuamente"},
-  {badge:"16",mini:"Helecho de Barnsley",cat:"SISTEMAS IFS · 1988",solver:"Chaos Game 4-Transform IFS",
-   title:"El Juego del Caos",sub:"El orden perfecto que emerge del azar puro",
-   eq:"f₁: [0,0;0,.16] p=0.01 · f₂: [.85,.04;-.04,.85] p=0.85\nf₃: [.2,-.26;.23,.22] p=0.07 · f₄: [-.15,.28;.26,.24] p=0.07",
-   hist:"Michael Barnsley demostró en 1988 que cuatro transformaciones aleatorias con probabilidades exactas convergen siempre al mismo fractal: un helecho perfecto. El azar puro, bien encauzado, construye orden biológico.",
-   poem:'"Tres instrucciones simples y un dado bastan para dibujar la misma hoja de helecho que la naturaleza tardó millones de años en diseñar."',
-   hint:"4000 puntos aleatorios por frame convergiendo al helecho de Barnsley"},
-  {badge:"17",mini:"Espiral de Fibonacci",cat:"FILOTAXIS ÁUREA · 1202",solver:"Golden Angle Phyllotaxis",
-   title:"Las Flores del Girasol",sub:"La ley secreta del crecimiento de las plantas",
-   eq:"θₙ = n · 137.508°  (ángulo áureo)\nrₙ = c√n",
-   hist:"En 1202, Fibonacci contó conejos. Nadie imaginó que su secuencia 1,1,2,3,5,8... aparecería 800 años después en las semillas del girasol, piñón, caracol y galaxias espirales.",
-   poem:'"La flor no sabe matemáticas: solo crece de la forma más eficiente posible. En esa eficiencia está la belleza más antigua del universo."',
-   hint:"Cada semilla se planta en el ángulo áureo exacto (137.508°)"},
-  {badge:"18",mini:"Belousov-Zhabotinsky",cat:"OSCILACIÓN QUÍMICA · 1951",solver:"Gray-Scott Reaction-Diffusion",
-   title:"Las Espirales Químicas",sub:"El latido del universo en un tubo de ensayo",
-   eq:"∂u/∂t = Dᵤ∇²u - uv² + F(1-u)\n∂v/∂t = Dᵥ∇²v + uv² - (F+k)v",
-   hist:"En 1951, Belousov descubrió una reacción que pulsaba sola entre rojo y azul. Sus colegas la rechazaron por 'imposible'. Era correcta: el corazón humano late usando el mismo mecanismo.",
-   poem:'"El corazón late usando la misma ecuación que Belousov descubrió en un tubo de ensayo. Cada latido tuyo es una reacción química que se negó a detenerse."',
-   hint:"Espirales químicas vivas; haz clic para sembrar nuevos focos de oscilación"},
-  {badge:"19",mini:"Onda de Schrödinger",cat:"MECÁNICA CUÁNTICA · 1926",solver:"Gaussian Wavepacket Analytical",
-   title:"El Colapso de la Ola Cuántica",sub:"La probabilidad que pinta el universo antes de ser observado",
-   eq:"iℏ ∂ψ/∂t = -ℏ²/2m ∇²ψ + Vψ\n|ψ(x,t)|² = densidad de probabilidad",
-   hist:"En 1926, Schrödinger escribió la ecuación que describe la probabilidad de encontrar un electrón. La solución es una ola que existe en todas partes simultáneamente hasta que alguien la observa.",
-   poem:'"Antes de ser mirado, el electrón existe en todos los lugares a la vez. Lo mismo ocurre con las decisiones no tomadas: existen como olas hasta que elegimos."',
-   hint:"Tres paquetes gaussianos interfiriendo en el espacio cuántico"},
-  {badge:"20",mini:"Regla 110",cat:"COMPUTACIÓN UNIVERSAL · 1983",solver:"Wolfram Turing-Complete CA",
-   title:"El Laberinto Perfecto",sub:"El programa más simple que puede calcular todo",
-   eq:"Regla 110: 111→0 · 110→1 · 101→1 · 100→0\n011→1 · 010→1 · 001→1 · 000→0",
-   hist:"Wolfram estudió 256 autómatas celulares de 1D. La Regla 110 resultó ser Turing-completa: con una sola regla de tres vecinos, puede calcular cualquier cosa que una computadora pueda calcular.",
-   poem:'"Una sola celda negra en un mar blanco. Una sola regla. Y de eso nace todo lo que una mente puede imaginar o calcular en el universo."',
-   hint:"Una celda inicial genera un patrón computacionalmente universal"},
-
-  // ── 21 A 24: ENIGMAS DEL MILENIO & CONJETURAS ──
-  {badge:"21",mini:"Ceros de Riemann",cat:"PROBLEMA DEL MILENIO · 1859",solver:"Riemann-Siegel Critical Spiral",
-   title:"Los Ceros de Riemann",sub:"El enigma de un millón de dólares en la línea crítica",
-   eq:"ζ(s) = ∑ 1/nˢ = 0  ⇒  Re(s) = 1/2\nZ(t) cruza el origen exactamente en t₁, t₂, t₃...",
-   hist:"En 1859, Bernhard Riemann conjeturó que todos los ceros no triviales de su función Zeta yacen en la línea crítica Re(s)=1/2. Es el problema no resuelto más famoso del mundo: gobierna la distribución de todos los números primos.",
-   poem:'"Una cuerda de luz tensada a través de la nada que gira en el espacio y besa el cero absoluto en cada número primo del universo."',
-   hint:"Observa los destellos expansivos cada vez que la curva cruza un cero no trivial"},
-  {badge:"22",mini:"Desierto de Beal",cat:"CONJETURA DE BEAL · 1993",solver:"Logarithmic Power Lattice",
-   title:"El Desierto de Beal",sub:"La repulsión matemática entre potencias coprimas",
-   eq:"Aˣ + Bʸ = Cᶻ  con  x,y,z > 2\n⇒  mcd(A,B,C) > 1 (Premio $1.000.000 USD)",
-   hist:"El banquero Andrew Beal ofreció $1.000.000 USD a quien demuestre que Aˣ + Bʸ = Cᶻ exige un factor primo común. Si buscas soluciones coprimas, la matemática te expulsa: se crea un vacío donde nada puede tocarse.",
-   poem:'"En el desierto de las potencias puras, los números solitarios jamás logran sumarse. Solo aquellos que comparten la misma sangre prima pueden abrazarse en la geometría."',
-   hint:"Constelaciones ordenadas (factor común) vs Desierto vacío (exclusión coprima)"},
-  {badge:"23",mini:"Navier-Stokes",cat:"PROBLEMA DEL MILENIO · 1845",solver:"3D Vortex Filament Stretching",
-   title:"Vórtices de Navier-Stokes",sub:"El misterio de la turbulencia y las velocidades infinitas",
-   eq:"∂u/∂t + (u·∇)u = -∇p/ρ + ν∇²u\n¿Puede la vorticidad ω = ∇×u explotar a infinito?",
-   hist:"Claude Navier y George Stokes formularon las ecuaciones que gobiernan el agua y el aire. El Instituto Clay ofrece $1.000.000 USD a quien demuestre si un fluido puede desarrollar singularidades de energía infinita.",
-   poem:'"Tubos de remolinos microscópicos que se estiran y trenzan como músculos de luz, disipando la furia del océano en un polvo de chispas estelares."',
-   hint:"Filamentos de vórtice entrelazados estirándose y liberando chispas turbulentas"},
-  {badge:"24",mini:"Flujo de Ricci",cat:"PROBLEMA DEL MILENIO · 2002",solver:"Perelman Metric Smoothing S³",
-   title:"El Flujo de Ricci de Poincaré",sub:"La redondez cósmica que resolvió Grigori Perelman",
-   eq:"∂g_ij/∂t = -2 R_ij\nDeformación métrica hacia la esfera perfecta S³",
-   hist:"En 1904 Henri Poincaré planteó su conjetura sobre la esfera tridimensional. En 2002, el ermitaño ruso Grigori Perelman la resolvió usando el Flujo de Ricci... y rechazó la Medalla Fields y el millón de dólares.",
-   poem:'"El calor geométrico plancha cada arruga del espacio, redondeando la imperfección de la materia hasta devolverla a la pureza de la primera esfera."',
-   hint:"Observa cómo el flujo alisa las arrugas del espacio hacia la esfera perfecta"}
-];
 
 // ═══════════════════════════════════════════════════════════════════
-// ORQUESTACIÓN
+// LOS 10 ARQUETIPOS MATEMÁTICOS PARA LAS 100 OBRAS DEL CANON
+// FÍSICA COMPUTACIONAL EN SILICIO NATIVO · TIMONEL F2
 // ═══════════════════════════════════════════════════════════════════
-const INITS =[init01,init02,init03,init04,init05,init06,init07,init08,init09,init10,init11,init12,init13,init14,init15,init16,init17,init18,init19,init20,init21,init22,init23,init24];
-const STEPS =[step01,step02,step03,step04,step05,step06,step07,step08,step09,step10,step11,step12,step13,step14,step15,step16,step17,step18,step19,step20,step21,step22,step23,step24];
 
+// Variables compartidas de arquetipos
+let archT = 0;
+let archState = {};
 
-  // API Pública Soberana
-  root.AtelierMath = {
-    ARTWORKS: ARTWORKS,
-    INITS: INITS,
-    STEPS: STEPS,
-    bindCanvas: function(c, width, height) {
-      canvas = c;
-      ctx = canvas.getContext("2d");
-      if (width && height) {
-        W = canvas.width = width;
-        H = canvas.height = height;
-      } else {
-        W = canvas.width;
-        H = canvas.height;
+// Helper: Trazo con desvanecimiento alfa
+function trailFade(alpha = 0.055) {
+  ctx.fillStyle = `rgba(4,2,12,${alpha})`;
+  ctx.fillRect(0, 0, W, H);
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 1. ARQUETIPO: DINÁMICA CELESTE, GEODÉSICAS & COSMOLOGÍA (celestial)
+// ───────────────────────────────────────────────────────────────────
+let celBodies = [], celCenter = {x: 0, y: 0}, celRot = 0;
+function init_archetype_celestial(idx) {
+  celCenter = { x: W * 0.5, y: H * 0.5 };
+  celRot = 0;
+  celBodies = [];
+  const seed = (idx * 37) % 100;
+  const count = (idx === 64) ? 24 : 6; // Para agujero negro más fotones
+  for (let i = 0; i < count; i++) {
+    const a = (W * 0.08) + i * (W * 0.06);
+    const e = 0.15 + ((seed + i * 19) % 55) * 0.01;
+    const b = a * Math.sqrt(Math.max(0.01, 1 - e * e));
+    const omega = 0.012 / Math.pow(a / (W * 0.08), 1.5);
+    celBodies.push({
+      a, b, e, omega, theta: (i * Math.PI * 2) / count,
+      pts: [], maxPts: 300,
+      mass: 1.0 + i * 0.5,
+      rSize: 2.5 + (i % 3) * 1.5
+    });
+  }
+  archState[idx] = { center: celCenter, t: 0 };
+}
+
+function step_archetype_celestial(idx) {
+  trailFade(0.05);
+  celRot += 0.001;
+  const cx = celCenter.x, cy = celCenter.y;
+  const palFunc = PALS_CSS[currentPal];
+
+  // Núcleo o Singularidad central
+  if (idx === 64) {
+    // Agujero Negro de Schwarzschild
+    const rs = W * 0.045;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rs * 1.5, 0, Math.PI * 2);
+    ctx.strokeStyle = palFunc(0.9);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Esfera de fotones y sombra del horizonte
+    ctx.beginPath();
+    ctx.arc(cx, cy, rs, 0, Math.PI * 2);
+    ctx.fillStyle = '#020204';
+    ctx.fill();
+    ctx.strokeStyle = palFunc(0.3);
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    // Foco gravitacional / Sol
+    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, W * 0.05);
+    grad.addColorStop(0, palFunc(0.95));
+    grad.addColorStop(0.4, palFunc(0.5));
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, W * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Órbitas y cuerpos
+  for (let i = 0; i < celBodies.length; i++) {
+    const b = celBodies[i];
+    b.theta += b.omega;
+    const r = (b.a * (1 - b.e * b.e)) / (1 + b.e * Math.cos(b.theta));
+    const px = cx + r * Math.cos(b.theta + celRot);
+    const py = cy + r * Math.sin(b.theta + celRot);
+
+    b.pts.push([px, py]);
+    if (b.pts.length > b.maxPts) b.pts.shift();
+
+    // Área barrida (Kepler II) para idx === 6
+    if (idx === 6 && i === 1 && b.pts.length > 10) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      const startP = b.pts[Math.max(0, b.pts.length - 25)];
+      ctx.lineTo(startP[0], startP[1]);
+      for (let k = b.pts.length - 24; k < b.pts.length; k++) {
+        ctx.lineTo(b.pts[k][0], b.pts[k][1]);
       }
-    },
-    resize: function(width, height) {
-      if (width && height) {
-        W = canvas.width = width;
-        H = canvas.height = height;
-      } else if (canvas && canvas.parentElement) {
-        const r = canvas.parentElement.getBoundingClientRect();
-        W = canvas.width = r.width | 0;
-        H = canvas.height = (r.height - 8) | 0;
+      ctx.closePath();
+      ctx.fillStyle = palFunc(0.25);
+      ctx.fill();
+    }
+
+    // Traza orbital
+    if (b.pts.length > 2) {
+      ctx.beginPath();
+      ctx.moveTo(b.pts[0][0], b.pts[0][1]);
+      for (let j = 1; j < b.pts.length; j++) {
+        ctx.lineTo(b.pts[j][0], b.pts[j][1]);
       }
-    },
-    init: function(idx) {
-      if (INITS[idx]) INITS[idx]();
-    },
-    step: function(idx) {
-      if (STEPS[idx]) STEPS[idx]();
-    },
-    setPalette: function(pal) {
-      currentPal = (pal % 4 + 4) % 4;
-    },
-    getPalette: function() {
-      return currentPal;
-    },
-    setChladniModes: function(m, n) {
-      if (typeof chM !== "undefined") chM = Math.max(1, Math.min(8, m));
-      if (typeof chN !== "undefined") chN = Math.max(1, Math.min(8, n));
-    },
-    getChladniModes: function() {
-      return { m: typeof chM !== "undefined" ? chM : 3, n: typeof chN !== "undefined" ? chN : 5 };
-    },
-    handlePointer: function(type, x, y, dx, dy, artIdx) {
-      mouseX = x; mouseY = y;
-      if (type === "down") {
-        isDrag = true; dragX = x; dragY = y; mouseDown = true;
-        if (artIdx === 5 && typeof tAgents !== "undefined") {
-          tAgents.push({x, y, angle: Math.random()*Math.PI*2, sp: 0, pts: []});
+      ctx.strokeStyle = palFunc((i / celBodies.length) * 0.7 + 0.2);
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+    }
+
+    // Cuerpo celeste
+    ctx.beginPath();
+    ctx.arc(px, py, b.rSize, 0, Math.PI * 2);
+    ctx.fillStyle = palFunc(0.85);
+    ctx.fill();
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 2. ARQUETIPO: ONDAS, INTERFERENCIA & CUÁNTICA ONDULATORIA (wave)
+// ───────────────────────────────────────────────────────────────────
+let waveRays = [], waveT = 0;
+function init_archetype_wave(idx) {
+  waveT = 0;
+  waveRays = [];
+  const count = (idx === 35) ? 12 : 28; // Solitones KdV o Armónicos D'Alembert
+  for (let i = 0; i < count; i++) {
+    waveRays.push({
+      amp: (H * 0.04) + (i % 5) * (H * 0.015),
+      freq: 0.008 + (i * 0.0025),
+      speed: 0.02 + (i % 3) * 0.015,
+      phase: (i * Math.PI) / count,
+      yBase: H * 0.15 + (i / count) * (H * 0.7)
+    });
+  }
+}
+
+function step_archetype_wave(idx) {
+  trailFade(0.06);
+  waveT += 0.025;
+  const palFunc = PALS_CSS[currentPal];
+
+  if (idx === 35) {
+    // Solitones KdV: Dos crestas solitarias que colisionan y pasan limpias
+    const c1 = 4.0, c2 = 1.5;
+    const xMid = W * 0.5;
+    const tCycle = (waveT * 40) % (W * 1.4) - (W * 0.7);
+
+    ctx.lineWidth = 2.0;
+    for (let layer = 0; layer < 5; layer++) {
+      ctx.beginPath();
+      const y0 = H * 0.5 + (layer - 2) * (H * 0.08);
+      for (let x = 0; x < W; x += 4) {
+        const xi1 = (x - xMid - tCycle * 1.5) * 0.025;
+        const xi2 = (x - xMid + tCycle * 0.8) * 0.035;
+        const s1 = 1 / Math.cosh(xi1);
+        const s2 = 1 / Math.cosh(xi2);
+        const eta = (H * 0.14) * (s1 * s1) + (H * 0.09) * (s2 * s2);
+        const y = y0 - eta * Math.cos(layer * 0.4);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = palFunc(0.3 + layer * 0.15);
+      ctx.stroke();
+    }
+  } else if (idx === 38) {
+    // Efecto Doppler: Fuente móvil emitiendo ondas circulares que se comprimen
+    const srcX = W * 0.3 + Math.sin(waveT * 0.5) * (W * 0.25);
+    const srcY = H * 0.5;
+    ctx.lineWidth = 1.5;
+    for (let r = 10; r < W * 0.65; r += 28) {
+      const age = (r + waveT * 35) % (W * 0.65);
+      const emitX = srcX - (age * 0.3); // Desplazamiento Doppler
+      ctx.beginPath();
+      ctx.arc(emitX, srcY, age, 0, Math.PI * 2);
+      ctx.strokeStyle = palFunc(Math.max(0.1, 1 - age / (W * 0.65)));
+      ctx.stroke();
+    }
+    // Fuente
+    ctx.beginPath();
+    ctx.arc(srcX, srcY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = palFunc(0.95);
+    ctx.fill();
+  } else {
+    // Ondas viajeras armónicas D'Alembert & De Broglie / Schrödinger
+    for (let i = 0; i < waveRays.length; i++) {
+      const w = waveRays[i];
+      ctx.beginPath();
+      const nPts = 120;
+      for (let j = 0; j <= nPts; j++) {
+        const x = (j / nPts) * W;
+        // Paquete de onda gaussiano si es cuántico (idx 65, 66)
+        let env = 1.0;
+        if (idx === 65 || idx === 66) {
+          const dx = (x - W * 0.5) / (W * 0.22);
+          env = Math.exp(-dx * dx);
         }
-        if (artIdx === 17 && typeof bzU !== "undefined" && bzU) {
-          const bx = x / 4 | 0, by = y / 4 | 0;
-          for (let ddy = -4; ddy < 5; ddy++) {
-            for (let ddx = -4; ddx < 5; ddx++) {
-              const idx = (by + ddy) * bzBW + (bx + ddx);
-              if (idx >= 0 && idx < bzU.length) { bzU[idx] = 0.5; bzV[idx] = 0.25; }
-            }
-          }
-        }
-      } else if (type === "move") {
-        if (artIdx === 4 && typeof chM !== "undefined") {
-          chM = Math.max(1, Math.min(8, Math.floor((x / W) * 8) + 1));
-          chN = Math.max(1, Math.min(8, Math.floor((y / H) * 8) + 1));
-        }
-        if (isDrag) {
-          if ((artIdx === 0 || artIdx === 6 || artIdx === 14) && typeof lRotZ !== "undefined") {
-            lRotZ += dx * 0.005; lRotX += dy * 0.005; if (typeof rRot !== "undefined") rRot += dx * 0.005;
-          }
-          if (artIdx === 20 && typeof rieRot !== "undefined") rieRot += dx * 0.005;
-          if (artIdx === 22 && typeof nsRot !== "undefined") nsRot += dx * 0.005;
-          if (artIdx === 23 && typeof ricciAngle !== "undefined") ricciAngle += dx * 0.005;
-        }
-      } else if (type === "up") {
-        isDrag = false; mouseDown = false;
+        const y = w.yBase + Math.sin(x * w.freq + waveT * w.speed + w.phase) * w.amp * env;
+        if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = palFunc((i / waveRays.length) * 0.8 + 0.15);
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 3. ARQUETIPO: LÍNEAS DE CAMPO & ELECTROMAGNETISMO (field)
+// ───────────────────────────────────────────────────────────────────
+let fieldParticles = [], fieldT = 0;
+function init_archetype_field(idx) {
+  fieldT = 0;
+  fieldParticles = [];
+  const N = 320;
+  for (let i = 0; i < N; i++) {
+    fieldParticles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: 0, vy: 0,
+      life: Math.random() * 200,
+      maxLife: 150 + Math.random() * 150
+    });
+  }
+}
+
+function step_archetype_field(idx) {
+  trailFade(0.05);
+  fieldT += 0.02;
+  const palFunc = PALS_CSS[currentPal];
+
+  // Polos de carga / imán
+  const q1 = { x: W * 0.35 + Math.cos(fieldT * 0.6) * (W * 0.08), y: H * 0.5, q: +1.0 };
+  const q2 = { x: W * 0.65 - Math.cos(fieldT * 0.6) * (W * 0.08), y: H * 0.5, q: -1.0 };
+
+  // Dibujar electrodos / cargas
+  ctx.beginPath();
+  ctx.arc(q1.x, q1.y, 7, 0, Math.PI * 2);
+  ctx.fillStyle = palFunc(0.95);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(q2.x, q2.y, 7, 0, Math.PI * 2);
+  ctx.fillStyle = palFunc(0.4);
+  ctx.fill();
+
+  // Partículas siguiendo líneas de fuerza E o espirales de Lorentz
+  ctx.lineWidth = 1.2;
+  for (let i = 0; i < fieldParticles.length; i++) {
+    const p = fieldParticles[i];
+    const dx1 = p.x - q1.x, dy1 = p.y - q1.y;
+    const d1 = Math.max(20, Math.hypot(dx1, dy1));
+    const dx2 = p.x - q2.x, dy2 = p.y - q2.y;
+    const d2 = Math.max(20, Math.hypot(dx2, dy2));
+
+    // Campo dipolar E
+    let ex = (q1.q * dx1) / (d1 * d1 * d1) + (q2.q * dx2) / (d2 * d2 * d2);
+    let ey = (q1.q * dy1) / (d1 * d1 * d1) + (q2.q * dy2) / (d2 * d2 * d2);
+
+    if (idx === 45) {
+      // Fuerza de Lorentz v x B (rotación perpendicular helicoidal)
+      const bx = -ey * 12000, by = ex * 12000;
+      ex = bx; ey = by;
+    } else {
+      ex *= 18000; ey *= 18000;
+    }
+
+    const norm = Math.hypot(ex, ey) || 1;
+    const sp = Math.min(6, Math.max(1.2, 400 / norm));
+    const nx = p.x + (ex / norm) * sp;
+    const ny = p.y + (ey / norm) * sp;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(nx, ny);
+    ctx.strokeStyle = palFunc((p.life / p.maxLife) * 0.7 + 0.2);
+    ctx.stroke();
+
+    p.x = nx; p.y = ny;
+    p.life++;
+    if (p.life > p.maxLife || p.x < 0 || p.x > W || p.y < 0 || p.y > H || d1 < 8 || d2 < 8) {
+      p.x = q1.x + (Math.random() - 0.5) * 30;
+      p.y = q1.y + (Math.random() - 0.5) * 30;
+      p.life = 0;
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 4. ARQUETIPO: DINÁMICA DE FLUIDOS & CONVECCIÓN (fluid)
+// ───────────────────────────────────────────────────────────────────
+let flParticles = [], flT = 0;
+function init_archetype_fluid(idx) {
+  flT = 0;
+  flParticles = [];
+  const N = 400;
+  for (let i = 0; i < N; i++) {
+    flParticles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: 2 + Math.random() * 2,
+      vy: 0,
+      size: 1.5 + Math.random() * 2.0
+    });
+  }
+}
+
+function step_archetype_fluid(idx) {
+  trailFade(0.06);
+  flT += 0.02;
+  const palFunc = PALS_CSS[currentPal];
+
+  if (idx === 21) {
+    // Venturi: Flujo acelerando en el cuello estrecho (Bernoulli)
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    // Dibujar paredes del tubo de Venturi
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.2);
+    ctx.bezierCurveTo(W * 0.35, H * 0.2, W * 0.45, H * 0.38, W * 0.5, H * 0.38);
+    ctx.bezierCurveTo(W * 0.55, H * 0.38, W * 0.65, H * 0.2, W, H * 0.2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.8);
+    ctx.bezierCurveTo(W * 0.35, H * 0.8, W * 0.45, H * 0.62, W * 0.5, H * 0.62);
+    ctx.bezierCurveTo(W * 0.55, H * 0.62, W * 0.65, H * 0.8, W, H * 0.8);
+    ctx.stroke();
+
+    for (let i = 0; i < flParticles.length; i++) {
+      const p = flParticles[i];
+      const normX = p.x / W;
+      // Perfil del tubo
+      const neckFactor = Math.exp(-Math.pow((normX - 0.5) / 0.15, 2));
+      const speed = 2.0 + neckFactor * 7.5; // Acelera en el cuello
+      const yHalfWidth = (H * 0.3) - neckFactor * (H * 0.18);
+      const yTarget = H * 0.5 + ((p.y - H * 0.5) * 0.98);
+
+      p.x += speed;
+      p.y += (yTarget - p.y) * 0.05;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = palFunc(0.2 + (speed / 9.5) * 0.75);
+      ctx.fill();
+
+      if (p.x > W) { p.x = 0; p.y = H * 0.25 + Math.random() * (H * 0.5); }
+    }
+  } else {
+    // Convección o Langevin Brownian Motion
+    for (let i = 0; i < flParticles.length; i++) {
+      const p = flParticles[i];
+      // Celdas de Rayleigh-Bénard: vórtices contrarrotantes
+      const u = Math.sin((p.x / W) * Math.PI * 4) * Math.cos((p.y / H) * Math.PI * 2);
+      const v = -Math.cos((p.x / W) * Math.PI * 4) * Math.sin((p.y / H) * Math.PI * 2);
+
+      p.x += u * 3.5;
+      p.y += v * 3.5;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = palFunc(0.3 + (Math.abs(u) + Math.abs(v)) * 0.45);
+      ctx.fill();
+
+      if (p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+        p.x = Math.random() * W; p.y = Math.random() * H;
       }
     }
-  };
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 5. ARQUETIPO: TERMODINÁMICA & ESTADÍSTICA (thermo)
+// ───────────────────────────────────────────────────────────────────
+let thParticles = [], thT = 0;
+function init_archetype_thermo(idx) {
+  thT = 0;
+  thParticles = [];
+  const N = 120;
+  for (let i = 0; i < N; i++) {
+    thParticles.push({
+      x: W * 0.2 + Math.random() * (W * 0.6),
+      y: H * 0.2 + Math.random() * (H * 0.5),
+      vx: (Math.random() - 0.5) * 5,
+      vy: (Math.random() - 0.5) * 5,
+      r: 2.5
+    });
+  }
+}
+
+function step_archetype_thermo(idx) {
+  trailFade(0.06);
+  thT += 0.02;
+  const palFunc = PALS_CSS[currentPal];
+
+  if (idx === 32) {
+    // Ciclo de Carnot: Diagrama P-V animado con 4 etapas isotérmicas/adiabáticas
+    const cx = W * 0.2, cy = H * 0.8;
+    const axW = W * 0.6, axH = H * 0.55;
+
+    // Ejes P y V
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - axH); ctx.lineTo(cx, cy); ctx.lineTo(cx + axW, cy);
+    ctx.stroke();
+
+    // 4 vértices del ciclo
+    const pA = [cx + axW * 0.2, cy - axH * 0.85];
+    const pB = [cx + axW * 0.55, cy - axH * 0.65];
+    const pC = [cx + axW * 0.85, cy - axH * 0.25];
+    const pD = [cx + axW * 0.45, cy - axH * 0.35];
+
+    ctx.beginPath();
+    ctx.moveTo(pA[0], pA[1]);
+    ctx.quadraticCurveTo(cx + axW * 0.35, cy - axH * 0.78, pB[0], pB[1]); // Isoterma caliente
+    ctx.quadraticCurveTo(cx + axW * 0.72, cy - axH * 0.42, pC[0], pC[1]); // Adiabática expansión
+    ctx.quadraticCurveTo(cx + axW * 0.62, cy - axH * 0.28, pD[0], pD[1]); // Isoterma fría
+    ctx.quadraticCurveTo(cx + axW * 0.3, cy - axH * 0.55, pA[0], pA[1]); // Adiabática compresión
+    ctx.strokeStyle = palFunc(0.7);
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+    ctx.fillStyle = palFunc(0.12);
+    ctx.fill();
+
+    // Punto de estado circulando por el ciclo
+    const loopT = (thT * 0.8) % 4.0;
+    let stX = pA[0], stY = pA[1];
+    if (loopT < 1.0) {
+      const f = loopT;
+      stX = pA[0] + (pB[0] - pA[0]) * f;
+      stY = pA[1] + (pB[1] - pA[1]) * f;
+    } else if (loopT < 2.0) {
+      const f = loopT - 1.0;
+      stX = pB[0] + (pC[0] - pB[0]) * f;
+      stY = pB[1] + (pC[1] - pB[1]) * f;
+    } else if (loopT < 3.0) {
+      const f = loopT - 2.0;
+      stX = pC[0] + (pD[0] - pC[0]) * f;
+      stY = pC[1] + (pD[1] - pC[1]) * f;
+    } else {
+      const f = loopT - 3.0;
+      stX = pD[0] + (pA[0] - pD[0]) * f;
+      stY = pD[1] + (pA[1] - pD[1]) * f;
+    }
+
+    ctx.beginPath();
+    ctx.arc(stX, stY, 6, 0, Math.PI * 2);
+    ctx.fillStyle = palFunc(0.95);
+    ctx.fill();
+  } else {
+    // Gas cinético de Boltzmann / Maxwell
+    const bx = W * 0.2, by = H * 0.25, bw = W * 0.6, bh = H * 0.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.strokeRect(bx, by, bw, bh);
+
+    for (let i = 0; i < thParticles.length; i++) {
+      const p = thParticles[i];
+      p.x += p.vx; p.y += p.vy;
+
+      if (p.x < bx + p.r || p.x > bx + bw - p.r) p.vx *= -1;
+      if (p.y < by + p.r || p.y > by + bh - p.r) p.vy *= -1;
+
+      const sp = Math.hypot(p.vx, p.vy);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = palFunc(Math.min(1.0, sp / 5));
+      ctx.fill();
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 6. ARQUETIPO: ESPACIOTIEMPO, RELATIVIDAD & GEOMETRÍA RIEMANNIANA (spacetime)
+// ───────────────────────────────────────────────────────────────────
+let stRot = 0;
+function init_archetype_spacetime(idx) {
+  stRot = 0;
+}
+
+function step_archetype_spacetime(idx) {
+  trailFade(0.06);
+  stRot += 0.008;
+  const palFunc = PALS_CSS[currentPal];
+  const cx = W * 0.5, cy = H * 0.5;
+
+  if (idx === 55 || idx === 63) {
+    // Cono de luz de Minkowski y transformación hiperbólica
+    const beta = Math.sin(stRot * 0.5) * 0.65; // Velocidad v/c
+    const gamma = 1 / Math.sqrt(1 - beta * beta);
+
+    // Cono de luz (líneas a 45 grados)
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(cx - W * 0.4, cy - W * 0.4); ctx.lineTo(cx + W * 0.4, cy + W * 0.4);
+    ctx.moveTo(cx - W * 0.4, cy + W * 0.4); ctx.lineTo(cx + W * 0.4, cy - W * 0.4);
+    ctx.stroke();
+
+    // Malla espaciotemporal inclinada por Lorentz
+    const steps = 14;
+    ctx.lineWidth = 0.8;
+    for (let k = -steps; k <= steps; k++) {
+      const val = k * (W * 0.025);
+      // Líneas de simultaneidad ct'
+      ctx.beginPath();
+      const x1 = -W * 0.35, t1 = val + beta * x1;
+      const x2 = W * 0.35, t2 = val + beta * x2;
+      ctx.moveTo(cx + x1, cy - t1); ctx.lineTo(cx + x2, cy - t2);
+      ctx.strokeStyle = palFunc(0.35);
+      ctx.stroke();
+
+      // Líneas de posición x'
+      ctx.beginPath();
+      const tA = -H * 0.3, xA = val + beta * tA;
+      const tB = H * 0.3, xB = val + beta * tB;
+      ctx.moveTo(cx + xA, cy - tA); ctx.lineTo(cx + xB, cy - tB);
+      ctx.strokeStyle = palFunc(0.55);
+      ctx.stroke();
+    }
+  } else {
+    // Malla métrica riemanniana deformada por masa central (Einstein Field)
+    const gridSize = 18;
+    const spacing = Math.min(W, H) * 0.045;
+    ctx.lineWidth = 1.0;
+
+    for (let r = -gridSize; r <= gridSize; r++) {
+      ctx.beginPath();
+      for (let c = -gridSize; c <= gridSize; c++) {
+        const ox = c * spacing, oy = r * spacing;
+        const d = Math.hypot(ox, oy) + 20;
+        // Curvatura gravitacional g_00
+        const warp = 1.0 - (W * 0.12) / d;
+        const px = cx + ox * warp;
+        const py = cy + oy * warp;
+        if (c === -gridSize) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = palFunc(0.4);
+      ctx.stroke();
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 7. ARQUETIPO: FÍSICA CUÁNTICA & MODELO ESTÁNDAR (quantum)
+// ───────────────────────────────────────────────────────────────────
+let qAngle = 0;
+function init_archetype_quantum(idx) {
+  qAngle = 0;
+}
+
+function step_archetype_quantum(idx) {
+  trailFade(0.06);
+  qAngle += 0.02;
+  const palFunc = PALS_CSS[currentPal];
+  const cx = W * 0.5, cy = H * 0.5;
+
+  if (idx === 79) {
+    // Mecanismo de Higgs: Sombrero Mexicano con ruptura espontánea de simetría
+    ctx.lineWidth = 1.2;
+    for (let ring = 1; ring <= 10; ring++) {
+      const phi = (ring / 10) * 1.8;
+      // Potencial V = -mu^2 phi^2 + lambda phi^4
+      const V = -1.2 * phi * phi + 0.45 * Math.pow(phi, 4);
+      const r = ring * (W * 0.038);
+      const yOffset = V * (H * 0.18);
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + yOffset, r, r * 0.45, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = palFunc(0.2 + (ring / 10) * 0.65);
+      ctx.stroke();
+    }
+
+    // Partícula del bosón rodando en el valle mínimo (VEV)
+    const vevR = 6.8 * (W * 0.038);
+    const vevY = (-1.2 * Math.pow(6.8/10*1.8, 2) + 0.45 * Math.pow(6.8/10*1.8, 4)) * (H * 0.18);
+    const bx = cx + Math.cos(qAngle) * vevR;
+    const by = cy + vevY + Math.sin(qAngle) * (vevR * 0.45);
+
+    ctx.beginPath();
+    ctx.arc(bx, by, 7, 0, Math.PI * 2);
+    ctx.fillStyle = palFunc(0.95);
+    ctx.fill();
+  } else {
+    // Modelo Estándar & Cuantos de Planck: Mandala de calibre SU(3)xSU(2)xU(1)
+    const sectors = 12;
+    for (let s = 0; s < sectors; s++) {
+      const a = (s * Math.PI * 2) / sectors + qAngle * 0.3;
+      const r = W * 0.28;
+      const px = cx + Math.cos(a) * r;
+      const py = cy + Math.sin(a) * r;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.strokeStyle = palFunc(0.3);
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      // Nódulo de partícula
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, Math.PI * 2);
+      ctx.fillStyle = palFunc(0.5 + (s % 3) * 0.22);
+      ctx.fill();
+    }
+
+    // Anillos concéntricos de gauge
+    [0.12, 0.2, 0.28, 0.36].forEach((f, k) => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, W * f, 0, Math.PI * 2);
+      ctx.strokeStyle = palFunc(0.3 + k * 0.2);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 8. ARQUETIPO: AUTÓMATAS, COMPUTACIÓN & LÓGICA (automata)
+// ───────────────────────────────────────────────────────────────────
+let autoHistory = [], autoCols = 80, autoRows = 90;
+function init_archetype_automata(idx) {
+  autoHistory = [];
+  autoCols = 80;
+  // Inicializar fila inicial con una sola semilla viva en el centro
+  const firstRow = new Uint8Array(autoCols);
+  firstRow[autoCols >> 1] = 1;
+  autoHistory.push(firstRow);
+  for (let r = 1; r < autoRows; r++) {
+    const prev = autoHistory[r - 1];
+    const next = new Uint8Array(autoCols);
+    for (let c = 0; c < autoCols; c++) {
+      const left = c > 0 ? prev[c - 1] : 0;
+      const self = prev[c];
+      const right = c < autoCols - 1 ? prev[c + 1] : 0;
+      const pattern = (left << 2) | (self << 1) | right;
+      // Regla 110: 01101110 en binario = 110
+      next[c] = (110 & (1 << pattern)) ? 1 : 0;
+    }
+    autoHistory.push(next);
+  }
+}
+
+function step_archetype_automata(idx) {
+  trailFade(0.08);
+  const palFunc = PALS_CSS[currentPal];
+  const cellW = W / autoCols;
+  const cellH = H / autoRows;
+
+  // Actualizar una nueva fila al final y descartar la primera
+  const lastRow = autoHistory[autoHistory.length - 1];
+  const newRow = new Uint8Array(autoCols);
+  for (let c = 0; c < autoCols; c++) {
+    const left = c > 0 ? lastRow[c - 1] : 0;
+    const self = lastRow[c];
+    const right = c < autoCols - 1 ? lastRow[c + 1] : 0;
+    const pattern = (left << 2) | (self << 1) | right;
+    newRow[c] = (110 & (1 << pattern)) ? 1 : 0;
+  }
+  autoHistory.shift();
+  autoHistory.push(newRow);
+
+  // Renderizar la cascada de autómatas
+  for (let r = 0; r < autoHistory.length; r++) {
+    const row = autoHistory[r];
+    for (let c = 0; c < autoCols; c++) {
+      if (row[c]) {
+        ctx.fillStyle = palFunc(0.25 + (r / autoHistory.length) * 0.7);
+        ctx.fillRect(c * cellW, r * cellH, cellW - 0.5, cellH - 0.5);
+      }
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 9. ARQUETIPO: GEOMETRÍA CLÁSICA, ÓPTICA & ARMONÍA (geometry)
+// ───────────────────────────────────────────────────────────────────
+let geoAngle = 0;
+function init_archetype_geometry(idx) {
+  geoAngle = 0;
+}
+
+function step_archetype_geometry(idx) {
+  trailFade(0.06);
+  geoAngle += 0.015;
+  const palFunc = PALS_CSS[currentPal];
+  const cx = W * 0.5, cy = H * 0.5;
+
+  if (idx === 0) {
+    // Teorema de Pitágoras: Triángulo rectángulo y cuadrados animados
+    const a = W * 0.15;
+    const b = W * 0.20;
+    const x0 = cx - a * 0.5, y0 = cy + b * 0.5;
+
+    ctx.lineWidth = 2.0;
+    // Cuadrado cateto a
+    ctx.strokeStyle = palFunc(0.4);
+    ctx.strokeRect(x0, y0, a, a);
+    ctx.fillStyle = palFunc(0.15);
+    ctx.fillRect(x0, y0, a, a);
+
+    // Cuadrado cateto b
+    ctx.strokeStyle = palFunc(0.6);
+    ctx.strokeRect(x0 - b, y0 - b, b, b);
+    ctx.fillStyle = palFunc(0.2);
+    ctx.fillRect(x0 - b, y0 - b, b, b);
+
+    // Cuadrado hipotenusa c
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0 + a, y0);
+    ctx.lineTo(x0, y0 - b);
+    ctx.closePath();
+    ctx.strokeStyle = palFunc(0.95);
+    ctx.stroke();
+  } else if (idx === 3) {
+    // Espiral Áurea de Fibonacci
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    const turns = 6;
+    for (let a = 0; a < Math.PI * 2 * turns; a += 0.05) {
+      const r = 4.0 * Math.exp(0.306 * a) * 0.12;
+      const px = cx + Math.cos(a + geoAngle) * r;
+      const py = cy + Math.sin(a + geoAngle) * r;
+      if (a === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.strokeStyle = palFunc(0.85);
+    ctx.stroke();
+  } else if (idx === 20) {
+    // Identidad de Euler e^{i pi} + 1 = 0: Fasor complejo rotando hacia -1
+    const rUnit = W * 0.28;
+    // Círculo unidad
+    ctx.beginPath();
+    ctx.arc(cx, cy, rUnit, 0, Math.PI * 2);
+    ctx.strokeStyle = palFunc(0.4);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Ejes real e imaginario
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(cx - rUnit * 1.3, cy); ctx.lineTo(cx + rUnit * 1.3, cy);
+    ctx.moveTo(cx, cy - rUnit * 1.3); ctx.lineTo(cx, cy + rUnit * 1.3);
+    ctx.stroke();
+
+    // Fasor rotando
+    const theta = Math.PI - Math.abs(Math.sin(geoAngle * 0.8) * Math.PI);
+    const fx = cx + Math.cos(theta) * rUnit;
+    const fy = cy - Math.sin(theta) * rUnit;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy); ctx.lineTo(fx, fy);
+    ctx.strokeStyle = palFunc(0.95);
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(fx, fy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = palFunc(0.95);
+    ctx.fill();
+  } else {
+    // Armónicos esféricos / Geometría Sagrada Multiaxial
+    const count = 8;
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < count; i++) {
+      const a = (i * Math.PI) / count + geoAngle * 0.5;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, W * 0.32, H * 0.12, a, 0, Math.PI * 2);
+      ctx.strokeStyle = palFunc(0.2 + (i / count) * 0.7);
+      ctx.stroke();
+    }
+  }
+}
+
+// ───────────────────────────────────────────────────────────────────
+// 10. ARQUETIPO: TEORÍA DE NÚMEROS & FRONTERAS DIOFÁNTICAS (number)
+// ───────────────────────────────────────────────────────────────────
+let numT = 0;
+function init_archetype_number(idx) {
+  numT = 0;
+}
+
+function step_archetype_number(idx) {
+  trailFade(0.06);
+  numT += 0.02;
+  const palFunc = PALS_CSS[currentPal];
+  const cx = W * 0.5, cy = H * 0.5;
+
+  // Curva elíptica de Fermat / Beal: y^2 = x^3 + a x + b
+  const aParam = -2.5 + Math.sin(numT * 0.6) * 1.2;
+  const bParam = 2.0;
+  const sc = W * 0.055;
+
+  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = palFunc(0.85);
+
+  // Ejes
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1.0;
+  ctx.beginPath();
+  ctx.moveTo(cx - W * 0.4, cy); ctx.lineTo(cx + W * 0.4, cy);
+  ctx.moveTo(cx, cy - H * 0.4); ctx.lineTo(cx, cy + H * 0.4);
+  ctx.stroke();
+
+  // Curva y = +sqrt(x^3 + ax + b) e y = -sqrt(...)
+  ctx.strokeStyle = palFunc(0.85);
+  ctx.lineWidth = 2.0;
+  for (let sign of [1, -1]) {
+    ctx.beginPath();
+    let started = false;
+    for (let px = -5.0; px <= 6.0; px += 0.05) {
+      const rhs = px * px * px + aParam * px + bParam;
+      if (rhs >= 0) {
+        const py = sign * Math.sqrt(rhs);
+        const scrX = cx + px * sc;
+        const scrY = cy - py * sc;
+        if (!started) { ctx.moveTo(scrX, scrY); started = true; }
+        else ctx.lineTo(scrX, scrY);
+      } else {
+        started = false;
+      }
+    }
+    ctx.stroke();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAPEO CANÓNICO DE LAS 100 OBRAS DEL COSMOS (0..99)
+// ═══════════════════════════════════════════════════════════════════
+
+// Mapeo a los 25 motores clásicos altamente refinados
+const CLASSIC_MAP = {
+  86: { init: init01, step: step01 }, // 087: Lorenz
+  59: { init: init02, step: step02 }, // 060: Von Mises
+  95: { init: init03, step: step03 }, // 096: Yoshida
+  54: { init: init04, step: step04 }, // 055: Clifford
+  26: { init: init05, step: step05 }, // 027: Chladni
+  84: { init: init06, step: step06 }, // 085: Turing Morphogenesis
+  87: { init: init07, step: step07 }, // 088: Rössler
+  57: { init: init08, step: step08 }, // 058: Apolonio
+  89: { init: init09, step: step09 }, // 090: Mandelbrot / Julia
+  94: { init: init10, step: step10 }, // 095: Langton Ant
+  24: { init: init11, step: step11 }, // 025: Euler Beam
+  90: { init: init12, step: step12 }, // 091: Kuramoto
+  68: { init: init13, step: step13 }, // 069: Heisenberg
+  92: { init: init14, step: step14 }, // 093: Black-Scholes
+  69: { init: init15, step: step15 }, // 070: Dirac
+  70: { init: init16, step: step16 }, // 071: Hopf Fibration
+  85: { init: init17, step: step17 }, // 086: Belousov-Zhabotinsky
+  88: { init: init18, step: step18 }, // 089: Feigenbaum
+  82: { init: init19, step: step19 }, // 083: Shannon Entropy
+  83: { init: init19, step: step19 }, // 084: Shannon Capacity
+  30: { init: init20, step: step20 }, // 031: Fourier
+  50: { init: init21, step: step21 }, // 051: Riemann Zeta
+  52: { init: init22, step: step22 }, // 053: Stefan-Boltzmann
+  39: { init: init23, step: step23 }, // 040: Navier-Stokes
+  97: { init: init24, step: step24 }  // 098: Ricci Flow (Perelman)
+};
+
+// Asignación de los 75 restantes a sus respectivos arquetipos
+const ARCHETYPE_GROUPS = {
+  celestial: [4, 5, 6, 7, 13, 14, 15, 16, 64, 71, 72],
+  wave: [22, 23, 35, 38, 65, 66, 75],
+  field: [25, 33, 34, 40, 41, 42, 43, 44, 45],
+  fluid: [2, 21, 56, 91],
+  thermo: [17, 27, 31, 32, 46, 47, 48, 49, 53, 76, 77],
+  spacetime: [51, 55, 62, 63, 73],
+  quantum: [60, 61, 67, 74, 78, 79, 99],
+  automata: [80, 81, 93, 98],
+  geometry: [0, 1, 3, 8, 9, 11, 12, 18, 19, 20, 28, 29, 36, 37, 58],
+  number: [10, 96]
+};
+
+const INITS = new Array(100);
+const STEPS = new Array(100);
+
+for (let i = 0; i < 100; i++) {
+  if (CLASSIC_MAP[i]) {
+    INITS[i] = CLASSIC_MAP[i].init;
+    STEPS[i] = CLASSIC_MAP[i].step;
+  } else {
+    // Buscar en qué arquetipo reside
+    let group = 'geometry';
+    for (const [grpName, indices] of Object.entries(ARCHETYPE_GROUPS)) {
+      if (indices.includes(i)) {
+        group = grpName;
+        break;
+      }
+    }
+
+    switch(group) {
+      case 'celestial':
+        INITS[i] = () => init_archetype_celestial(i);
+        STEPS[i] = () => step_archetype_celestial(i);
+        break;
+      case 'wave':
+        INITS[i] = () => init_archetype_wave(i);
+        STEPS[i] = () => step_archetype_wave(i);
+        break;
+      case 'field':
+        INITS[i] = () => init_archetype_field(i);
+        STEPS[i] = () => step_archetype_field(i);
+        break;
+      case 'fluid':
+        INITS[i] = () => init_archetype_fluid(i);
+        STEPS[i] = () => step_archetype_fluid(i);
+        break;
+      case 'thermo':
+        INITS[i] = () => init_archetype_thermo(i);
+        STEPS[i] = () => step_archetype_thermo(i);
+        break;
+      case 'spacetime':
+        INITS[i] = () => init_archetype_spacetime(i);
+        STEPS[i] = () => step_archetype_spacetime(i);
+        break;
+      case 'quantum':
+        INITS[i] = () => init_archetype_quantum(i);
+        STEPS[i] = () => step_archetype_quantum(i);
+        break;
+      case 'automata':
+        INITS[i] = () => init_archetype_automata(i);
+        STEPS[i] = () => step_archetype_automata(i);
+        break;
+      case 'number':
+        INITS[i] = () => init_archetype_number(i);
+        STEPS[i] = () => step_archetype_number(i);
+        break;
+      case 'geometry':
+      default:
+        INITS[i] = () => init_archetype_geometry(i);
+        STEPS[i] = () => step_archetype_geometry(i);
+        break;
+    }
+  }
+}
+
+// Fallback de catálogo maestro
+const MASTER_ARTWORKS = (typeof window !== "undefined" && window.ARTWORKS_100) 
+  ? window.ARTWORKS_100 
+  : (root.ARTWORKS_100 || []);
+
+// ═══════════════════════════════════════════════════════════════════
+// API PÚBLICA SOBERANA ATELIER MATH (100 OBRAS)
+// ═══════════════════════════════════════════════════════════════════
+root.AtelierMath = {
+  ARTWORKS: MASTER_ARTWORKS,
+  INITS: INITS,
+  STEPS: STEPS,
+  bindCanvas: function(c, width, height) {
+    canvas = c;
+    ctx = canvas.getContext("2d");
+    if (width && height) {
+      W = canvas.width = width;
+      H = canvas.height = height;
+    } else {
+      W = canvas.width;
+      H = canvas.height;
+    }
+  },
+  resize: function(width, height) {
+    if (width && height) {
+      W = canvas.width = width;
+      H = canvas.height = height;
+    } else if (canvas && canvas.parentElement) {
+      const r = canvas.parentElement.getBoundingClientRect();
+      W = canvas.width = r.width | 0;
+      H = canvas.height = (r.height - 8) | 0;
+    }
+  },
+  init: function(idx) {
+    if (INITS[idx]) INITS[idx]();
+  },
+  step: function(idx) {
+    if (STEPS[idx]) STEPS[idx]();
+  },
+  setPalette: function(pal) {
+    currentPal = (pal % 4 + 4) % 4;
+  },
+  getPalette: function() {
+    return currentPal;
+  },
+  setChladniModes: function(m, n) {
+    if (typeof chM !== "undefined") chM = Math.max(1, Math.min(8, m));
+    if (typeof chN !== "undefined") chN = Math.max(1, Math.min(8, n));
+  },
+  getChladniModes: function() {
+    return { m: typeof chM !== "undefined" ? chM : 3, n: typeof chN !== "undefined" ? chN : 5 };
+  },
+  handlePointer: function(type, x, y, dx, dy, artIdx) {
+    mouseX = x; mouseY = y;
+    if (type === "down") {
+      isDrag = true; dragX = x; dragY = y; mouseDown = true;
+      if (artIdx === 84 && typeof tAgents !== "undefined") {
+        tAgents.push({x, y, angle: Math.random()*Math.PI*2, sp: 0, pts: []});
+      }
+      if (artIdx === 85 && typeof bzU !== "undefined" && bzU) {
+        const bx = x / 4 | 0, by = y / 4 | 0;
+        for (let ddy = -4; ddy < 5; ddy++) {
+          for (let ddx = -4; ddx < 5; ddx++) {
+            const idx = (by + ddy) * bzBW + (bx + ddx);
+            if (idx >= 0 && idx < bzU.length) { bzU[idx] = 0.5; bzV[idx] = 0.25; }
+          }
+        }
+      }
+    } else if (type === "move") {
+      if (artIdx === 26 && typeof chM !== "undefined") {
+        chM = Math.max(1, Math.min(8, Math.floor((x / W) * 8) + 1));
+        chN = Math.max(1, Math.min(8, Math.floor((y / H) * 8) + 1));
+      }
+      if (isDrag) {
+        if ((artIdx === 86 || artIdx === 87 || artIdx === 68) && typeof lRotZ !== "undefined") {
+          lRotZ += dx * 0.005; lRotX += dy * 0.005; if (typeof rRot !== "undefined") rRot += dx * 0.005;
+        }
+        if (artIdx === 50 && typeof rieRot !== "undefined") rieRot += dx * 0.005;
+        if (artIdx === 39 && typeof nsRot !== "undefined") nsRot += dx * 0.005;
+        if (artIdx === 97 && typeof ricciAngle !== "undefined") ricciAngle += dx * 0.005;
+      }
+    } else if (type === "up") {
+      isDrag = false; mouseDown = false;
+    }
+  }
+};
 })(typeof window !== "undefined" ? window : global);

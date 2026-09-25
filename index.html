@@ -114,7 +114,7 @@
     <nav class="hidden lg:flex items-center gap-8 text-xs tracking-wider uppercase mono text-[#a1a1aa]">
       <a href="#dossier" class="hover:text-[#f4f1ea] transition">Manufactura</a>
       <a href="#coleccion" class="hover:text-[#f4f1ea] transition">Formatos</a>
-      <a href="#catalogo" class="hover:text-[#f4f1ea] transition">24 Obras</a>
+      <a href="#catalogo" class="hover:text-[#f4f1ea] transition">100 Obras</a>
       <a href="#manifiesto" class="hover:text-[#f4f1ea] transition">Garantía & Tiempos</a>
     </nav>
 
@@ -219,7 +219,7 @@
               <div class="flex items-center justify-center gap-2 mb-1">
                 <span id="hero-plaque-cat" class="text-[9px] mono uppercase tracking-widest text-[#a1a1aa]">PROBLEMA DEL MILENIO · 1859</span>
                 <span class="text-white/20">·</span>
-                <span id="hero-plaque-badge" class="text-[9px] mono text-[#dfc285]">OBRA 21 DE 24</span>
+                <span id="hero-plaque-badge" class="text-[9px] mono text-[#dfc285]">OBRA 051 DE 100</span>
               </div>
               <h3 id="hero-plaque-title" class="serif text-base md:text-xl text-[#f4f1ea] font-medium tracking-wide">
                 Los Ceros de Riemann
@@ -236,13 +236,16 @@
             </div>
 
             <!-- Selector rápido de obras maestras en muro -->
-            <div class="flex flex-wrap justify-center gap-1.5 max-w-xl">
-              <button onclick="setHeroArtwork(20, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-[#c5a059] text-[#c5a059] bg-[#c5a059]/10 transition" data-idx="20">21 · Riemann</button>
-              <button onclick="setHeroArtwork(0, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="0">01 · Lorenz</button>
-              <button onclick="setHeroArtwork(4, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="4">05 · Chladni</button>
-              <button onclick="setHeroArtwork(22, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="22">23 · Navier-Stokes</button>
-              <button onclick="setHeroArtwork(14, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="14">15 · Hopf</button>
-              <button onclick="setHeroArtwork(23, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="23">24 · Ricci</button>
+            <div class="flex flex-wrap items-center justify-center gap-1.5 max-w-xl">
+              <button onclick="cycleHeroArtwork(-1, event)" class="px-2.5 py-1 rounded-full text-[9px] mono border border-white/20 text-[#f4f1ea] hover:border-[#c5a059] hover:text-[#c5a059] transition cursor-pointer">← Anterior</button>
+              <button onclick="setHeroArtwork(0, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="0">001 · Pitágoras</button>
+              <button onclick="setHeroArtwork(20, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="20">021 · Euler</button>
+              <button onclick="setHeroArtwork(39, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="39">040 · Navier-Stokes</button>
+              <button onclick="setHeroArtwork(50, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-[#c5a059] text-[#c5a059] bg-[#c5a059]/10 transition" data-idx="50">051 · Riemann</button>
+              <button onclick="setHeroArtwork(61, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="61">062 · E=mc²</button>
+              <button onclick="setHeroArtwork(86, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="86">087 · Lorenz</button>
+              <button onclick="setHeroArtwork(97, event)" class="hero-selector-btn px-2.5 py-1 rounded-full text-[9px] mono border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition" data-idx="97">098 · Ricci</button>
+              <button onclick="cycleHeroArtwork(1, event)" class="px-2.5 py-1 rounded-full text-[9px] mono border border-white/20 text-[#f4f1ea] hover:border-[#c5a059] hover:text-[#c5a059] transition cursor-pointer">Siguiente →</button>
             </div>
           </div>
 
@@ -472,158 +475,52 @@
   </section>
 
   <!-- ========================================================================= -->
-  <!-- 5. CURADURÍA: LAS 24 LEYES DE LA CIENCIA                                  -->
+  <!-- 5. CURADURÍA: EL CANON DE LAS 100 LEYES DEL COSMOS                         -->
   <!-- ========================================================================= -->
   <section id="catalogo" class="py-24 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/[0.08]">
     
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
-      <div class="max-w-2xl space-y-3">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+      <div class="max-w-3xl space-y-3">
         <span class="text-xs mono uppercase tracking-[0.25em] text-[#c5a059] font-medium block">
-          03 · Catálogo Universal
+          03 · Catálogo Universal Completo
         </span>
         <h2 class="serif text-3xl md:text-5xl text-[#f4f1ea] font-normal">
-          Las 24 Leyes del Cosmos
+          El Canon de las 100 Leyes del Cosmos
         </h2>
         <p class="text-sm text-[#a1a1aa] font-light leading-relaxed">
-          Desde los 7 Problemas del Milenio hasta la teoría del caos y la cimática sonora. Cada ecuación ha sido calculada en silicio nativo y tipografiada con rigor matemático.
+          Las 100 ecuaciones, principios y teoremas que forjaron la civilización humana. Desde la geometría sagrada de la antigüedad hasta la mecánica cuántica, la relatividad general, el caos determinista y los 7 Problemas del Milenio.
         </p>
       </div>
 
-      <a href="shop.html" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[#c5a059]/40 hover:border-[#c5a059] text-[#c5a059] text-xs mono uppercase tracking-wider transition">
-        <span>Inspeccionar las 24 en Vitrina 3D</span>
-        <span>→</span>
-      </a>
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <span id="catalog-counter" class="text-xs mono text-[#c5a059]">Mostrando 100 obras</span>
+        <a href="shop.html" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[#c5a059]/40 hover:border-[#c5a059] text-[#c5a059] text-xs mono uppercase tracking-wider transition">
+          <span>Abrir Vitrina Boutique 3D</span>
+          <span>→</span>
+        </a>
+      </div>
     </div>
 
-    <!-- SELECCIÓN EDITORIAL DE OBRAS MAESTRAS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      <!-- Obra 21: Riemann -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 21</span>
-            <span>PROBLEMA DEL MILENIO · 1859</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">Los Ceros de Riemann</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            ζ(s) = ∑ n⁻ˢ = 0 ⇒ Re(s) = ½
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            La hipótesis más profunda de la matemática pura: el misterio de la distribución de todos los números primos a lo largo de la recta crítica.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(20)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=20" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
+    <!-- BARRA DE BÚSQUEDA Y FILTROS POR ÉPOCA -->
+    <div class="mb-10 space-y-4">
+      <div class="relative max-w-xl">
+        <input type="text" id="catalog-search" oninput="handleCatalogFilter()" placeholder="Buscar por título, autor, ecuación o concepto (ej. Pitágoras, Fourier, Maxwell, Caos...)" class="w-full bg-[#101014] border border-white/10 rounded-full px-5 py-3 text-xs mono text-[#f4f1ea] placeholder-[#71717a] focus:outline-none focus:border-[#c5a059] transition shadow-inner">
       </div>
 
-      <!-- Obra 01: Lorenz -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 01</span>
-            <span>TEORÍA DEL CAOS · 1963</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">El Vuelo de Lorenz</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            dx/dt = σ(y-x) · dy/dt = x(ρ-z)-y
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            El nacimiento del efecto mariposa en meteorología. Dos alas que jamás se cruzan, tejiendo una órbita infinita y aperiódica.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(0)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=0" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
+      <!-- Pestañas de Épocas Históricas -->
+      <div class="flex flex-wrap gap-2 text-[10px] mono">
+        <button onclick="setEpochFilter('all', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-[#c5a059] text-[#c5a059] bg-[#c5a059]/10 transition cursor-pointer" data-epoch="all">Todas (100)</button>
+        <button onclick="setEpochFilter('1', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition cursor-pointer" data-epoch="1">Época I: Antigüedad & Geometría (001–020)</button>
+        <button onclick="setEpochFilter('2', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition cursor-pointer" data-epoch="2">Época II: Ilustración & Ondas (021–040)</button>
+        <button onclick="setEpochFilter('3', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition cursor-pointer" data-epoch="3">Época III: Termodinámica & Campos (041–060)</button>
+        <button onclick="setEpochFilter('4', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition cursor-pointer" data-epoch="4">Época IV: Relatividad & Cuántica (061–080)</button>
+        <button onclick="setEpochFilter('5', event)" class="epoch-filter-btn px-4 py-1.5 rounded-full border border-white/10 text-[#a1a1aa] hover:border-white/25 hover:text-white transition cursor-pointer" data-epoch="5">Época V: Caos & Computación (081–100)</button>
       </div>
+    </div>
 
-      <!-- Obra 05: Chladni -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 05</span>
-            <span>CIMÁTICA NODAL · 1787</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">Los Cantos de Chladni</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            w(x,y) = sin(nπx)sin(mπy) - sin(mπx)sin(nπy) = 0
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            El violín acariciando una placa de latón: la vibración sonora expulsa la arena hacia las líneas de silencio, tejiendo mandalas exactos.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(4)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=4" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
-      </div>
-
-      <!-- Obra 23: Navier-Stokes -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 23</span>
-            <span>PROBLEMA DEL MILENIO · 1845</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">Vórtices de Navier-Stokes</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            ρ(∂u/∂t + u·∇u) = -∇p + μ∇²u + f
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            La turbulencia de los fluidos incompresibles: la frontera donde el orden laminar colapsa en vórtices auto-inducidos.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(22)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=22" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
-      </div>
-
-      <!-- Obra 15: Hopf -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 15</span>
-            <span>TOPOLOGÍA 4D · 1931</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">La Fibración de Hopf</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            π: S³ → S² (Fibras circulares entrelazadas)
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            La esfera de cuatro dimensiones proyectada en tres dimensiones: círculos perfectos que llenan el espacio sin cortarse jamás.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(14)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=14" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
-      </div>
-
-      <!-- Obra 24: Ricci -->
-      <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition">
-        <div>
-          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
-            <span>OBRA 24</span>
-            <span>PROBLEMA DEL MILENIO RESUELTO · 2002</span>
-          </div>
-          <h3 class="serif text-lg text-[#f4f1ea]">El Flujo de Ricci de Poincaré</h3>
-          <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059]">
-            ∂g_ij/∂t = -2 R_ij (Perelman)
-          </div>
-          <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            Grigori Perelman demostró que cualquier variedad tridimensional cerrada puede alisarse geométricamente hasta converger en una esfera.
-          </p>
-        </div>
-        <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
-          <button onclick="loadArtworkInHero(23)" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer"><span>Ver colgado en muro</span> <span>↑</span></button>
-          <a href="shop.html?art=23" class="text-[#a1a1aa] hover:text-white transition">Vitrina 3D →</a>
-        </div>
-      </div>
-
+    <!-- GRILLA DINÁMICA DE LAS 100 OBRAS -->
+    <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Inyectado dinámicamente vía JavaScript -->
     </div>
 
   </section>
@@ -723,7 +620,7 @@
           <span class="text-[10px] mono uppercase tracking-widest text-[#a1a1aa] block">Gravedad Cero (6DOF)</span>
           <h3 class="serif text-2xl text-[#f4f1ea]">Observatorio Cósmico</h3>
           <p class="text-xs text-[#a1a1aa] font-light leading-relaxed">
-            Vuelo orbital inercial libre entre las 24 leyes científicas vivas calculadas en silicio. Tu dispositivo aporta cómputo voluntario a la red mientras cazas capturas fotográficas en tiempo real.
+            Vuelo orbital inercial libre entre las 100 leyes del cosmos vivas calculadas en silicio. Tu dispositivo aporta cómputo voluntario a la red mientras cazas capturas fotográficas en tiempo real.
           </p>
         </div>
         <div class="text-xs mono uppercase tracking-wider text-[#f4f1ea] flex items-center gap-2">
@@ -777,17 +674,18 @@
     </div>
   </footer>
 
-  <!-- MOTOR MATEMÁTICO EN SILICIO NATIVO -->
+  <!-- MOTOR MATEMÁTICO & CATÁLOGO MAESTRO DE 100 OBRAS EN SILICIO NATIVO -->
+  <script src="js/artworks_catalog.js"></script>
   <script src="js/math_engines.js"></script>
 
   <!-- SCRIPT PARALAJE ESPACIAL 3D & LIENZO VIVO EN MURO DE TRAVERTINO (60 FPS NATIVO) -->
   <script>
     // 1. Estado y Control de Obras en el Muro de Travertino
-    let currentHeroArt = 20; // Obra 21 (Riemann por defecto)
+    let currentHeroArt = 50; // Obra 051 (Riemann por defecto en catálogo de 100)
     const urlArtParam = new URLSearchParams(window.location.search).get('art');
     if (urlArtParam !== null) {
       const parsedArt = parseInt(urlArtParam, 10);
-      if (!isNaN(parsedArt) && parsedArt >= 0 && parsedArt < 24) {
+      if (!isNaN(parsedArt) && parsedArt >= 0 && parsedArt < 100) {
         currentHeroArt = parsedArt;
       }
     }
@@ -812,11 +710,11 @@
         event.stopPropagation();
         event.preventDefault();
       }
-      currentHeroArt = ((idx % 24) + 24) % 24;
+      currentHeroArt = ((idx % 100) + 100) % 100;
       if (window.AtelierMath) {
         window.AtelierMath.bindCanvas(heroCanvas, 720, 1008);
         window.AtelierMath.init(currentHeroArt);
-        const art = window.AtelierMath.ARTWORKS[currentHeroArt];
+        const art = (window.ARTWORKS_100 && window.ARTWORKS_100[currentHeroArt]) || (window.AtelierMath.ARTWORKS && window.AtelierMath.ARTWORKS[currentHeroArt]);
         if (art) {
           const sheetTitle = document.getElementById('hero-sheet-title');
           const plaqueCat = document.getElementById('hero-plaque-cat');
@@ -827,14 +725,14 @@
 
           if (sheetTitle) sheetTitle.textContent = `ATELIER MATEMÁTICO · OBRA ${art.badge}`;
           if (plaqueCat) plaqueCat.textContent = art.cat;
-          if (plaqueBadge) plaqueBadge.textContent = `OBRA ${art.badge} DE 24`;
+          if (plaqueBadge) plaqueBadge.textContent = `OBRA ${art.badge} DE 100`;
           if (plaqueTitle) plaqueTitle.textContent = art.title;
-          if (plaqueEq) plaqueEq.textContent = art.eq ? art.eq.split('\n')[0] : '';
+          if (plaqueEq) plaqueEq.textContent = art.eqShort || (art.eq ? art.eq.split('\n')[0] : '');
           if (plaqueBtn) plaqueBtn.href = `shop.html?art=${currentHeroArt}`;
         }
       }
 
-      // Actualizar estado activo en los botones de selección
+      // Actualizar estado activo en los botones de selección rápida
       document.querySelectorAll('.hero-selector-btn').forEach(btn => {
         const bIdx = parseInt(btn.dataset.idx, 10);
         const isActive = bIdx === currentHeroArt;
@@ -859,12 +757,111 @@
       }
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // 2. Control y Renderizado del Catálogo de las 100 Obras
+    // ─────────────────────────────────────────────────────────────────
+    let currentEpochFilter = 'all';
+
+    function setEpochFilter(epoch, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      currentEpochFilter = epoch;
+      document.querySelectorAll('.epoch-filter-btn').forEach(btn => {
+        const isAct = btn.dataset.epoch === epoch;
+        btn.classList.toggle('border-[#c5a059]', isAct);
+        btn.classList.toggle('text-[#c5a059]', isAct);
+        btn.classList.toggle('bg-[#c5a059]/10', isAct);
+        btn.classList.toggle('border-white/10', !isAct);
+        btn.classList.toggle('text-[#a1a1aa]', !isAct);
+      });
+      handleCatalogFilter();
+    }
+
+    function handleCatalogFilter() {
+      const searchInput = document.getElementById('catalog-search');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      renderCatalogGrid(currentEpochFilter, query);
+    }
+
+    function renderCatalogGrid(epochFilter, query) {
+      const grid = document.getElementById('catalog-grid');
+      const counter = document.getElementById('catalog-counter');
+      if (!grid) return;
+
+      const catalog = window.ARTWORKS_100 || (window.AtelierMath && window.AtelierMath.ARTWORKS) || [];
+      const filtered = catalog.filter(art => {
+        // Filtro por época
+        if (epochFilter !== 'all' && String(art.epoch) !== String(epochFilter)) {
+          return false;
+        }
+        // Filtro por búsqueda de texto
+        if (query) {
+          const matchTitle = (art.title || '').toLowerCase().includes(query);
+          const matchAuthor = (art.author || '').toLowerCase().includes(query);
+          const matchEq = (art.eq || '').toLowerCase().includes(query) || (art.eqShort || '').toLowerCase().includes(query);
+          const matchCat = (art.cat || '').toLowerCase().includes(query);
+          const matchHist = (art.hist || '').toLowerCase().includes(query);
+          const matchBadge = (art.badge || '').toLowerCase().includes(query);
+          if (!matchTitle && !matchAuthor && !matchEq && !matchCat && !matchHist && !matchBadge) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (counter) {
+        counter.textContent = `Mostrando ${filtered.length} de 100 obras`;
+      }
+
+      grid.innerHTML = filtered.map(art => `
+        <div class="p-6 rounded-xl bg-[#101014] luxury-border flex flex-col justify-between space-y-4 hover:border-white/20 transition group">
+          <div>
+            <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-2">
+              <span class="text-[#c5a059] font-medium">OBRA ${art.badge}</span>
+              <span>${art.cat}</span>
+            </div>
+            <h3 class="serif text-lg text-[#f4f1ea] group-hover:text-[#dfc285] transition">${art.title}</h3>
+            <span class="text-[10px] mono text-[#a1a1aa] block mb-2">${art.author} (${art.year})</span>
+            <div class="my-2 p-2 bg-[#08080a] border border-white/5 rounded text-[11px] mono text-[#c5a059] overflow-x-auto whitespace-nowrap">
+              ${art.eqShort || (art.eq ? art.eq.split('\n')[0] : '')}
+            </div>
+            <p class="text-xs text-[#a1a1aa] font-light leading-relaxed line-clamp-3">
+              ${art.hist}
+            </p>
+          </div>
+          <div class="pt-4 border-t border-white/5 flex justify-between items-center text-xs mono">
+            <button onclick="loadArtworkInHero(${art.id})" class="text-[#c5a059] hover:text-[#dfc285] hover:underline flex items-center gap-1 cursor-pointer">
+              <span>Ver en muro</span> <span>↑</span>
+            </button>
+            <a href="shop.html?art=${art.id}" class="text-[#a1a1aa] hover:text-white transition flex items-center gap-1">
+              <span>Vitrina 3D</span> <span>→</span>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
     // Navegación accesible por teclado
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft') cycleHeroArtwork(-1);
       if (e.key === 'ArrowRight') cycleHeroArtwork(1);
     });
+
+    // Iniciar el motor y catálogo en cuanto cargue el DOM
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        initHeroMath();
+        renderCatalogGrid('all', '');
+      });
+    } else {
+      initHeroMath();
+      renderCatalogGrid('all', '');
+    }
+
+
 
     // Iniciar el motor en cuanto cargue el DOM
     if (document.readyState === 'loading') {

@@ -6,6 +6,7 @@
 <title>Rotonda Tectónica & Observatorio 3D — Atelier Matemático</title>
 <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
 <script src="js/three.min.js"></script>
+<script src="js/artworks_catalog.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -158,7 +159,7 @@
       </div>
     </div>
     <div class="bg-[#101014] px-3.5 py-1 rounded-full text-xs mono text-[#c5a059] border border-[#c5a059]/30">
-      24 Leyes en Silicio Nativo · Timonel F2
+      100 Leyes del Cosmos en Silicio Nativo · Timonel F2
     </div>
   </div>
 
@@ -182,11 +183,11 @@
         <span class="text-[#c5a059]">que el universo no puede olvidar."</span>
       </h1>
       <p class="text-xs md:text-sm text-[#a1a1aa] font-light leading-relaxed mb-6">
-        Veinticuatro leyes fundamentales de la física y la topología confinadas en silicio nativo. Desde esta cubierta de basalto, barre el cosmos a través del telescopio colimador o adéntrate en la órbita inercial de cada escultura matemática.
+        Cien leyes inmortales de la física, la geometría y la computación confinadas en silicio nativo. Desde esta cubierta de basalto, barre el cosmos a través del telescopio colimador o adéntrate en la órbita inercial de cada escultura matemática.
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-        <button onclick="enterCapsule(true)" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs px-6 py-3 rounded-full font-medium transition shadow-lg flex items-center gap-2 mono uppercase tracking-wider font-semibold">
+        <button onclick="enterCapsule(true)" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs px-6 py-3 rounded-full font-medium transition shadow-lg flex items-center gap-2 mono uppercase tracking-wider font-semibold cursor-pointer">
           <span>Entrar al Observatorio 3D →</span>
         </button>
         <a href="shop.html" class="bg-[#101014] hover:bg-white/10 text-[#f4f1ea] text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 luxury-border">
@@ -197,7 +198,7 @@
   </div>
 
   <div class="text-center text-[11px] mono text-[#71717a] max-w-xl mx-auto">
-    Matías Cortés Figueroa · Timonel Suite · 24 Leyes de la Física & Silicio Nativo
+    Matías Cortés Figueroa · Timonel Suite · 100 Leyes del Cosmos & Silicio Nativo
   </div>
 </div>
 
@@ -323,7 +324,7 @@
   <div class="fixed top-6 left-6 right-6 flex flex-wrap justify-between items-center gap-4 pointer-events-auto">
     <button onclick="exitShopMode()" class="bg-[#101014]/90 hover:bg-white/10 text-[#f4f1ea] text-xs px-4 py-2 rounded-full mono transition flex items-center gap-2 luxury-border shadow-2xl">
       <span>←</span>
-      <span>Volver a la Rotonda de 24 Ecuaciones</span>
+      <span>Volver a la Rotonda de las 100 Leyes</span>
     </button>
 
     <div class="bg-[#101014]/90 px-3 py-1.5 rounded-full luxury-border flex items-center gap-2 shadow-2xl">
@@ -397,7 +398,7 @@
   <div class="fixed bottom-6 left-6 right-6 md:right-auto md:max-w-2xl bg-[#101014]/90 backdrop-blur-xl rounded-xl p-3 luxury-border shadow-2xl pointer-events-auto space-y-2">
     <div class="flex justify-between items-center text-[11px] mono">
       <span class="text-[#f4f1ea] font-bold">Proyectar Textura en la Pieza:</span>
-      <span class="text-[#71717a] text-[10px]">24 Leyes de la Ciencia + Tus Fotos</span>
+      <span class="text-[#71717a] text-[10px]">100 Leyes del Cosmos + Tus Fotos</span>
     </div>
     <div id="texture-tray-carousel" class="flex gap-2.5 overflow-x-auto pb-1 pt-0.5">
       <!-- Generado dinámicamente -->
@@ -416,7 +417,7 @@
         <h3 class="serif text-lg font-bold text-[#f4f1ea]">Tu Carrete Fotográfico</h3>
         <p class="text-xs text-[#a1a1aa] mono">Instantes cazados en la rotonda 3D</p>
       </div>
-      <button onclick="toggleCameraRoll()" class="text-[#a1a1aa] hover:text-[#f4f1ea] text-lg mono p-1">✕</button>
+      <button onclick="toggleCameraRoll()" class="text-[#a1a1aa] hover:text-[#f4f1ea] text-lg mono p-1 cursor-pointer">✕</button>
     </div>
     <div class="bg-[#101014] p-3 rounded-lg mb-4 flex items-center justify-between text-xs mono text-[#dfc285] luxury-border">
       <span>Capacidad:</span>
@@ -424,7 +425,7 @@
     </div>
     <div id="roll-grid" class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto p-1">
       <div id="roll-empty-state" class="col-span-2 text-center py-12 text-[#71717a] text-xs mono">
-        Aún no has tomado fotografías.<br>Acércate a cualquiera de las 24 leyes y pulsa 'Capturar al Carrete'.
+        Aún no has tomado fotografías.<br>Acércate a cualquiera de las 100 leyes y pulsa 'Capturar al Carrete'.
       </div>
     </div>
   </div>
@@ -480,11 +481,11 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- JAVASCRIPT: ATLAS CÓSMICO DE 24 LEYES & HILOS DE TIMONEL                   -->
+<!-- JAVASCRIPT: ATLAS CÓSMICO DE 100 LEYES & HILOS DE TIMONEL                  -->
 <!-- ========================================================================= -->
 <script>
-// CATÁLOGO COMPLETO DE LAS 24 LEYES DE LA HUMANIDAD (BÓVEDA CELESTE VISIBLE · TIMONEL F2)
-const ARTWORKS_24 = [
+// CATÁLOGO COMPLETO DE LAS 100 LEYES DE LA HUMANIDAD (BÓVEDA CELESTE VISIBLE · TIMONEL F2)
+const ARTWORKS_24 = (typeof window !== 'undefined' && window.ARTWORKS_100 && window.ARTWORKS_100.length) ? window.ARTWORKS_100 : [
   // ── ANILLO I: HORIZONTE Y LEYES CLÁSICAS (R = 18m, φ ∈ [+0.12, +0.28] rad sobre el horizonte)
   { id: 0, badge:"01", title:"El Vuelo de Lorenz", sub:"Atractor Caótico Aperiodico", cat:"TEORÍA DEL CAOS · 1963",
     eq:"dx/dt=10(y-x)\ndy/dt=x(28-z)-y\ndz/dt=xy-(8/3)z", metric:"Lyapunov: λ₁ = +0.9056",
@@ -1017,7 +1018,7 @@ function createLivingMathematicalAstro(data, index) {
   astroGroup.add(pointLight);
 
   // 3. Sistema Matemático Físico Real de la Ley
-  const mathModel = buildBespokeAstroModel(data.id);
+  const mathModel = buildBespokeAstroModel(data.id, data);
   astroGroup.add(mathModel.group);
 
   scene.add(astroGroup);
@@ -1074,7 +1075,7 @@ const UNRESOLVED_FRONTIERS = {
   }
 };
 
-function buildBespokeAstroModel(id) {
+function buildBespokeAstroModel(id, data) {
   const group = new THREE.Group();
   let updater = null;
 
@@ -1889,6 +1890,74 @@ function buildBespokeAstroModel(id) {
       };
       break;
     }
+    default: {
+      // ── MODELO DE ARQUETIPO MATEMÁTICO 3D EN SILICIO (TIMONEL F2) ──
+      const arch = (data && data.archetype) || 'geometry';
+      const N = 450;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(N * 3);
+      const cols = new Float32Array(N * 3);
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+
+      // Color base según época
+      const epColor = data && data.epoch === 1 ? 0xc5a059 :
+                     (data && data.epoch === 2 ? 0x60a5fa :
+                     (data && data.epoch === 3 ? 0x34d399 :
+                     (data && data.epoch === 4 ? 0xa78bfa : 0xf43f5e)));
+      
+      const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+        size: 0.032,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9
+      }));
+      group.add(pts);
+
+      // Núcleo geométrico interior según arquetipo
+      let innerMesh;
+      if (arch.includes('orbit') || arch.includes('kepler') || arch.includes('celestial') || arch.includes('gravit')) {
+        innerMesh = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.02, 16, 48), new THREE.MeshBasicMaterial({ color: epColor, wireframe: true, transparent: true, opacity: 0.5 }));
+        const core = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffeedd }));
+        innerMesh.add(core);
+      } else if (arch.includes('wave') || arch.includes('dalembert') || arch.includes('harmonic')) {
+        innerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.8, 24, 8, true), new THREE.MeshBasicMaterial({ color: epColor, wireframe: true, transparent: true, opacity: 0.4 }));
+      } else {
+        innerMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 1), new THREE.MeshStandardMaterial({ color: epColor, wireframe: true, transparent: true, opacity: 0.45 }));
+      }
+      group.add(innerMesh);
+
+      let animT = ((id || 0) * 0.37);
+      updater = (dt, cycleT, phase, relaxFactor) => {
+        animT += dt * 0.8;
+        const entropy = 1.0 - relaxFactor;
+        const pArr = pts.geometry.attributes.position.array;
+        const cArr = pts.geometry.attributes.color.array;
+
+        for (let i = 0; i < N; i++) {
+          const u = (i / N) * Math.PI * 4 + animT;
+          const v = ((i % 25) / 25) * Math.PI * 2;
+          const rBase = 0.5 + Math.sin(u * 2 + animT) * 0.25;
+          const noise = (Math.sin(cycleT * 4 + i) * 0.35) * entropy;
+          const r = rBase * relaxFactor + noise;
+
+          pArr[i*3]     = r * Math.sin(v) * Math.cos(u);
+          pArr[i*3 + 1] = (i / N - 0.5) * 1.2 * relaxFactor + noise * 0.5;
+          pArr[i*3 + 2] = r * Math.cos(v);
+
+          // Color vivo
+          cArr[i*3]     = 0.7 + Math.sin(u) * 0.3;
+          cArr[i*3 + 1] = 0.6 + Math.cos(v) * 0.3;
+          cArr[i*3 + 2] = 0.85;
+        }
+
+        pts.geometry.attributes.position.needsUpdate = true;
+        pts.geometry.attributes.color.needsUpdate = true;
+        innerMesh.rotation.y += 0.008;
+        innerMesh.rotation.x += 0.004;
+      };
+      break;
+    }
   }
 
   return { group, update: updater };
@@ -2017,7 +2086,7 @@ function createDefaultMasterTexture() {
   cx.fillStyle = '#e8d2a6'; cx.font = 'bold 38px Cinzel'; cx.textAlign = 'center';
   cx.fillText("ATELIER MATEMÁTICO", 512, 480);
   cx.fillStyle = '#38bdf8'; cx.font = '22px Space Mono';
-  cx.fillText("ATLAS DE 24 LEYES · TIMONEL F2", 512, 530);
+  cx.fillText("ATLAS DE 100 LEYES · TIMONEL F2", 512, 530);
   activeProductTexture = new THREE.CanvasTexture(c);
 }
 
@@ -2743,7 +2812,7 @@ function enterCapsule(enableVoice) {
       foyer.classList.add('hidden');
     }, 800);
   }
-  speakNai("Bienvenido a la Rotonda de Timonel. 24 leyes de la ciencia se están desenredando en silicio.");
+  speakNai("Bienvenido a la Rotonda de Timonel. 100 leyes del cosmos se están desenredando en silicio.");
 }
 
 function toggleVoiceGuide() {

@@ -44,8 +44,9 @@
   /* Canvas 3D a pantalla completa */
   #webgl-canvas {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: block; z-index: 1; outline: none; cursor: crosshair;
+    display: block; z-index: 1; outline: none; cursor: grab;
   }
+  #webgl-canvas:active { cursor: grabbing; }
 
   /* Flash de cámara */
   #camera-flash {
@@ -136,7 +137,7 @@
     </button>
   </div>
   <div id="telescope-nav-hint" class="bg-[#0c0c10]/85 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 text-[10px] mono text-[#a1a1aa] tracking-wider pointer-events-none shadow-lg">
-    <span class="text-[#c5a059] font-medium">WASD / Flechas:</span> Caminar a barandilla &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Mouse:</span> Mirar bóveda &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar órbita
+    <span class="text-[#c5a059] font-medium">Arrastrar Mouse / Flechas ← →:</span> Mirar 360° &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">WASD:</span> Caminar &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Rueda:</span> Zoom &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar órbita
   </div>
 </div>
 

@@ -2093,6 +2093,11 @@ function warpToTargetAstro(idx) {
   if (swarmPill) swarmPill.classList.add('hidden');
   const reopenBtn = document.getElementById('btn-reopen-hud');
   if (reopenBtn) reopenBtn.classList.add('hidden');
+  const epochBar = document.getElementById('epoch-filter-bar');
+  if (epochBar) epochBar.classList.add('hidden');
+
+  // Silenciar presencia visual de NAI centinela en confinamiento para dar 100% protagonismo a la escultura
+  if (nai3D.group) nai3D.group.visible = false;
 
   // Mostrar tarjeta de telemetría de la ley
   const hudCard = document.getElementById('orbital-hud-card');
@@ -2138,8 +2143,13 @@ function returnToRotunda() {
   if (swarmPill) swarmPill.classList.remove('hidden');
   const reopenBtn = document.getElementById('btn-reopen-hud');
   if (reopenBtn) reopenBtn.classList.add('hidden');
+  const epochBar = document.getElementById('epoch-filter-bar');
+  if (epochBar) epochBar.classList.remove('hidden');
   const hudCard = document.getElementById('orbital-hud-card');
   if (hudCard) hudCard.classList.add('opacity-0', 'translate-x-8', 'pointer-events-none');
+
+  // Reactivar centinela NAI en la rotonda
+  if (nai3D.group) nai3D.group.visible = true;
 
   speakNai("Regresando a la plataforma de observación de la rotonda.");
 }
@@ -2200,11 +2210,32 @@ if (typeof window !== 'undefined') {
 }
 
 // ── CONTROLES INERCIALES DE TELESCOPIO & BURBUJA ESFÉRICA S² ──────
+let currentMouseScreenPos = { x: -1, y: -1 };
+
 function setup6DOFControls() {
   let lastPointer = null;
+  let isPointerDown = false;
+  let dragStartPos = { x: 0, y: 0 };
+  let hasDragged = false;
+
+  window.addEventListener('mousedown', (e) => {
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input')) return;
+    isPointerDown = true;
+    hasDragged = false;
+    dragStartPos = { x: e.clientX, y: e.clientY };
+    lastPointer = { x: e.clientX, y: e.clientY };
+  });
+
+  window.addEventListener('mouseup', () => {
+    isPointerDown = false;
+    lastPointer = null;
+  });
 
   window.addEventListener('mousemove', (e) => {
-    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, button, a, select, input')) {
+    currentMouseScreenPos.x = e.clientX;
+    currentMouseScreenPos.y = e.clientY;
+
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #telescope-collimator-hud, #confinement-return-bar, #epoch-filter-bar, button, a, select, input')) {
       lastPointer = null;
       return;
     }
@@ -2218,26 +2249,35 @@ function setup6DOFControls() {
     const dy = e.clientY - lastPointer.y;
     lastPointer = { x: e.clientX, y: e.clientY };
 
+    if (Math.hypot(e.clientX - dragStartPos.x, e.clientY - dragStartPos.y) > 4) {
+      hasDragged = true;
+    }
+
+    // Permite rotación tanto arrastrando (click-drag) como mediante barrido fluido
+    // Al mantener presionado (click-drag) se obtiene respuesta directa 1:1 para girar 360° sin barreras
+    const sensitivity = isPointerDown ? 0.0055 : 0.0035;
+
     if (isInShopMode) {
       targetProductRotation.y += dx * 0.01;
       targetProductRotation.x += dy * 0.01;
     } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-      // El usuario barre el cielo pasando el dedo por el trackpad / moviendo el mouse (cero clics sostenidos)
       userInertiaTimer = 0;
-      targetOrientation.yaw -= dx * 0.0035;
-      targetOrientation.pitch -= dy * 0.0035;
+      targetOrientation.yaw -= dx * sensitivity;
+      targetOrientation.pitch -= dy * sensitivity;
       targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch)); // Permite mirar el zócalo/barandilla y al cenit
     } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
-      // El observador se desplaza libremente en S² al mover el mouse
       userInertiaTimer = 0;
-      targetSphereTheta -= dx * 0.0045;
-      targetSpherePhi   -= dy * 0.0045;
+      targetSphereTheta -= dx * (isPointerDown ? 0.0065 : 0.0045);
+      targetSpherePhi   -= dy * (isPointerDown ? 0.0065 : 0.0045);
       targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
     }
   });
 
   window.addEventListener('mouseleave', () => {
+    isPointerDown = false;
     lastPointer = null;
+    currentMouseScreenPos.x = -1;
+    currentMouseScreenPos.y = -1;
   });
 
   // Soporte táctil fluido en trackpads y móviles
@@ -2253,12 +2293,12 @@ function setup6DOFControls() {
       lastPointer = { x: touch.clientX, y: touch.clientY };
 
       if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-        targetOrientation.yaw -= dx * 0.0035;
-        targetOrientation.pitch -= dy * 0.0035;
+        targetOrientation.yaw -= dx * 0.0045;
+        targetOrientation.pitch -= dy * 0.0045;
         targetOrientation.pitch = Math.max(-0.25, Math.min(1.50, targetOrientation.pitch));
       } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
-        targetSphereTheta -= dx * 0.0045;
-        targetSpherePhi   -= dy * 0.0045;
+        targetSphereTheta -= dx * 0.0055;
+        targetSpherePhi   -= dy * 0.0055;
         targetSpherePhi   = Math.max(0.08, Math.min(Math.PI - 0.08, targetSpherePhi));
       }
     }
@@ -2268,9 +2308,10 @@ function setup6DOFControls() {
     lastPointer = null;
   });
 
-  // Clic directo: si se está mirando una fórmula y se hace clic, entrar en ella
+  // Clic directo: si se está mirando una fórmula y se hace clic (sin haber arrastrado), entrar en ella
   window.addEventListener('click', (e) => {
-    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, button, a')) return;
+    if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, #epoch-filter-bar, button, a')) return;
+    if (hasDragged) return; // Si arrastró para rotar la cámara, no entrar por error
     if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
       warpToTargetAstro(collimatedAstroIndex);
     }
@@ -2366,7 +2407,25 @@ function animate() {
     });
 
   } else if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-    // 1. MODO ROTONDA: Desplazamiento libre por la plataforma hacia la barandilla
+    // 1. ROTACIÓN PANORÁMICA 360° POR TECLADO (Flechas Izq/Der o Q/E):
+    if (keysPressed['ArrowLeft'] || keysPressed['KeyQ']) {
+      targetOrientation.yaw += 0.032;
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowRight'] || keysPressed['KeyE']) {
+      targetOrientation.yaw -= 0.032;
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowUp'] || keysPressed['KeyR']) {
+      targetOrientation.pitch = Math.min(1.50, targetOrientation.pitch + 0.022);
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowDown'] || keysPressed['KeyF']) {
+      targetOrientation.pitch = Math.max(-0.25, targetOrientation.pitch - 0.022);
+      userInertiaTimer = 0;
+    }
+
+    // 2. DESPLAZAMIENTO POR LA PLATAFORMA CON TECLAS WASD:
     const forwardX = -Math.sin(orientation.yaw);
     const forwardZ = -Math.cos(orientation.yaw);
     const rightX = Math.cos(orientation.yaw);
@@ -2374,10 +2433,10 @@ function animate() {
 
     let moveX = 0;
     let moveZ = 0;
-    if (keysPressed['KeyW'] || keysPressed['ArrowUp']) { moveX += forwardX; moveZ += forwardZ; }
-    if (keysPressed['KeyS'] || keysPressed['ArrowDown']) { moveX -= forwardX; moveZ -= forwardZ; }
-    if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { moveX += rightX; moveZ += rightZ; }
-    if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) { moveX -= rightX; moveZ -= rightZ; }
+    if (keysPressed['KeyW']) { moveX += forwardX; moveZ += forwardZ; }
+    if (keysPressed['KeyS']) { moveX -= forwardX; moveZ -= forwardZ; }
+    if (keysPressed['KeyD']) { moveX += rightX; moveZ += rightZ; }
+    if (keysPressed['KeyA']) { moveX -= rightX; moveZ -= rightZ; }
 
     const moveLen = Math.hypot(moveX, moveZ);
     if (moveLen > 0.001) {
@@ -2396,6 +2455,18 @@ function animate() {
 
     platformObserverPos.lerp(targetPlatformPos, 0.12);
     camera.position.copy(platformObserverPos);
+
+    // 3. BARRIDO AUTOMÁTICO EN BORDES DE PANTALLA (EDGE PANNING):
+    if (currentMouseScreenPos.x >= 0 && typeof window !== 'undefined') {
+      const edgeMargin = Math.min(65, window.innerWidth * 0.06);
+      if (currentMouseScreenPos.x < edgeMargin) {
+        targetOrientation.yaw += 0.020 * (1.0 - currentMouseScreenPos.x / edgeMargin);
+        userInertiaTimer = 0;
+      } else if (currentMouseScreenPos.x > window.innerWidth - edgeMargin) {
+        targetOrientation.yaw -= 0.020 * (1.0 - (window.innerWidth - currentMouseScreenPos.x) / edgeMargin);
+        userInertiaTimer = 0;
+      }
+    }
 
     orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.18;
     orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.18;
@@ -2421,7 +2492,36 @@ function animate() {
     astros24.forEach(a => a.timonelRing.lookAt(camera.position));
 
   } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT && activeConfinementAstro) {
-    // 2. MODO BURBUJA S²: El observador se desplaza sobre la superficie esférica
+    // 2. MODO BURBUJA S²: Órbita libre con Mouse o Teclas (Flechas / WASD / QE):
+    if (keysPressed['ArrowLeft'] || keysPressed['KeyA'] || keysPressed['KeyQ']) {
+      targetSphereTheta += 0.035;
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowRight'] || keysPressed['KeyD'] || keysPressed['KeyE']) {
+      targetSphereTheta -= 0.035;
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowUp'] || keysPressed['KeyW'] || keysPressed['KeyR']) {
+      targetSpherePhi = Math.max(0.08, targetSpherePhi - 0.025);
+      userInertiaTimer = 0;
+    }
+    if (keysPressed['ArrowDown'] || keysPressed['KeyS'] || keysPressed['KeyF']) {
+      targetSpherePhi = Math.min(Math.PI - 0.08, targetSpherePhi + 0.025);
+      userInertiaTimer = 0;
+    }
+
+    // Barrido en bordes en modo confinamiento:
+    if (currentMouseScreenPos.x >= 0 && typeof window !== 'undefined') {
+      const edgeMargin = Math.min(65, window.innerWidth * 0.06);
+      if (currentMouseScreenPos.x < edgeMargin) {
+        targetSphereTheta += 0.022 * (1.0 - currentMouseScreenPos.x / edgeMargin);
+        userInertiaTimer = 0;
+      } else if (currentMouseScreenPos.x > window.innerWidth - edgeMargin) {
+        targetSphereTheta -= 0.022 * (1.0 - (window.innerWidth - currentMouseScreenPos.x) / edgeMargin);
+        userInertiaTimer = 0;
+      }
+    }
+
     sphereTheta  += (targetSphereTheta - sphereTheta) * 0.18;
     spherePhi    += (targetSpherePhi - spherePhi) * 0.18;
     sphereRadius += (targetSphereRadius - sphereRadius) * 0.15;

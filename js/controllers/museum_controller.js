@@ -1529,87 +1529,278 @@ function buildMinkowski3D(epColor) {
   };
 }
 
-// 9. Vórtice Turbulento de Navier-Stokes & Filamentos en Cascada (Vórtice de Burgers)
+// 9. Vórtice Turbulento de Navier-Stokes & Filamentos en Cascada (Vórtice de Burgers Real)
+// Solución analítica exacta de Navier-Stokes axisimétrico bajo estiramiento de vorticidad (ω·∇)u = ν∇²ω:
+// Inflow radial:       u_r = -a * r
+// Estiramiento axial:  u_y = 2 * a * y
+// Vorticidad azimutal: u_theta = (Gamma / (2*pi*r)) * (1 - exp(-r² / r₀²))
+// Núcleo de vorticidad: ω_y = (Gamma / (pi*r₀²)) * exp(-r² / r₀²)
 function buildNavierStokesVortex3D(epColor) {
   const group = new THREE.Group();
-  
-  // A. Doble embudo hiperbólico de baja presión central (Vórtice de Burgers)
-  const funnelGeo = createParametricSurface(24, 32, (uNorm, vNorm) => {
-    const z = (uNorm - 0.5) * 1.8;
-    const r = 0.16 + 0.65 * (z * z);
-    const th = vNorm * Math.PI * 2 + z * 3.2;
+
+  const aStrain = 0.45;
+  const r0Core = 0.25;
+  const gammaCirc = 3.8;
+  const r0Sq = r0Core * r0Core;
+
+  // Función analítica del campo de velocidades tridimensional de Burgers
+  function burgersVelocity(x, y, z) {
+    const r = Math.sqrt(x * x + z * z) + 1e-6;
+    const ur = -aStrain * r;
+    const utheta = (gammaCirc / (2.0 * Math.PI * r)) * (1.0 - Math.exp(-(r * r) / r0Sq));
+    const uy = 2.0 * aStrain * y;
+
+    const cosT = x / r;
+    const sinT = z / r;
+    const vx = ur * cosT - utheta * sinT;
+    const vz = ur * sinT + utheta * cosT;
+    return { vx, vy: uy, vz };
+  }
+
+  // A. Vaina Isóbara de Depresión Central (Criterio Q > 0 / Isosuperficie de Presión Barométrica)
+  // Superficie hiperbólica continua con Shader Fresnel y disipación exponencial en los bordes
+  const funnelGeo = createParametricSurface(36, 48, (uNorm, vNorm) => {
+    const y = (uNorm - 0.5) * 1.9;
+    const r = r0Core * Math.sqrt(1.0 + 2.6 * y * y);
+    const th = vNorm * Math.PI * 2;
     return {
       x: r * Math.cos(th),
-      y: z,
+      y: y,
       z: r * Math.sin(th)
     };
   });
-  const funnelMat = new THREE.MeshStandardMaterial({
-    color: epColor,
-    roughness: 0.22,
-    metalness: 0.85,
-    side: THREE.DoubleSide,
+
+  const funnelShaderMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uColorCore: { value: new THREE.Color(0x0284c7) },
+      uColorShear: { value: new THREE.Color(0x38bdf8) },
+      uColorGlow: { value: new THREE.Color(0xa5f3fc) }
+    },
+    vertexShader: `
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        vViewPosition = -mvPosition.xyz;
+        vWorldPosition = position;
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      uniform float uTime;
+      uniform vec3 uColorCore;
+      uniform vec3 uColorShear;
+      uniform vec3 uColorGlow;
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDir = normalize(vViewPosition);
+        float fresnel = pow(1.0 - abs(dot(normal, viewDir)), 2.2);
+
+        // Desvanecimiento orgánico en los extremos axiales para eliminar corte artificial de CAD
+        float yNorm = abs(vWorldPosition.y) / 0.95;
+        float edgeFade = smoothstep(1.0, 0.45, yNorm);
+
+        // Rizo de corte azimutal continuo
+        float angle = atan(vWorldPosition.z, vWorldPosition.x);
+        float swirl = sin(angle * 6.0 - vWorldPosition.y * 7.5 - uTime * 3.2);
+
+        vec3 baseColor = mix(uColorCore, uColorShear, clamp(swirl * 0.4 + 0.6, 0.0, 1.0));
+        vec3 finalColor = mix(baseColor, uColorGlow, fresnel * 0.8);
+        float alpha = (0.22 + 0.60 * fresnel) * edgeFade;
+
+        gl_FragColor = vec4(finalColor, alpha);
+      }
+    `,
     transparent: true,
-    opacity: 0.62,
-    emissive: epColor,
-    emissiveIntensity: 0.2
+    depthWrite: false,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending
   });
-  const funnelMesh = new THREE.Mesh(funnelGeo, funnelMat);
+  const funnelMesh = new THREE.Mesh(funnelGeo, funnelShaderMat);
   group.add(funnelMesh);
 
-  // B. Haz de 8 filamentos helicoidales de estiramiento de vorticidad ((ω·∇)u)
-  const streamPts = [];
+  // B. Filamento de Vorticidad Extrema en el Núcleo (ω_z máximo en r ≤ 0.06)
+  // Cordón axial luminoso en torsión helicoidal de alta energía
+  const corePts = [];
+  const numCorePts = 100;
+  for (let i = 0; i <= numCorePts; i++) {
+    const t = i / numCorePts;
+    const y = (t - 0.5) * 1.85;
+    const coreR = 0.038 * (1.0 + 0.25 * Math.sin(y * 10.0));
+    const coreTh = y * 14.0;
+    corePts.push(new THREE.Vector3(coreR * Math.cos(coreTh), y, coreR * Math.sin(coreTh)));
+  }
+  const coreCurve = new THREE.CatmullRomCurve3(corePts);
+  const coreGeo = new THREE.TubeGeometry(coreCurve, 80, 0.018, 8, false);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: 0x67e8f9,
+    transparent: true,
+    opacity: 0.88,
+    blending: THREE.AdditiveBlending
+  });
+  const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+  group.add(coreMesh);
+
+  // C. Haz de 8 Líneas de Corriente Integradas por Runge-Kutta 4 (RK4)
+  // Trazadas rigurosamente paso a paso sobre el campo u(x, y, z) sin saltos poligonales
+  const streamlinesGroup = new THREE.Group();
   const numHel = 8;
+  const lineSteps = 56;
+  const dtRK = 0.036;
+
   for (let h = 0; h < numHel; h++) {
     const phi0 = (h / numHel) * Math.PI * 2;
-    for (let i = 0; i <= 48; i++) {
-      const u = i / 48;
-      const z = (u - 0.5) * 1.9;
-      const r = 0.18 + 0.70 * (z * z);
-      const th = phi0 + z * 4.5;
-      streamPts.push(r * Math.cos(th), z, r * Math.sin(th));
-    }
-  }
-  const streamGeo = new THREE.BufferGeometry();
-  streamGeo.setAttribute('position', new THREE.Float32BufferAttribute(streamPts, 3));
-  const streamLines = new THREE.Line(streamGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 }));
-  group.add(streamLines);
+    const isTop = (h % 2 === 0);
+    let curX = 0.65 * Math.cos(phi0);
+    let curY = isTop ? 0.88 : -0.88;
+    let curZ = 0.65 * Math.sin(phi0);
+    const dir = isTop ? -1.0 : 1.0;
 
-  // C. Trazadores Lagrangianos en aceleración hacia el núcleo central (cascada de Kolmogorov)
-  const numP = 42;
-  const pPos = new Float32Array(numP * 3);
-  const pSpeeds = new Float32Array(numP);
-  const pAngles = new Float32Array(numP);
-  const pHeights = new Float32Array(numP);
-  for (let k = 0; k < numP; k++) {
-    pAngles[k] = Math.random() * Math.PI * 2;
-    pHeights[k] = (Math.random() - 0.5) * 1.6;
-    pSpeeds[k] = 1.8 + Math.random() * 2.2;
-    const r = 0.16 + 0.65 * (pHeights[k] * pHeights[k]);
-    pPos[k * 3]     = r * Math.cos(pAngles[k]);
-    pPos[k * 3 + 1] = pHeights[k];
-    pPos[k * 3 + 2] = r * Math.sin(pAngles[k]);
+    const pts = [new THREE.Vector3(curX, curY, curZ)];
+
+    for (let s = 0; s < lineSteps; s++) {
+      const k1 = burgersVelocity(curX, curY, curZ);
+      const k2 = burgersVelocity(
+        curX + 0.5 * dtRK * dir * k1.vx,
+        curY + 0.5 * dtRK * dir * k1.vy,
+        curZ + 0.5 * dtRK * dir * k1.vz
+      );
+      const k3 = burgersVelocity(
+        curX + 0.5 * dtRK * dir * k2.vx,
+        curY + 0.5 * dtRK * dir * k2.vy,
+        curZ + 0.5 * dtRK * dir * k2.vz
+      );
+      const k4 = burgersVelocity(
+        curX + dtRK * dir * k3.vx,
+        curY + dtRK * dir * k3.vy,
+        curZ + dtRK * dir * k3.vz
+      );
+
+      curX += (dtRK * dir / 6.0) * (k1.vx + 2.0 * k2.vx + 2.0 * k3.vx + k4.vx);
+      curY += (dtRK * dir / 6.0) * (k1.vy + 2.0 * k2.vy + 2.0 * k3.vy + k4.vy);
+      curZ += (dtRK * dir / 6.0) * (k1.vz + 2.0 * k2.vz + 2.0 * k3.vz + k4.vz);
+
+      pts.push(new THREE.Vector3(curX, curY, curZ));
+      if (Math.abs(curY) > 0.95 || Math.sqrt(curX * curX + curZ * curZ) < 0.03) break;
+    }
+
+    const sGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    const sMat = new THREE.LineBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.82,
+      blending: THREE.AdditiveBlending
+    });
+    const sLine = new THREE.Line(sGeo, sMat);
+    streamlinesGroup.add(sLine);
   }
+  group.add(streamlinesGroup);
+
+  // D. Anillos de Diagnóstico Isóbaro (PIV Láser de Laboratorio a y = -0.42, 0.0, +0.42)
+  const ringsGroup = new THREE.Group();
+  const ringYs = [-0.42, 0.0, 0.42];
+  ringYs.forEach(ry => {
+    const rIso = r0Core * Math.sqrt(1.0 + 2.6 * ry * ry);
+    const rGeo = new THREE.RingGeometry(rIso - 0.007, rIso + 0.007, 48);
+    const rMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.35,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    });
+    const rMesh = new THREE.Mesh(rGeo, rMat);
+    rMesh.position.y = ry;
+    rMesh.rotation.x = Math.PI / 2;
+    ringsGroup.add(rMesh);
+  });
+  group.add(ringsGroup);
+
+  // E. Trazadores Lagrangianos en Advección Viva Continua (72 partículas transportadas por u(x))
+  const numP = 72;
+  const pPositions = new Float32Array(numP * 3);
+  const pColors = new Float32Array(numP * 3);
+
+  function resetParticle(k) {
+    const isTop = Math.random() > 0.5;
+    const y = (isTop ? 1 : -1) * (0.65 + Math.random() * 0.25);
+    const r = 0.50 + Math.random() * 0.25;
+    const th = Math.random() * Math.PI * 2;
+    pPositions[k * 3]     = r * Math.cos(th);
+    pPositions[k * 3 + 1] = y;
+    pPositions[k * 3 + 2] = r * Math.sin(th);
+  }
+
+  for (let k = 0; k < numP; k++) {
+    resetParticle(k);
+    pColors[k * 3]     = 0.22;
+    pColors[k * 3 + 1] = 0.74;
+    pColors[k * 3 + 2] = 0.97;
+  }
+
   const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMesh = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.045, color: 0x67e8f9, transparent: true, opacity: 0.9 }));
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+  pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+
+  const pMat = new THREE.PointsMaterial({
+    size: 0.046,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const pMesh = new THREE.Points(pGeo, pMat);
   group.add(pMesh);
+
+  let totalSimTime = 0;
 
   return {
     group,
     update: (dt) => {
-      funnelMesh.rotation.y += 0.016;
-      streamLines.rotation.y += 0.024;
+      totalSimTime += dt;
+      funnelShaderMat.uniforms.uTime.value = totalSimTime;
+      
+      // Rotación global sutil de coherencia angular
+      streamlinesGroup.rotation.y += 0.015;
+      coreMesh.rotation.y += 0.035;
+
+      // Advección Lagrangiana exacta en tiempo real
+      const advectDt = Math.min(dt, 0.05) * 1.35;
       for (let k = 0; k < numP; k++) {
-        pAngles[k] += dt * pSpeeds[k] * (1.0 / (0.2 + Math.abs(pHeights[k])));
-        pHeights[k] += dt * 0.25;
-        if (pHeights[k] > 0.8) pHeights[k] = -0.8;
-        const r = 0.16 + 0.65 * (pHeights[k] * pHeights[k]);
-        pPos[k * 3]     = r * Math.cos(pAngles[k]);
-        pPos[k * 3 + 1] = pHeights[k];
-        pPos[k * 3 + 2] = r * Math.sin(pAngles[k]);
+        const px = pPositions[k * 3];
+        const py = pPositions[k * 3 + 1];
+        const pz = pPositions[k * 3 + 2];
+
+        const v = burgersVelocity(px, py, pz);
+
+        pPositions[k * 3]     += v.vx * advectDt;
+        pPositions[k * 3 + 1] += v.vy * advectDt;
+        pPositions[k * 3 + 2] += v.vz * advectDt;
+
+        const rCurr = Math.sqrt(pPositions[k * 3] * pPositions[k * 3] + pPositions[k * 3 + 2] * pPositions[k * 3 + 2]);
+        const yCurr = pPositions[k * 3 + 1];
+
+        // Mapeo termocromático de vorticidad: blanco incandescente en el cuello, cerúleo en periferia
+        const coreFactor = Math.min(1.0, 0.18 / (rCurr + 0.05));
+        pColors[k * 3]     = 0.22 + 0.78 * coreFactor;
+        pColors[k * 3 + 1] = 0.74 + 0.26 * coreFactor;
+        pColors[k * 3 + 2] = 1.0;
+
+        // Reciclado suave si la partícula sale del volumen de confinamiento
+        if (Math.abs(yCurr) > 0.94 || rCurr < 0.032 || rCurr > 0.88) {
+          resetParticle(k);
+        }
       }
       pGeo.attributes.position.needsUpdate = true;
+      pGeo.attributes.color.needsUpdate = true;
     }
   };
 }

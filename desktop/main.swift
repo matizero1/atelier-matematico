@@ -68,15 +68,22 @@ class NativeBridge: NSObject, WKScriptMessageHandler {
 
     private func handleSaveFile(dict: [String: Any]) {
         let callbackId = dict["callbackId"] as? Int ?? 0
-        guard let filename = dict["filename"] as? String,
+        guard let rawFilename = dict["filename"] as? String,
               let dataStr = dict["data"] as? String else {
             dispatchCallback(id: callbackId, data: ["success": false, "error": "Parámetros inválidos"])
             return
         }
 
+        // Sanitización estricta contra Path Traversal (NASA JPL & Timonel F2)
+        let safeName = URL(fileURLWithPath: rawFilename).lastPathComponent
+        guard !safeName.isEmpty, safeName != ".", safeName != ".." else {
+            dispatchCallback(id: callbackId, data: ["success": false, "error": "Nombre de archivo no válido"])
+            return
+        }
+
         let isBase64 = dict["isBase64"] as? Bool ?? false
         let downloadsUrl = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        let fileUrl = downloadsUrl.appendingPathComponent(filename)
+        let fileUrl = downloadsUrl.appendingPathComponent(safeName)
 
         do {
             if isBase64 {
@@ -96,9 +103,9 @@ class NativeBridge: NSObject, WKScriptMessageHandler {
             dispatchCallback(id: callbackId, data: [
                 "success": true,
                 "path": fileUrl.path,
-                "filename": filename
+                "filename": safeName
             ])
-            print("[NativeBridge] Archivo guardado con éxito: \(fileUrl.path)")
+            print("[NativeBridge] Archivo guardado con éxito y ruta sanitizada: \(fileUrl.path)")
         } catch {
             dispatchCallback(id: callbackId, data: [
                 "success": false,

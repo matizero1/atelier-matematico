@@ -32,8 +32,6 @@
     <string>Atelier Matemático © 2026 Nai Systems. Silicio Nativo Apple Silicon.</string>
     <key>NSAppTransportSecurity</key>
     <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
         <key>NSAllowsLocalNetworking</key>
         <true/>
     </dict>

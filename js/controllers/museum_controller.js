@@ -2130,49 +2130,198 @@ function buildDoppler3D(epColor) {
   };
 }
 
-// 10F. Onda de D'Alembert & Modos Armónicos de Cuerda Tensada
+// 10F. Onda de D'Alembert & Modos Armónicos de Cuerda Tensada (1747)
+// Solución analítica exacta: ∂²u/∂t² = c² ∂²u/∂x² con u(x, t) = f(x - ct) + g(x + ct)
+// Superposición de modos estacionarios y descomposición en ondas viajeras contrarias
 function buildWaveString3D(epColor) {
   const group = new THREE.Group();
-  
-  const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x64748b }));
-  post1.position.set(-0.85, 0, 0);
+
+  // A. Puentes de Resonancia y Tensión en Latón Torneado (Cejuelas de Melde)
+  const bridgeMat = new THREE.MeshStandardMaterial({
+    color: 0xc5a059,
+    metalness: 0.85,
+    roughness: 0.25
+  });
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    metalness: 0.6,
+    roughness: 0.5
+  });
+
+  // Base de resonancia de grafito/madera acústica
+  const baseGeo = new THREE.BoxGeometry(2.1, 0.08, 0.35);
+  const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+  baseMesh.position.y = -0.38;
+  group.add(baseMesh);
+
+  // Cejuelas de soporte en x = -0.92 y x = +0.92
+  const bridgeGeo = new THREE.BoxGeometry(0.08, 0.42, 0.22);
+  const post1 = new THREE.Mesh(bridgeGeo, bridgeMat);
+  post1.position.set(-0.92, -0.17, 0);
   group.add(post1);
-  const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x64748b }));
-  post2.position.set(0.85, 0, 0);
+
+  const post2 = new THREE.Mesh(bridgeGeo, bridgeMat);
+  post2.position.set(0.92, -0.17, 0);
   group.add(post2);
 
-  const N = 40;
+  // Clavijas micrométricas de tensión en los extremos
+  const pegGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.28, 12);
+  const peg1 = new THREE.Mesh(pegGeo, bridgeMat);
+  peg1.rotation.z = Math.PI / 2;
+  peg1.position.set(-0.98, 0.02, 0);
+  group.add(peg1);
+
+  const peg2 = new THREE.Mesh(pegGeo, bridgeMat);
+  peg2.rotation.z = Math.PI / 2;
+  peg2.position.set(0.98, 0.02, 0);
+  group.add(peg2);
+
+  // B. Cuerda Principal Tensada de Alta Energía (Modos Armónicos Vibrantes)
+  const N = 80;
+  const L = 1.84; // Distancia libre entre cejuelas
+  const xStart = -0.92;
   const pts = [];
   for (let i = 0; i <= N; i++) {
-    const x = (i / N - 0.5) * 1.7;
-    pts.push(new THREE.Vector3(x, 0, 0));
+    const x = xStart + (i / N) * L;
+    pts.push(new THREE.Vector3(x, 0.04, 0));
   }
   const waveGeo = new THREE.BufferGeometry().setFromPoints(pts);
-  const waveLine = new THREE.Line(waveGeo, new THREE.LineBasicMaterial({ color: epColor, linewidth: 3 }));
+  const waveLine = new THREE.Line(waveGeo, new THREE.LineBasicMaterial({
+    color: 0x67e8f9,
+    linewidth: 3,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending
+  }));
   group.add(waveLine);
 
-  const envGeo = createParametricSurface(16, 20, (uNorm, vNorm) => {
-    const x = (uNorm - 0.5) * 1.7;
-    const amp = 0.32 * Math.sin(uNorm * Math.PI);
-    const th = vNorm * Math.PI * 2;
-    return { x, y: amp * Math.cos(th), z: amp * Math.sin(th) };
+  // Segunda pasada para dar halo de resonancia luminosa a la cuerda
+  const haloLine = new THREE.Line(waveGeo, new THREE.LineBasicMaterial({
+    color: 0x0284c7,
+    linewidth: 5,
+    transparent: true,
+    opacity: 0.60,
+    blending: THREE.AdditiveBlending
+  }));
+  group.add(haloLine);
+
+  // C. Lámina Planar de Envolvente Resonante (Planar Wave Envelope - Cero volumen hinchado)
+  // Muestra el rango de oscilación transversal u_max(x) en el plano vertical XY con degradado suave
+  const envGeo = createParametricSurface(40, 6, (uNorm, vNorm) => {
+    const x = xStart + uNorm * L;
+    const maxAmp = 0.30 * Math.sin(uNorm * Math.PI);
+    const y = 0.04 + (vNorm * 2.0 - 1.0) * maxAmp;
+    const z = (vNorm - 0.5) * 0.012; // Espesor planar mínimo
+    return { x, y, z };
   });
-  const envMesh = new THREE.Mesh(envGeo, new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.25, side: THREE.DoubleSide }));
+  const envMat = new THREE.MeshBasicMaterial({
+    color: 0x0284c7,
+    transparent: true,
+    opacity: 0.18,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const envMesh = new THREE.Mesh(envGeo, envMat);
   group.add(envMesh);
+
+  // Líneas de cresta de envolvente superior e inferior
+  const envUpperPts = [];
+  const envLowerPts = [];
+  for (let i = 0; i <= N; i++) {
+    const x = xStart + (i / N) * L;
+    const maxAmp = 0.30 * Math.sin((i / N) * Math.PI);
+    envUpperPts.push(new THREE.Vector3(x, 0.04 + maxAmp, 0));
+    envLowerPts.push(new THREE.Vector3(x, 0.04 - maxAmp, 0));
+  }
+  const envUpperGeo = new THREE.BufferGeometry().setFromPoints(envUpperPts);
+  const envLowerGeo = new THREE.BufferGeometry().setFromPoints(envLowerPts);
+  const envLineMat = new THREE.LineBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.50,
+    blending: THREE.AdditiveBlending
+  });
+  group.add(new THREE.Line(envUpperGeo, envLineMat));
+  group.add(new THREE.Line(envLowerGeo, envLineMat));
+
+  // D. Nodos Estáticos de Resonancia Harmónica (Nodal Rings en x = 0 y x = ±L/3)
+  const nodeMarkers = [];
+  const nodeXs = [0.0, -L / 3, L / 3];
+  nodeXs.forEach(nx => {
+    const ringGeo = new THREE.RingGeometry(0.035, 0.05, 24);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xdfc285,
+      transparent: true,
+      opacity: 0.75,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.set(nx, 0.04, 0);
+    group.add(ring);
+    nodeMarkers.push(ring);
+  });
+
+  // E. Ondas Viajeras de D'Alembert f(x - ct) [Cian] y g(x + ct) [Oro]
+  // Dos pulsos solitarios que viajan en direcciones opuestas en planos desplazados z = ±0.06
+  const pulseN = 50;
+  const fPts = [];
+  const gPts = [];
+  for (let i = 0; i <= pulseN; i++) {
+    const x = xStart + (i / pulseN) * L;
+    fPts.push(new THREE.Vector3(x, -0.22, 0.06));
+    gPts.push(new THREE.Vector3(x, -0.22, -0.06));
+  }
+  const fGeo = new THREE.BufferGeometry().setFromPoints(fPts);
+  const gGeo = new THREE.BufferGeometry().setFromPoints(gPts);
+  const fLine = new THREE.Line(fGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending }));
+  const gLine = new THREE.Line(gGeo, new THREE.LineBasicMaterial({ color: 0xdfc285, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending }));
+  group.add(fLine);
+  group.add(gLine);
 
   let waveTime = 0;
   return {
     group,
     update: (dt) => {
-      group.rotation.y += 0.008;
-      waveTime += dt * 6.0;
+      group.rotation.y += 0.007;
+      waveTime += dt * 4.8;
+
+      // 1. Vibración de la cuerda principal: Superposición exacta de modos normales
       const positions = waveGeo.attributes.position.array;
       for (let i = 0; i <= N; i++) {
         const u = i / N;
-        const y = 0.32 * Math.sin(u * Math.PI) * Math.sin(waveTime) + 0.12 * Math.sin(u * 2 * Math.PI) * Math.cos(waveTime * 2);
-        positions[i * 3 + 1] = y;
+        const yMode1 = 0.24 * Math.sin(u * Math.PI) * Math.sin(waveTime);
+        const yMode2 = 0.09 * Math.sin(u * 2.0 * Math.PI) * Math.cos(waveTime * 2.0);
+        const yMode3 = 0.04 * Math.sin(u * 3.0 * Math.PI) * Math.sin(waveTime * 3.0);
+        positions[i * 3 + 1] = 0.04 + yMode1 + yMode2 + yMode3;
       }
       waveGeo.attributes.position.needsUpdate = true;
+
+      // 2. Pulsos de D'Alembert f(x - ct) hacia la derecha y g(x + ct) hacia la izquierda
+      const fPos = fGeo.attributes.position.array;
+      const gPos = gGeo.attributes.position.array;
+      const c = 0.85;
+      const centerF = xStart + ((waveTime * c) % L);
+      const centerG = (xStart + L) - ((waveTime * c) % L);
+      for (let i = 0; i <= pulseN; i++) {
+        const x = xStart + (i / pulseN) * L;
+        const dF = x - centerF;
+        const pulseF = 0.13 * Math.exp(-(dF * dF) / 0.025);
+        fPos[i * 3 + 1] = -0.22 + pulseF;
+
+        const dG = x - centerG;
+        const pulseG = 0.13 * Math.exp(-(dG * dG) / 0.025);
+        gPos[i * 3 + 1] = -0.22 + pulseG;
+      }
+      fGeo.attributes.position.needsUpdate = true;
+      gGeo.attributes.position.needsUpdate = true;
+
+      // 3. Pulsación armónica de los anillos nodales
+      nodeMarkers.forEach((ring, idx) => {
+        const scale = 1.0 + 0.14 * Math.sin(waveTime * 2.0 + idx * 1.2);
+        ring.scale.set(scale, scale, 1.0);
+      });
     }
   };
 }
@@ -3814,7 +3963,7 @@ function updateTelescopeCollimation() {
   _collimationLookDir.set(0, 0, -1).applyQuaternion(camera.quaternion);
 
   let bestIdx = -1;
-  let bestDot = Math.cos(10 * Math.PI / 180); // Cono de 10 grados para apuntado astronómico preciso
+  let bestDot = Math.cos(15 * Math.PI / 180); // Cono de 15 grados para apuntado astronómico ágil y fluido
 
   for (let idx = 0; idx < astros24.length; idx++) {
     const a = astros24[idx];
@@ -4218,19 +4367,63 @@ function setup6DOFControls() {
     lastPointer = null;
   });
 
-  // Clic directo: si se está mirando una fórmula y se hace clic (sin haber arrastrado), entrar en ella
+  // Clic directo: si se está mirando una fórmula y se hace clic, o clic con raycaster en el cielo, entrar directo
   window.addEventListener('click', (e) => {
     if (e.target.closest('header, #foyer-screen, #orbital-hud-card, #btn-reopen-hud, #roll-drawer, #shop-bay-overlay, #confinement-return-bar, #epoch-filter-bar, #telescope-proximity-badge, #telescope-goto-modal, #btn-open-telescope-goto, button, a, #pointer-lock-badge')) return;
-    if (hasDragged) return; // Si arrastró para rotar la cámara, no entrar por error
+    
     if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
-      const distToScope = Math.hypot(camera.position.x, camera.position.z - 5.0);
-      if (distToScope < 3.8 && !document.pointerLockElement) {
-        openTelescopeGotoTerminal();
+      // 1. Si el puntero está bloqueado (mira activa), cualquier clic con fórmula colimada viaja inmediatamente
+      if (document.pointerLockElement) {
+        if (collimatedAstroIndex >= 0) {
+          warpToTargetAstro(collimatedAstroIndex);
+          return;
+        }
         return;
       }
-      if (collimatedAstroIndex >= 0) {
-        warpToTargetAstro(collimatedAstroIndex);
-      } else if (!document.pointerLockElement) {
+
+      // 2. Si no hubo arrastre prolongado:
+      if (!hasDragged) {
+        // A. Si hay fórmula colimada en el centro
+        if (collimatedAstroIndex >= 0) {
+          warpToTargetAstro(collimatedAstroIndex);
+          return;
+        }
+
+        // B. Raycaster 3D directo desde la posición del cursor en pantalla
+        const mouseRay = new THREE.Raycaster();
+        const mouseNDC = new THREE.Vector2(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        mouseRay.setFromCamera(mouseNDC, camera);
+
+        let hitAstro = null;
+        let minRayDist = Infinity;
+        for (let idx = 0; idx < astros24.length; idx++) {
+          const a = astros24[idx];
+          if (!a.group.visible) continue;
+          const sphere = new THREE.Sphere(a.worldPos, 2.4);
+          const hit = mouseRay.ray.intersectSphere(sphere, new THREE.Vector3());
+          if (hit) {
+            const d = camera.position.distanceTo(hit);
+            if (d < minRayDist) {
+              minRayDist = d;
+              hitAstro = a;
+            }
+          }
+        }
+        if (hitAstro) {
+          warpToTargetAstro(hitAstro.index);
+          return;
+        }
+
+        const distToScope = Math.hypot(camera.position.x, camera.position.z - 5.0);
+        if (distToScope < 3.8) {
+          openTelescopeGotoTerminal();
+          return;
+        }
+
+        // Si hizo clic en espacio vacío, activar mira 100%
         togglePointerLock();
       }
     }
@@ -4283,9 +4476,13 @@ function setup6DOFControls() {
       }
       return;
     }
-    if (e.code === 'Enter') {
+    // [E], [F] o [Enter]: Viajar directo a la fórmula colimada en la distancia sin pasar por el telescopio
+    if (e.code === 'KeyE' || e.code === 'KeyF' || e.code === 'Enter') {
+      if (e.target.closest('input, textarea, select')) return;
       if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE && collimatedAstroIndex >= 0) {
+        e.preventDefault();
         warpToTargetAstro(collimatedAstroIndex);
+        return;
       }
     }
   });

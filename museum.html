@@ -146,12 +146,14 @@
       <div class="serif text-sm text-[#f4f1ea] font-medium" id="collimator-title">Obra 01 · El Vuelo de Lorenz</div>
       <div class="text-[11px] text-[#a1a1aa] mono font-light" id="collimator-sub">Atractor Caótico Aperiodico · Distancia: 12.0m</div>
     </div>
-    <button id="btn-collimator-warp" onclick="warpToTargetAstro()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold px-4 py-2.5 rounded-xl mono uppercase tracking-wider transition shadow-md whitespace-nowrap">
-      Enfocar con Telescopio →
+    <button id="btn-collimator-warp" onclick="warpToTargetAstro()" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs font-semibold px-4 py-2.5 rounded-xl mono uppercase tracking-wider transition shadow-md whitespace-nowrap flex items-center gap-1.5">
+      <span>Viajar a la Fórmula</span>
+      <kbd class="bg-[#08080a]/30 px-1.5 py-0.5 rounded text-[10px] font-bold">[E]</kbd>
+      <span>→</span>
     </button>
   </div>
   <div id="telescope-nav-hint" class="bg-[#0c0c10]/85 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 text-[10px] mono text-[#a1a1aa] tracking-wider pointer-events-none shadow-lg">
-    <span class="text-[#c5a059] font-medium">[T]:</span> Consola GoTo &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">[ESPACIO]:</span> Mira 100% &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">WASD:</span> Caminar &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar
+    <span class="text-[#c5a059] font-medium">[E] o Clic:</span> Viajar a la Fórmula &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">[T]:</span> Consola GoTo &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">[ESPACIO]:</span> Mira 100% &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">WASD:</span> Caminar
   </div>
 </div>
 

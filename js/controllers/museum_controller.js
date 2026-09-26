@@ -1275,6 +1275,233 @@ function buildLorenz3D(epColor) {
   };
 }
 
+// 1B. Atractor Caótico de Rössler (Cinta Plegada Unilateral de Banda Única)
+// ẋ = -y - z, ẏ = x + a·y, ż = b + z·(x - c) con a=0.2, b=0.2, c=5.7
+function buildRossler3D(epColor) {
+  const group = new THREE.Group();
+
+  let rx = 0.5, ry = 0.5, rz = 0.5;
+  const a = 0.2, b = 0.2, c = 5.7;
+  const dt = 0.024;
+
+  for (let i = 0; i < 200; i++) {
+    const k1x = -ry - rz, k1y = rx + a * ry, k1z = b + rz * (rx - c);
+    rx += k1x * dt; ry += k1y * dt; rz += k1z * dt;
+  }
+
+  const pts = [];
+  const zVals = [];
+  for (let i = 0; i < 700; i++) {
+    pts.push(new THREE.Vector3(rx * 0.11, (rz - 4.0) * 0.11, ry * 0.11));
+    zVals.push(rz);
+
+    const k1x = -ry - rz, k1y = rx + a * ry, k1z = b + rz * (rx - c);
+    const x2 = rx + 0.5*dt*k1x, y2 = ry + 0.5*dt*k1y, z2 = rz + 0.5*dt*k1z;
+    const k2x = -y2 - z2, k2y = x2 + a*y2, k2z = b + z2*(x2 - c);
+    const x3 = rx + 0.5*dt*k2x, y3 = ry + 0.5*dt*k2y, z3 = rz + 0.5*dt*k2z;
+    const k3x = -y3 - z3, k3y = x3 + a*y3, k3z = b + z3*(x3 - c);
+    const x4 = rx + dt*k3x, y4 = ry + dt*k3y, z4 = rz + dt*k3z;
+    const k4x = -y4 - z4, k4y = x4 + a*y4, k4z = b + z4*(x4 - c);
+
+    rx += (dt / 6.0) * (k1x + 2*k2x + 2*k3x + k4x);
+    ry += (dt / 6.0) * (k1y + 2*k2y + 2*k3y + k4y);
+    rz += (dt / 6.0) * (k1z + 2*k2z + 2*k3z + k4z);
+  }
+
+  const positions = [];
+  const colors = [];
+  const indices = [];
+  const rw = 0.07;
+
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const nextP = pts[Math.min(i + 1, pts.length - 1)];
+    const tangent = new THREE.Vector3().subVectors(nextP, p).normalize();
+    if (tangent.lengthSq() < 0.0001) tangent.set(0, 1, 0);
+
+    const normal = new THREE.Vector3(0, 1, 0);
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    if (binormal.lengthSq() < 0.0001) binormal.set(1, 0, 0);
+
+    const off = binormal.multiplyScalar(rw);
+    positions.push(p.x + off.x, p.y + off.y, p.z + off.z);
+    positions.push(p.x - off.x, p.y - off.y, p.z - off.z);
+
+    const zNorm = Math.min(1.0, zVals[i] / 12.0);
+    const cR = 0.15 + 0.85 * zNorm;
+    const cG = 0.70 + 0.25 * zNorm;
+    const cB = 0.95 * (1.0 - zNorm);
+    colors.push(cR, cG, cB, cR, cG, cB);
+  }
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a0 = i * 2, a1 = a0 + 1;
+    const b0 = (i + 1) * 2, b1 = b0 + 1;
+    indices.push(a0, b0, a1);
+    indices.push(a1, b0, b1);
+  }
+
+  const ribbonGeo = new THREE.BufferGeometry();
+  ribbonGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  ribbonGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  ribbonGeo.setIndex(indices);
+  ribbonGeo.computeVertexNormals();
+
+  const ribbonMat = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.22,
+    metalness: 0.80,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.85
+  });
+  const ribbonMesh = new THREE.Mesh(ribbonGeo, ribbonMat);
+  group.add(ribbonMesh);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.x = 0.55;
+    }
+  };
+}
+
+// 1C. Sincronización Colectiva de Kuramoto (θ̇ᵢ = ωᵢ + (K/N) ∑ sin(θⱼ - θᵢ))
+function buildKuramoto3D(epColor) {
+  const group = new THREE.Group();
+
+  const ringGeo = new THREE.RingGeometry(0.70 - 0.015, 0.70 + 0.015, 48);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.35,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2;
+  group.add(ring);
+
+  const N = 32;
+  const phases = new Float32Array(N);
+  const natFreqs = new Float32Array(N);
+  const oscMeshes = [];
+
+  for (let i = 0; i < N; i++) {
+    phases[i] = (i / N) * Math.PI * 2;
+    natFreqs[i] = (Math.random() - 0.5) * 1.5;
+    const osc = new THREE.Mesh(
+      new THREE.SphereGeometry(0.04, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0x67e8f9 })
+    );
+    group.add(osc);
+    oscMeshes.push(osc);
+  }
+
+  const orderArrowGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0, 0)
+  ]);
+  const orderArrow = new THREE.Line(orderArrowGeo, new THREE.LineBasicMaterial({
+    color: 0xf59e0b,
+    linewidth: 3
+  }));
+  group.add(orderArrow);
+
+  let kuramotoTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      kuramotoTime += dt;
+
+      const K = 1.2 + 1.0 * Math.sin(kuramotoTime * 0.4);
+
+      let sumCos = 0, sumSin = 0;
+      for (let i = 0; i < N; i++) {
+        sumCos += Math.cos(phases[i]);
+        sumSin += Math.sin(phases[i]);
+      }
+      const rOrder = Math.hypot(sumCos, sumSin) / N;
+      const psi = Math.atan2(sumSin, sumCos);
+
+      for (let i = 0; i < N; i++) {
+        const dTheta = natFreqs[i] + K * rOrder * Math.sin(psi - phases[i]);
+        phases[i] += dTheta * dt * 2.5;
+
+        const x = 0.70 * Math.cos(phases[i]);
+        const z = 0.70 * Math.sin(phases[i]);
+        oscMeshes[i].position.set(x, 0, z);
+
+        const phaseDist = Math.abs(phases[i] - psi) % (Math.PI * 2);
+        oscMeshes[i].material.color.setHex(phaseDist < 0.4 ? 0xf59e0b : 0x38bdf8);
+      }
+
+      const arrPos = orderArrowGeo.attributes.position.array;
+      arrPos[3] = (0.70 * rOrder) * Math.cos(psi);
+      arrPos[4] = 0;
+      arrPos[5] = (0.70 * rOrder) * Math.sin(psi);
+      orderArrowGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 1D. Ecuación Estocástica de Langevin & Movimiento Browniano (m ẍ = -γ ẋ + ξ(t))
+function buildLangevin3D(epColor) {
+  const group = new THREE.Group();
+
+  const N = 240;
+  const pts = [new THREE.Vector3(0, 0, 0)];
+  let cur = new THREE.Vector3(0, 0, 0);
+  const step = 0.055;
+  for (let i = 1; i <= N; i++) {
+    cur.x += (Math.random() - 0.5) * step;
+    cur.y += (Math.random() - 0.5) * step;
+    cur.z += (Math.random() - 0.5) * step;
+    pts.push(cur.clone());
+  }
+  const pathGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const pathLine = new THREE.Line(pathGeo, new THREE.LineBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.85
+  }));
+  group.add(pathLine);
+
+  const partMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.065, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.2, metalness: 0.8 })
+  );
+  partMesh.position.copy(cur);
+  group.add(partMesh);
+
+  const diffGeo = new THREE.SphereGeometry(0.55, 20, 16);
+  const diffMat = new THREE.MeshBasicMaterial({
+    color: 0xa855f7,
+    transparent: true,
+    opacity: 0.15,
+    wireframe: true
+  });
+  const diffSphere = new THREE.Mesh(diffGeo, diffMat);
+  group.add(diffSphere);
+
+  let brownianT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      brownianT += dt * 3.0;
+      partMesh.position.x = cur.x + (Math.random() - 0.5) * 0.02;
+      partMesh.position.y = cur.y + (Math.random() - 0.5) * 0.02;
+      partMesh.position.z = cur.z + (Math.random() - 0.5) * 0.02;
+
+      const s = 1.0 + 0.15 * Math.sin(brownianT * 0.5);
+      diffSphere.scale.set(s, s, s);
+    }
+  };
+}
+
 // 2. Botella de Klein (Inmersión 3D Figura 8 con Auto-Intersección)
 function buildKlein3D(epColor) {
   const group = new THREE.Group();
@@ -3024,6 +3251,427 @@ function buildMaxwell3D(epColor) {
   };
 }
 
+// 16A. Primera Ecuación de Maxwell: Ley de Gauss Eléctrica (∇·E = ρ/ε₀)
+// Divergencia neta de campo electrostático saliente a través de una superficie gaussiana cerrada
+function buildGaussElectric3D(epColor) {
+  const group = new THREE.Group();
+
+  // 1. Carga puntual central positiva (Monopolo Eléctrico +Q)
+  const coreMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.95 });
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 24), coreMat);
+  group.add(core);
+
+  const coronaMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending });
+  const corona = new THREE.Mesh(new THREE.SphereGeometry(0.18, 20, 20), coronaMat);
+  group.add(corona);
+
+  // 2. Superficie Gaussiana Esférica Cerrada S (Radio R = 0.72)
+  const sphereGeo = new THREE.SphereGeometry(0.72, 24, 18);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.18,
+    roughness: 0.2,
+    metalness: 0.1,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const gaussSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  group.add(gaussSphere);
+
+  const sphereWire = new THREE.LineSegments(
+    new THREE.WireframeGeometry(sphereGeo),
+    new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.25 })
+  );
+  group.add(sphereWire);
+
+  // 3. Haces de Líneas de Campo Eléctrico Radiales Divergentes (E ∝ r̂ / r²)
+  const numRays = 18;
+  const rayLines = new THREE.Group();
+  const rayVectors = [];
+  for (let i = 0; i < numRays; i++) {
+    const phi = Math.acos(-1 + (2 * i) / numRays);
+    const theta = Math.sqrt(numRays * Math.PI) * phi;
+    const dir = new THREE.Vector3(
+      Math.sin(phi) * Math.cos(theta),
+      Math.cos(phi),
+      Math.sin(phi) * Math.sin(theta)
+    ).normalize();
+    rayVectors.push(dir);
+
+    const pts = [
+      dir.clone().multiplyScalar(0.14),
+      dir.clone().multiplyScalar(1.05)
+    ];
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({
+      color: 0x67e8f9,
+      transparent: true,
+      opacity: 0.75,
+      blending: THREE.AdditiveBlending
+    }));
+    rayLines.add(line);
+
+    // Pequeño vector normal dA en el cruce de la superficie gaussiana
+    const daPos = dir.clone().multiplyScalar(0.72);
+    const daTip = dir.clone().multiplyScalar(0.85);
+    const daGeo = new THREE.BufferGeometry().setFromPoints([daPos, daTip]);
+    const daLine = new THREE.Line(daGeo, new THREE.LineBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.95
+    }));
+    rayLines.add(daLine);
+  }
+  group.add(rayLines);
+
+  // 4. Trazadores de Flujo Eléctrico Radiales Continuos (Partículas de Campo E)
+  const numP = 36;
+  const pPositions = new Float32Array(numP * 3);
+  const pRads = new Float32Array(numP);
+  const pRayIdx = new Int32Array(numP);
+  for (let k = 0; k < numP; k++) {
+    pRayIdx[k] = k % numRays;
+    pRads[k] = 0.15 + Math.random() * 0.9;
+    const d = rayVectors[pRayIdx[k]];
+    pPositions[k * 3]     = d.x * pRads[k];
+    pPositions[k * 3 + 1] = d.y * pRads[k];
+    pPositions[k * 3 + 2] = d.z * pRads[k];
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+  const pMesh = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 0.045,
+    color: 0xfde047,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending
+  }));
+  group.add(pMesh);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.006;
+      corona.scale.setScalar(1.0 + 0.08 * Math.sin(performance.now() * 0.005));
+
+      const speed = dt * 0.65;
+      for (let k = 0; k < numP; k++) {
+        pRads[k] += speed;
+        if (pRads[k] > 1.05) pRads[k] = 0.15;
+        const d = rayVectors[pRayIdx[k]];
+        pPositions[k * 3]     = d.x * pRads[k];
+        pPositions[k * 3 + 1] = d.y * pRads[k];
+        pPositions[k * 3 + 2] = d.z * pRads[k];
+      }
+      pGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 16B. Segunda Ecuación de Maxwell: Ley de Gauss Magnética (∇·B = 0)
+// Inexistencia de monopolos magnéticos: líneas de campo cerradas continuas sin fuente ni sumidero
+function buildGaussMagnetic3D(epColor) {
+  const group = new THREE.Group();
+
+  // 1. Dipolo Magnético Físico Central (Imán Bipolar N/S)
+  const poleGeo = new THREE.CylinderGeometry(0.065, 0.065, 0.28, 16);
+  const northMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.8, roughness: 0.25 });
+  const north = new THREE.Mesh(poleGeo, northMat);
+  north.position.y = 0.14;
+  group.add(north);
+
+  const southMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.8, roughness: 0.25 });
+  const south = new THREE.Mesh(poleGeo, southMat);
+  south.position.y = -0.14;
+  group.add(south);
+
+  const bandGeo = new THREE.CylinderGeometry(0.072, 0.072, 0.04, 16);
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0xc5a059, metalness: 0.9, roughness: 0.2 });
+  group.add(new THREE.Mesh(bandGeo, bandMat));
+
+  // 2. Lazos Cerrados de Campo Magnético Dipolar B
+  const numLoops = 12;
+  const loopGroup = new THREE.Group();
+  for (let l = 0; l < numLoops; l++) {
+    const azim = (l / numLoops) * Math.PI * 2;
+    [0.45, 0.72, 1.05].forEach(rMax => {
+      const pts = [];
+      const N = 48;
+      for (let i = 0; i <= N; i++) {
+        const th = (i / N) * Math.PI;
+        const r = rMax * Math.sin(th) * Math.sin(th) + 0.05;
+        const y = r * Math.cos(th) * 1.25;
+        const distHoriz = r * Math.sin(th);
+        const x = distHoriz * Math.cos(azim);
+        const z = distHoriz * Math.sin(azim);
+        pts.push(new THREE.Vector3(x, y, z));
+      }
+      const loopGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      const loopLine = new THREE.Line(loopGeo, new THREE.LineBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending
+      }));
+      loopGroup.add(loopLine);
+    });
+  }
+  group.add(loopGroup);
+
+  // 3. Superficie Gaussiana de Prueba (Mostrando Flujo Neto Nulo ∯ B·dA = 0)
+  const testSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 18, 14),
+    new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.12, wireframe: true })
+  );
+  group.add(testSphere);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      loopGroup.rotation.y += 0.003;
+    }
+  };
+}
+
+// 16C. Tercera Ecuación de Maxwell: Ley de Inducción de Faraday (∇×E = -∂B/∂t)
+// Un campo magnético variable en el tiempo induce vórtices cerrados de campo eléctrico rotacional
+function buildFaradayMaxwell3D(epColor) {
+  const group = new THREE.Group();
+
+  // 1. Núcleo cilíndrico de Flujo Magnético Variable B_z(t)
+  const coreGeo = new THREE.CylinderGeometry(0.12, 0.12, 1.4, 20);
+  const coreMat = new THREE.MeshStandardMaterial({
+    color: 0x6366f1,
+    transparent: true,
+    opacity: 0.75,
+    emissive: 0x4f46e5,
+    emissiveIntensity: 0.8
+  });
+  const magCore = new THREE.Mesh(coreGeo, coreMat);
+  group.add(magCore);
+
+  const bLinesGroup = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const ang = (i / 6) * Math.PI * 2;
+    const bx = 0.07 * Math.cos(ang);
+    const bz = 0.07 * Math.sin(ang);
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(bx, -0.7, bz),
+      new THREE.Vector3(bx, 0.7, bz)
+    ]);
+    bLinesGroup.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x818cf8, linewidth: 2 })));
+  }
+  group.add(bLinesGroup);
+
+  // 2. Anillos Concéntricos de Campo Eléctrico Rotacional E_θ (Vórtices de Faraday)
+  const ringRadii = [0.32, 0.55, 0.80];
+  const eRingsGroup = new THREE.Group();
+  ringRadii.forEach(rad => {
+    const ringGeo = new THREE.RingGeometry(rad - 0.012, rad + 0.012, 48);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.70,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = Math.PI / 2;
+    eRingsGroup.add(ringMesh);
+  });
+  group.add(eRingsGroup);
+
+  // 3. Trazadores de Circulación Rotacional ∇×E
+  const numP = 36;
+  const pPos = new Float32Array(numP * 3);
+  const pAngles = new Float32Array(numP);
+  const pRadChoice = new Float32Array(numP);
+  for (let k = 0; k < numP; k++) {
+    pAngles[k] = Math.random() * Math.PI * 2;
+    pRadChoice[k] = ringRadii[k % ringRadii.length];
+    pPos[k * 3]     = pRadChoice[k] * Math.cos(pAngles[k]);
+    pPos[k * 3 + 1] = 0;
+    pPos[k * 3 + 2] = pRadChoice[k] * Math.sin(pAngles[k]);
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMesh = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 0.05,
+    color: 0xfde047,
+    transparent: true,
+    opacity: 0.95,
+    blending: THREE.AdditiveBlending
+  }));
+  group.add(pMesh);
+
+  let faradayTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      faradayTime += dt * 3.5;
+
+      const dBdt = -Math.sin(faradayTime);
+      magCore.material.emissiveIntensity = 0.5 + 0.5 * Math.abs(Math.cos(faradayTime));
+
+      const rotSpeed = dBdt * dt * 2.2;
+      for (let k = 0; k < numP; k++) {
+        pAngles[k] += rotSpeed * (0.6 / pRadChoice[k]);
+        pPos[k * 3]     = pRadChoice[k] * Math.cos(pAngles[k]);
+        pPos[k * 3 + 1] = 0;
+        pPos[k * 3 + 2] = pRadChoice[k] * Math.sin(pAngles[k]);
+      }
+      pGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 16D. Cuarta Ecuación de Maxwell: Ley de Ampère-Maxwell (∇×B = μ₀J + μ₀ε₀ ∂E/∂t)
+// La corriente de desplazamiento en el condensador genera campo magnético en el vacío
+function buildAmpereMaxwell3D(epColor) {
+  const group = new THREE.Group();
+
+  // 1. Placas circulares de condensador en z = -0.32 y z = +0.32
+  const plateGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.04, 32);
+  const plateMat = new THREE.MeshStandardMaterial({ color: 0xc5a059, metalness: 0.9, roughness: 0.2 });
+  const p1 = new THREE.Mesh(plateGeo, plateMat);
+  p1.rotation.x = Math.PI / 2;
+  p1.position.z = -0.32;
+  group.add(p1);
+
+  const p2 = new THREE.Mesh(plateGeo, plateMat);
+  p2.rotation.x = Math.PI / 2;
+  p2.position.z = 0.32;
+  group.add(p2);
+
+  const wireGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.6, 12);
+  const wireMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.8, roughness: 0.3 });
+  const w1 = new THREE.Mesh(wireGeo, wireMat);
+  w1.rotation.x = Math.PI / 2;
+  w1.position.z = -0.65;
+  group.add(w1);
+  const w2 = new THREE.Mesh(wireGeo, wireMat);
+  w2.rotation.x = Math.PI / 2;
+  w2.position.z = 0.65;
+  group.add(w2);
+
+  // 2. Líneas de Campo Eléctrico Variable E(t) en la brecha
+  const eFieldLines = new THREE.Group();
+  for (let r = 0.15; r <= 0.42; r += 0.12) {
+    for (let i = 0; i < 6; i++) {
+      const th = (i / 6) * Math.PI * 2;
+      const ex = r * Math.cos(th);
+      const ey = r * Math.sin(th);
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(ex, ey, -0.30),
+        new THREE.Vector3(ex, ey, 0.30)
+      ]);
+      eFieldLines.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.75
+      })));
+    }
+  }
+  group.add(eFieldLines);
+
+  // 3. Anillos de Campo Magnético Inducido B alrededor de la brecha
+  const bRings = new THREE.Group();
+  [0.25, 0.45, 0.68].forEach(rad => {
+    const ringGeo = new THREE.RingGeometry(rad - 0.01, rad + 0.01, 36);
+    const ringMesh = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+      color: 0x10b981,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.80,
+      blending: THREE.AdditiveBlending
+    }));
+    bRings.add(ringMesh);
+  });
+  group.add(bRings);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.006;
+      bRings.rotation.z += 0.025;
+    }
+  };
+}
+
+// 16E. Fuerza Electromagnética de Lorentz (F = q(E + v × B))
+// Espiral helicoidal de Larmor y precesión de ciclotrón bajo campo magnético
+function buildLorentzForce3D(epColor) {
+  const group = new THREE.Group();
+
+  const bField = new THREE.Group();
+  for (let ix = -0.6; ix <= 0.6; ix += 0.4) {
+    for (let iz = -0.6; iz <= 0.6; iz += 0.4) {
+      const geo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(ix, -0.85, iz),
+        new THREE.Vector3(ix, 0.85, iz)
+      ]);
+      bField.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: 0.35
+      })));
+    }
+  }
+  group.add(bField);
+
+  const helixPts = [];
+  const N = 120;
+  const rLarmor = 0.38;
+  const turns = 4.0;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const th = t * Math.PI * 2 * turns;
+    const y = (t - 0.5) * 1.5;
+    helixPts.push(new THREE.Vector3(rLarmor * Math.cos(th), y, rLarmor * Math.sin(th)));
+  }
+  const helixGeo = new THREE.BufferGeometry().setFromPoints(helixPts);
+  const helixLine = new THREE.Line(helixGeo, new THREE.LineBasicMaterial({
+    color: 0x38bdf8,
+    linewidth: 3,
+    transparent: true,
+    opacity: 0.75,
+    blending: THREE.AdditiveBlending
+  }));
+  group.add(helixLine);
+
+  const ionMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+  const ionMesh = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), ionMat);
+  group.add(ionMesh);
+
+  const fVectorGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)]);
+  const fVectorLine = new THREE.Line(fVectorGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 }));
+  group.add(fVectorLine);
+
+  let tLarmor = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      tLarmor += dt * 3.2;
+      const th = tLarmor;
+      const y = (Math.sin(tLarmor * 0.25) * 0.6);
+      const px = rLarmor * Math.cos(th);
+      const pz = rLarmor * Math.sin(th);
+      ionMesh.position.set(px, y, pz);
+
+      const fPos = fVectorGeo.attributes.position.array;
+      fPos[0] = px; fPos[1] = y; fPos[2] = pz;
+      fPos[3] = px - 0.22 * Math.cos(th);
+      fPos[4] = y;
+      fPos[5] = pz - 0.22 * Math.sin(th);
+      fVectorGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
 // 17. Membrana Vibrante de Chladni & Curvas Nodales
 function buildChladni3D(epColor) {
   const group = new THREE.Group();
@@ -3224,6 +3872,14 @@ const BESPOKE_3D_BUILDERS = {
   kepler: buildKepler3D,
   euler: buildEuler3D,
   maxwell: buildMaxwell3D,
+  gauss_electric: buildGaussElectric3D,
+  gauss_magnetic: buildGaussMagnetic3D,
+  faraday_maxwell: buildFaradayMaxwell3D,
+  ampere_maxwell: buildAmpereMaxwell3D,
+  lorentz_force: buildLorentzForce3D,
+  rossler: buildRossler3D,
+  kuramoto: buildKuramoto3D,
+  langevin: buildLangevin3D,
   chladni: buildChladni3D,
   snell: buildSnell3D,
   pythagoras: buildPythagoras3D,
@@ -3232,9 +3888,13 @@ const BESPOKE_3D_BUILDERS = {
 };
 
 const MANIFOLD_ARCHETYPE_MAP = {
-  // Caos & Sistemas Dinámicos
-  lorenz_attractor: "lorenz", rossler_attractor: "lorenz", logistic_feigenbaum: "lorenz",
-  kuramoto_sync: "lorenz", langevin_stochastic: "lorenz", hamilton_phase: "lorenz",
+  // Caos & Sistemas Dinámicos Fidedignos
+  lorenz_attractor: "lorenz",
+  rossler_attractor: "rossler",
+  logistic_feigenbaum: "lorenz",
+  kuramoto_sync: "kuramoto",
+  langevin_stochastic: "langevin",
+  hamilton_phase: "lorenz",
 
   // Topología & Complejidad
   ricci_flow: "ricci_flow",
@@ -3280,9 +3940,13 @@ const MANIFOLD_ARCHETYPE_MAP = {
   euler_beam: "euler_beam",
   calculus_fundamental: "calculus_riemann",
 
-  // Electromagnetismo
-  maxwell_gauss_e: "maxwell", maxwell_gauss_b: "maxwell", maxwell_faraday: "maxwell",
-  maxwell_ampere: "maxwell", lorentz_force: "maxwell", faraday_induction: "maxwell",
+  // Electromagnetismo Diferenciado y Riguroso
+  maxwell_gauss_e: "gauss_electric",
+  maxwell_gauss_b: "gauss_magnetic",
+  maxwell_faraday: "faraday_maxwell",
+  maxwell_ampere: "ampere_maxwell",
+  lorentz_force: "lorentz_force",
+  faraday_induction: "faraday_maxwell",
   coulomb_force: "coulomb_field",
   ohm_conduction: "coulomb_field",
 

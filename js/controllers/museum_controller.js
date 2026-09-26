@@ -1114,68 +1114,931 @@ function buildMinkowski3D(epColor) {
   };
 }
 
-// 9. Toro de Vorticidad de Navier-Stokes & Filamentos Helicoidales
-function buildNavierVortex3D(epColor) {
+// 9. Vórtice Turbulento de Navier-Stokes & Filamentos en Cascada (Vórtice de Burgers)
+function buildNavierStokesVortex3D(epColor) {
   const group = new THREE.Group();
-  const coreGeo = new THREE.TorusGeometry(0.72, 0.16, 16, 40);
-  const coreMat = new THREE.MeshStandardMaterial({
-    color: epColor,
-    roughness: 0.3,
-    metalness: 0.75,
-    transparent: true,
-    opacity: 0.85
+  
+  // A. Doble embudo hiperbólico de baja presión central (Vórtice de Burgers)
+  const funnelGeo = createParametricSurface(24, 32, (uNorm, vNorm) => {
+    const z = (uNorm - 0.5) * 1.8;
+    const r = 0.16 + 0.65 * (z * z);
+    const th = vNorm * Math.PI * 2 + z * 3.2;
+    return {
+      x: r * Math.cos(th),
+      y: z,
+      z: r * Math.sin(th)
+    };
   });
-  const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-  group.add(coreMesh);
+  const funnelMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.22,
+    metalness: 0.85,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.62,
+    emissive: epColor,
+    emissiveIntensity: 0.2
+  });
+  const funnelMesh = new THREE.Mesh(funnelGeo, funnelMat);
+  group.add(funnelMesh);
 
+  // B. Haz de 8 filamentos helicoidales de estiramiento de vorticidad ((ω·∇)u)
   const streamPts = [];
-  const numHel = 6;
+  const numHel = 8;
   for (let h = 0; h < numHel; h++) {
     const phi0 = (h / numHel) * Math.PI * 2;
-    for (let i = 0; i <= 60; i++) {
-      const th = (i / 60) * Math.PI * 2;
-      const phi = phi0 + th * 4.0;
-      const R = 0.72 + 0.22 * Math.cos(phi);
-      streamPts.push(
-        R * Math.cos(th),
-        R * Math.sin(th),
-        0.22 * Math.sin(phi)
-      );
+    for (let i = 0; i <= 48; i++) {
+      const u = i / 48;
+      const z = (u - 0.5) * 1.9;
+      const r = 0.18 + 0.70 * (z * z);
+      const th = phi0 + z * 4.5;
+      streamPts.push(r * Math.cos(th), z, r * Math.sin(th));
     }
   }
   const streamGeo = new THREE.BufferGeometry();
   streamGeo.setAttribute('position', new THREE.Float32BufferAttribute(streamPts, 3));
-  group.add(new THREE.Line(streamGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6 })));
+  const streamLines = new THREE.Line(streamGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 }));
+  group.add(streamLines);
+
+  // C. Trazadores Lagrangianos en aceleración hacia el núcleo central (cascada de Kolmogorov)
+  const numP = 42;
+  const pPos = new Float32Array(numP * 3);
+  const pSpeeds = new Float32Array(numP);
+  const pAngles = new Float32Array(numP);
+  const pHeights = new Float32Array(numP);
+  for (let k = 0; k < numP; k++) {
+    pAngles[k] = Math.random() * Math.PI * 2;
+    pHeights[k] = (Math.random() - 0.5) * 1.6;
+    pSpeeds[k] = 1.8 + Math.random() * 2.2;
+    const r = 0.16 + 0.65 * (pHeights[k] * pHeights[k]);
+    pPos[k * 3]     = r * Math.cos(pAngles[k]);
+    pPos[k * 3 + 1] = pHeights[k];
+    pPos[k * 3 + 2] = r * Math.sin(pAngles[k]);
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+  const pMesh = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.045, color: 0x67e8f9, transparent: true, opacity: 0.9 }));
+  group.add(pMesh);
 
   return {
     group,
     update: (dt) => {
-      group.rotation.z += 0.012;
-      coreMesh.rotation.x += 0.008;
+      funnelMesh.rotation.y += 0.016;
+      streamLines.rotation.y += 0.024;
+      for (let k = 0; k < numP; k++) {
+        pAngles[k] += dt * pSpeeds[k] * (1.0 / (0.2 + Math.abs(pHeights[k])));
+        pHeights[k] += dt * 0.25;
+        if (pHeights[k] > 0.8) pHeights[k] = -0.8;
+        const r = 0.16 + 0.65 * (pHeights[k] * pHeights[k]);
+        pPos[k * 3]     = r * Math.cos(pAngles[k]);
+        pPos[k * 3 + 1] = pHeights[k];
+        pPos[k * 3 + 2] = r * Math.sin(pAngles[k]);
+      }
+      pGeo.attributes.position.needsUpdate = true;
     }
   };
 }
 
-// 10. Solitón Hidrodinámico de KdV (Onda Solitaria No-Lineal)
-function buildKdvSoliton3D(epColor) {
+// 9B. Tubo de Venturi de Bernoulli (Caída de Presión por Aceleración de Flujo)
+function buildBernoulliTube3D(epColor) {
   const group = new THREE.Group();
-  const ringGeo = new THREE.TorusGeometry(0.85, 0.08, 12, 48);
-  const ringMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.5 });
-  group.add(new THREE.Mesh(ringGeo, ringMat));
+  
+  const venturiGeo = createParametricSurface(24, 24, (uNorm, vNorm) => {
+    const x = (uNorm - 0.5) * 1.8;
+    const r = 0.52 - 0.26 * Math.exp(-x * x / 0.14);
+    const th = vNorm * Math.PI * 2;
+    return { x, y: r * Math.cos(th), z: r * Math.sin(th) };
+  });
+  const venturiMat = new THREE.MeshStandardMaterial({
+    color: 0x93c5fd,
+    roughness: 0.15,
+    metalness: 0.3,
+    transparent: true,
+    opacity: 0.45,
+    side: THREE.DoubleSide
+  });
+  group.add(new THREE.Mesh(venturiGeo, venturiMat));
 
-  const solGeo = new THREE.SphereGeometry(0.24, 16, 16);
-  solGeo.scale(1.8, 1.0, 0.8);
-  const solMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.2, metalness: 0.85 });
-  const solMesh = new THREE.Mesh(solGeo, solMat);
-  group.add(solMesh);
+  const m1Geo = new THREE.CylinderGeometry(0.04, 0.04, 0.65, 12);
+  const m1Mat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.2, metalness: 0.8 });
+  const m1 = new THREE.Mesh(m1Geo, m1Mat);
+  m1.position.set(-0.65, 0.65, 0);
+  group.add(m1);
 
-  let solAngle = 0;
+  const m2Geo = new THREE.CylinderGeometry(0.04, 0.04, 0.28, 12);
+  const m2 = new THREE.Mesh(m2Geo, m1Mat);
+  m2.position.set(0, 0.38, 0);
+  group.add(m2);
+
+  const streamPts = [];
+  [-0.15, 0, 0.15].forEach(yOff => {
+    for (let i = 0; i <= 30; i++) {
+      const x = (i / 30 - 0.5) * 1.7;
+      const r = (0.52 - 0.26 * Math.exp(-x * x / 0.14)) * 0.6;
+      streamPts.push(x, yOff * (r / 0.32), 0);
+    }
+  });
+  const sGeo = new THREE.BufferGeometry();
+  sGeo.setAttribute('position', new THREE.Float32BufferAttribute(streamPts, 3));
+  group.add(new THREE.Line(sGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 })));
+
   return {
     group,
     update: (dt) => {
-      solAngle += dt * 1.8;
-      solMesh.position.set(0.85 * Math.cos(solAngle), 0.85 * Math.sin(solAngle), 0.08 * Math.sin(solAngle * 2));
-      solMesh.rotation.z = solAngle + Math.PI / 2;
+      group.rotation.y += 0.007;
+      group.rotation.x = 0.25;
+    }
+  };
+}
+
+// 9C. Celdas de Convección Térmica de Bénard (Hexágonos de Rayleigh-Bénard)
+function buildBenardConvection3D(epColor) {
+  const group = new THREE.Group();
+  const hexR = 0.42;
+  const centers = [
+    [0, 0],
+    [hexR * Math.sqrt(3), 0],
+    [-hexR * Math.sqrt(3), 0],
+    [hexR * Math.sqrt(3)/2, hexR * 1.5],
+    [-hexR * Math.sqrt(3)/2, hexR * 1.5],
+    [hexR * Math.sqrt(3)/2, -hexR * 1.5],
+    [-hexR * Math.sqrt(3)/2, -hexR * 1.5]
+  ];
+
+  centers.forEach(([cx, cy], idx) => {
+    const hexGeo = new THREE.CylinderGeometry(hexR * 0.95, hexR * 0.95, 0.35, 6);
+    const hexMat = new THREE.MeshStandardMaterial({
+      color: idx === 0 ? epColor : 0x3b82f6,
+      roughness: 0.3,
+      metalness: 0.7,
+      transparent: true,
+      opacity: 0.65
+    });
+    const cell = new THREE.Mesh(hexGeo, hexMat);
+    cell.position.set(cx, 0, cy);
+    group.add(cell);
+
+    const torGeo = new THREE.TorusGeometry(hexR * 0.45, 0.025, 8, 24);
+    const torMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+    const tor = new THREE.Mesh(torGeo, torMat);
+    tor.rotation.x = Math.PI / 2;
+    tor.position.set(cx, 0.18, cy);
+    group.add(tor);
+  });
+
+  group.scale.set(0.68, 0.68, 0.68);
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.x = 0.45;
+    }
+  };
+}
+
+// 10A. Resorte Helicoidal Elástico de Hooke (F = -kx)
+function buildHookeSpring3D(epColor) {
+  const group = new THREE.Group();
+  
+  const turns = 7;
+  const pts = [];
+  const N = 120;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const angle = t * Math.PI * 2 * turns;
+    const r = 0.28;
+    const y = 0.65 - t * 1.1;
+    pts.push(new THREE.Vector3(r * Math.cos(angle), y, r * Math.sin(angle)));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const springGeo = new THREE.TubeGeometry(curve, 80, 0.028, 8, false);
+  const springMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.2, metalness: 0.85 });
+  const springMesh = new THREE.Mesh(springGeo, springMat);
+  group.add(springMesh);
+
+  const capGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.06, 24);
+  const capMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.4, metalness: 0.8 });
+  const topCap = new THREE.Mesh(capGeo, capMat);
+  topCap.position.y = 0.68;
+  group.add(topCap);
+
+  const bobGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.32, 24);
+  const bobMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.9 });
+  const bob = new THREE.Mesh(bobGeo, bobMat);
+  bob.position.y = -0.58;
+  group.add(bob);
+
+  const arrowGeo = new THREE.ConeGeometry(0.08, 0.22, 16);
+  const arrowMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+  const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+  arrow.position.set(0, -0.22, 0.32);
+  group.add(arrow);
+
+  let oscT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      oscT += dt * 4.5;
+      const disp = Math.sin(oscT) * 0.16;
+      springMesh.scale.set(1.0, 1.0 + disp * 0.5, 1.0);
+      bob.position.y = -0.58 + disp;
+      arrow.position.y = -0.22 + disp;
+      arrow.rotation.x = disp > 0 ? Math.PI : 0;
+    }
+  };
+}
+
+// 10B. Ley de la Palanca de Arquímedes (Equilibrio de Momentos F₁d₁ = F₂d₂)
+function buildLeverArchimedes3D(epColor) {
+  const group = new THREE.Group();
+  
+  const fulcrumGeo = new THREE.ConeGeometry(0.25, 0.45, 4);
+  const fulcrumMat = new THREE.MeshStandardMaterial({ color: 0x71717a, roughness: 0.4, metalness: 0.7 });
+  const fulcrum = new THREE.Mesh(fulcrumGeo, fulcrumMat);
+  fulcrum.rotation.y = Math.PI / 4;
+  fulcrum.position.y = -0.22;
+  group.add(fulcrum);
+
+  const barGroup = new THREE.Group();
+  const barGeo = new THREE.BoxGeometry(1.9, 0.06, 0.14);
+  const barMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.25, metalness: 0.85 });
+  barGroup.add(new THREE.Mesh(barGeo, barMat));
+
+  const m1Geo = new THREE.CylinderGeometry(0.18, 0.18, 0.28, 16);
+  const m1Mat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, metalness: 0.9 });
+  const m1 = new THREE.Mesh(m1Geo, m1Mat);
+  m1.position.set(-0.35, 0.17, 0);
+  barGroup.add(m1);
+
+  const m2Geo = new THREE.CylinderGeometry(0.09, 0.09, 0.16, 16);
+  const m2 = new THREE.Mesh(m2Geo, m1Mat);
+  m2.position.set(0.85, 0.11, 0);
+  barGroup.add(m2);
+
+  group.add(barGroup);
+
+  let rockT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      rockT += dt * 2.0;
+      barGroup.rotation.z = Math.sin(rockT) * 0.06;
+    }
+  };
+}
+
+// 10C. Principio de Flotabilidad de Arquímedes (E = ρ g V)
+function buildBuoyancy3D(epColor) {
+  const group = new THREE.Group();
+
+  const fluidGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.95, 24);
+  const fluidMat = new THREE.MeshStandardMaterial({
+    color: 0x0284c7,
+    roughness: 0.1,
+    metalness: 0.2,
+    transparent: true,
+    opacity: 0.35
+  });
+  group.add(new THREE.Mesh(fluidGeo, fluidMat));
+
+  const surfGeo = new THREE.RingGeometry(0.02, 0.74, 24);
+  const surfMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+  const surf = new THREE.Mesh(surfGeo, surfMat);
+  surf.rotation.x = Math.PI / 2;
+  surf.position.y = 0.46;
+  group.add(surf);
+
+  const bodyGeo = new THREE.BoxGeometry(0.48, 0.48, 0.48);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.3, metalness: 0.8 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 0.32;
+  group.add(body);
+
+  const empujeGeo = new THREE.ConeGeometry(0.07, 0.25, 12);
+  const empujeMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+  const empuje = new THREE.Mesh(empujeGeo, empujeMat);
+  empuje.position.set(0, 0.75, 0);
+  group.add(empuje);
+
+  const empujeLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0.32, 0), new THREE.Vector3(0, 0.75, 0)]),
+    new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 3 })
+  );
+  group.add(empujeLine);
+
+  let floatT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      floatT += dt * 3.0;
+      const bobY = Math.sin(floatT) * 0.035;
+      body.position.y = 0.32 + bobY;
+      empuje.position.y = 0.75 + bobY;
+    }
+  };
+}
+
+// 10D. Leyes del Movimiento de Newton (Inercia, F = ma, Acción y Reacción)
+function buildNewtonMechanics3D(epColor) {
+  const group = new THREE.Group();
+
+  const railGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.8, 16);
+  const railMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.3, metalness: 0.8 });
+  const rail = new THREE.Mesh(railGeo, railMat);
+  rail.rotation.z = Math.PI / 2;
+  group.add(rail);
+
+  const massGeo = new THREE.BoxGeometry(0.38, 0.38, 0.38);
+  const massMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.2, metalness: 0.85 });
+  const massMesh = new THREE.Mesh(massGeo, massMat);
+  group.add(massMesh);
+
+  const fGeo = new THREE.ConeGeometry(0.06, 0.22, 12);
+  const fMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+  const fCone = new THREE.Mesh(fGeo, fMat);
+  fCone.rotation.z = -Math.PI / 2;
+  fCone.position.set(0.42, 0, 0);
+  massMesh.add(fCone);
+
+  const rMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+  const rCone = new THREE.Mesh(fGeo, rMat);
+  rCone.rotation.z = Math.PI / 2;
+  rCone.position.set(-0.42, 0, 0);
+  massMesh.add(rCone);
+
+  let newtonT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      newtonT += dt * 3.0;
+      massMesh.position.x = Math.sin(newtonT) * 0.45;
+    }
+  };
+}
+
+// 10E. Frentes de Onda del Efecto Doppler (Compresión y Dilatación Espectral)
+function buildDoppler3D(epColor) {
+  const group = new THREE.Group();
+  
+  const sourceGeo = new THREE.SphereGeometry(0.12, 16, 16);
+  const sourceMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const source = new THREE.Mesh(sourceGeo, sourceMat);
+  source.position.set(0.42, 0, 0);
+  group.add(source);
+
+  const rings = [];
+  const numRings = 6;
+  for (let k = 0; k < numRings; k++) {
+    const frac = (k + 1) / numRings;
+    const r = frac * 0.95;
+    const xCenter = (1.0 - frac) * 0.42;
+    const ringGeo = new THREE.TorusGeometry(r, 0.016, 8, 36);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: k % 2 === 0 ? 0x38bdf8 : epColor,
+      transparent: true,
+      opacity: 0.85 - frac * 0.4
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(xCenter, 0, 0);
+    group.add(ring);
+    rings.push({ mesh: ring, baseR: r, baseCenter: xCenter });
+  }
+
+  let dopT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.006;
+      group.rotation.x = 0.35;
+      dopT += dt * 2.0;
+      rings.forEach((r, idx) => {
+        const pulse = 1.0 + 0.08 * Math.sin(dopT + idx * 0.8);
+        r.mesh.scale.set(pulse, pulse, 1.0);
+      });
+    }
+  };
+}
+
+// 10F. Onda de D'Alembert & Modos Armónicos de Cuerda Tensada
+function buildWaveString3D(epColor) {
+  const group = new THREE.Group();
+  
+  const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+  post1.position.set(-0.85, 0, 0);
+  group.add(post1);
+  const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.7, 12), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+  post2.position.set(0.85, 0, 0);
+  group.add(post2);
+
+  const N = 40;
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N - 0.5) * 1.7;
+    pts.push(new THREE.Vector3(x, 0, 0));
+  }
+  const waveGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const waveLine = new THREE.Line(waveGeo, new THREE.LineBasicMaterial({ color: epColor, linewidth: 3 }));
+  group.add(waveLine);
+
+  const envGeo = createParametricSurface(16, 20, (uNorm, vNorm) => {
+    const x = (uNorm - 0.5) * 1.7;
+    const amp = 0.32 * Math.sin(uNorm * Math.PI);
+    const th = vNorm * Math.PI * 2;
+    return { x, y: amp * Math.cos(th), z: amp * Math.sin(th) };
+  });
+  const envMesh = new THREE.Mesh(envGeo, new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.25, side: THREE.DoubleSide }));
+  group.add(envMesh);
+
+  let waveTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      waveTime += dt * 6.0;
+      const positions = waveGeo.attributes.position.array;
+      for (let i = 0; i <= N; i++) {
+        const u = i / N;
+        const y = 0.32 * Math.sin(u * Math.PI) * Math.sin(waveTime) + 0.12 * Math.sin(u * 2 * Math.PI) * Math.cos(waveTime * 2);
+        positions[i * 3 + 1] = y;
+      }
+      waveGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 10. Solitón Hidrodinámico de Russell & KdV (Onda Solitaria No-Lineal en Canal)
+function buildKdvSoliton3D(epColor) {
+  const group = new THREE.Group();
+
+  // Canal de agua horizontal
+  const flumeGeo = new THREE.BoxGeometry(1.9, 0.08, 0.55);
+  const flumeMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.7 });
+  const flume = new THREE.Mesh(flumeGeo, flumeMat);
+  flume.position.y = -0.35;
+  group.add(flume);
+
+  // Perfil de solitón sech²(x - ct)
+  const N = 48;
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N - 0.5) * 1.8;
+    const sech = 1.0 / Math.cosh(x * 3.5);
+    const y = sech * sech * 0.55 - 0.32;
+    pts.push(new THREE.Vector3(x, y, 0));
+  }
+  const solGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const solLine = new THREE.Line(solGeo, new THREE.LineBasicMaterial({ color: epColor, linewidth: 3 }));
+  group.add(solLine);
+
+  // Superficie fluida del solitón en el canal
+  const solMeshGeo = createParametricSurface(24, 16, (uNorm, vNorm) => {
+    const x = (uNorm - 0.5) * 1.8;
+    const z = (vNorm - 0.5) * 0.5;
+    const sech = 1.0 / Math.cosh(x * 3.5);
+    const y = sech * sech * 0.52 - 0.32;
+    return { x, y, z };
+  });
+  const solMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    roughness: 0.15,
+    metalness: 0.6,
+    transparent: true,
+    opacity: 0.75,
+    side: THREE.DoubleSide
+  });
+  group.add(new THREE.Mesh(solMeshGeo, solMat));
+
+  let solShift = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      solShift += dt * 0.6;
+      if (solShift > 1.8) solShift = 0;
+    }
+  };
+}
+
+// 10G. Superficie de Curva Elíptica de Weierstrass (Fermat, Beal y Aritmética Modular)
+function buildEllipticCurveSurface3D(epColor) {
+  const group = new THREE.Group();
+  
+  const geo = createParametricSurface(28, 28, (uNorm, vNorm) => {
+    const x = (uNorm - 0.5) * 1.6;
+    const th = vNorm * Math.PI * 2;
+    const rhs = Math.max(0.04, x * x * x - 0.7 * x + 0.35);
+    const r = Math.sqrt(rhs) * 0.65;
+    return {
+      x: x * 0.95,
+      y: r * Math.sin(th),
+      z: r * Math.cos(th)
+    };
+  });
+  const mat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.8,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.78
+  });
+  group.add(new THREE.Mesh(geo, mat));
+
+  const pts = [
+    [-0.5, 0.45, 0], [-0.5, -0.45, 0],
+    [0.1, 0.38, 0.2], [0.1, -0.38, -0.2],
+    [0.65, 0.65, 0], [0.65, -0.65, 0]
+  ];
+  pts.forEach(([px, py, pz]) => {
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0xffd700 })
+    );
+    dot.position.set(px, py, pz);
+    group.add(dot);
+  });
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.z += 0.004;
+    }
+  };
+}
+
+// 10H. Proyección Tridimensional del Hipercubo Booleano 4D (Tesseract · P vs NP)
+function buildComplexityHypercube3D(epColor) {
+  const group = new THREE.Group();
+
+  const verts4D = [];
+  for (let i = 0; i < 16; i++) {
+    verts4D.push([
+      (i & 1) ? 1 : -1,
+      (i & 2) ? 1 : -1,
+      (i & 4) ? 1 : -1,
+      (i & 8) ? 1 : -1
+    ]);
+  }
+
+  const edges = [];
+  for (let i = 0; i < 16; i++) {
+    for (let b = 0; b < 4; b++) {
+      const j = i ^ (1 << b);
+      if (i < j) edges.push([i, j]);
+    }
+  }
+
+  const vMeshes = [];
+  verts4D.forEach(() => {
+    const vMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.045, 12, 12),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    );
+    group.add(vMesh);
+    vMeshes.push(vMesh);
+  });
+
+  const linePts = [];
+  edges.forEach(() => {
+    linePts.push(new THREE.Vector3(), new THREE.Vector3());
+  });
+  const edgeGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+  const edgeLine = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: epColor, transparent: true, opacity: 0.8 }));
+  group.add(edgeLine);
+
+  let rot4D = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.006;
+      rot4D += dt * 1.2;
+      const cosT = Math.cos(rot4D);
+      const sinT = Math.sin(rot4D);
+
+      const proj3D = verts4D.map(([x, y, z, w]) => {
+        const xRot = x * cosT - w * sinT;
+        const wRot = x * sinT + w * cosT;
+        const dist = 2.4;
+        const fov = 1.0 / (dist - wRot * 0.45);
+        return new THREE.Vector3(xRot * fov * 0.85, y * fov * 0.85, z * fov * 0.85);
+      });
+
+      proj3D.forEach((p, idx) => vMeshes[idx].position.copy(p));
+
+      const posAttr = edgeGeo.attributes.position.array;
+      edges.forEach(([i, j], eIdx) => {
+        const p1 = proj3D[i];
+        const p2 = proj3D[j];
+        posAttr[eIdx * 6]     = p1.x;
+        posAttr[eIdx * 6 + 1] = p1.y;
+        posAttr[eIdx * 6 + 2] = p1.z;
+        posAttr[eIdx * 6 + 3] = p2.x;
+        posAttr[eIdx * 6 + 4] = p2.y;
+        posAttr[eIdx * 6 + 5] = p2.z;
+      });
+      edgeGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 10I. Flujo de Ricci & Regularización Topológica (Perelman · Poincaré)
+function buildRicciFlow3D(epColor) {
+  const group = new THREE.Group();
+
+  let flowT = 0;
+  const geo = createParametricSurface(24, 24, (uNorm, vNorm) => {
+    const z = (uNorm - 0.5) * 1.8;
+    const neck = 0.28 + 0.35 * (1.0 - Math.exp(-z * z / 0.15));
+    const th = vNorm * Math.PI * 2;
+    return { x: neck * Math.cos(th), y: z, z: neck * Math.sin(th) };
+  });
+  const mat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.8,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  group.add(mesh);
+  group.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 })));
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.x += 0.004;
+      flowT += dt * 1.5;
+      const s = 1.0 + 0.08 * Math.sin(flowT);
+      mesh.scale.set(s, 1.0 - 0.05 * Math.sin(flowT), s);
+    }
+  };
+}
+
+// 10J. Curvatura Espaciotemporal de Einstein (Ecuación de Campo G_μν = 8πG T_μν)
+function buildEinsteinCurvature3D(epColor) {
+  const group = new THREE.Group();
+
+  const gridGeo = createParametricSurface(24, 24, (uNorm, vNorm) => {
+    const x = (uNorm - 0.5) * 2.0;
+    const y = (vNorm - 0.5) * 2.0;
+    const r = Math.hypot(x, y);
+    const z = -0.75 / (1.0 + r * r * 3.5);
+    return { x, y: z, z: y };
+  });
+  const gridMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b,
+    roughness: 0.3,
+    metalness: 0.8,
+    side: THREE.DoubleSide
+  });
+  group.add(new THREE.Mesh(gridGeo, gridMat));
+  group.add(new THREE.LineSegments(new THREE.WireframeGeometry(gridGeo), new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 })));
+
+  const massGeo = new THREE.SphereGeometry(0.25, 20, 20);
+  const massMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.15, metalness: 0.9, emissive: epColor, emissiveIntensity: 0.4 });
+  const mass = new THREE.Mesh(massGeo, massMat);
+  mass.position.y = -0.52;
+  group.add(mass);
+
+  const rayPts = [];
+  for (let i = 0; i <= 30; i++) {
+    const t = (i / 30 - 0.5) * 2.0;
+    const def = -0.32 / (1.0 + t * t * 4.0);
+    rayPts.push(new THREE.Vector3(t, def - 0.1, 0.45 + def * 0.3));
+  }
+  const rayGeo = new THREE.BufferGeometry().setFromPoints(rayPts);
+  group.add(new THREE.Line(rayGeo, new THREE.LineBasicMaterial({ color: 0xffd700, linewidth: 2 })));
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      mass.rotation.y += 0.015;
+    }
+  };
+}
+
+// 10K. Expansión Cósmica de Hubble & Friedmann (v = H₀ d · Redshift Relativista)
+function buildHubbleExpansion3D(epColor) {
+  const group = new THREE.Group();
+
+  const numG = 36;
+  const galaxies = [];
+  const gGeo = new THREE.BufferGeometry();
+  const gPos = new Float32Array(numG * 3);
+  const gColors = new Float32Array(numG * 3);
+
+  for (let i = 0; i < numG; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = (Math.random() - 0.5) * Math.PI;
+    const r0 = 0.25 + Math.random() * 0.65;
+    galaxies.push({ r0, th, ph });
+
+    const color = new THREE.Color().setHSL(0.55 - r0 * 0.55, 0.9, 0.55);
+    gColors[i * 3]     = color.r;
+    gColors[i * 3 + 1] = color.g;
+    gColors[i * 3 + 2] = color.b;
+  }
+  gGeo.setAttribute('position', new THREE.BufferAttribute(gPos, 3));
+  gGeo.setAttribute('color', new THREE.BufferAttribute(gColors, 3));
+
+  const gPoints = new THREE.Points(gGeo, new THREE.PointsMaterial({ size: 0.065, vertexColors: true }));
+  group.add(gPoints);
+
+  const sphereWire = new THREE.LineSegments(
+    new THREE.WireframeGeometry(new THREE.SphereGeometry(0.95, 12, 12)),
+    new THREE.LineBasicMaterial({ color: epColor, transparent: true, opacity: 0.25 })
+  );
+  group.add(sphereWire);
+
+  let hubbleT = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      hubbleT += dt * 1.8;
+      const scaleA = 1.0 + 0.35 * Math.sin(hubbleT);
+      const positions = gGeo.attributes.position.array;
+      for (let i = 0; i < numG; i++) {
+        const g = galaxies[i];
+        const r = g.r0 * scaleA;
+        positions[i * 3]     = r * Math.cos(g.ph) * Math.sin(g.th);
+        positions[i * 3 + 1] = r * Math.sin(g.ph);
+        positions[i * 3 + 2] = r * Math.cos(g.ph) * Math.cos(g.th);
+      }
+      gGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 10L. Superficie de Volatilidad de Black-Scholes (Sonrisa de Volatilidad & EDP de Difusión)
+function buildBlackScholesSurface3D(epColor) {
+  const group = new THREE.Group();
+
+  const geo = createParametricSurface(24, 24, (uNorm, vNorm) => {
+    const s = (uNorm - 0.5) * 1.8;
+    const tau = vNorm * 1.6;
+    const d1 = s / (0.35 * Math.sqrt(Math.max(0.08, tau)));
+    const v = Math.max(0, s) * 0.45 + 0.28 * Math.exp(-d1 * d1 * 0.5) * Math.sqrt(tau);
+    return {
+      x: s * 0.95,
+      y: (v - 0.4) * 0.85,
+      z: (tau - 0.8) * 0.95
+    };
+  });
+  const mat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.8,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.8
+  });
+  group.add(new THREE.Mesh(geo, mat));
+  group.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 })));
+
+  const pathPts = [];
+  let curS = -0.8;
+  for (let i = 0; i <= 30; i++) {
+    const tau = (i / 30) * 1.6;
+    curS += (Math.random() - 0.48) * 0.12;
+    pathPts.push(new THREE.Vector3(curS, 0.15 + curS * 0.3, tau - 0.8));
+  }
+  const pathGeo = new THREE.BufferGeometry().setFromPoints(pathPts);
+  group.add(new THREE.Line(pathGeo, new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 2 })));
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      group.rotation.x = 0.35;
+    }
+  };
+}
+
+// 10M. Viga Elástica de Euler-Bernoulli (Deformación por Flexión EI w'''' = q)
+function buildEulerBeam3D(epColor) {
+  const group = new THREE.Group();
+
+  const wallGeo = new THREE.BoxGeometry(0.12, 0.85, 0.45);
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.4, metalness: 0.8 });
+  const wall = new THREE.Mesh(wallGeo, wallMat);
+  wall.position.set(-0.85, 0, 0);
+  group.add(wall);
+
+  const pts = [];
+  const N = 32;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const x = -0.8 + t * 1.6;
+    const deflection = -0.38 * (3 * t * t - t * t * t) / 2.0;
+    pts.push(new THREE.Vector3(x, deflection, 0));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const beamGeo = new THREE.TubeGeometry(curve, 32, 0.065, 8, false);
+  const beamMat = new THREE.MeshStandardMaterial({ color: epColor, roughness: 0.25, metalness: 0.85 });
+  group.add(new THREE.Mesh(beamGeo, beamMat));
+
+  const loadCone = new THREE.Mesh(
+    new THREE.ConeGeometry(0.08, 0.24, 16),
+    new THREE.MeshBasicMaterial({ color: 0xef4444 })
+  );
+  loadCone.position.set(0.8, -0.22, 0);
+  group.add(loadCone);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+    }
+  };
+}
+
+// 10N. Teorema Fundamental del Cálculo & Sumas Integrales de Riemann
+function buildCalculusRiemannSum3D(epColor) {
+  const group = new THREE.Group();
+
+  const pts = [];
+  const N = 40;
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N - 0.5) * 1.6;
+    const y = 0.35 + 0.32 * Math.cos(x * 2.5);
+    pts.push(new THREE.Vector3(x, y, 0));
+  }
+  const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  group.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffd700, linewidth: 3 })));
+
+  const numBars = 8;
+  const barW = 1.6 / numBars;
+  for (let b = 0; b < numBars; b++) {
+    const x = -0.8 + (b + 0.5) * barW;
+    const h = 0.35 + 0.32 * Math.cos(x * 2.5);
+    const barGeo = new THREE.BoxGeometry(barW * 0.92, h, 0.22);
+    const barMat = new THREE.MeshStandardMaterial({
+      color: epColor,
+      roughness: 0.2,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0.72
+    });
+    const barMesh = new THREE.Mesh(barGeo, barMat);
+    barMesh.position.set(x, h / 2, 0);
+    group.add(barMesh);
+  }
+
+  const axis = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.95, 0, 0), new THREE.Vector3(0.95, 0, 0)]),
+    new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 })
+  );
+  group.add(axis);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.x = 0.2;
+    }
+  };
+}
+
+// 10O. Ley de Coulomb & Líneas de Campo del Dipolo Eléctrico
+function buildCoulombField3D(epColor) {
+  const group = new THREE.Group();
+
+  const qPosMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.2, metalness: 0.8 }));
+  qPosMesh.position.set(-0.55, 0, 0);
+  group.add(qPosMesh);
+
+  const qNegMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.2, metalness: 0.8 }));
+  qNegMesh.position.set(0.55, 0, 0);
+  group.add(qNegMesh);
+
+  const numLines = 8;
+  for (let k = 0; k < numLines; k++) {
+    const angle = (k / numLines) * Math.PI * 2;
+    const curvePts = [];
+    for (let i = 0; i <= 30; i++) {
+      const t = i / 30;
+      const x = -0.55 + t * 1.1;
+      const y = Math.sin(t * Math.PI) * 0.45 * Math.cos(angle);
+      const z = Math.sin(t * Math.PI) * 0.45 * Math.sin(angle);
+      curvePts.push(new THREE.Vector3(x, y, z));
+    }
+    const cGeo = new THREE.BufferGeometry().setFromPoints(curvePts);
+    group.add(new THREE.Line(cGeo, new THREE.LineBasicMaterial({ color: epColor, transparent: true, opacity: 0.65 })));
+  }
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      group.rotation.z += 0.004;
     }
   };
 }
@@ -1571,7 +2434,7 @@ function buildAutomata3D(epColor) {
   };
 }
 
-// Mapeo Canónico de los 100 Arquetipos del Cosmos a Familias 3D Volumétricas
+// Mapeo Canónico de los 100 Arquetipos del Cosmos a Familias 3D Volumétricas Auténticas
 const BESPOKE_3D_BUILDERS = {
   lorenz: buildLorenz3D,
   klein: buildKlein3D,
@@ -1581,8 +2444,25 @@ const BESPOKE_3D_BUILDERS = {
   quantum_orbital: buildQuantumOrbital3D,
   schwarzschild: buildSchwarzschild3D,
   minkowski: buildMinkowski3D,
-  navier_vortex: buildNavierVortex3D,
+  navier_vortex: buildNavierStokesVortex3D,
+  bernoulli_tube: buildBernoulliTube3D,
+  benard_convection: buildBenardConvection3D,
+  hooke_spring: buildHookeSpring3D,
+  lever_archimedes: buildLeverArchimedes3D,
+  buoyancy: buildBuoyancy3D,
+  newton_mechanics: buildNewtonMechanics3D,
+  doppler: buildDoppler3D,
+  wave_string: buildWaveString3D,
   kdv_soliton: buildKdvSoliton3D,
+  elliptic_curve: buildEllipticCurveSurface3D,
+  complexity_hypercube: buildComplexityHypercube3D,
+  ricci_flow: buildRicciFlow3D,
+  einstein_curvature: buildEinsteinCurvature3D,
+  hubble_expansion: buildHubbleExpansion3D,
+  black_scholes: buildBlackScholesSurface3D,
+  euler_beam: buildEulerBeam3D,
+  calculus_riemann: buildCalculusRiemannSum3D,
+  coulomb_field: buildCoulombField3D,
   riemann: buildRiemann3D,
   higgs: buildHiggs3D,
   fibonacci: buildFibonacci3D,
@@ -1597,58 +2477,86 @@ const BESPOKE_3D_BUILDERS = {
 };
 
 const MANIFOLD_ARCHETYPE_MAP = {
+  // Caos & Sistemas Dinámicos
   lorenz_attractor: "lorenz", rossler_attractor: "lorenz", logistic_feigenbaum: "lorenz",
   kuramoto_sync: "lorenz", langevin_stochastic: "lorenz", hamilton_phase: "lorenz",
 
-  ricci_flow: "klein", beal_conjecture: "klein", fermat_last: "klein", p_vs_np: "klein",
+  // Topología & Complejidad
+  ricci_flow: "ricci_flow",
+  beal_conjecture: "elliptic_curve",
+  fermat_last: "elliptic_curve",
+  p_vs_np: "complexity_hypercube",
   clifford_dual: "mobius", noether_symmetry: "mobius", godel_incompleteness: "mobius",
   hopf_fibration: "hopf", quaternion: "hopf", yang_mills: "hopf",
   turing_morphogenesis: "gyroid", belousov_zhabotinsky: "gyroid", von_mises: "gyroid", voronoi: "gyroid",
 
+  // Cuántica
   schrodinger: "quantum_orbital", de_broglie_wave: "quantum_orbital", dirac_equation: "quantum_orbital",
   pauli_exclusion: "quantum_orbital", planck_quantum: "quantum_orbital", photoelectric: "quantum_orbital",
   heisenberg_uncertainty: "quantum_orbital",
 
+  // Astrofísica Relativista
   schwarzschild_bh: "schwarzschild", black_hole_entropy: "schwarzschild",
-  hawking_radiation: "schwarzschild", gravitation_universal: "schwarzschild",
+  hawking_radiation: "schwarzschild", gravitation_universal: "einstein_curvature",
 
+  // Relatividad Espacial & General
   minkowski_spacetime: "minkowski", lorentz_transform: "minkowski", light_speed: "minkowski",
-  einstein_field: "minkowski", mass_energy: "minkowski",
+  einstein_field: "einstein_curvature", mass_energy: "einstein_curvature",
 
-  navier_stokes: "navier_vortex", bernoulli_fluid: "navier_vortex", benard_convection: "navier_vortex",
-  kdv_soliton: "kdv_soliton", doppler: "kdv_soliton", wave_dalembert: "kdv_soliton",
+  // Fluidos & Ondas Fidedignos
+  navier_stokes: "navier_vortex",
+  bernoulli_fluid: "bernoulli_tube",
+  benard_convection: "benard_convection",
+  kdv_soliton: "kdv_soliton",
+  doppler: "doppler",
+  wave_dalembert: "wave_string",
 
+  // Fronteras Matemáticas & Modelo Estándar
   riemann_zeta: "riemann", riemann_metric: "riemann",
   standard_model: "higgs", higgs_mechanism: "higgs",
 
+  // Geometría & Órbitas
   fibonacci: "fibonacci", apollonian: "fibonacci", mandelbrot_julia: "fibonacci",
   kepler_ellipse: "kepler", kepler_area: "kepler", kepler_harmonic: "kepler",
   yoshida_symplectic: "kepler", gravity_drop: "kepler",
 
+  // Estructuras, Cálculo & Poliedros
   euler_polyhedra: "euler", euler_identity: "euler", euler_lagrange: "euler",
-  euler_beam: "euler", calculus_fundamental: "euler",
+  euler_beam: "euler_beam",
+  calculus_fundamental: "calculus_riemann",
 
+  // Electromagnetismo
   maxwell_gauss_e: "maxwell", maxwell_gauss_b: "maxwell", maxwell_faraday: "maxwell",
   maxwell_ampere: "maxwell", lorentz_force: "maxwell", faraday_induction: "maxwell",
-  coulomb_force: "maxwell", ohm_conduction: "maxwell",
+  coulomb_force: "coulomb_field",
+  ohm_conduction: "coulomb_field",
 
+  // Fenómenos Espectrales & Óptica
   chladni: "chladni", laplace_harmonic: "chladni", poisson_potential: "chladni",
   fourier_spectral: "chladni", fourier_heat: "chladni",
-
   snell_refract: "snell", fermat_principle: "snell",
 
-  pythagoras: "pythagoras", cartesian: "pythagoras", lever: "pythagoras",
-  buoyancy: "pythagoras", hooke_spring: "pythagoras", newton_inertia: "pythagoras",
-  newton_fma: "pythagoras", newton_reaction: "pythagoras",
+  // Mecánica Clásica Fidedigna (Independiente de Pitágoras)
+  pythagoras: "pythagoras", cartesian: "pythagoras",
+  lever: "lever_archimedes",
+  buoyancy: "buoyancy",
+  hooke_spring: "hooke_spring",
+  newton_inertia: "newton_mechanics",
+  newton_fma: "newton_mechanics",
+  newton_reaction: "newton_mechanics",
 
+  // Termodinámica & Finanzas Cuantitativas
   carnot_cycle: "thermo", first_law_thermo: "thermo", second_law_entropy: "thermo",
   boltzmann_entropy: "thermo", maxwell_boltzmann_dist: "thermo", thermal_cooling: "thermo",
   ideal_gas: "thermo", stefan_boltzmann: "thermo", wien_displacement: "thermo",
-  bose_einstein: "thermo", black_scholes: "thermo",
+  bose_einstein: "thermo",
+  black_scholes: "black_scholes",
 
+  // Cosmología & Autómatas
   turing_machine: "automata", rule_110: "automata", langton_ant: "automata",
-  shannon_entropy: "automata", shannon_capacity: "automata", hubble_expansion: "automata",
-  friedmann_cosmos: "automata"
+  shannon_entropy: "automata", shannon_capacity: "automata",
+  hubble_expansion: "hubble_expansion",
+  friedmann_cosmos: "hubble_expansion"
 };
 
 // ── CONSTRUCTOR PRINCIPAL DEL MODELO DE ASTRO 3D EN R³ ─────────────

@@ -412,11 +412,29 @@
       pctx.fillText(`${art.author} (${art.year})`, printCanvas.width - pad - 20 * scale, printCanvas.height - 50 * scale);
 
       // 3. Exportar PNG de alta fidelidad
+      const exportFilename = `Atelier_Obra_${art.badge}_${art.title.replace(/\s+/g, '_')}_HD.png`;
+      const exportDataUrl = printCanvas.toDataURL('image/png');
+
+      if (typeof window !== 'undefined' && window.AtelierDesktop && window.AtelierDesktop.saveFile && window.isAtelierDesktop) {
+        window.AtelierDesktop.saveFile(exportFilename, exportDataUrl, true);
+      }
+
       const link = document.createElement('a');
-      link.download = `Atelier_Obra_${art.badge}_${art.title.replace(/\s+/g, '_')}_HD.png`;
-      link.href = printCanvas.toDataURL('image/png');
+      link.download = exportFilename;
+      link.href = exportDataUrl;
       link.click();
     }
+
+    // Exportar funciones globalmente
+    window.downloadArtworkHD = downloadArtworkHD;
+    window.selectArtwork = selectArtwork;
+    window.loadArtwork = loadArtwork;
+    window.cycleArtwork = cycleArtwork;
+    window.restartArtwork = restartArtwork;
+    window.togglePalette = togglePalette;
+    window.setEpochFilter = setEpochFilter;
+    window.handleStudioSearch = handleStudioSearch;
+    window.startVideoRecording = startVideoRecording;
 
     // Inicializar al cargar el DOM
     if (document.readyState === 'loading') {

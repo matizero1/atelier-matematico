@@ -6,13 +6,21 @@
 
 set -e
 
-WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="$WORKSPACE_DIR/build/desktop"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "$SCRIPT_DIR" == *"gallery/scripts"* ]]; then
+  GALLERY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+  REPO_DIR="$(cd "$GALLERY_DIR/.." && pwd)"
+else
+  REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+  GALLERY_DIR="$REPO_DIR/gallery"
+fi
+
+BUILD_DIR="$REPO_DIR/build/desktop"
 APP_NAME="Atelier Matematico"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 DMG_NAME="Atelier_Matematico_Silicon_arm64.dmg"
 FINAL_DMG="$BUILD_DIR/$DMG_NAME"
-GALLERY_DOWNLOADS="$WORKSPACE_DIR/gallery/downloads"
+GALLERY_DOWNLOADS="$GALLERY_DIR/downloads"
 
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "🏛️  CONSTRUYENDO ESTACIÓN DE TRABAJO NATIVA DE ESCRITORIO (MACOS ARM64)"
@@ -29,7 +37,7 @@ mkdir -p "$GALLERY_DOWNLOADS"
 # 2. Compilar binario nativo ARM64 con swiftc
 echo "⚙️ [2/6] Compilando ejecutable nativo en silicio (swiftc -O)..."
 swiftc -O -target arm64-apple-macos12.0 \
-  "$WORKSPACE_DIR/desktop/main.swift" \
+  "$GALLERY_DIR/desktop/main.swift" \
   -o "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 
 chmod +x "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
@@ -38,12 +46,15 @@ echo "  ✓ Binario nativo generado: $BIN_SIZE (Ultra-compacto en silicio puro)"
 
 # 3. Copiar metadatos Info.plist y puente de silicio
 echo "📄 [3/6] Inyectando metadatos Info.plist y puente TimonelDesktop..."
-cp "$WORKSPACE_DIR/desktop/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
-cp "$WORKSPACE_DIR/desktop/bridge.js" "$APP_BUNDLE/Contents/Resources/bridge.js"
+cp "$GALLERY_DIR/desktop/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
+cp "$GALLERY_DIR/desktop/bridge.js" "$APP_BUNDLE/Contents/Resources/bridge.js"
 
 # 4. Copiar recursos web completos para ejecución 100% offline
 echo "🎨 [4/6] Integrando salas, motores CAS y recursos de museo..."
-cp -R "$WORKSPACE_DIR/gallery/"* "$APP_BUNDLE/Contents/Resources/"
+cp -R "$GALLERY_DIR/"*.html "$APP_BUNDLE/Contents/Resources/"
+cp -R "$GALLERY_DIR/js" "$APP_BUNDLE/Contents/Resources/"
+if [ -d "$GALLERY_DIR/assets" ]; then cp -R "$GALLERY_DIR/assets" "$APP_BUNDLE/Contents/Resources/"; fi
+if [ -d "$GALLERY_DIR/css" ]; then cp -R "$GALLERY_DIR/css" "$APP_BUNDLE/Contents/Resources/"; fi
 # Eliminar posibles descargas anidadas o temporales
 rm -rf "$APP_BUNDLE/Contents/Resources/downloads"
 

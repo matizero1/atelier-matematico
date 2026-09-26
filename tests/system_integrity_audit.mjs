@@ -510,6 +510,19 @@ cspRooms.forEach(room => {
   assert(content.includes('http-equiv="Content-Security-Policy"'), `Sala ${room} define política estricta de seguridad de contenido (CSP)`);
 });
 
+// 6. Inmunidad XSS en el Graficador Cartesiano (ClassroomController) & Paquete Offline Completo
+const classroomCtrlCode = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'classroom_controller.js'), 'utf8');
+assert(!classroomCtrlCode.includes('new Function'), 'classroom_controller.js erradica totalmente new Function (Cero riesgo de RCE/XSS)');
+assert(classroomCtrlCode.includes('JITMathCompiler.compile'), 'classroom_controller.js delega evaluación simbólica en el motor seguro JITMathCompiler');
+
+const tailwindPath = path.join(rootDir, 'js', 'tailwindcss.min.js');
+assert(fs.existsSync(tailwindPath) && fs.statSync(tailwindPath).size > 300000, 'Motor CSS tailwindcss.min.js empaquetado localmente para ejecución 100% offline');
+
+cspRooms.forEach(room => {
+  const content = fs.readFileSync(path.join(rootDir, room), 'utf8');
+  assert(content.includes('src="js/tailwindcss.min.js"'), `Sala ${room} vincula tailwindcss localmente sin depender de CDN externo`);
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────

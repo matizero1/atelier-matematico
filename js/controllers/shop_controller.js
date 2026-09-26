@@ -953,9 +953,16 @@
       cctx.fillStyle = '#71717a';
       cctx.fillText('CERTIFICADOR RESIDUAL DETERMINISTA', 1250, 1000);
 
+      const certFilename = `Certificado_Autenticidad_Obra_${art.badge}_${art.title.replace(/\s+/g, '_')}.png`;
+      const certDataUrl = certCanvas.toDataURL('image/png');
+
+      if (typeof window !== 'undefined' && window.AtelierDesktop && window.AtelierDesktop.saveFile && window.isAtelierDesktop) {
+        window.AtelierDesktop.saveFile(certFilename, certDataUrl, true);
+      }
+
       const link = document.createElement('a');
-      link.download = `Certificado_Autenticidad_Obra_${art.badge}_${art.title.replace(/\s+/g, '_')}.png`;
-      link.href = certCanvas.toDataURL('image/png');
+      link.download = certFilename;
+      link.href = certDataUrl;
       link.click();
     }
 

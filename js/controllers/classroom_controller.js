@@ -693,33 +693,31 @@
         clean = `(${parts[0]}) - (${parts[1] || '0'})`;
       }
 
-      // Convertir potencia y multiplicaciones implícitas
-      clean = clean.replace(/\^/g, '**');
-      clean = clean.replace(/(\d)([a-zA-Z(])/g, '$1*$2');
-      clean = clean.replace(/\)\(/g, ')*(');
-      clean = clean.replace(/([a-zA-Z)])(\d)/g, '$1*$2');
+      // Normalización de expresiones y comandos LaTeX estándar
+      clean = clean.replace(/\\cdot/g, '*').replace(/\\times/g, '*');
+      clean = clean.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))');
+      clean = clean.replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)');
+      clean = clean.replace(/\\([a-zA-Z]+)/g, '$1');
+      clean = clean.replace(/\{/g, '(').replace(/\}/g, ')');
 
-      const fns = ['sin', 'cos', 'tan', 'sqrt', 'abs', 'exp', 'log'];
-      fns.forEach(fn => {
-        clean = clean.replace(new RegExp('\\b' + fn + '\\b', 'g'), 'Math.' + fn);
-      });
-      clean = clean.replace(/\bln\b/g, 'Math.log');
-      clean = clean.replace(/\bpi\b/gi, 'Math.PI');
-      clean = clean.replace(/\be\b/g, 'Math.E');
-
-      try {
-        const fn = new Function('x', `
-          try {
-            const v = (${clean});
-            return isFinite(v) ? v : NaN;
-          } catch(e) {
-            return NaN;
-          }
-        `);
-        return fn;
-      } catch (err) {
-        return () => 0;
+      // Compilación determinista y segura mediante AST con Timonel JIT Compiler
+      if (window.JITMathCompiler && typeof window.JITMathCompiler.compile === 'function') {
+        try {
+          const compiledFn = window.JITMathCompiler.compile(clean, ['x']);
+          return function(x) {
+            try {
+              const v = compiledFn(x);
+              return (typeof v === 'number' && isFinite(v)) ? v : NaN;
+            } catch (e) {
+              return NaN;
+            }
+          };
+        } catch (err) {
+          return () => 0;
+        }
       }
+
+      return () => 0;
     }
 
     plotFunctionCurve(ctx, fn, ox, oy, scale, W) {

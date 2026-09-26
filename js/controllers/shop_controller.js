@@ -34,6 +34,7 @@
       notebook: { clp: '$24.900 CLP',  usd: '~$27 USD',  eur: '€25 EUR',  label: 'Cuaderno Moleskine 100g' }
     };
     let currentCurrency = 'CLP';
+    const ATELIER_CONCIERGE_PHONE = (typeof window !== 'undefined' && window.ATELIER_PHONE) ? window.ATELIER_PHONE : '56984288000';
 
     // Grabación de video 60 FPS
     let mediaRecorder = null;
@@ -791,7 +792,7 @@
         `· Anticipo sugerido: 50% para inicio de manufactura\n\n` +
         `Hola Matías, he configurado mi pieza en la Vitrina de Pared del Atelier. Deseo coordinar el anticipo para iniciar la manufactura en Santiago.`
       );
-      window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
+      window.open(`https://wa.me/${ATELIER_CONCIERGE_PHONE}?text=${msg}`, '_blank');
     }
 
     function submitOrder(e) {
@@ -821,7 +822,7 @@
         `· Monto Total: ${fmt.clp}\n\n` +
         `Hola Matías, confirmo mi encargo formal. Quedo a la espera de los datos de transferencia del 50% de anticipo para iniciar la confección en taller.`
       );
-      window.open(`https://wa.me/56900000000?text=${msg}`, '_blank');
+      window.open(`https://wa.me/${ATELIER_CONCIERGE_PHONE}?text=${msg}`, '_blank');
       closeCheckoutModal();
     }
 

@@ -1,12 +1,13 @@
 /**
- * ROOM SYNC — Protocolo de Sincronización de Salas Magistrales P2P
+ * ROOM SYNC — Protocolo de Sincronización Local Multiventana (BroadcastChannel)
  * Atelier Matemático / Nai Systems
  * 
- * Permite crear y unirse a salas colaborativas mediante código de 4 caracteres.
- * Sincroniza en tiempo real:
+ * Gobernanza: Timonel F2 · Cero Autoengaño (Demarcación determinista de alcance local)
+ * Sincroniza en tiempo real entre pestañas y ventanas de la misma estación de trabajo:
  * - Pizarrón maestro del profesor (trazos, fórmulas, estado 3D/2D).
  * - Pupitres de los alumnos (derivación paso a paso, estado del Lápiz de Timonel).
  * - Mosaico de supervisión para el docente con alertas de divergencia roja.
+ * NOTA: Funciona de forma soberana y offline mediante BroadcastChannel del navegador.
  */
 
 (function(root) {

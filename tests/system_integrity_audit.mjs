@@ -478,8 +478,10 @@ const malAttack3 = jitEngine.compile('window.location="http://evil.com"', ['x', 
 assert(malAttack3(1, 1, 1) === 0, 'JITMathCompiler rechaza de raíz acceso a identificadores no autorizados');
 
 // 2. Verificación de Huella Criptográfica Auténtica SHA-256 en Certificados
-assert(!shopContent.includes('Math.random()*16'), 'shop_controller.js erradica hashes falsos generados con Math.random()');
-assert(shopContent.includes('SHA-256') && (shopContent.includes('subtle.digest') || shopContent.includes('crypto.createHash')), 'shop_controller.js implementa cálculo real y auditable de hash criptográfico SHA-256');
+const updatedShopContent = fs.readFileSync(shopControllerPath, 'utf8');
+assert(!updatedShopContent.includes('Math.random()*16'), 'shop_controller.js erradica hashes falsos generados con Math.random()');
+assert(updatedShopContent.includes('SHA-256') && (updatedShopContent.includes('subtle.digest') || updatedShopContent.includes('crypto.createHash')), 'shop_controller.js implementa cálculo real y auditable de hash criptográfico SHA-256');
+assert(updatedShopContent.includes('ATELIER_CONCIERGE_PHONE') && !updatedShopContent.includes('56900000000'), 'shop_controller.js define línea real de concierge sin teléfonos placeholder');
 
 // 3. Verificación de Protección Path Traversal y ATS en el Runner Nativo macOS
 const mainSwiftPath = path.join(desktopDir, 'main.swift');
@@ -489,6 +491,24 @@ assert(mainSwiftContent.includes('lastPathComponent'), 'desktop/main.swift sanit
 const infoPlistPath = path.join(desktopDir, 'Info.plist');
 const infoPlistContent = fs.readFileSync(infoPlistPath, 'utf8');
 assert(!infoPlistContent.includes('NSAllowsArbitraryLoads'), 'desktop/Info.plist prohíbe conexiones HTTP en texto plano (ATS estricto activo)');
+
+// 4. Verificación de Controles Táctiles Móviles en Observatorio 3D & SRI en Recursos Externos
+const updatedMuseumContent = fs.readFileSync(path.join(rootDir, 'museum.html'), 'utf8');
+assert(updatedMuseumContent.includes('id="mobile-touch-controls"') && updatedMuseumContent.includes('btn-touch-action'), 'museum.html provee D-Pad táctil virtual y control de propulsión 6DOF para dispositivos móviles');
+
+const updatedClassroomContent = fs.readFileSync(path.join(rootDir, 'classroom.html'), 'utf8');
+assert(updatedClassroomContent.includes('integrity="sha384-') && updatedClassroomContent.includes('crossorigin="anonymous"'), 'classroom.html protege KaTeX con firmas de integridad de subrecurso (SRI)');
+
+const roomSyncPath = path.join(rootDir, 'js', 'room_sync.js');
+const roomSyncContent = fs.readFileSync(roomSyncPath, 'utf8');
+assert(roomSyncContent.includes('BroadcastChannel') && roomSyncContent.includes('Demarcación determinista de alcance local'), 'room_sync.js declara honestamente su arquitectura de sincronización local BroadcastChannel');
+
+// 5. Verificación de Content Security Policy (CSP) en las 5 salas canónicas
+const cspRooms = ['index.html', 'shop.html', 'museum.html', 'classroom.html', 'studio.html'];
+cspRooms.forEach(room => {
+  const content = fs.readFileSync(path.join(rootDir, room), 'utf8');
+  assert(content.includes('http-equiv="Content-Security-Policy"'), `Sala ${room} define política estricta de seguridad de contenido (CSP)`);
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN

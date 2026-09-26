@@ -2236,6 +2236,51 @@ function setup6DOFControls() {
   window.addEventListener('keyup', (e) => {
     keysPressed[e.code] = false;
   });
+
+  // ── VINCULACIÓN DE CONTROLES TÁCTILES VIRTUALES MÓVILES (TIMONEL 6DOF) ──
+  const btnTouchUp = document.getElementById('btn-touch-up');
+  const btnTouchDown = document.getElementById('btn-touch-down');
+  const btnTouchLeft = document.getElementById('btn-touch-left');
+  const btnTouchRight = document.getElementById('btn-touch-right');
+  const btnTouchAction = document.getElementById('btn-touch-action');
+
+  const bindHoldButton = (el, code) => {
+    if (!el) return;
+    const start = (ev) => {
+      ev.preventDefault();
+      keysPressed[code] = true;
+    };
+    const stop = (ev) => {
+      ev.preventDefault();
+      keysPressed[code] = false;
+    };
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('touchend', stop, { passive: false });
+    el.addEventListener('touchcancel', stop, { passive: false });
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', stop);
+    el.addEventListener('mouseleave', stop);
+  };
+
+  bindHoldButton(btnTouchUp, 'KeyW');
+  bindHoldButton(btnTouchDown, 'KeyS');
+  bindHoldButton(btnTouchLeft, 'KeyA');
+  bindHoldButton(btnTouchRight, 'KeyD');
+
+  if (btnTouchAction) {
+    btnTouchAction.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      if (currentMuseumMode === MODE_ROTUNDA_TELESCOPE) {
+        if (collimatedAstroIndex >= 0) {
+          warpToTargetAstro(collimatedAstroIndex);
+        } else {
+          toggleTelescopeGotoTerminal();
+        }
+      } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT) {
+        returnToRotunda();
+      }
+    });
+  }
 }
 
 // ── BUCLE PRINCIPAL DE ANIMACIÓN Y SILICIO ─────────────────────────

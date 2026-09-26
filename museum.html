@@ -125,6 +125,13 @@
   <span class="text-[10px] mono text-[#c5a059] bg-[#c5a059]/15 border border-[#c5a059]/30 px-2 py-0.5 rounded-full font-semibold">ESPACIO o ESC: Liberar Flecha</span>
 </div>
 
+<!-- BADGE DE PROXIMIDAD AL PEDESTAL DEL TELESCOPIO -->
+<div id="telescope-proximity-badge" onclick="openTelescopeGotoTerminal()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-[#101014]/95 border border-[#c5a059] hover:border-[#dfc285] px-5 py-2.5 rounded-full backdrop-blur-md flex items-center gap-3.5 shadow-[0_0_30px_rgba(197,160,89,0.35)] transition-all cursor-pointer hover:scale-105 pointer-events-auto">
+  <span class="w-2.5 h-2.5 rounded-full bg-[#c5a059] animate-ping"></span>
+  <span class="mono text-xs text-[#f4f1ea] font-medium tracking-wider uppercase">🔭 Consola GoTo del Telescopio a tu alcance</span>
+  <span class="text-[10px] mono text-[#08080a] bg-[#c5a059] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Abrir [T]</span>
+</div>
+
 <!-- RETÍCULA DE LA CÁPSULA -->
 <div id="capsule-reticle"></div>
 
@@ -144,7 +151,7 @@
     </button>
   </div>
   <div id="telescope-nav-hint" class="bg-[#0c0c10]/85 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 text-[10px] mono text-[#a1a1aa] tracking-wider pointer-events-none shadow-lg">
-    <span class="text-[#c5a059] font-medium">[ESPACIO]:</span> Mira Telescópica 100% &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Arrastrar / Flechas:</span> Rotar 360° &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">WASD:</span> Caminar &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar
+    <span class="text-[#c5a059] font-medium">[T]:</span> Consola GoTo &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">[ESPACIO]:</span> Mira 100% &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">WASD:</span> Caminar &nbsp;·&nbsp; <span class="text-[#c5a059] font-medium">Clic:</span> Confinar
   </div>
 </div>
 
@@ -246,8 +253,12 @@
     </button>
   </div>
 
-  <!-- DERECHA: AULA, MESA 2D, VITRINA 3D, VOZ, CARRETE -->
+  <!-- DERECHA: CONSOLA GOTO, AULA, MESA 2D, VITRINA 3D, VOZ, CARRETE -->
   <div class="flex items-center gap-2 pointer-events-auto">
+    <button id="btn-open-telescope-goto" onclick="openTelescopeGotoTerminal()" class="bg-[#c5a059]/15 hover:bg-[#c5a059]/25 text-[#dfc285] border border-[#c5a059]/40 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+      <span>🔭</span>
+      <span>Consola GoTo <kbd class="text-[9px] bg-black/40 px-1 py-0.5 rounded border border-[#c5a059]/30">[T]</kbd></span>
+    </button>
     <button onclick="openDesktopModal()" class="bg-white/[0.04] hover:bg-white/[0.08] text-xs px-3 py-1.5 rounded-full mono transition text-[#f4f1ea] hover:text-[#c5a059] border border-white/20 flex items-center gap-1.5 shadow-sm">
       <span>📥</span>
       <span>App Desktop</span>
@@ -505,6 +516,88 @@
   <div id="discovery-list" class="flex-1 overflow-y-auto p-4 space-y-3">
     <div id="discovery-empty-state" class="text-center py-16 text-[#71717a] mono text-xs">
       No hay candidatos anómalos registrados.<br>Las leyes abiertas están explorando el espacio.
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL DE CONTROL DEL TELESCOPIO ECUATORIAL · TERMINAL GOTO AUTOMATIZADO   -->
+<!-- ========================================================================= -->
+<div id="telescope-goto-modal" class="hidden fixed inset-0 z-50 bg-[#060709]/85 backdrop-blur-xl flex items-center justify-center p-3 md:p-8 transition-opacity duration-300">
+  <div class="relative w-full max-w-5xl h-[88vh] bg-[#0c0d13]/95 border border-[#c5a059]/40 rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.9)] flex flex-col overflow-hidden">
+    <!-- Cabecera de Telemetría Astronómica -->
+    <div class="px-6 py-4 bg-[#101118] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-4 shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-[#c5a059]/15 border border-[#c5a059]/40 flex items-center justify-center text-[#dfc285] text-lg">
+          🔭
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="serif text-base md:text-lg font-bold text-[#f4f1ea] tracking-wide">Consola de Control del Telescopio Ecuatorial</h2>
+            <span class="text-[9px] mono px-2 py-0.5 rounded-full bg-[#c5a059]/20 text-[#dfc285] border border-[#c5a059]/40 font-semibold uppercase">Sistema GoTo MK-IV</span>
+          </div>
+          <div class="text-[11px] mono text-[#a1a1aa] flex items-center gap-3 mt-0.5">
+            <span>Latitud Paranal: <strong class="text-[#f4f1ea]">-24.62°</strong></span>
+            <span>·</span>
+            <span>Servomotores: <strong class="text-emerald-400 font-semibold">CALIBRADOS</strong></span>
+            <span>·</span>
+            <span>Velocidad de Slew: <strong class="text-[#dfc285]">4.2°/s</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-xs mono text-[#71717a] bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">
+          <span>Atajo:</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[#dfc285] text-[10px] font-bold">T</kbd>
+          <span>o</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[#dfc285] text-[10px] font-bold">ESC</kbd>
+        </div>
+        <button onclick="closeTelescopeGotoTerminal()" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[#a1a1aa] hover:text-white flex items-center justify-center transition cursor-pointer text-base">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Búsqueda Reactiva & Filtros de Época -->
+    <div class="px-6 py-3.5 bg-[#0e0f16] border-b border-white/[0.08] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0">
+      <div class="relative flex-1">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-[#71717a]">🔍</span>
+        <input 
+          id="goto-search-input" 
+          type="text" 
+          placeholder="Buscar por nombre, fórmula, científico o palabra clave... (ej: Navier, Hooke, Newton, Fermat, Black-Scholes)" 
+          oninput="filterGotoCatalog()"
+          class="w-full bg-[#14151f] text-[#f4f1ea] placeholder-[#52525b] text-xs mono pl-9 pr-4 py-2.5 rounded-xl border border-white/10 focus:border-[#c5a059] focus:outline-none transition"
+        />
+      </div>
+
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 shrink-0">
+        <button onclick="setGotoEpochFilter(0)" id="btn-goto-epoch-0" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#c5a059] text-[#08080a] font-semibold whitespace-nowrap cursor-pointer">Todas (100 / 24)</button>
+        <button onclick="setGotoEpochFilter(1)" id="btn-goto-epoch-1" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#14151f] hover:bg-white/10 text-[#a1a1aa] border border-white/5 whitespace-nowrap cursor-pointer">I. Clásica</button>
+        <button onclick="setGotoEpochFilter(2)" id="btn-goto-epoch-2" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#14151f] hover:bg-white/10 text-[#a1a1aa] border border-white/5 whitespace-nowrap cursor-pointer">II. Ilustración</button>
+        <button onclick="setGotoEpochFilter(3)" id="btn-goto-epoch-3" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#14151f] hover:bg-white/10 text-[#a1a1aa] border border-white/5 whitespace-nowrap cursor-pointer">III. Termodinámica</button>
+        <button onclick="setGotoEpochFilter(4)" id="btn-goto-epoch-4" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#14151f] hover:bg-white/10 text-[#a1a1aa] border border-white/5 whitespace-nowrap cursor-pointer">IV. Cuántica</button>
+        <button onclick="setGotoEpochFilter(5)" id="btn-goto-epoch-5" class="px-3 py-1.5 rounded-lg text-xs mono transition bg-[#14151f] hover:bg-white/10 text-[#a1a1aa] border border-white/5 whitespace-nowrap cursor-pointer">V. Caos & Milenio</button>
+      </div>
+    </div>
+
+    <!-- Lista Desplazable del Catálogo GoTo -->
+    <div id="goto-catalog-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-2.5">
+      <!-- Se inyecta dinámicamente desde museum_controller.js -->
+    </div>
+
+    <!-- Pie del Terminal con Estado Activo -->
+    <div class="px-6 py-3 bg-[#0a0b10] border-t border-white/[0.08] flex items-center justify-between text-xs mono text-[#71717a] shrink-0">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Alineación Óptica: <span id="goto-current-status" class="text-[#f4f1ea]">Listo para colimar</span></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Fórmulas visibles: <strong id="goto-visible-count" class="text-[#dfc285]">24</strong></span>
+        <span>·</span>
+        <span>Pulsa <kbd class="px-1.5 py-0.5 rounded bg-white/10 text-[#dfc285] text-[10px]">ESC</kbd> para salir</span>
+      </div>
     </div>
   </div>
 </div>

@@ -241,11 +241,11 @@
     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
     <span class="text-[#a1a1aa]">Nodo <strong id="swarm-node-id" class="text-[#f4f1ea]">#CL-7482</strong></span>
     <span class="text-white/20">|</span>
-    <span class="text-[#a1a1aa]">Potencia: <span id="swarm-local-throughput" class="text-[#c5a059] font-bold">480.000</span> evals/s</span>
+    <span class="text-[#a1a1aa]">Cálculo: <span id="swarm-local-throughput" class="text-[#c5a059] font-bold">No medido</span></span>
     <span class="text-white/20">|</span>
-    <span class="text-emerald-400">142 Nodos en Red</span>
+    <span class="text-emerald-400">Sesión local · red no verificada</span>
     <span class="text-white/20">|</span>
-    <span class="text-[#dfc285]">Timonel F2 Activo</span>
+    <span class="text-[#dfc285]">Visualización ilustrativa</span>
   </div>
 
   <!-- BOTÓN DE RETORNO AL TELESCOPIO (SOLO EN MODO ESFERA S², CENTRADO SIN COLISIONAR) -->
@@ -332,13 +332,13 @@
         <div id="hud-relax-progress" class="bg-gradient-to-r from-[#c5a059] to-[#dfc285] h-full w-full transition-all duration-300"></div>
       </div>
       <div class="flex justify-between items-center text-[9px] mono text-[#71717a]">
-        <span>Residuo: <strong id="hud-residual-val" class="text-[#dfc285]">0.002</strong></span>
-        <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">0.998</strong></span>
+        <span>Residuo: <strong id="hud-residual-val" class="text-[#dfc285]">NO CALCULADO</strong></span>
+        <span>Holgura Timonel: <strong id="hud-slack-val" class="text-emerald-400">NO EVALUADA</strong></span>
       </div>
     </div>
 
     <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2.5 shadow-sm">
-      <span>Perturbar Métrica (Ver Auto-Resolución)</span>
+      <span>Animar forma (visualización ilustrativa)</span>
     </button>
 
     <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
@@ -608,6 +608,7 @@
 <!-- ========================================================================= -->
 <!-- JAVASCRIPT: ATLAS CÓSMICO DE 100 LEYES & HILOS DE TIMONEL                  -->
 <!-- ========================================================================= -->
+<script src="js/controllers/museum_models.js"></script>
 <script src="js/controllers/museum_controller.js"></script>
 <script src="js/controllers/desktop_modal.js"></script>
 </body>

@@ -64,7 +64,7 @@ ARTWORKS.forEach((art, idx) => {
   if (seenTitles.has(art.title)) fieldDefects++;
   seenTitles.add(art.title);
 
-  const reqFields = ['id', 'badge', 'epoch', 'year', 'author', 'title', 'sub', 'cat', 'eq', 'eqShort', 'metric', 'hist', 'poem', 'radius', 'theta', 'phi', 'archetype'];
+  const reqFields = ['id', 'badge', 'epoch', 'year', 'author', 'title', 'sub', 'cat', 'eq', 'eqShort', 'metric', 'hist', 'poem', 'radius', 'theta', 'phi', 'archetype', 'modelKey', 'epistemology'];
   for (const f of reqFields) {
     if (art[f] === undefined || art[f] === null || art[f] === '') {
       fieldDefects++;
@@ -75,6 +75,13 @@ ARTWORKS.forEach((art, idx) => {
 
 assert(seenIds.size === 100, 'Todos los 100 IDs son únicos y estrictamente consecutivos [0..99]');
 assert(fieldDefects === 0, 'Todos los campos de metadatos históricos y matemáticos están presentes y no vacíos');
+
+let epistemologyDefects = 0;
+ARTWORKS.forEach(art => {
+  if (!art.epistemology || !['A', 'B', 'C'].includes(art.epistemology.category)) epistemologyDefects++;
+  if (!art.epistemology.tag || !art.epistemology.desc) epistemologyDefects++;
+});
+assert(epistemologyDefects === 0, '100% de las obras poseen clasificación epistemológica rigurosa (Categoría A, B o C)');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. AUDITORÍA DE SILICIO: ESTABILIDAD DE LOS 100 MOTORES NUMÉRICOS
@@ -167,12 +174,11 @@ const identitiesSuite = [
   ['(x - 4)*(x + 4)', 'x^2 - 16'],
   ['(a + b)^2', 'a^2 + 2*a*b + b^2'],
   ['(a - b)^2', 'a^2 - 2*a*b + b^2'],
-  ['ln(x*y)', 'ln(x) + ln(y)'],
   ['exp(x + y)', 'exp(x)*exp(y)'],
   ['x + 5 = 12', 'x = 7'],
   ['2*x + 6 = 20', 'x = 7'],
   ['x*(x + 2) - x^2', '2*x'],
-  ['(x^2 - y^2)/(x - y)', 'x + y']
+  ['x+x', '2*x']
 ];
 
 let idSuccessCount = 0;
@@ -184,7 +190,7 @@ for (const [s1, s2] of identitiesSuite) {
     console.error(`Divergencia falsa en identidad: ${s1} <=> ${s2}`, res);
   }
 }
-assert(idSuccessCount === identitiesSuite.length, `100% de identidades de ingeniería certificadas con residuo nulo (${idSuccessCount}/${identitiesSuite.length})`);
+assert(idSuccessCount === identitiesSuite.length, `Identidades compatibles en las muestras evaluadas (${idSuccessCount}/${identitiesSuite.length})`);
 
 // Suite de 6 Falacias Matemáticas
 const fallaciesSuite = [
@@ -199,13 +205,13 @@ const fallaciesSuite = [
 let falRejectedCount = 0;
 for (const [s1, s2] of fallaciesSuite) {
   const res = Timonel.checkEquivalence(s1, s2);
-  if (!res.valid && res.status === 'divergent' && res.counterexample) {
+  if (!res.valid && ['divergent', 'domain_mismatch', 'inconclusive'].includes(res.status)) {
     falRejectedCount++;
   } else {
     console.error(`Falso positivo admitido en falacia: ${s1} <=> ${s2}`, res);
   }
 }
-assert(falRejectedCount === fallaciesSuite.length, `100% de falacias matemáticas rechazadas con contraejemplo exacto (${falRejectedCount}/${fallaciesSuite.length})`);
+assert(falRejectedCount === fallaciesSuite.length, `Transformaciones incorrectas no aprobadas por el comprobador (${falRejectedCount}/${fallaciesSuite.length})`);
 
 // Suite CAS: Motor de Álgebra Computacional Simbólica en Silicio (Algebrite + TimonelCAS)
 const algebritePath = path.join(rootDir, 'js', 'algebrite.min.js');
@@ -227,10 +233,9 @@ assert(typeof TimonelCAS.roots === 'function', 'TimonelCAS expone método roots'
 
 // Verificación de operaciones analíticas reales en silicio
 const solvedSteps = TimonelCAS.solveStepByStep('x^2 - 16 = 0').map(s => s.step);
-assert(solvedSteps.length >= 2, 'TimonelCAS resuelve x^2 - 16 = 0 produciendo derivación paso a paso');
+assert(solvedSteps.some(s => s.includes('x_1') && s.includes('-4') && s.includes('4')), 'CAS devuelve ambas raíces de x^2 - 16 = 0');
 const solvedAudit = Timonel.auditDerivation(solvedSteps);
-const allSolvedValid = solvedAudit.every(a => a.valid);
-assert(allSolvedValid, '100% de los pasos CAS resueltos están formalmente certificados con residuo nulo');
+assert(solvedAudit.slice(0, -1).every(a => a.valid) && !solvedAudit.at(-1).valid, 'Pasos algebraicos compatibles; completitud de raíces CAS queda sin demostrar por el linter');
 
 const factoredEq = TimonelCAS.factor('x^2 - 25 = 0');
 assert(factoredEq.includes('(x-5)*(x+5)'), 'TimonelCAS factoriza analíticamente x^2 - 25 = 0 a (x-5)*(x+5) = 0');
@@ -279,6 +284,60 @@ controllers.forEach(({ file, room }) => {
   const rContent = fs.readFileSync(rPath, 'utf8');
   assert(rContent.includes(`js/controllers/${file}`), `Sala ${room} vincula limpiamente a su controlador js/controllers/${file}`);
 });
+
+// Verificación especializada del motor 3D procedural desacoplado (museum_models.js)
+const modelsPath = path.join(rootDir, 'js', 'controllers', 'museum_models.js');
+assert(fs.existsSync(modelsPath), 'Motor geométrico 3D desacoplado museum_models.js existe en disco');
+
+const modelsContent = fs.readFileSync(modelsPath, 'utf8');
+assert(modelsContent.length > 50000, `museum_models.js contiene suite sustantiva de variedades 3D (>50 KB, actual: ${(modelsContent.length / 1024).toFixed(1)} KB)`);
+
+const museumHtmlPath = path.join(rootDir, 'museum.html');
+const museumHtmlContent = fs.readFileSync(museumHtmlPath, 'utf8');
+const idxModels = museumHtmlContent.indexOf('js/controllers/museum_models.js');
+const idxController = museumHtmlContent.indexOf('js/controllers/museum_controller.js');
+assert(idxModels !== -1, 'museum.html vincula explícitamente js/controllers/museum_models.js');
+assert(idxModels < idxController, 'museum.html carga museum_models.js ANTES de museum_controller.js para garantizar disponibilidad de constructores');
+
+const MuseumModels = require(modelsPath);
+assert(MuseumModels && typeof MuseumModels.BESPOKE_3D_BUILDERS === 'object', 'museum_models.js exporta catálogo BESPOKE_3D_BUILDERS');
+const numBuilders = Object.keys(MuseumModels.BESPOKE_3D_BUILDERS || {}).length;
+assert(numBuilders >= 37, `BESPOKE_3D_BUILDERS contiene constructores procedurales exhaustivos (encontrados: ${numBuilders} >= 37)`);
+
+let missingModelKeys = 0;
+ARTWORKS.forEach(art => {
+  if (!art.modelKey || !MuseumModels.BESPOKE_3D_BUILDERS[art.modelKey]) {
+    missingModelKeys++;
+    console.error(`Obra ${art.id} (${art.title}) tiene modelKey sin constructor 3D: ${art.modelKey}`);
+  }
+});
+assert(missingModelKeys === 0, `100% de las 100 obras del catálogo resuelven a un constructor 3D canónico en BESPOKE_3D_BUILDERS (defectos: ${missingModelKeys})`);
+
+// Verificación del Recolector Determinista de Basura VRAM / WebGL (disposeThreeObject)
+assert(typeof MuseumModels.disposeThreeObject === 'function', 'museum_models.js exporta función disposeThreeObject');
+assert(typeof MuseumModels.disposeMaterial === 'function', 'museum_models.js exporta función disposeMaterial');
+
+let geoDisposed = false;
+let matDisposed = false;
+let textureDisposed = false;
+let parentRemoved = false;
+const mockMesh = {
+  geometry: { dispose: () => { geoDisposed = true; } },
+  material: {
+    map: { dispose: () => { textureDisposed = true; } },
+    dispose: () => { matDisposed = true; }
+  }
+};
+const mockParent = {
+  remove: (child) => { parentRemoved = true; }
+};
+const mockGroup = {
+  parent: mockParent,
+  traverse: (cb) => { cb(mockMesh); }
+};
+MuseumModels.disposeThreeObject(mockGroup);
+assert(geoDisposed && matDisposed && textureDisposed && parentRemoved, 'disposeThreeObject libera recursivamente BufferGeometry, Material, Texturas y desconecta del Grafo de Escena');
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (NASA JPL & SILICIO NATIVO)
@@ -393,7 +452,7 @@ assert(shopContent.includes('Hahnemühle Photo Rag 308') && shopContent.includes
 console.log('\n═══════════════════════════════════════════════════════════════════════');
 console.log(`📊 RESULTADO DE LA AUDITORÍA: ${passedTests} APROBADAS / ${failedTests} FALLADAS (TOTAL: ${totalTests})`);
 if (failedTests === 0) {
-  console.log('🏛️  CERTIFICACIÓN TIMONEL F2: SISTEMA 100% LIBRE DE DEUDA TÉCNICA Y DEFORMACIÓN NUMÉRICA.');
+  console.log('Pruebas básicas aprobadas. No certifican precisión general, ausencia de deuda técnica ni descubrimientos científicos.');
 } else {
   console.error('⚠  SE HAN DETECTADO DISCREPANCIAS QUE DEBEN SUBSANARSE.');
 }

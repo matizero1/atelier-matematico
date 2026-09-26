@@ -151,7 +151,7 @@
         p = presets[idx] || {
           title: 'Diferencia de Cuadrados (Álgebra Troncal)',
           category: 'Cálculo I / Álgebra Troncal',
-          desc: 'Demuestra la equivalencia formal paso a paso. Cada renglón será evaluado por Timonel en silicio nativo.',
+          desc: 'Explora pasos algebraicos. El muestreo numérico orienta la revisión y no demuestra equivalencia formal.',
           steps: ['(x - 3)*(x + 3)', 'x*(x + 3) - 3*(x + 3)', 'x^2 + 3*x - 3*x - 9', 'x^2 - 9']
         };
       }
@@ -229,13 +229,13 @@
       let maxRes = 0;
 
       container.innerHTML = this.derivationSteps.map((stepText, idx) => {
-        const evalInfo = audit[idx] || { valid: true, status: 'certified', maxResidue: 0 };
+        const evalInfo = audit[idx] || { valid: false, status: 'inconclusive' };
         const isCertified = evalInfo.valid;
         if (!isCertified && idx > 0) hasDivergence = true;
         if (evalInfo.maxResidue > maxRes) maxRes = evalInfo.maxResidue;
 
         let badgeClass = 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30';
-        let badgeText = 'CERTIFICADO';
+        let badgeText = 'CONSISTENCIA MUESTRAL';
         let rowClass = 'border-white/10';
 
         if (idx === 0) {
@@ -243,7 +243,7 @@
           badgeText = 'PREMISA';
         } else if (!isCertified) {
           badgeClass = 'bg-red-950/60 text-red-300 border-red-500/50 divergent-pulse';
-          badgeText = 'DIVERGENCIA';
+          badgeText = ['inconclusive', 'domain_mismatch'].includes(evalInfo.status) ? 'REVISAR DOMINIO / RAÍCES' : 'DIVERGENCIA';
           rowClass = 'border-red-500/50 bg-red-950/10';
         }
 
@@ -251,7 +251,7 @@
           <div class="mt-2 text-[11px] mono text-red-300 bg-red-950/40 p-2.5 rounded-lg border border-red-500/30 flex items-start gap-2">
             <span class="text-red-400 font-bold text-sm">💡</span>
             <div>
-              <strong>Timonel:</strong> ${evalInfo.counterexample.desc}
+              <strong>Timonel:</strong> ${this.escapeHtml(evalInfo.counterexample.desc)}
             </div>
           </div>
         ` : '';
@@ -278,6 +278,7 @@
             <div id="katex-step-${idx}" class="text-sm text-[#dfc285] min-h-[22px] px-1 py-0.5 overflow-x-auto custom-scrollbar"></div>
             
             ${counterexampleHtml}
+            ${idx > 0 ? `<div class="text-[10px] text-amber-200">${this.escapeHtml(evalInfo.desc || "Comprobación numérica limitada")}</div>` : ""}
           </div>
         `;
       }).join('');
@@ -290,10 +291,10 @@
       if (statusBadge) {
         if (hasDivergence) {
           statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-950/60 text-red-300 border border-red-500/50 divergent-pulse';
-          statusBadge.textContent = 'DIVERGENCIA DETECTADA';
+          statusBadge.textContent = 'HAY PASOS SIN VALIDAR';
         } else {
           statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30';
-          statusBadge.textContent = 'CERTIFICADO (RESIDUO = 0)';
+          statusBadge.textContent = 'CONSISTENCIA MUESTRAL · NO ES PRUEBA';
         }
       }
 
@@ -1037,7 +1038,7 @@
       if (!grid) return;
 
       const list = students && students.length > 0 ? students : [
-        { id: 'self', name: 'Mi Pupitre (Local)', stepsCount: this.derivationSteps.length, status: 'certified', residue: 0, lastEq: this.derivationSteps[this.derivationSteps.length - 1] || '0' }
+        { id: 'self', name: 'Mi Pupitre (Local)', stepsCount: this.derivationSteps.length, status: 'unverified', residue: null, lastEq: this.derivationSteps[this.derivationSteps.length - 1] || '0' }
       ];
 
       if (countEl) countEl.textContent = String(list.length);
@@ -1046,8 +1047,8 @@
         <div class="bg-[#08080a] border border-white/10 rounded-xl p-3.5 flex flex-col gap-2">
           <div class="flex justify-between items-center text-xs mono">
             <span class="font-bold text-[#f4f1ea]">${this.escapeHtml(st.name)}</span>
-            <span class="text-[9px] px-2 py-0.5 rounded font-bold ${st.status === 'certified' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' : 'bg-red-950/60 text-red-300 border border-red-500/40'}">
-              ${st.status === 'certified' ? 'CERTIFICADO' : 'DIVERGENCIA'}
+            <span class="text-[9px] px-2 py-0.5 rounded font-bold ${st.status === 'numerically_consistent' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30' : 'bg-red-950/60 text-red-300 border border-red-500/40'}">
+              ${st.status === 'numerically_consistent' ? 'CONSISTENCIA MUESTRAL' : 'SIN VERIFICAR'}
             </span>
           </div>
           <div class="bg-[#101014] p-2 rounded text-xs font-mono text-[#dfc285] truncate">
@@ -1055,7 +1056,7 @@
           </div>
           <div class="flex justify-between items-center text-[10px] mono text-[#71717a]">
             <span>Pasos: ${st.stepsCount || 1}</span>
-            <span>Residuo: ${(st.residue || 0).toFixed(3)}</span>
+            <span>Residuo: ${Number.isFinite(st.residue) ? st.residue.toExponential(2) : "N/D"}</span>
           </div>
         </div>
       `).join('');
@@ -1063,13 +1064,13 @@
 
     exportLaTeXReport() {
       const title = document.getElementById('problem-title')?.textContent || 'Derivación';
-      let tex = `\\documentclass{article}\n\\usepackage{amsmath}\n\\title{${title} - Certificación Timonel}\n\\author{Atelier Matemático}\n\\begin{document}\n\\maketitle\n\n\\section*{Derivación Formal}\n\\begin{align*}\n`;
+      let tex = `\\documentclass{article}\n\\usepackage{amsmath}\n\\title{${title} - Registro Timonel}\n\\author{Atelier Matemático}\n\\begin{document}\n\\maketitle\n\n\\section*{Derivación Formal}\n\\begin{align*}\n`;
 
       this.derivationSteps.forEach((s, idx) => {
         const latexStep = this.mathStringToLaTeX(s);
         tex += `  \\text{Paso ${idx + 1}: } & ${latexStep} \\\\\n`;
       });
-      tex += `\\end{align*}\n\n\\textbf{Certificación:} Todos los pasos fueron evaluados deterministamente por Timonel F2 con residuo formal $\\|F(x)\\| \\le 10^{-12}$.\n\\end{document}`;
+      tex += `\\end{align*}\n\n\\textbf{Alcance:} Registro de pasos; no es una certificación. La revisión numérica muestral no demuestra equivalencia ni completitud de raíces.\n\\end{document}`;
 
       navigator.clipboard.writeText(tex).then(() => {
         alert('Código LaTeX formal copiado al portapapeles con éxito.');
@@ -1096,7 +1097,7 @@
       // Título
       ctx.fillStyle = '#c5a059';
       ctx.font = 'bold 20px Space Mono, monospace';
-      ctx.fillText('ATELIER MATEMÁTICO · LÁPIZ DE TIMONEL · CERTIFICACIÓN DE DERIVACIÓN', 100, 120);
+      ctx.fillText('ATELIER MATEMÁTICO · LÁPIZ DE TIMONEL · REGISTRO DE DERIVACIÓN', 100, 120);
 
       const title = document.getElementById('problem-title')?.textContent || 'Teorema Fundamental';
       ctx.fillStyle = '#f4f1ea';
@@ -1115,7 +1116,7 @@
       // Pie
       ctx.fillStyle = '#71717a';
       ctx.font = '14px Space Mono, monospace';
-      ctx.fillText('Certificado por Timonel F2 · Silicio Nativo · ‖F(x)‖ ≤ 1e-12 · Santiago de Chile, 2026', 100, 900);
+      ctx.fillText('Registro de práctica · Comprobación por muestras · Sin certificación formal', 100, 900);
 
       const link = document.createElement('a');
       link.download = `Certificacion_Derivacion_${title.replace(/\s+/g, '_')}.png`;

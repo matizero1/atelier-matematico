@@ -1,10 +1,10 @@
 /**
- * TIMONEL LINTER — Motor Determinista de Equivalencia Formal y Andamiaje Cognitivo
+ * TIMONEL LINTER — Comprobador Numérico de Pasos Algebraicos y Andamiaje Cognitivo
  * Atelier Matemático / Nai Systems
  * 
  * Principio: Cero autoengaño y verificación residual estricta en silicio.
  * Audita derivaciones algebraicas y ecuaciones paso a paso en tiempo real.
- * Si un paso preserva el conjunto solución y la equivalencia matemática: CERTIFIED (verde/dorado).
+ * El muestreo puede encontrar discrepancias; no demuestra equivalencia formal ni completitud de raíces.
  * Si un paso introduce una divergencia lógica: DIVERGENT (rojo) con contraejemplo numérico exacto.
  */
 
@@ -42,7 +42,8 @@
           while (i < expr.length && (/\d/.test(expr[i]) || expr[i] === '.')) {
             numStr += expr[i++];
           }
-          rawTokens.push({ type: 'NUM', value: parseFloat(numStr) });
+          if (!/^([0-9]+(\.[0-9]*)?|\.[0-9]+)$/.test(numStr)) throw new Error('Número no válido');
+          rawTokens.push({ type: 'NUM', value: Number(numStr) });
         } else if (/[a-zA-Z]/.test(ch)) {
           let name = '';
           while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
@@ -57,7 +58,7 @@
             rawTokens.push({ type: 'VAR', value: name });
           }
         } else {
-          i++;
+          throw new Error(`Carácter no admitido: '${ch}'`);
         }
       }
 
@@ -113,20 +114,20 @@
       };
 
       const parseMultiplicative = () => {
-        let node = parsePower();
+        let node = parseUnary();
         while (peek() && (peek().value === '*' || peek().value === '/')) {
           const op = consume().value;
-          const right = parsePower();
+          const right = parseUnary();
           node = { type: 'BINOP', op, left: node, right };
         }
         return node;
       };
 
       const parsePower = () => {
-        let node = parseUnary();
+        let node = parsePrimary();
         if (peek() && peek().value === '^') {
           consume('^');
-          const right = parsePower(); // right-associative
+          const right = parseUnary(); // right-associative, permits x^-2
           node = { type: 'BINOP', op: '^', left: node, right };
         }
         return node;
@@ -141,7 +142,7 @@
           consume('+');
           return parseUnary();
         }
-        return parsePrimary();
+        return parsePower();
       };
 
       const parsePrimary = () => {
@@ -170,7 +171,9 @@
         throw new Error(`Símbolo inesperado: '${tok.value}'`);
       };
 
-      return parseExpression();
+      const result = parseExpression();
+      if (pos !== tokens.length) throw new Error('Hay símbolos sin consumir');
+      return result;
     }
 
     evaluate(ast, scope = {}) {
@@ -300,25 +303,24 @@
           return list;
         };
 
-        const domains = ['standard', 'positive', 'bounded'];
-        let bestSamples = [];
-        for (const d of domains) {
-          const scopes = generateScopes(d);
-          const validPairs = [];
-          for (const sc of scopes) {
-            const vP = this.parser.evaluate(prevAst, sc);
-            const vC = this.parser.evaluate(currAst, sc);
-            if (!isNaN(vP) && !isNaN(vC) && isFinite(vP) && isFinite(vC)) {
-              validPairs.push({ sc, vP, vC });
-            }
+        const bestSamples = [];
+        const scopes = ['standard', 'positive', 'bounded'].flatMap(generateScopes);
+        // Include excluded-domain boundaries that generic nonzero samples miss.
+        for (const value of [0, -1, 1]) {
+          scopes.push(Object.fromEntries(varList.map(v => [v, value])));
+          for (const variable of varList) {
+            scopes.push(Object.fromEntries(varList.map(v => [v, v === variable ? value : 2])));
           }
-          if (validPairs.length >= 12) {
-            bestSamples = validPairs;
-            break;
+        }
+        for (const sc of scopes) {
+          const vP = this.parser.evaluate(prevAst, sc);
+          const vC = this.parser.evaluate(currAst, sc);
+          if (Number.isFinite(vP) !== Number.isFinite(vC)) {
+            return {valid: false, status: 'domain_mismatch', formal_proof: false,
+              desc: 'Los dominios difieren. Declara y verifica las restricciones antes de transformar.',
+              counterexample: {scope: sc, desc: `Solo un paso está definido en ${JSON.stringify(sc)}.`}};
           }
-          if (validPairs.length > bestSamples.length) {
-            bestSamples = validPairs;
-          }
+          if (Number.isFinite(vP) && Number.isFinite(vC)) bestSamples.push({sc, vP, vC});
         }
 
         if (bestSamples.length < 3) {
@@ -334,9 +336,10 @@
             const diff = Math.abs(item.vP - item.vC);
             const norm = 1.0 + Math.max(Math.abs(item.vP), Math.abs(item.vC));
             const relDiff = diff / norm;
+            maxRelResidue = Math.max(maxRelResidue, relDiff);
             if (diff > maxResidue) {
               maxResidue = diff;
-              maxRelResidue = relDiff;
+              maxRelResidue = Math.max(maxRelResidue, relDiff);
               worstCounterexample = {
                 scope: item.sc,
                 prevVal: item.vP,
@@ -362,14 +365,19 @@
             }
           }
           if (k === null) k = 1.0;
+          if (!Number.isFinite(k) || Math.abs(k) < 1e-12) {
+            return {valid: false, status: 'inconclusive', formal_proof: false,
+              desc: 'Una igualdad trivial no establece equivalencia con la otra ecuación.'};
+          }
 
           for (const item of bestSamples) {
             const diff = Math.abs(item.vP - k * item.vC);
             const norm = 1.0 + Math.max(Math.abs(item.vP), Math.abs(k * item.vC));
             const relDiff = diff / norm;
+            maxRelResidue = Math.max(maxRelResidue, relDiff);
             if (diff > maxResidue) {
               maxResidue = diff;
-              maxRelResidue = relDiff;
+              maxRelResidue = Math.max(maxRelResidue, relDiff);
               worstCounterexample = {
                 scope: item.sc,
                 prevVal: item.vP,
@@ -388,55 +396,20 @@
 
         let isCertified = maxResidue < 1e-7 || (maxRelResidue < 1e-7 && maxResidue < 1e-3);
 
-        // Si falló la equivalencia funcional ordinaria pero el paso anterior era una ecuación,
-        // verificar si el paso actual representa el conjunto solución o raíces exactas:
+        // Checking that a listed root works cannot establish that no roots were lost.
+        // Nonproportional equation residuals are inconclusive with this numerical method.
         if (!isCertified && isPrevEq) {
-          const candidateRoots = this.extractCandidateRoots(currStr);
-          if (candidateRoots.length > 0) {
-            const varName = varList[0] || 'x';
-            let rootsAllValid = true;
-            let worstRootRes = 0;
-            let worstRootVal = null;
-
-            for (const r of candidateRoots) {
-              const resVal = Math.abs(this.parser.evaluate(prevAst, { [varName]: r }));
-              if (isNaN(resVal) || resVal > 1e-6) {
-                rootsAllValid = false;
-                if (resVal > worstRootRes) {
-                  worstRootRes = resVal;
-                  worstRootVal = r;
-                }
-              }
-            }
-
-            if (rootsAllValid) {
-              isCertified = true;
-              maxResidue = 0;
-              worstCounterexample = {
-                sample: 0,
-                scope: { [varName]: candidateRoots[0] },
-                prevVal: 0,
-                currVal: 0,
-                residue: 0,
-                desc: 'Conjunto solución certificado en silicio. Cada raíz anula exactamente la ecuación previa (residuo = 0).'
-              };
-            } else if (worstRootVal !== null) {
-              maxResidue = worstRootRes;
-              worstCounterexample = {
-                sample: 0,
-                scope: { [varName]: worstRootVal },
-                prevVal: worstRootRes,
-                currVal: 0,
-                residue: worstRootRes,
-                desc: `Ruptura de equivalencia: ${varName} = ${worstRootVal} no satisface la ecuación previa (residuo = ${worstRootRes.toFixed(3)} ≠ 0).`
-              };
-            }
-          }
+          return { valid: false, status: 'inconclusive', formal_proof: false,
+            maxResidue, sample_count: bestSamples.length,
+            desc: 'No se ha establecido equivalencia de conjuntos solución; pueden faltar raíces.' };
         }
 
         return {
           valid: isCertified,
-          status: isCertified ? 'certified' : 'divergent',
+          status: isCertified ? 'numerically_consistent' : 'divergent',
+          formal_proof: false,
+          sample_count: bestSamples.length,
+          desc: isCertified ? 'Consistente en las muestras evaluadas; no es una prueba formal.' : 'Discrepancia numérica detectada.',
           maxResidue,
           counterexample: worstCounterexample ? {
             sample: 0,
@@ -445,70 +418,11 @@
             currVal: Number(worstCounterexample.currVal.toFixed(4)),
             residue: Number(worstCounterexample.residue.toFixed(4)),
             desc: isCertified
-              ? (worstCounterexample.desc || 'Equivalencia formal verificada. Residuo matemático nulo en silicio.')
+              ? (worstCounterexample.desc || 'Consistencia numérica en muestras; no demuestra equivalencia formal.')
               : `Ruptura de equivalencia: para ${JSON.stringify(worstCounterexample.scope)}, el paso previo da ${worstCounterexample.prevVal.toFixed(3)} pero tu paso da ${worstCounterexample.currVal.toFixed(3)} (error residual = ${worstCounterexample.residue.toFixed(3)}).`
           } : null
         };
       } catch (err) {
-        // Si falló el parsing de currStr (por ej. por símbolos lógicos \\lor en soluciones),
-        // intentar verificar si es un conjunto solución de prevStr si prevStr es ecuación válida:
-        try {
-          const prevTokens = this.parser.tokenize(prevStr);
-          const prevAst = this.parser.parse(prevTokens);
-          if (prevAst && prevAst.type === 'EQ') {
-            const candidateRoots = this.extractCandidateRoots(currStr);
-            if (candidateRoots.length > 0) {
-              const allVars = new Set();
-              this.parser.extractVariables(prevAst, allVars);
-              const varName = Array.from(allVars)[0] || 'x';
-              let rootsAllValid = true;
-              let worstRootRes = 0;
-              let worstRootVal = null;
-
-              for (const r of candidateRoots) {
-                const resVal = Math.abs(this.parser.evaluate(prevAst, { [varName]: r }));
-                if (isNaN(resVal) || resVal > 1e-6) {
-                  rootsAllValid = false;
-                  if (resVal > worstRootRes) {
-                    worstRootRes = resVal;
-                    worstRootVal = r;
-                  }
-                }
-              }
-
-              if (rootsAllValid) {
-                return {
-                  valid: true,
-                  status: 'certified',
-                  maxResidue: 0,
-                  counterexample: {
-                    sample: 0,
-                    scope: { [varName]: candidateRoots[0] },
-                    prevVal: 0,
-                    currVal: 0,
-                    residue: 0,
-                    desc: 'Conjunto solución certificado en silicio. Cada raíz anula exactamente la ecuación previa (residuo = 0).'
-                  }
-                };
-              } else if (worstRootVal !== null) {
-                return {
-                  valid: false,
-                  status: 'divergent',
-                  maxResidue: worstRootRes,
-                  counterexample: {
-                    sample: 0,
-                    scope: { [varName]: worstRootVal },
-                    prevVal: worstRootRes,
-                    currVal: 0,
-                    residue: worstRootRes,
-                    desc: `Ruptura de equivalencia: ${varName} = ${worstRootVal} no satisface la ecuación previa (residuo = ${worstRootRes.toFixed(3)} ≠ 0).`
-                  }
-                };
-              }
-            }
-          }
-        } catch (_) {}
-
         return {
           valid: false,
           status: 'syntax_error',
@@ -529,10 +443,10 @@
         const eqIdx = p.indexOf('=');
         if (eqIdx !== -1) {
           const valStr = p.substring(eqIdx + 1).trim();
-          const val = parseFloat(valStr);
+          const val = Number(valStr);
           if (!isNaN(val)) roots.push(val);
         } else {
-          const val = parseFloat(p);
+          const val = Number(p);
           if (!isNaN(val)) roots.push(val);
         }
       }

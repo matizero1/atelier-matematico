@@ -586,18 +586,18 @@ function buildTectonicRotunda() {
     post.position.set(px, 0.525, pz);
     rotundaGroup.add(post);
 
-    // Iluminación rasante empotrada en el perímetro exterior (16 focos LED ámbar)
-    if (i % 2 === 0) {
-      const spot = new THREE.PointLight(0xdfc285, 0.6, 5.0);
+    // Iluminación rasante empotrada en el perímetro exterior (4 focos LED cardinales + 16 luminarias emisivas)
+    if (i % 8 === 0) {
+      const spot = new THREE.PointLight(0xdfc285, 0.9, 7.0);
       spot.position.set(px * 0.96, 0.08, pz * 0.96);
       rotundaGroup.add(spot);
-
-      const fixtureGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.015, 16);
-      const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
-      const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
-      fixture.position.set(px * 0.96, 0.015, pz * 0.96);
-      rotundaGroup.add(fixture);
     }
+
+    const fixtureGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.015, 16);
+    const fixtureMat = new THREE.MeshBasicMaterial({ color: 0xdfc285 });
+    const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+    fixture.position.set(px * 0.96, 0.015, pz * 0.96);
+    rotundaGroup.add(fixture);
   }
 
   // 5. ARCOS MONUMENTALES DE LA RANURA DE CÚPULA (R = 26.0m, Y = 22.0m)
@@ -666,12 +666,15 @@ function createLivingMathematicalAstro(data, index) {
   astroGroup.add(timonelRing);
 
   // 2. Luz de Resonancia Cálida Orbital (Key & Fill exterior)
+  // Lazy dynamic lights: se inicializan ocultas para 0 sobrecosto en shaders forward de WebGL
   const pointLight = new THREE.PointLight(0xdfc285, 1.4, 8.0);
   pointLight.position.set(1.5, 2.0, 2.2);
+  pointLight.visible = false;
   astroGroup.add(pointLight);
 
   const fillLight = new THREE.PointLight(0x60a5fa, 0.8, 6.0);
   fillLight.position.set(-1.6, -1.2, -1.5);
+  fillLight.visible = false;
   astroGroup.add(fillLight);
 
   // 3. Sistema Matemático Físico Real de la Ley
@@ -839,6 +842,11 @@ function buildLorenz3D(epColor) {
     update: (dt, cycleT, phase, relaxFactor) => {
       group.rotation.y += 0.008;
       group.rotation.x += 0.003;
+      // Optimización de bus PCIe/WebGL: solo mutar y subir buffer de vértices si está enfocado o colimado
+      const isFocused = (typeof activeConfinementAstro !== 'undefined' && activeConfinementAstro && activeConfinementAstro.data.id === 1);
+      const isCollimated = (typeof collimatedAstroIndex !== 'undefined' && collimatedAstroIndex >= 0 && astros24[collimatedAstroIndex] && astros24[collimatedAstroIndex].data.id === 1);
+      if (!isFocused && !isCollimated) return;
+
       particleHead = (particleHead + dt * 180) % pts.length;
       for (let k = 0; k < numP; k++) {
         const idx = Math.floor((particleHead + k * (pts.length / numP)) % pts.length);
@@ -1713,7 +1721,8 @@ function buildBespokeAstroModel(id, data) {
       const isFocused = (typeof activeConfinementAstro !== 'undefined' && activeConfinementAstro && activeConfinementAstro.data.id === id);
       const isCollimated = (typeof collimatedAstroIndex !== 'undefined' && collimatedAstroIndex >= 0 && astros24[collimatedAstroIndex] && astros24[collimatedAstroIndex].data.id === id);
 
-      if (isFocused || isCollimated || (frameCount % 4 === 0)) {
+      // Cero sobrecosto de CPU: solo integrar el motor 2D en silicio si el astro está enfocado en Confinamiento o colimado en telescopio
+      if (isFocused || isCollimated) {
         try {
           window.AtelierMath.step(id);
         } catch (e) {
@@ -2056,23 +2065,28 @@ function propelToAstro(idx) {
   warpToTargetAstro(idx);
 }
 
+// Static reusable vectors to avoid GC pauses
+const _collimationLookDir = new THREE.Vector3();
+const _collimationToA = new THREE.Vector3();
+
 // ── CÁLCULO DE COLIMACIÓN ASTRONÓMICA CON TELESCOPIO (MODO ROTONDA) ──
 function updateTelescopeCollimation() {
   if (currentMuseumMode !== MODE_ROTUNDA_TELESCOPE || isInShopMode) return;
-  const lookDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  _collimationLookDir.set(0, 0, -1).applyQuaternion(camera.quaternion);
 
   let bestIdx = -1;
   let bestDot = Math.cos(10 * Math.PI / 180); // Cono de 10 grados para apuntado astronómico preciso
 
-  astros24.forEach((a, idx) => {
-    if (!a.group.visible) return; // Respetar filtro de época activo
-    const toA = new THREE.Vector3().subVectors(a.worldPos, camera.position).normalize();
-    const dot = lookDir.dot(toA);
+  for (let idx = 0; idx < astros24.length; idx++) {
+    const a = astros24[idx];
+    if (!a.group.visible) continue; // Respetar filtro de época activo
+    _collimationToA.subVectors(a.worldPos, camera.position).normalize();
+    const dot = _collimationLookDir.dot(_collimationToA);
     if (dot > bestDot) {
       bestDot = dot;
       bestIdx = idx;
     }
-  });
+  }
 
   collimatedAstroIndex = bestIdx;
   const card = document.getElementById('telescope-target-card');
@@ -2539,6 +2553,11 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// Static reusable transform objects to avoid GC spikes in 60 FPS animation loop
+const _camEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const _naiTarget = new THREE.Vector3();
+const _targetCam = new THREE.Vector3();
+
 function animate() {
   if (!isTabVisible && !isAutomationOrDirect) return; // 0% CPU/GPU en segundo plano
   frameCounter++;
@@ -2635,28 +2654,35 @@ function animate() {
       }
     }
 
-    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * 0.18;
-    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * 0.18;
-    camera.quaternion.setFromEuler(new THREE.Euler(orientation.pitch, orientation.yaw, 0, 'YXZ'));
+    const lerpFactor = isPointerLocked ? 0.55 : 0.35;
+    orientation.pitch += (targetOrientation.pitch - orientation.pitch) * lerpFactor;
+    orientation.yaw   += (targetOrientation.yaw - orientation.yaw) * lerpFactor;
+    _camEuler.set(orientation.pitch, orientation.yaw, 0);
+    camera.quaternion.setFromEuler(_camEuler);
 
-    // Calcular colimación astronómica con la lente del telescopio
-    updateTelescopeCollimation();
+    // Calcular colimación astronómica con la lente del telescopio cada 2 frames
+    if (frameCounter % 2 === 0) {
+      updateTelescopeCollimation();
+    }
 
     // Dinámica suave de NAI centinela en la rotonda
     if (nai3D.group) {
       nai3D.pulseTime += delta;
-      const naiTarget = new THREE.Vector3(
+      _naiTarget.set(
         2.6 + Math.sin(nai3D.pulseTime * 0.5) * 0.6,
         1.65 + Math.cos(nai3D.pulseTime * 0.8) * 0.25,
         -1.8
       );
-      nai3D.group.position.lerp(naiTarget, 0.04);
+      nai3D.group.position.lerp(_naiTarget, 0.04);
       nai3D.core.rotation.y += 0.02;
       nai3D.outerHalo.rotation.y -= 0.025;
       nai3D.light.intensity = 1.6 + Math.sin(nai3D.pulseTime * 4.0) * 0.3;
     }
 
-    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+    // Solo reorientar anillos hacia la cámara cuando el observador se desplaza o a baja frecuencia
+    if (moveLen > 0.001 || (frameCounter % 15 === 0)) {
+      astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+    }
 
   } else if (currentMuseumMode === MODE_SPHERE_CONFINEMENT && activeConfinementAstro) {
     // 2. MODO BURBUJA S²: Órbita libre con Mouse o Teclas (Flechas / WASD / QE):
@@ -2689,38 +2715,41 @@ function animate() {
       }
     }
 
-    sphereTheta  += (targetSphereTheta - sphereTheta) * 0.18;
-    spherePhi    += (targetSpherePhi - spherePhi) * 0.18;
-    sphereRadius += (targetSphereRadius - sphereRadius) * 0.15;
+    const confLerp = isPointerLocked ? 0.45 : 0.25;
+    sphereTheta  += (targetSphereTheta - sphereTheta) * confLerp;
+    spherePhi    += (targetSpherePhi - spherePhi) * confLerp;
+    sphereRadius += (targetSphereRadius - sphereRadius) * 0.20;
 
     const center = activeConfinementAstro.worldPos;
-    const targetCam = new THREE.Vector3(
+    _targetCam.set(
       center.x + sphereRadius * Math.sin(spherePhi) * Math.sin(sphereTheta),
       center.y + sphereRadius * Math.cos(spherePhi),
       center.z + sphereRadius * Math.sin(spherePhi) * Math.cos(sphereTheta)
     );
-    if (camera.position.distanceTo(targetCam) > 4.0) {
-      camera.position.copy(targetCam);
+    if (camera.position.distanceTo(_targetCam) > 4.0) {
+      camera.position.copy(_targetCam);
     } else {
-      camera.position.lerp(targetCam, 0.15);
+      camera.position.lerp(_targetCam, 0.22);
     }
     camera.lookAt(center);
 
     // Dinámica de NAI orbitando cerca del astro enfocado
     if (nai3D.group) {
       nai3D.pulseTime += delta;
-      const naiTarget = new THREE.Vector3(
+      _naiTarget.set(
         center.x + Math.sin(nai3D.pulseTime * 0.8) * 2.2,
         center.y + Math.cos(nai3D.pulseTime * 1.0) * 1.0,
         center.z + 1.6
       );
-      nai3D.group.position.lerp(naiTarget, 0.06);
+      nai3D.group.position.lerp(_naiTarget, 0.06);
       nai3D.core.rotation.y += 0.02;
       nai3D.outerHalo.rotation.y -= 0.025;
       nai3D.light.intensity = 1.8 + Math.sin(nai3D.pulseTime * 4.0) * 0.4;
     }
 
-    astros24.forEach(a => a.timonelRing.lookAt(camera.position));
+    if (activeConfinementAstro) {
+      activeConfinementAstro.timonelRing.lookAt(camera.position);
+    }
   }
 
   // Actualizar los 24 Modelos Matemáticos con Ciclo de Auto-Resolución y Culling Térmico
@@ -2729,6 +2758,13 @@ function animate() {
 
   astros24.forEach((astro) => {
     if (!astro.group.visible) return; // Si la época no está activa, 0% CPU
+
+    // Lazy Lights: Solo el astro activo/colimado activa luces dinámicas (evita saturar WebGL con 200 luces)
+    const shouldLight = isConfinement ? (astro === activeConfinementAstro) : (astro.index === collimatedAstroIndex);
+    if (astro.pointLight && astro.pointLight.visible !== shouldLight) {
+      astro.pointLight.visible = shouldLight;
+      astro.fillLight.visible = shouldLight;
+    }
 
     const distToCam = astro.worldPos.distanceTo(camPos);
 

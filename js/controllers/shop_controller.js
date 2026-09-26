@@ -59,7 +59,10 @@
       if (!isNaN(urlArt) && urlArt >= 0 && urlArt < 100) {
         defaultArt = urlArt;
       }
-      currentArtIdx = defaultArt;
+      const urlFormat = urlParams.get('format');
+      if (urlFormat && PRICES[urlFormat]) {
+        currentFormat = urlFormat;
+      }
 
       // 3. Inicializar textura matemática compartida con AtelierMath
       initMathCanvasTexture();
@@ -74,8 +77,9 @@
       const urlView = urlParams.get('view');
       if (urlView) setObserverPreset(urlView);
 
-      // 5. Cargar la obra inicial
+      // 5. Cargar la obra inicial y formato activo
       selectArtwork(currentArtIdx);
+      selectFormat(currentFormat);
 
       // 6. Iniciar loop de render
       animate();
@@ -966,14 +970,26 @@
       link.click();
     }
 
+    function cycleArtwork(delta) {
+      selectArtwork((currentArtIdx + delta + 100) % 100);
+    }
+
+    function restartArtwork() {
+      selectArtwork(currentArtIdx);
+    }
+
     // Exportación a nivel global
     window.selectArtwork = selectArtwork;
     window.cycleArtwork = cycleArtwork;
-    window.setCameraPreset = setCameraPreset;
-    window.switchProductFormat = switchProductFormat;
+    window.restartArtwork = restartArtwork;
+    window.setObserverPreset = setObserverPreset;
+    window.setCameraPreset = setObserverPreset;
+    window.selectFormat = selectFormat;
+    window.switchProductFormat = selectFormat;
     window.setFrameFinish = setFrameFinish;
     window.setMatteFinish = setMatteFinish;
-    window.setLightIntensity = setLightIntensity;
+    window.setLighting = setLighting;
+    window.setLightIntensity = setLighting;
     window.setCurrency = setCurrency;
     window.updatePriceDisplay = updatePriceDisplay;
     window.openCheckoutModal = openCheckoutModal;
@@ -981,6 +997,6 @@
     window.orderViaWhatsApp = orderViaWhatsApp;
     window.submitOrder = submitOrder;
     window.downloadCertificate = downloadCertificate;
+    window.downloadArtwork300DPI = downloadArtwork300DPI;
     window.startVideoRecording = startVideoRecording;
     window.togglePalette = togglePalette;
-    window.restartArtwork = restartArtwork;

@@ -2769,6 +2769,34 @@ function bootAtlas() {
   }
 }
 
+// Exportación explícita para interactividad con eventos DOM y onclicks HTML
+window.warpToTargetAstro = warpToTargetAstro;
+window.enterCapsule = enterCapsule;
+window.returnToRotunda = returnToRotunda;
+window.toggleVoiceGuide = toggleVoiceGuide;
+window.toggleDiscoveryDrawer = toggleDiscoveryDrawer;
+window.toggleCameraRoll = toggleCameraRoll;
+window.toggleHudCardMinimize = toggleHudCardMinimize;
+window.perturbCurrentAstro = perturbCurrentAstro;
+window.triggerShutter = triggerShutter;
+window.navigateToActiveShop = navigateToActiveShop;
+window.exitShopMode = exitShopMode;
+window.switch3DProduct = switch3DProduct;
+window.processDirectCheckout = processDirectCheckout;
+window.clearCameraRoll = clearCameraRoll;
+window.deleteRollItem = deleteRollItem;
+window.exportDiscoveryLedger = exportDiscoveryLedger;
+window.clearDiscoveryLedger = clearDiscoveryLedger;
+window.simulateDiscoveryCandidate = simulateDiscoveryCandidate;
+window.openTelescopeGotoTerminal = openTelescopeGotoTerminal;
+window.closeTelescopeGotoTerminal = closeTelescopeGotoTerminal;
+window.toggleTelescopeGotoTerminal = toggleTelescopeGotoTerminal;
+window.slewTelescopeToTarget = slewTelescopeToTarget;
+window.filterGotoCatalog = filterGotoCatalog;
+window.setGotoEpochFilter = setGotoEpochFilter;
+window.filterEpoch = filterEpoch;
+window.togglePointerLock = togglePointerLock;
+
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', bootAtlas);
 } else {

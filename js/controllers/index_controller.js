@@ -250,3 +250,16 @@
       }
       requestAnimationFrame(renderSpatialParallax);
     }
+
+    function goToShopHeroArt() {
+      window.location.href = `shop.html?art=${currentHeroArt}`;
+    }
+
+    // Exportación explícita para compatibilidad total con eventos DOM y onclick
+    window.currentHeroArt = currentHeroArt;
+    window.setHeroArtwork = setHeroArtwork;
+    window.cycleHeroArtwork = cycleHeroArtwork;
+    window.loadArtworkInHero = loadArtworkInHero;
+    window.setEpochFilter = setEpochFilter;
+    window.handleCatalogFilter = handleCatalogFilter;
+    window.goToShopHeroArt = goToShopHeroArt;

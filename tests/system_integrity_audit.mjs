@@ -523,6 +523,58 @@ cspRooms.forEach(room => {
   assert(content.includes('src="js/tailwindcss.min.js"'), `Sala ${room} vincula tailwindcss localmente sin depender de CDN externo`);
 });
 
+// 7. Verificación de Integridad de Enlaces y Conexiones DOM (Onclicks & Cross-Links)
+const roomControllers = {
+  'index.html': ['js/controllers/index_controller.js', 'js/controllers/desktop_modal.js'],
+  'shop.html': ['js/controllers/shop_controller.js', 'js/controllers/desktop_modal.js'],
+  'studio.html': ['js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
+  'museum.html': ['js/controllers/museum_controller.js', 'js/controllers/museum_models.js', 'js/controllers/desktop_modal.js'],
+  'classroom.html': ['js/controllers/classroom_controller.js', 'js/controllers/desktop_modal.js']
+};
+
+for (const [htmlFile, jsFiles] of Object.entries(roomControllers)) {
+  const htmlContent = fs.readFileSync(path.join(rootDir, htmlFile), 'utf8');
+  const combinedJs = jsFiles.map(f => fs.readFileSync(path.join(rootDir, f), 'utf8')).join('\n');
+  
+  // Extraer llamadas en onclick="..."
+  const onclicks = [...htmlContent.matchAll(/onclick="([^"]+)"/g)].map(m => m[1]);
+  const calledFns = new Set();
+  onclicks.forEach(expr => {
+    const cleanExpr = expr.replace(/\x27[^\x27]*\x27/g, '""').replace(/"[^"]*"/g, '""');
+    const matches = cleanExpr.matchAll(/([a-zA-Z0-9_$]+)\s*\(/g);
+    for (const m of matches) {
+      const name = m[1];
+      if (!['alert', 'parseInt', 'encodeURIComponent', 'isNaN', 'confirm'].includes(name)) {
+        calledFns.add(name);
+      }
+    }
+  });
+
+  let allBound = true;
+  for (const fn of calledFns) {
+    const isDeclared = combinedJs.includes('function ' + fn) || combinedJs.includes(fn + ' =');
+    const isExported = combinedJs.includes('window.' + fn + ' =') || combinedJs.includes('root.' + fn + ' =');
+    if (!isDeclared || !isExported) {
+      allBound = false;
+      break;
+    }
+  }
+  assert(allBound, `Sala ${htmlFile}: 100% de las funciones interactivas onclick están declaradas y expuestas a window`);
+
+  // Validar enlaces href internos
+  const hrefs = [...htmlContent.matchAll(/href="([^"#]+)(#[^"]*)?"/g)].map(m => m[1]);
+  const internalHrefs = hrefs.filter(h => !h.startsWith('http') && !h.startsWith('mailto:') && !h.startsWith('tel:') && !h.startsWith('data:'));
+  let allHrefsValid = true;
+  for (const h of internalHrefs) {
+    const baseFile = h.split('?')[0];
+    if (!fs.existsSync(path.join(rootDir, baseFile))) {
+      allHrefsValid = false;
+      break;
+    }
+  }
+  assert(allHrefsValid, `Sala ${htmlFile}: Todos los enlaces de navegación interna resuelven a archivos existentes`);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────

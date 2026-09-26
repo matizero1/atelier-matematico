@@ -1070,9 +1070,18 @@
       });
       tex += `\\end{align*}\n\n\\textbf{Alcance:} Registro de pasos; no es una certificación. La revisión numérica muestral no demuestra equivalencia ni completitud de raíces.\n\\end{document}`;
 
-      navigator.clipboard.writeText(tex).then(() => {
-        alert('Código LaTeX formal copiado al portapapeles con éxito.');
-      });
+      if (typeof window !== 'undefined' && window.AtelierDesktop && window.AtelierDesktop.saveFile && window.isAtelierDesktop) {
+        const texFilename = `Reporte_${title.replace(/\s+/g, '_')}.tex`;
+        window.AtelierDesktop.saveFile(texFilename, tex, false);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(tex).then(() => {
+          alert('Código LaTeX formal copiado al portapapeles con éxito.');
+        }).catch(() => {
+          alert('Reporte LaTeX generado con éxito.');
+        });
+      }
     }
 
     downloadFineArtPlate() {
@@ -1116,9 +1125,16 @@
       ctx.font = '14px Space Mono, monospace';
       ctx.fillText('Registro de práctica · Comprobación por muestras · Sin certificación formal', 100, 900);
 
+      const plateFilename = `Certificacion_Derivacion_${title.replace(/\s+/g, '_')}.png`;
+      const plateDataUrl = canvas.toDataURL('image/png');
+
+      if (typeof window !== 'undefined' && window.AtelierDesktop && window.AtelierDesktop.saveFile && window.isAtelierDesktop) {
+        window.AtelierDesktop.saveFile(plateFilename, plateDataUrl, true);
+      }
+
       const link = document.createElement('a');
-      link.download = `Certificacion_Derivacion_${title.replace(/\s+/g, '_')}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.download = plateFilename;
+      link.href = plateDataUrl;
       link.click();
     }
 

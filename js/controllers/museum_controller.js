@@ -3837,6 +3837,827 @@ function buildAutomata3D(epColor) {
   };
 }
 
+// 22. Superficie Termodinámica P-V-T del Gas Ideal (PV = nRT)
+function buildIdealGas3D(epColor) {
+  const group = new THREE.Group();
+  const nu = 24, nv = 24;
+  const gasGeo = createParametricSurface(nu, nv, (u, v) => {
+    const V = 0.5 + u * 1.5;
+    const T = 0.6 + v * 1.4;
+    const P = (0.55 * T) / V;
+    return {
+      x: (u - 0.5) * 1.5,
+      y: (P - 0.9) * 0.9,
+      z: (v - 0.5) * 1.4
+    };
+  });
+  const gasMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.75,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.75
+  });
+  group.add(new THREE.Mesh(gasGeo, gasMat));
+
+  const isoCurves = [0.2, 0.5, 0.8];
+  isoCurves.forEach(vFix => {
+    const pts = [];
+    for (let u = 0; u <= 1.0; u += 0.05) {
+      const V = 0.5 + u * 1.5;
+      const T = 0.6 + vFix * 1.4;
+      const P = (0.55 * T) / V;
+      pts.push(new THREE.Vector3((u - 0.5) * 1.5, (P - 0.9) * 0.9 + 0.01, (vFix - 0.5) * 1.4));
+    }
+    const isoGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    group.add(new THREE.Line(isoGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 })));
+  });
+
+  const stateMarker = new THREE.Mesh(
+    new THREE.SphereGeometry(0.06, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.8 })
+  );
+  group.add(stateMarker);
+
+  let gasTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      gasTime += dt * 1.8;
+      const u = 0.5 + 0.45 * Math.sin(gasTime);
+      const vFix = 0.5;
+      const V = 0.5 + u * 1.5;
+      const T = 0.6 + vFix * 1.4;
+      const P = (0.55 * T) / V;
+      stateMarker.position.set((u - 0.5) * 1.5, (P - 0.9) * 0.9 + 0.02, (vFix - 0.5) * 1.4);
+    }
+  };
+}
+
+// 23. Ciclo Termodinámico Cerrado de Carnot (Isotermas y Adiabáticas en Espacio P-V-T)
+function buildCarnotCycle3D(epColor) {
+  const group = new THREE.Group();
+  const pA = new THREE.Vector3(-0.6,  0.7,  0.5);
+  const pB = new THREE.Vector3( 0.1,  0.25, 0.5);
+  const pC = new THREE.Vector3( 0.7, -0.5, -0.5);
+  const pD = new THREE.Vector3( 0.0, -0.2, -0.5);
+
+  const curve = new THREE.CatmullRomCurve3([pA, pB, pC, pD], true, 'centripetal');
+  const tubeGeo = new THREE.TubeGeometry(curve, 64, 0.045, 12, true);
+  const tubeMat = new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    roughness: 0.2,
+    metalness: 0.8
+  });
+  group.add(new THREE.Mesh(tubeGeo, tubeMat));
+
+  const patchPts = curve.getPoints(32);
+  const patchGeo = new THREE.BufferGeometry();
+  const patchVerts = [];
+  const center = new THREE.Vector3(0.05, 0.06, 0.0);
+  for (let i = 0; i < patchPts.length; i++) {
+    const next = patchPts[(i + 1) % patchPts.length];
+    patchVerts.push(center.x, center.y, center.z);
+    patchVerts.push(patchPts[i].x, patchPts[i].y, patchPts[i].z);
+    patchVerts.push(next.x, next.y, next.z);
+  }
+  patchGeo.setAttribute('position', new THREE.Float32BufferAttribute(patchVerts, 3));
+  patchGeo.computeVertexNormals();
+  group.add(new THREE.Mesh(patchGeo, new THREE.MeshBasicMaterial({
+    color: 0xd97706,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.35
+  })));
+
+  const arrowH = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), new THREE.Vector3(-0.25, 0.9, 0.5), 0.35, 0xef4444, 0.1, 0.06);
+  const arrowC = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), new THREE.Vector3( 0.35, -0.35, -0.5), 0.35, 0x3b82f6, 0.1, 0.06);
+  group.add(arrowH);
+  group.add(arrowC);
+
+  const pulseMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.0 })
+  );
+  group.add(pulseMesh);
+
+  let carnotProg = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      carnotProg = (carnotProg + dt * 0.25) % 1.0;
+      const pt = curve.getPoint(carnotProg);
+      pulseMesh.position.copy(pt);
+      if (pt.z > 0) {
+        pulseMesh.material.color.setHex(0xf97316);
+        pulseMesh.material.emissive.setHex(0xf97316);
+      } else {
+        pulseMesh.material.color.setHex(0x38bdf8);
+        pulseMesh.material.emissive.setHex(0x38bdf8);
+      }
+    }
+  };
+}
+
+// 24. Distribución de Velocidades de Maxwell-Boltzmann en R³
+function buildMaxwellBoltzmannDist3D(epColor) {
+  const group = new THREE.Group();
+  const vpRadius = 0.62;
+  const shellGeo = new THREE.SphereGeometry(vpRadius, 32, 24);
+  const shellMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.1,
+    metalness: 0.8,
+    transparent: true,
+    opacity: 0.32,
+    wireframe: true
+  });
+  group.add(new THREE.Mesh(shellGeo, shellMat));
+
+  const bellPts = [];
+  const numSteps = 48;
+  for (let i = 0; i <= numSteps; i++) {
+    const r = (i / numSteps) * 1.35;
+    const y = 2.4 * r * r * Math.exp(-(r * r) / 0.38);
+    bellPts.push(new THREE.Vector3(r, y - 0.6, 0));
+  }
+  const bellGeo = new THREE.BufferGeometry().setFromPoints(bellPts);
+  group.add(new THREE.Line(bellGeo, new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 3 })));
+
+  const bellPtsNeg = bellPts.map(p => new THREE.Vector3(-p.x, p.y, p.z));
+  group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bellPtsNeg), new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 3 })));
+
+  const numV = 64;
+  const vPos = new Float32Array(numV * 3);
+  const vSpeeds = new Float32Array(numV);
+  const vDirs = [];
+  for (let k = 0; k < numV; k++) {
+    const gx = (Math.random() + Math.random() + Math.random() - 1.5);
+    const gy = (Math.random() + Math.random() + Math.random() - 1.5);
+    const gz = (Math.random() + Math.random() + Math.random() - 1.5);
+    const dir = new THREE.Vector3(gx, gy, gz).normalize();
+    const speed = Math.sqrt(gx*gx + gy*gy + gz*gz) * 0.75;
+    vDirs.push(dir);
+    vSpeeds[k] = speed;
+    vPos[k*3]   = dir.x * speed;
+    vPos[k*3+1] = dir.y * speed;
+    vPos[k*3+2] = dir.z * speed;
+  }
+  const vGeo = new THREE.BufferGeometry();
+  vGeo.setAttribute('position', new THREE.BufferAttribute(vPos, 3));
+  group.add(new THREE.Points(vGeo, new THREE.PointsMaterial({
+    size: 0.045,
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.85
+  })));
+
+  let mbTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.006;
+      mbTime += dt * 2.0;
+      for (let k = 0; k < numV; k++) {
+        const pulse = 1.0 + 0.12 * Math.sin(mbTime + k);
+        const r = vSpeeds[k] * pulse;
+        vPos[k*3]   = vDirs[k].x * r;
+        vPos[k*3+1] = vDirs[k].y * r;
+        vPos[k*3+2] = vDirs[k].z * r;
+      }
+      vGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 25. Partición del Espacio de Fases de Boltzmann (S = kB ln Ω)
+function buildBoltzmannEntropy3D(epColor) {
+  const group = new THREE.Group();
+  const cellsGroup = new THREE.Group();
+  const d = 0.38;
+  for (let x = -1; x <= 1; x++) {
+    for (let y = -1; y <= 1; y++) {
+      for (let z = -1; z <= 1; z++) {
+        const box = new THREE.BoxGeometry(d * 0.88, d * 0.88, d * 0.88);
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(box),
+          new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.4 })
+        );
+        edges.position.set(x * d, y * d, z * d);
+        cellsGroup.add(edges);
+      }
+    }
+  }
+  group.add(cellsGroup);
+
+  const omegaGeo = new THREE.SphereGeometry(0.72, 24, 24);
+  const omegaMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.1,
+    metalness: 0.9,
+    transparent: true,
+    opacity: 0.35
+  });
+  const omegaMesh = new THREE.Mesh(omegaGeo, omegaMat);
+  group.add(omegaMesh);
+
+  const numM = 36;
+  const mGeo = new THREE.BufferGeometry();
+  const mPos = new Float32Array(numM * 3);
+  for (let i = 0; i < numM; i++) {
+    mPos[i*3]   = (Math.random() - 0.5) * 1.1;
+    mPos[i*3+1] = (Math.random() - 0.5) * 1.1;
+    mPos[i*3+2] = (Math.random() - 0.5) * 1.1;
+  }
+  mGeo.setAttribute('position', new THREE.BufferAttribute(mPos, 3));
+  group.add(new THREE.Points(mGeo, new THREE.PointsMaterial({
+    size: 0.055,
+    color: 0xf59e0b,
+    transparent: true,
+    opacity: 0.9
+  })));
+
+  let bTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      group.rotation.x += 0.003;
+      bTime += dt * 3.0;
+      const scaleS = 1.0 + 0.08 * Math.sin(bTime);
+      omegaMesh.scale.set(scaleS, 1.0 + 0.05 * Math.cos(bTime * 0.7), scaleS);
+      for (let i = 0; i < numM; i++) {
+        mPos[i*3+1] += Math.sin(bTime + i * 2.0) * 0.004;
+      }
+      mGeo.attributes.position.needsUpdate = true;
+    }
+  };
+}
+
+// 26. Ley de Enfriamiento de Newton (dT/dt = -k(T - T_env)) en R³
+function buildThermalCooling3D(epColor) {
+  const group = new THREE.Group();
+  const coreMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.28, 24, 24),
+    new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xef4444,
+      emissiveIntensity: 0.8,
+      roughness: 0.3,
+      metalness: 0.7
+    })
+  );
+  group.add(coreMesh);
+
+  const shells = [
+    { r: 0.52, color: 0xf97316, op: 0.45 },
+    { r: 0.78, color: 0xfacc15, op: 0.30 },
+    { r: 1.05, color: 0x38bdf8, op: 0.18 }
+  ];
+  shells.forEach(s => {
+    group.add(new THREE.Mesh(
+      new THREE.SphereGeometry(s.r, 24, 18),
+      new THREE.MeshStandardMaterial({
+        color: s.color,
+        roughness: 0.2,
+        metalness: 0.5,
+        transparent: true,
+        opacity: s.op,
+        wireframe: true
+      })
+    ));
+  });
+
+  const streamGroup = new THREE.Group();
+  for (let a = 0; a < 6; a++) {
+    const ang = (a / 6) * Math.PI * 2;
+    const pts = [];
+    for (let h = -0.7; h <= 0.9; h += 0.1) {
+      const rad = 0.32 + Math.abs(h) * 0.35 + 0.05 * Math.sin(h * 6);
+      pts.push(new THREE.Vector3(Math.cos(ang) * rad, h, Math.sin(ang) * rad));
+    }
+    const cCurve = new THREE.CatmullRomCurve3(pts);
+    streamGroup.add(new THREE.Mesh(
+      new THREE.TubeGeometry(cCurve, 20, 0.015, 6, false),
+      new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.6 })
+    ));
+  }
+  group.add(streamGroup);
+
+  let coolTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      coolTime += dt * 2.5;
+      coreMesh.material.emissiveIntensity = 0.6 + 0.35 * Math.sin(coolTime);
+      streamGroup.rotation.y += dt * 0.4;
+    }
+  };
+}
+
+// 27. Paquete de Onda Cuántica de De Broglie (λ = h/p, ψ = A e^{i(kx - ωt)})
+function buildDeBroglieWave3D(epColor) {
+  const group = new THREE.Group();
+  const numSteps = 120;
+  const helixPts = [];
+  const k = 14.0;
+  for (let i = 0; i <= numSteps; i++) {
+    const x = -1.1 + (i / numSteps) * 2.2;
+    const envelope = 0.48 * Math.exp(-(x * x) / 0.35);
+    helixPts.push(new THREE.Vector3(x, envelope * Math.cos(k * x), envelope * Math.sin(k * x)));
+  }
+  const helixCurve = new THREE.CatmullRomCurve3(helixPts);
+  const helixTube = new THREE.Mesh(
+    new THREE.TubeGeometry(helixCurve, 120, 0.024, 8, false),
+    new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.15, metalness: 0.85 })
+  );
+  group.add(helixTube);
+
+  const envGeo = createParametricSurface(24, 24, (u, v) => {
+    const x = -1.1 + u * 2.2;
+    const r = 0.52 * Math.exp(-(x * x) / 0.35);
+    const th = v * Math.PI * 2;
+    return { x: x, y: r * Math.cos(th), z: r * Math.sin(th) };
+  });
+  group.add(new THREE.Mesh(
+    envGeo,
+    new THREE.MeshStandardMaterial({ color: epColor, transparent: true, opacity: 0.22, side: THREE.DoubleSide })
+  ));
+
+  const corpuscle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.9 })
+  );
+  group.add(corpuscle);
+
+  const axis = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-1.25, 0, 0), new THREE.Vector3(1.25, 0, 0)]),
+    new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.5 })
+  );
+  group.add(axis);
+
+  let wavePhase = 0;
+  return {
+    group,
+    update: (dt) => {
+      helixTube.rotation.x += dt * 5.0;
+      wavePhase += dt * 1.5;
+      corpuscle.position.x = 0.45 * Math.sin(wavePhase);
+    }
+  };
+}
+
+// 28. Elipsoide Simpléctico de Incertidumbre de Heisenberg (Δx · Δp ≥ ℏ/2)
+function buildHeisenbergUncertainty3D(epColor) {
+  const group = new THREE.Group();
+  const ellGeo = new THREE.SphereGeometry(0.65, 32, 24);
+  const ellMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.2,
+    metalness: 0.85,
+    transparent: true,
+    opacity: 0.7
+  });
+  const ellMesh = new THREE.Mesh(ellGeo, ellMat);
+  group.add(ellMesh);
+
+  const cage = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(1.6, 1.6, 1.6)),
+    new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.35 })
+  );
+  group.add(cage);
+
+  const gridHelper = new THREE.GridHelper(1.5, 10, 0xdfc285, 0x334155);
+  gridHelper.rotation.x = Math.PI / 2;
+  group.add(gridHelper);
+
+  let uncTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      uncTime += dt * 2.2;
+      const s = 0.55 + 0.35 * Math.sin(uncTime);
+      const invS = 1.0 / s;
+      ellMesh.scale.set(s, invS * 0.4, 0.7);
+    }
+  };
+}
+
+// 29. Dispersión Relativista y Salto de Masa de Dirac (E² = p²c² + m²c⁴)
+function buildDiracEquation3D(epColor) {
+  const group = new THREE.Group();
+  const gap = 0.32;
+  const sheetGeoPos = createParametricSurface(24, 24, (u, v) => {
+    const p = u * 0.85;
+    const th = v * Math.PI * 2;
+    const E = Math.sqrt(p * p + gap * gap);
+    return { x: p * Math.cos(th), y: E, z: p * Math.sin(th) };
+  });
+  group.add(new THREE.Mesh(sheetGeoPos, new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    roughness: 0.2,
+    metalness: 0.8,
+    side: THREE.DoubleSide
+  })));
+
+  const sheetGeoNeg = createParametricSurface(24, 24, (u, v) => {
+    const p = u * 0.85;
+    const th = v * Math.PI * 2;
+    const E = -Math.sqrt(p * p + gap * gap);
+    return { x: p * Math.cos(th), y: E, z: p * Math.sin(th) };
+  });
+  group.add(new THREE.Mesh(sheetGeoNeg, new THREE.MeshStandardMaterial({
+    color: 0xf43f5e,
+    roughness: 0.2,
+    metalness: 0.8,
+    side: THREE.DoubleSide
+  })));
+
+  const gapGeo = new THREE.CylinderGeometry(0.35, 0.35, gap * 2, 24, 1, true);
+  group.add(new THREE.Mesh(gapGeo, new THREE.MeshBasicMaterial({
+    color: 0xfacc15,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.35
+  })));
+
+  const spinor = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 0.55, 0xfacc15, 0.12, 0.08);
+  group.add(spinor);
+
+  let diracTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.008;
+      diracTime += dt * 3.5;
+      const sx = 0.35 * Math.sin(diracTime);
+      const sz = 0.35 * Math.cos(diracTime);
+      spinor.setDirection(new THREE.Vector3(sx, 0.8, sz).normalize());
+    }
+  };
+}
+
+// 30. Cuantización de Cavidad de Planck (E = hν) y Fotones Discretos
+function buildPlanckQuantum3D(epColor) {
+  const group = new THREE.Group();
+  const m1 = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.52, 0.52, 0.04, 32),
+    new THREE.MeshStandardMaterial({ color: 0xc5a059, roughness: 0.1, metalness: 0.95 })
+  );
+  m1.rotation.z = Math.PI / 2;
+  m1.position.x = -0.85;
+  group.add(m1);
+
+  const m2 = m1.clone();
+  m2.position.x = 0.85;
+  group.add(m2);
+
+  const modes = [
+    { n: 1, color: 0xef4444, amp: 0.22, yOff: 0.28 },
+    { n: 2, color: 0x38bdf8, amp: 0.18, yOff: 0.0 },
+    { n: 3, color: 0x10b981, amp: 0.14, yOff: -0.28 }
+  ];
+  const modeLines = [];
+  modes.forEach(m => {
+    const pts = [];
+    const N = 48;
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      const x = -0.85 + u * 1.7;
+      const y = m.yOff + m.amp * Math.sin(m.n * Math.PI * u);
+      pts.push(new THREE.Vector3(x, y, 0));
+    }
+    const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: m.color, linewidth: 2 }));
+    group.add(line);
+    modeLines.push({ line, geo: lineGeo, mode: m, pts });
+  });
+
+  const photon = new THREE.Mesh(
+    new THREE.SphereGeometry(0.065, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.0 })
+  );
+  group.add(photon);
+
+  let pTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.005;
+      pTime += dt * 4.0;
+      modeLines.forEach(item => {
+        const m = item.mode;
+        const pos = item.geo.attributes.position.array;
+        const N = 48;
+        for (let i = 0; i <= N; i++) {
+          const u = i / N;
+          const vib = Math.cos(pTime * m.n) * m.amp * Math.sin(m.n * Math.PI * u);
+          pos[i * 3 + 1] = m.yOff + vib;
+        }
+        item.geo.attributes.position.needsUpdate = true;
+      });
+
+      const activeMode = modes[Math.floor((pTime * 0.4) % 3)];
+      photon.position.set(0.4 * Math.sin(pTime * 2.0), activeMode.yOff, 0);
+    }
+  };
+}
+
+// 31. Árbol Tridimensional de Bifurcación de Feigenbaum (x_{n+1} = r x_n (1 - x_n))
+function buildLogisticFeigenbaum3D(epColor) {
+  const group = new THREE.Group();
+  const numR = 90;
+  const treePts = [];
+  for (let ir = 0; ir < numR; ir++) {
+    const r = 2.8 + (ir / numR) * 1.2;
+    let x = 0.5;
+    for (let t = 0; t < 120; t++) {
+      x = r * x * (1.0 - x);
+    }
+    for (let s = 0; s < 32; s++) {
+      x = r * x * (1.0 - x);
+      const px = ((r - 2.8) / 1.2 - 0.5) * 1.8;
+      const py = (x - 0.5) * 1.35;
+      const pz = (Math.sin(s * 0.4) * 0.08);
+      treePts.push(px, py, pz);
+    }
+  }
+
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.Float32BufferAttribute(treePts, 3));
+  group.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 0.035,
+    color: epColor,
+    transparent: true,
+    opacity: 0.85
+  })));
+
+  const r1X = ((3.0 - 2.8) / 1.2 - 0.5) * 1.8;
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(r1X, -0.7, 0), new THREE.Vector3(r1X, 0.7, 0)]),
+    new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5 })
+  ));
+
+  const r2X = ((3.449 - 2.8) / 1.2 - 0.5) * 1.8;
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(r2X, -0.7, 0), new THREE.Vector3(r2X, 0.7, 0)]),
+    new THREE.LineBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.5 })
+  ));
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+    }
+  };
+}
+
+// 32. Mecánica Hamiltoniana: Toroide Simpléctico de Liouville-Arnol'd en Espacio de Fases
+function buildHamiltonPhase3D(epColor) {
+  const group = new THREE.Group();
+  const torusGeo = new THREE.TorusGeometry(0.72, 0.28, 24, 48);
+  const torusMat = new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.75,
+    transparent: true,
+    opacity: 0.65
+  });
+  group.add(new THREE.Mesh(torusGeo, torusMat));
+
+  const orbitPts = [];
+  const N = 240;
+  const R = 0.72, r = 0.28;
+  const phiStep = (Math.sqrt(5) - 1) / 2;
+  for (let i = 0; i <= N; i++) {
+    const theta = (i / N) * Math.PI * 16;
+    const phi = theta * phiStep;
+    orbitPts.push(new THREE.Vector3(
+      (R + r * Math.cos(phi)) * Math.cos(theta),
+      (R + r * Math.cos(phi)) * Math.sin(theta),
+      r * Math.sin(phi)
+    ));
+  }
+  const orbitGeo = new THREE.BufferGeometry().setFromPoints(orbitPts);
+  group.add(new THREE.Line(orbitGeo, new THREE.LineBasicMaterial({ color: 0xfacc15, linewidth: 2 })));
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.x += 0.006;
+      group.rotation.y += 0.008;
+    }
+  };
+}
+
+// 33. Identidad Suprema de Euler (e^{iπ} + 1 = 0) en el Plano Complejo de Argand
+function buildEulerIdentity3D(epColor) {
+  const group = new THREE.Group();
+  const axRe = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1.2, 0, 0), 2.4, 0x94a3b8, 0.08, 0.05);
+  const axIm = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, -1.2, 0), 2.4, 0x94a3b8, 0.08, 0.05);
+  group.add(axRe);
+  group.add(axIm);
+
+  const circleGeo = new THREE.RingGeometry(0.81, 0.85, 64);
+  group.add(new THREE.Mesh(circleGeo, new THREE.MeshBasicMaterial({ color: 0xc5a059, side: THREE.DoubleSide })));
+
+  const phasor = new THREE.ArrowHelper(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 0, 0), 0.83, 0x38bdf8, 0.12, 0.08);
+  group.add(phasor);
+
+  const returnVector = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-0.83, 0, 0), 0.83, 0x10b981, 0.12, 0.08);
+  group.add(returnVector);
+
+  const zeroSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.9 })
+  );
+  group.add(zeroSphere);
+
+  let eulerAngle = 0;
+  return {
+    group,
+    update: (dt) => {
+      eulerAngle += dt * 1.5;
+      const th = Math.PI + Math.sin(eulerAngle) * (Math.PI * 0.95);
+      phasor.setDirection(new THREE.Vector3(Math.cos(th), Math.sin(th), 0).normalize());
+    }
+  };
+}
+
+// 34. Incompletitud Lógica de Gödel (G ↔ ¬Prov(⌈G⌉)) & Grafo Axiomático
+function buildGodelIncompleteness3D(epColor) {
+  const group = new THREE.Group();
+  const nodeGeo = new THREE.SphereGeometry(0.065, 12, 12);
+  const nodeMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.7 });
+  const nodes = [
+    new THREE.Vector3(-0.6, -0.6, -0.2),
+    new THREE.Vector3( 0.0, -0.6,  0.3),
+    new THREE.Vector3( 0.6, -0.6, -0.2),
+    new THREE.Vector3(-0.3, -0.1,  0.0),
+    new THREE.Vector3( 0.3, -0.1,  0.0),
+    new THREE.Vector3( 0.0,  0.35, 0.1)
+  ];
+  nodes.forEach(p => {
+    const nm = new THREE.Mesh(nodeGeo, nodeMat);
+    nm.position.copy(p);
+    group.add(nm);
+  });
+
+  const edges = [
+    [0, 3], [1, 3], [1, 4], [2, 4], [3, 5], [4, 5]
+  ];
+  edges.forEach(([i, j]) => {
+    group.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([nodes[i], nodes[j]]),
+      new THREE.LineBasicMaterial({ color: 0x64748b, transparent: true, opacity: 0.6 })
+    ));
+  });
+
+  const boundary = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.85, 0.5, 0), new THREE.Vector3(0.85, 0.5, 0)]),
+    new THREE.LineDashedMaterial({ color: 0xef4444, dashSize: 0.06, gapSize: 0.04 })
+  );
+  boundary.computeLineDistances();
+  group.add(boundary);
+
+  const godelPos = new THREE.Vector3(0, 0.75, 0);
+  const godelNode = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.85 })
+  );
+  godelNode.position.copy(godelPos);
+  group.add(godelNode);
+
+  const mobLoop = new THREE.Mesh(
+    new THREE.TorusGeometry(0.18, 0.02, 12, 32),
+    new THREE.MeshBasicMaterial({ color: 0xf43f5e })
+  );
+  mobLoop.position.copy(godelPos);
+  mobLoop.rotation.x = Math.PI / 3;
+  group.add(mobLoop);
+
+  let gTime = 0;
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      gTime += dt * 3.0;
+      mobLoop.rotation.z += dt * 2.0;
+      godelNode.position.y = 0.75 + 0.04 * Math.sin(gTime);
+    }
+  };
+}
+
+// 35. Problema del Milenio: Complejidad P versus NP & Hipercubo Booleano
+function buildPVsNP3D(epColor) {
+  const group = new THREE.Group();
+  const d1 = 0.65, d2 = 0.32;
+  const vertices = [];
+  for (let i = 0; i < 8; i++) {
+    vertices.push(new THREE.Vector3((i & 1 ? 1 : -1) * d1, (i & 2 ? 1 : -1) * d1, (i & 4 ? 1 : -1) * d1));
+  }
+  for (let i = 0; i < 8; i++) {
+    vertices.push(new THREE.Vector3((i & 1 ? 1 : -1) * d2, (i & 2 ? 1 : -1) * d2, (i & 4 ? 1 : -1) * d2));
+  }
+
+  const cubeMat = new THREE.LineBasicMaterial({ color: 0x475569, transparent: true, opacity: 0.4 });
+  group.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(d1*2, d1*2, d1*2)), cubeMat));
+  group.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(d2*2, d2*2, d2*2)), cubeMat));
+
+  for (let i = 0; i < 8; i++) {
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([vertices[i], vertices[i + 8]]), cubeMat));
+  }
+
+  const pPathPts = [vertices[0], vertices[1], vertices[3], vertices[7]];
+  const pCurve = new THREE.CatmullRomCurve3(pPathPts);
+  group.add(new THREE.Mesh(
+    new THREE.TubeGeometry(pCurve, 32, 0.035, 8, false),
+    new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 0.6 })
+  ));
+
+  const npGroup = new THREE.Group();
+  for (let i = 0; i < 8; i += 2) {
+    npGroup.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), vertices[i]]),
+      new THREE.LineBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.7 })
+    ));
+  }
+  group.add(npGroup);
+
+  const questionCore = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.12, 0),
+    new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xf43f5e, emissiveIntensity: 0.9 })
+  );
+  group.add(questionCore);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.y += 0.007;
+      group.rotation.x += 0.004;
+      questionCore.rotation.z += dt * 1.5;
+    }
+  };
+}
+
+// 36. Símplex de Probabilidad & Cúpula de Entropía de Shannon (H = -∑ p log₂ p)
+function buildShannonEntropy3D(epColor) {
+  const group = new THREE.Group();
+  const v1 = new THREE.Vector3( 0.0,  0.75, -0.35);
+  const v2 = new THREE.Vector3(-0.65, -0.38, -0.35);
+  const v3 = new THREE.Vector3( 0.65, -0.38, -0.35);
+
+  group.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([v1, v2, v3, v1]),
+    new THREE.LineBasicMaterial({ color: 0x64748b, linewidth: 2 })
+  ));
+
+  const domeGeo = createParametricSurface(24, 24, (u, v) => {
+    const sqrtU = Math.sqrt(u);
+    const b1 = 1 - sqrtU;
+    const b2 = sqrtU * (1 - v);
+    const b3 = sqrtU * v;
+    const x = b1 * v1.x + b2 * v2.x + b3 * v3.x;
+    const y = b1 * v1.y + b2 * v2.y + b3 * v3.y;
+    const eps = 1e-6;
+    const h1 = b1 > eps ? -b1 * Math.log2(b1) : 0;
+    const h2 = b2 > eps ? -b2 * Math.log2(b2) : 0;
+    const h3 = b3 > eps ? -b3 * Math.log2(b3) : 0;
+    const H = (h1 + h2 + h3) / Math.log2(3);
+    const z = -0.35 + H * 0.85;
+    return { x, y, z };
+  });
+
+  group.add(new THREE.Mesh(domeGeo, new THREE.MeshStandardMaterial({
+    color: epColor,
+    roughness: 0.25,
+    metalness: 0.75,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.75
+  })));
+
+  const peakMarker = new THREE.Mesh(
+    new THREE.SphereGeometry(0.07, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.95 })
+  );
+  peakMarker.position.set(0, 0, 0.50);
+  group.add(peakMarker);
+
+  return {
+    group,
+    update: (dt) => {
+      group.rotation.z += 0.005;
+      group.rotation.y += 0.004;
+    }
+  };
+}
+
 // Mapeo Canónico de los 100 Arquetipos del Cosmos a Familias 3D Volumétricas Auténticas
 const BESPOKE_3D_BUILDERS = {
   lorenz: buildLorenz3D,
@@ -3884,31 +4705,51 @@ const BESPOKE_3D_BUILDERS = {
   snell: buildSnell3D,
   pythagoras: buildPythagoras3D,
   thermo: buildThermo3D,
-  automata: buildAutomata3D
+  automata: buildAutomata3D,
+  // Modelos Fidedignos Adicionales (Cero Clones)
+  ideal_gas: buildIdealGas3D,
+  carnot_cycle: buildCarnotCycle3D,
+  maxwell_boltzmann: buildMaxwellBoltzmannDist3D,
+  boltzmann_entropy: buildBoltzmannEntropy3D,
+  thermal_cooling: buildThermalCooling3D,
+  de_broglie: buildDeBroglieWave3D,
+  heisenberg: buildHeisenbergUncertainty3D,
+  dirac: buildDiracEquation3D,
+  planck_quantum: buildPlanckQuantum3D,
+  feigenbaum: buildLogisticFeigenbaum3D,
+  hamilton_phase: buildHamiltonPhase3D,
+  euler_identity: buildEulerIdentity3D,
+  godel: buildGodelIncompleteness3D,
+  p_vs_np: buildPVsNP3D,
+  shannon_entropy: buildShannonEntropy3D
 };
 
 const MANIFOLD_ARCHETYPE_MAP = {
   // Caos & Sistemas Dinámicos Fidedignos
   lorenz_attractor: "lorenz",
   rossler_attractor: "rossler",
-  logistic_feigenbaum: "lorenz",
+  logistic_feigenbaum: "feigenbaum",
   kuramoto_sync: "kuramoto",
   langevin_stochastic: "langevin",
-  hamilton_phase: "lorenz",
+  hamilton_phase: "hamilton_phase",
 
   // Topología & Complejidad
   ricci_flow: "ricci_flow",
   beal_conjecture: "elliptic_curve",
   fermat_last: "elliptic_curve",
-  p_vs_np: "complexity_hypercube",
-  clifford_dual: "mobius", noether_symmetry: "mobius", godel_incompleteness: "mobius",
+  p_vs_np: "p_vs_np",
+  clifford_dual: "mobius", noether_symmetry: "mobius", godel_incompleteness: "godel",
   hopf_fibration: "hopf", quaternion: "hopf", yang_mills: "hopf",
   turing_morphogenesis: "gyroid", belousov_zhabotinsky: "gyroid", von_mises: "gyroid", voronoi: "gyroid",
 
-  // Cuántica
-  schrodinger: "quantum_orbital", de_broglie_wave: "quantum_orbital", dirac_equation: "quantum_orbital",
-  pauli_exclusion: "quantum_orbital", planck_quantum: "quantum_orbital", photoelectric: "quantum_orbital",
-  heisenberg_uncertainty: "quantum_orbital",
+  // Cuántica Diferenciada y Rigurosa
+  schrodinger: "quantum_orbital",
+  de_broglie_wave: "de_broglie",
+  dirac_equation: "dirac",
+  pauli_exclusion: "heisenberg",
+  planck_quantum: "planck_quantum",
+  photoelectric: "planck_quantum",
+  heisenberg_uncertainty: "heisenberg",
 
   // Astrofísica Relativista
   schwarzschild_bh: "schwarzschild", black_hole_entropy: "schwarzschild",
@@ -3936,7 +4777,7 @@ const MANIFOLD_ARCHETYPE_MAP = {
   yoshida_symplectic: "kepler", gravity_drop: "kepler",
 
   // Estructuras, Cálculo & Poliedros
-  euler_polyhedra: "euler", euler_identity: "euler", euler_lagrange: "euler",
+  euler_polyhedra: "euler", euler_identity: "euler_identity", euler_lagrange: "euler",
   euler_beam: "euler_beam",
   calculus_fundamental: "calculus_riemann",
 
@@ -3964,18 +4805,133 @@ const MANIFOLD_ARCHETYPE_MAP = {
   newton_fma: "newton_mechanics",
   newton_reaction: "newton_mechanics",
 
-  // Termodinámica & Finanzas Cuantitativas
-  carnot_cycle: "thermo", first_law_thermo: "thermo", second_law_entropy: "thermo",
-  boltzmann_entropy: "thermo", maxwell_boltzmann_dist: "thermo", thermal_cooling: "thermo",
-  ideal_gas: "thermo", stefan_boltzmann: "thermo", wien_displacement: "thermo",
-  bose_einstein: "thermo",
+  // Termodinámica Diferenciada y Rigurosa
+  carnot_cycle: "carnot_cycle",
+  first_law_thermo: "carnot_cycle",
+  second_law_entropy: "boltzmann_entropy",
+  boltzmann_entropy: "boltzmann_entropy",
+  maxwell_boltzmann_dist: "maxwell_boltzmann",
+  thermal_cooling: "thermal_cooling",
+  ideal_gas: "ideal_gas",
+  stefan_boltzmann: "planck_quantum",
+  wien_displacement: "planck_quantum",
+  bose_einstein: "quantum_orbital",
   black_scholes: "black_scholes",
 
   // Cosmología & Autómatas
   turing_machine: "automata", rule_110: "automata", langton_ant: "automata",
-  shannon_entropy: "automata", shannon_capacity: "automata",
+  shannon_entropy: "shannon_entropy", shannon_capacity: "shannon_entropy",
   hubble_expansion: "hubble_expansion",
   friedmann_cosmos: "hubble_expansion"
+};
+
+// Clasificación Epistemológica Fidedigna de las 100 Fórmulas (Timonel F2)
+const EPISTEMOLOGICAL_CATEGORIES = {
+  // Categoría A: FÍSICA ESPACIAL EN ℝ³
+  pythagoras: { cat: 'A', tag: 'FÍSICA ESPACIAL · GEOMETRÍA EN ℝ³', desc: 'Geometría euclidiana de áreas ortogonales en el espacio euclídeo.' },
+  lever: { cat: 'A', tag: 'MECÁNICA CLÁSICA · ESTÁTICA EN ℝ³', desc: 'Equilibrio de momentos de fuerza tangibles en silicio.' },
+  buoyancy: { cat: 'A', tag: 'HIDROSTÁTICA · EMPUJE EN ℝ³', desc: 'Gradiente de presión y volumen desplazado en fluidos reales.' },
+  gravity_drop: { cat: 'A', tag: 'CINEMÁTICA · CAÍDA LIBRE EN ℝ³', desc: 'Trayectoria parabólica continua acelerada por el campo gravitatorio terrestre.' },
+  kepler_ellipse: { cat: 'A', tag: 'ASTRODINÁMICA · ÓRBITA EN ℝ³', desc: 'Cónica gravitatoria kepleriana con foco en el centro de masas.' },
+  kepler_area: { cat: 'A', tag: 'CONSERVACIÓN · MOMENTO ANGULAR EN ℝ³', desc: 'Velocidad areolar constante por fuerza central neta.' },
+  kepler_harmonic: { cat: 'A', tag: 'ARMONÍA CÓSMICA · RELACIÓN EN ℝ³', desc: 'Resonancia orbital periódica T² ∝ a³.' },
+  snell_refract: { cat: 'A', tag: 'ÓPTICA ONDULATORIA · DIOPTER EN ℝ³', desc: 'Discontinuidad de velocidad de fase en la interfaz dieléctrica.' },
+  fermat_principle: { cat: 'A', tag: 'PRINCIPIO VARIACIONAL · ÓPTICA EN ℝ³', desc: 'Camino óptico de tiempo estacionario δ∫n ds = 0.' },
+  hooke_spring: { cat: 'A', tag: 'ELASTICIDAD LINEAL · RESORTE EN ℝ³', desc: 'Fuerza restauradora proporcional a la deformación axial F = -kx.' },
+  newton_inertia: { cat: 'A', tag: 'MECÁNICA NEWTONIANA · INERCIA EN ℝ³', desc: 'Partícula libre con momento lineal conservado.' },
+  newton_fma: { cat: 'A', tag: 'DINÁMICA VECTORIAL · LEY SUPREMA EN ℝ³', desc: 'Vector de aceleración colineal con la fuerza neta F = ma.' },
+  newton_reaction: { cat: 'A', tag: 'TERCERA LEY · ACCIÓN-REACCIÓN EN ℝ³', desc: 'Par de fuerzas iguales y opuestas en contacto mecánico.' },
+  gravitation_universal: { cat: 'A', tag: 'GRAVITACIÓN · LEY DE NEWTON EN ℝ³', desc: 'Campo de atracción mutua con decaimiento radial 1/r².' },
+  thermal_cooling: { cat: 'A', tag: 'TERMODINÁMICA · CONVECCIÓN EN ℝ³', desc: 'Gradiente térmico radial y líneas de flujo convectivo en el medio.' },
+  euler_polyhedra: { cat: 'A', tag: 'TOPOLOGÍA POLIÉDRICA · CARACTERÍSTICA DE EULER', desc: 'Invariante combinatorio V - E + F = 2 en poliedros convexos 3D.' },
+  bernoulli_fluid: { cat: 'A', tag: 'FLUIDODINÁMICA · TUBO DE VENTURI EN ℝ³', desc: 'Conservación de energía a lo largo de una línea de corriente continua.' },
+  wave_dalembert: { cat: 'A', tag: 'MECÁNICA ONDULATORIA · CUERDA EN ℝ³', desc: 'Superposición armónica exacta de ondas viajeras y modos propios de Fourier.' },
+  euler_beam: { cat: 'A', tag: 'ELASTICIDAD ESTRUCTURAL · VIGA EN ℝ³', desc: 'Deflexión transversal por momento flector continuo E·I·w\'\'\'\' = q.' },
+  coulomb_force: { cat: 'A', tag: 'ELECTROSTÁTICA · FUERZA DE COULOMB EN ℝ³', desc: 'Líneas de campo eléctrico radiales entre cargas electrostáticas puntuales.' },
+  chladni: { cat: 'A', tag: 'CIMÁTICA ACÚSTICA · PLACA EN ℝ³', desc: 'Líneas nodales de reposo acústico por interferencia de ondas estacionarias 2D.' },
+  fourier_heat: { cat: 'A', tag: 'DIFUSIÓN TÉRMICA · CAMPO EN ℝ³', desc: 'Propagación parabólica del calor ∂T/∂t = α∇²T en un sólido.' },
+  ohm_conduction: { cat: 'A', tag: 'ELECTRODINÁMICA · CONDUCCIÓN EN ℝ³', desc: 'Flujo microscópico de densidad de corriente J = σE en silicio metálico.' },
+  faraday_induction: { cat: 'A', tag: 'INDUCCIÓN ELECTROMAGNÉTICA EN ℝ³', desc: 'Fuerza electromotriz generada por variación de flujo magnético en la espira.' },
+  kdv_soliton: { cat: 'A', tag: 'HIDRODINÁMICA · SOLITÓN KDV EN ℝ³', desc: 'Onda solitaria no lineal que preserva su forma por balance dispersivo.' },
+  doppler: { cat: 'A', tag: 'ACÚSTICA ONDULATORIA · EFECTO DOPPLER EN ℝ³', desc: 'Frentes de onda esféricos comprimidos por movimiento relativo subsónico.' },
+  navier_stokes: { cat: 'A', tag: 'FLUIDODINÁMICA REAL · VÓRTICE DE BURGERS EN ℝ³', desc: 'Vórtice viscoso exacto de Navier-Stokes con balance entre estiramiento y difusión.' },
+  maxwell_gauss_e: { cat: 'A', tag: 'ELECTROMAGNETISMO · LEY DE GAUSS ELÉCTRICA EN ℝ³', desc: 'Divergencia del campo eléctrico neta igual a la densidad de carga local.' },
+  maxwell_gauss_b: { cat: 'A', tag: 'ELECTROMAGNETISMO · LEY DE GAUSS MAGNÉTICA EN ℝ³', desc: 'Ausencia estricta de monopolos magnéticos; líneas de campo cerradas.' },
+  maxwell_faraday: { cat: 'A', tag: 'ELECTROMAGNETISMO · INDUCCIÓN DE FARADAY EN ℝ³', desc: 'Rotacional eléctrico generado por flujo magnético temporal oscilante.' },
+  maxwell_ampere: { cat: 'A', tag: 'ELECTROMAGNETISMO · LEY DE AMPÈRE-MAXWELL EN ℝ³', desc: 'Circulación magnética inducida por corriente de conducción y desplazamiento.' },
+  light_speed: { cat: 'A', tag: 'ELECTRODINÁMICA · ONDA LUMINOSA TRANSVERSAL EN ℝ³', desc: 'Campos E y B ortogonales propagándose en el vacío a velocidad c.' },
+  lorentz_force: { cat: 'A', tag: 'ELECTRODINÁMICA · FUERZA DE LORENTZ EN ℝ³', desc: 'Espiral helicoidal de ciclotrón bajo interacción vectorial F = q(E + v×B).' },
+  benard_convection: { cat: 'A', tag: 'PATRONES DE CONVECCIÓN · CELDAS EN ℝ³', desc: 'Autoorganización hexagonal espontánea por inestabilidad de Rayleigh-Bénard.' },
+  schwarzschild_bh: { cat: 'A', tag: 'ASTROFÍSICA RELATIVISTA · AGUJERO NEGRO EN ℝ³', desc: 'Horizonte de sucesos esférico y curvatura espacial de Flamm.' },
+  hubble_expansion: { cat: 'A', tag: 'COSMOLOGÍA OBSERVACIONAL · EXPANSIÓN EN ℝ³', desc: 'Recesión métrica tridimensional de galaxias proporcional a la distancia v = H₀d.' },
+  turing_morphogenesis: { cat: 'A', tag: 'BIOLOGÍA TEÓRICA · MORFOGÉNESIS EN ℝ³', desc: 'Inestabilidad de reacción-difusión tejiendo patrones biológicos espaciales.' },
+  belousov_zhabotinsky: { cat: 'A', tag: 'SISTEMAS DISIPATIVOS · ONDAS QUÍMICAS EN ℝ³', desc: 'Ondas espirales concéntricas en un medio no lineal lejos del equilibrio.' },
+  photoelectric: { cat: 'A', tag: 'FÍSICA CUÁNTICA · FOTOEMISIÓN EN ℝ³', desc: 'Impacto balístico de fotones incidentes arrancando electrones del metal.' },
+  hawking_radiation: { cat: 'A', tag: 'GRAVEDAD CUÁNTICA · EVAPORACIÓN EN ℝ³', desc: 'Pares partícula-antipartícula en el horizonte de sucesos relativista.' },
+
+  // Categoría B: ESPACIO DE FASES / VARIEDAD PROYECTADA
+  fibonacci: { cat: 'B', tag: 'DINÁMICA DISCRETA · ESPACIO DE CRECIMIENTO', desc: 'Distribución angular áurea de filotaxis proyectada en coordenadas cilíndricas.' },
+  calculus_fundamental: { cat: 'B', tag: 'ANÁLISIS MATEMÁTICO · SUMA DE RIEMANN', desc: 'Variedad de integración geométrica bajo la curva f(x)dx.' },
+  euler_lagrange: { cat: 'B', tag: 'MECÁNICA ANALÍTICA · ESPACIO DE CONFIGURACIÓN', desc: 'Variedad variacional de acción mínima δS = 0 entre infinitas trayectorias.' },
+  laplace_harmonic: { cat: 'B', tag: 'TEORÍA DEL POTENCIAL · SUPERFICIE ARMÓNICA', desc: 'Variedad minimal con curvatura media nula ∇²ϕ = 0.' },
+  poisson_potential: { cat: 'B', tag: 'TEORÍA DEL POTENCIAL · POZO POISSONIANO', desc: 'Deformación del potencial escalar generada por fuentes densas.' },
+  fourier_spectral: { cat: 'B', tag: 'ANÁLISIS ESPECTRAL · ESPACIO DE FRECUENCIAS', desc: 'Proyección del espectro armónico continuo en componentes ortogonales.' },
+  ideal_gas: { cat: 'B', tag: 'TERMODINÁMICA · VARIEDAD DE ESTADO P-V-T', desc: 'Superficie de ecuación de estado continua P(V, T) = nRT/V en el espacio termodinámico.' },
+  carnot_cycle: { cat: 'B', tag: 'TERMODINÁMICA · CICLO DE ESTADO (P, V, T)', desc: 'Trayectoria reversible cerrada compuesta por dos isotermas y dos adiabáticas.' },
+  hamilton_phase: { cat: 'B', tag: 'MECÁNICA HAMILTONIANA · TOROIDE SIMPLÉCTICO', desc: 'Toroide de Liouville-Arnol\'d invariante bajo el flujo simpléctico canónico.' },
+  boltzmann_entropy: { cat: 'B', tag: 'MECÁNICA ESTADÍSTICA · ESPACIO DE FASES', desc: 'Volumen de microestados accesibles Ω en celdas cuánticas de volumen h³.' },
+  maxwell_boltzmann_dist: { cat: 'B', tag: 'MECÁNICA ESTADÍSTICA · ESPACIO DE VELOCIDADES', desc: 'Densidad radial de probabilidad f(v) ∝ v² exp(-mv²/2k_BT) en el espacio tridimensional de velocidades.' },
+  first_law_thermo: { cat: 'B', tag: 'TERMODINÁMICA · ESPACIO ENERGÉTICO ΔU', desc: 'Conservación de energía interna entre calor entrante y trabajo mecánico.' },
+  second_law_entropy: { cat: 'B', tag: 'TERMODINÁMICA · FLECHA DEL TIEMPO', desc: 'Crecimiento irreversible de entropía en sistemas aislados dS ≥ 0.' },
+  stefan_boltzmann: { cat: 'B', tag: 'RADIACIÓN TÉRMICA · FLUJO RADIATIVO', desc: 'Emisión total de energía proporcional a la cuarta potencia de la temperatura T⁴.' },
+  wien_displacement: { cat: 'B', tag: 'ESPECTROFOTOMETRÍA · DESPLAZAMIENTO DE WIEN', desc: 'Superficie espectral que muestra el corrimiento del pico hacia el ultravioleta.' },
+  lorentz_transform: { cat: 'B', tag: 'RELATIVIDAD ESPECIAL · ESPACIO-TIEMPO HIPERBÓLICO', desc: 'Rotación hiperbólica del marco de referencia preserving el intervalo invariante.' },
+  apollonian: { cat: 'B', tag: 'GEOMETRÍA FRACTAL · TAMIZ DE APOLONIO', desc: 'Empaquetamiento fractal de círculos tangentes recíprocos de curvatura entera.' },
+  voronoi: { cat: 'B', tag: 'GEOMETRÍA COMPUTACIONAL · TESELACIÓN DE PROXIMIDAD', desc: 'Fronteras poligonales de equidistancia respecto a semillas discretas.' },
+  von_mises: { cat: 'B', tag: 'MECÁNICA DE MATERIALES · CILINDRO DE PLASTIFICACIÓN', desc: 'Superficie de fluencia en el espacio de tensiones principales invariante ante presión hidrostática.' },
+  planck_quantum: { cat: 'B', tag: 'FÍSICA CUÁNTICA · MODOS DE CAVIDAD CUANTIZADOS', desc: 'Modos propios electromagnéticos discretizados en paquetes hν.' },
+  minkowski_spacetime: { cat: 'B', tag: 'GEOMETRÍA PSEUDO-RIEMANNIANA · CONO DE LUZ', desc: 'Estructura causal cuatridimensional proyectada al espacio euclídeo.' },
+  einstein_field: { cat: 'B', tag: 'RELATIVIDAD GENERAL · CURVATURA ESPACIOTEMPORAL', desc: 'Tensor de Einstein acoplado a la densidad de energía-momento.' },
+  de_broglie_wave: { cat: 'B', tag: 'FÍSICA CUÁNTICA · PAQUETE DE ONDA DE MATERIA', desc: 'Hélice compleja tridimensional de amplitud de probabilidad con longitud de onda λ = h/p.' },
+  schrodinger: { cat: 'B', tag: 'MECÁNICA CUÁNTICA · ORBITAL ATÓMICO |Y_l^m|²', desc: 'Densidad espacial de probabilidad cuántica calculada analíticamente.' },
+  heisenberg_uncertainty: { cat: 'B', tag: 'FUNDAMENTOS CUÁNTICOS · ELIPSOIDE SIMPLÉCTICO', desc: 'Volumen mínimo de acción de fase ΔxΔp ≥ ℏ/2 que preserva área bajo compresión.' },
+  dirac_equation: { cat: 'B', tag: 'ELECTRODINÁMICA CUÁNTICA · DISPERSIÓN DE DIRAC', desc: 'Hiperboloide relativista con brecha de masa 2mc² y precesión de espinor de 4 componentes.' },
+  hopf_fibration: { cat: 'B', tag: 'TOPOLOGÍA 4D · FIBRACIÓN S³ → S²', desc: 'Descomposición de la 3-esfera en círculos entrelazados de gran radio.' },
+  friedmann_cosmos: { cat: 'B', tag: 'COSMOLOGÍA RELATIVISTA · VARIEDAD FLRW', desc: 'Evolución dinámica del factor de escala del universo a(t).' },
+  pauli_exclusion: { cat: 'B', tag: 'FÍSICA ATÓMICA · ANDAMIAJE FERMIÓNICO', desc: 'Bloqueo cuántico que impide la superposición de dos estados con idénticos números cuánticos.' },
+  bose_einstein: { cat: 'B', tag: 'CONDENSACIÓN CUÁNTICA · MACROESTADO', desc: 'Colapso cooperativo de bosones en una única función de onda gigante al cero absoluto.' },
+  black_hole_entropy: { cat: 'B', tag: 'GRAVEDAD CUÁNTICA · ENTROPÍA HOLOGRÁFICA', desc: 'Capacidad informacional proporcional al área bidimensional del horizonte de sucesos.' },
+  yang_mills: { cat: 'B', tag: 'TEORÍA DE CALIBRE NO ABELIANA · SALTO DE MASA', desc: 'Curvatura no lineal en el grupo de simetría SU(2) con gap energético fundamental.' },
+  higgs_mechanism: { cat: 'B', tag: 'FÍSICA DE PARTÍCULAS · SOMBRERO MEXICANO', desc: 'Ruptura espontánea de simetría en el potencial escalar que otorga masa inercial.' },
+  shannon_capacity: { cat: 'B', tag: 'TELECOMUNICACIONES · VARIEDAD DE SHANNON-HARTLEY', desc: 'Frontera superior de transmisión de bits en canales con ruido gaussiano.' },
+  lorenz_attractor: { cat: 'B', tag: 'TEORÍA DEL CAOS · ATRACTOR DE LORENZ', desc: 'Órbita continua aperiódica en el espacio de fases tridimensional.' },
+  rossler_attractor: { cat: 'B', tag: 'TOPOLOGÍA CAÓTICA · CINTA PLEGADA DE RÖSSLER', desc: 'Herradura de Smale en dinámica continua con un solo plegamiento periódico.' },
+  logistic_feigenbaum: { cat: 'B', tag: 'DINÁMICA NO LINEAL · ÁRBOL 3D DE BIFURCACIÓN', desc: 'Cascada de duplicación de período calculada analíticamente con constante universal δ.' },
+  mandelbrot_julia: { cat: 'B', tag: 'FRACTALES COMPLEJOS · CONJUNTO DE JULIA 3D', desc: 'Frontera de escape iterativo en el álgebra de cuaterniones.' },
+  kuramoto_sync: { cat: 'B', tag: 'SISTEMAS COMPLEJOS · ESPACIO DE FASES SINC', desc: 'Sincronización espontánea en el círculo S¹ y emergencia del parámetro de orden macróscopico.' },
+  langevin_stochastic: { cat: 'B', tag: 'FÍSICA ESTOCÁSTICA · DIFUSIÓN DE EINSTEIN', desc: 'Paseo browniano tridimensional acoplado a la esfera difusiva ⟨r²⟩ = 6Dt.' },
+  black_scholes: { cat: 'B', tag: 'MATEMÁTICA FINANCIERA · SUPERFICIE DE VOLATILIDAD', desc: 'Ecuación parabólica de difusión y curvatura de cobertura dinámica.' },
+  yoshida_symplectic: { cat: 'B', tag: 'MECÁNICA COMPUTACIONAL · ÓRBITA SIMPLÉCTICA', desc: 'Conservación numérica exacta de energía mediante coeficientes simplécticos de 4º orden.' },
+  ricci_flow: { cat: 'B', tag: 'GEOMETRÍA DIFERENCIAL · FLUJO DE RICCI DE PERELMAN', desc: 'Difusión de curvatura alisando una variedad tridimensional hasta la esfera S³.' },
+  standard_model: { cat: 'B', tag: 'FÍSICA FUNDAMENTAL · GRUPOS DE CALIBRE', desc: 'Interacción geométrica de los grupos de simetría SU(3)×SU(2)×U(1).' },
+
+  // Categoría C: NO-ESPACIAL / IDENTIDAD ABSTRACTA
+  cartesian: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · SISTEMA COORDENADO', desc: 'Marco abstracto de referencia ortogonal que mapea el álgebra a la geometría.' },
+  fermat_last: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · CURVA MODULAR DE FREY', desc: 'Identidad aritmética pura xⁿ + yⁿ = zⁿ; visualizada mediante su representación geométrica elíptica modular.' },
+  euler_identity: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · PLANO COMPLEJO DE ARGAND', desc: 'Identidad e^{iπ} + 1 = 0 en el plano complejo; fasores circulares unitarios.' },
+  quaternion: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · ÁLGEBRA DE HAMILTON', desc: 'Estructura hipercompleja de dimensión 4 sin análogo euclídeo tridimensional directo.' },
+  riemann_zeta: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · RECTA CRÍTICA DE RIEMANN', desc: 'Función meromorfa analítica compleja; los ceros no triviales yacen en Re(s) = 1/2.' },
+  riemann_metric: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · TENSOR MÉTRICO RIEMANNIANO', desc: 'Definición analítica de curvatura intrínseca independiente de inmersión en ℝ³.' },
+  clifford_dual: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · ÁLGEBRA DE NÚMEROS DUALES', desc: 'Estructura puramente algebraica con unidad nilpotente ε² = 0 para autodiferenciación exacta.' },
+  mass_energy: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · EQUIVALENCIA MASA-ENERGÍA', desc: 'E = mc²; identidad escalar universal de cuadrimomento relativista.' },
+  noether_symmetry: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · TEOREMA DE NOETHER', desc: 'Dualidad matemática abstracta: a cada simetría continua de Lie le corresponde una carga conservada.' },
+  godel_incompleteness: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · LÓGICA AUTORREFERENCIAL', desc: 'Incompletitud formal pura; el enunciado no tiene cuerpo físico, es una verdad metamatemática indecidible.' },
+  turing_machine: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · MÁQUINA UNIVERSAL DE TURING', desc: 'Concepto abstracto de computabilidad algorítmica discreta.' },
+  shannon_entropy: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · SÍMPLEX DE PROBABILIDAD', desc: 'Información pura H(X); concavidad de Shannon sobre el símplex de probabilidad 2D.' },
+  rule_110: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · AUTÓMATA TURING-COMPLETO', desc: 'Regla booleana elemental unidimensional que genera computación universal.' },
+  langton_ant: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · SISTEMA DINÁMICO DISCRETO', desc: 'Comportamiento emergente asintótico sobre una grilla discreta de dos dimensiones.' },
+  beal_conjecture: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · TEORÍA DE NÚMEROS PURA', desc: 'Conjetura diofántica de exponentes enteros Aˣ + Bʸ = Cᶻ.' },
+  p_vs_np: { cat: 'C', tag: 'PROYECCIÓN CANÓNICA · COMPLEJIDAD COMPUTACIONAL', desc: 'Pregunta fundamental de la teoría de complejidad formal; hipercubo de satisfacibilidad.' }
 };
 
 // ── CONSTRUCTOR PRINCIPAL DEL MODELO DE ASTRO 3D EN R³ ─────────────
@@ -4657,10 +5613,9 @@ function updateTelescopeCollimation() {
 
     const coordEl = document.getElementById('collimator-coord');
     const titleEl = document.getElementById('collimator-title');
-    const subEl   = document.getElementById('collimator-sub');
-    if (coordEl) coordEl.textContent = `Asc ${String(ascHours).padStart(2,'0')}h ${String(ascMins).padStart(2,'0')}m · Dec ${decSign}${decDeg}°`;
-    if (titleEl) titleEl.textContent = `Obra ${d.badge} · ${d.title}`;
-    if (subEl)   subEl.textContent   = `${d.sub} · Distancia: ${dist}m`;
+    const epInfo = EPISTEMOLOGICAL_CATEGORIES[d.archetype];
+    const epTag = epInfo ? ` · [${epInfo.cat === 'A' ? 'FÍSICA ℝ³' : (epInfo.cat === 'B' ? 'ESPACIO FASES' : 'PROY. CANÓNICA')}]` : '';
+    if (subEl)   subEl.textContent   = `${d.sub}${epTag} · Distancia: ${dist}m`;
     
     if (card) card.classList.remove('hidden');
     if (reticle) reticle.classList.add('locked');
@@ -4774,6 +5729,26 @@ function warpToTargetAstro(idx) {
     const subEl = document.getElementById('hud-sub'); if (subEl) subEl.textContent = d.sub || '';
     const eqEl = document.getElementById('hud-eq'); if (eqEl) eqEl.innerHTML = (d.eq || '').replace(/\n/g, '<br>');
     const histEl = document.getElementById('hud-hist'); if (histEl) histEl.textContent = d.hist || '';
+
+    // Gobernanza Epistemológica Fidedigna: Identificar si es Física ℝ³, Espacio de Fases o Identidad Abstracta
+    const epInfo = EPISTEMOLOGICAL_CATEGORIES[d.archetype];
+    const epPill = document.getElementById('hud-epistemology-pill');
+    if (epPill && epInfo) {
+      epPill.classList.remove('hidden');
+      if (epInfo.cat === 'A') {
+        epPill.className = 'mb-3 px-2.5 py-1.5 rounded-lg border text-[9.5px] mono leading-tight bg-emerald-950/40 border-emerald-500/40 text-emerald-300';
+        epPill.innerHTML = `<div class="font-bold text-emerald-400 mb-0.5 tracking-wide">[${epInfo.tag}]</div><div class="text-emerald-200/80 font-sans">${epInfo.desc}</div>`;
+      } else if (epInfo.cat === 'B') {
+        epPill.className = 'mb-3 px-2.5 py-1.5 rounded-lg border text-[9.5px] mono leading-tight bg-amber-950/40 border-amber-500/40 text-amber-300';
+        epPill.innerHTML = `<div class="font-bold text-[#dfc285] mb-0.5 tracking-wide">[${epInfo.tag}]</div><div class="text-amber-200/80 font-sans">${epInfo.desc}</div>`;
+      } else {
+        epPill.className = 'mb-3 px-2.5 py-1.5 rounded-lg border text-[9.5px] mono leading-tight bg-purple-950/50 border-purple-500/40 text-purple-300';
+        epPill.innerHTML = `<div class="font-bold text-fuchsia-300 mb-0.5 tracking-wide">[${epInfo.tag}]</div><div class="text-purple-200/90 font-sans">${epInfo.desc}</div>`;
+      }
+    } else if (epPill) {
+      epPill.classList.add('hidden');
+    }
+
     hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
     hudCard.style.opacity = '1';
     hudCard.style.transform = 'none';

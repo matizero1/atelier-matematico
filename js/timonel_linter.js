@@ -263,6 +263,45 @@
         const isPrevEq = prevAst.type === 'EQ';
         const isCurrEq = currAst.type === 'EQ';
 
+        // 1. Verificación analítica formal previa (Residuo Simbólico Exacto)
+        const cleanP = prevStr.replace(/\s+/g, '');
+        const cleanC = currStr.replace(/\s+/g, '');
+        if (cleanP === cleanC) {
+          return {
+            valid: true,
+            status: 'formally_certified',
+            formal_proof: true,
+            sample_count: 0,
+            maxResidue: 0.0,
+            desc: 'Identidad algebraica idéntica; residuo formal nulo (0.00000000).',
+            counterexample: null
+          };
+        }
+
+        const cas = (typeof root.TimonelCAS !== 'undefined') ? root.TimonelCAS : (typeof require !== 'undefined' ? (() => { try { return require('./timonel_cas.js').instance; } catch (e) { return null; } })() : null);
+        if (cas && cas.symbolic) {
+          try {
+            if (!isPrevEq && !isCurrEq) {
+              const diffStr = `(${prevStr}) - (${currStr})`;
+              const diffAst = cas.symbolic.parser.parseString(diffStr);
+              const simplifiedAst = cas.symbolic.simplify(diffAst);
+              if (simplifiedAst.type === 'NUM' && Math.abs(simplifiedAst.value) < 1e-12) {
+                return {
+                  valid: true,
+                  status: 'formally_certified',
+                  formal_proof: true,
+                  sample_count: 0,
+                  maxResidue: 0.0,
+                  desc: 'Demostración analítica formal: la diferencia simbólica se reduce idénticamente a cero (residuo = 0).',
+                  counterexample: null
+                };
+              }
+            }
+          } catch (e) {
+            // Continuar con el muestreo estratificado
+          }
+        }
+
         // Recolectar variables presentes en ambos pasos
         const allVars = new Set();
         this.parser.extractVariables(prevAst, allVars);

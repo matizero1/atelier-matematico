@@ -229,12 +229,14 @@
       if (timeEl) timeEl.textContent = `${dt} ms`;
 
       let hasDivergence = false;
+      let allFormal = true;
       let maxRes = 0;
 
       container.innerHTML = this.derivationSteps.map((stepText, idx) => {
         const evalInfo = audit[idx] || { valid: false, status: 'inconclusive' };
         const isCertified = evalInfo.valid;
         if (!isCertified && idx > 0) hasDivergence = true;
+        if (idx > 0 && evalInfo.status !== 'formally_certified') allFormal = false;
         if (evalInfo.maxResidue > maxRes) maxRes = evalInfo.maxResidue;
 
         let badgeClass = 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30';
@@ -244,6 +246,9 @@
         if (idx === 0) {
           badgeClass = 'bg-blue-950/60 text-blue-300 border-blue-500/30';
           badgeText = 'PREMISA';
+        } else if (evalInfo.status === 'formally_certified') {
+          badgeClass = 'bg-[#c5a059]/20 text-[#dfc285] border-[#c5a059]/40';
+          badgeText = 'DEMOSTRACIÓN FORMAL';
         } else if (!isCertified) {
           badgeClass = 'bg-red-950/60 text-red-300 border-red-500/50 divergent-pulse';
           badgeText = ['inconclusive', 'domain_mismatch'].includes(evalInfo.status) ? 'REVISAR DOMINIO / RAÍCES' : 'DIVERGENCIA';
@@ -295,6 +300,9 @@
         if (hasDivergence) {
           statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-950/60 text-red-300 border border-red-500/50 divergent-pulse';
           statusBadge.textContent = 'HAY PASOS SIN VALIDAR';
+        } else if (allFormal && this.derivationSteps.length > 1) {
+          statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#c5a059]/20 text-[#dfc285] border border-[#c5a059]/40';
+          statusBadge.textContent = 'DEMOSTRACIÓN SIMBÓLICA FORMAL (RESIDUO = 0)';
         } else {
           statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30';
           statusBadge.textContent = 'CONSISTENCIA MUESTRAL · NO ES PRUEBA';
@@ -492,6 +500,45 @@
           solStr = rootsList.map((r, i) => `x_${i + 1} = ${r}`).join('  \\lor  ');
         }
         this.appendCalculatedStep(solStr);
+      }
+    }
+
+    calculateTaylor() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'sin(x)';
+
+      const t = cas.taylor(curr, 'x', 0, 4);
+      if (t) {
+        this.appendCalculatedStep(t);
+      }
+    }
+
+    calculateLimit() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'sin(x)/x';
+
+      const lim = cas.limit(curr, 'x', 0);
+      if (lim && Number.isFinite(lim.value)) {
+        this.appendCalculatedStep(`${curr} = ${lim.value}`);
+      }
+    }
+
+    calculateSimplify() {
+      const cas = window.TimonelCAS;
+      if (!cas) return;
+
+      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
+      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x + 0';
+
+      const s = cas.simplify(curr);
+      if (s && s !== curr) {
+        this.appendCalculatedStep(s);
       }
     }
 
@@ -1320,6 +1367,9 @@
   root.calculateDerivative = () => controller.calculateDerivative();
   root.calculateIntegral = () => controller.calculateIntegral();
   root.calculateRoots = () => controller.calculateRoots();
+  root.calculateTaylor = () => controller.calculateTaylor();
+  root.calculateLimit = () => controller.calculateLimit();
+  root.calculateSimplify = () => controller.calculateSimplify();
   root.switchVisorMode = (mode) => controller.switchVisorMode(mode);
   root.zoomGraph = (factor) => controller.zoomGraph(factor);
   root.resetGraphView = () => controller.resetGraphView();

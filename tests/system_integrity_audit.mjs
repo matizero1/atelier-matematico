@@ -806,6 +806,62 @@ assert(modalCode.includes('Atelier_Matematico_Intel_x64.dmg'), 'desktop_modal.js
 assert(modalCode.includes('Atelier_Matematico_Silicon_arm64.dmg'), 'desktop_modal.js enlaza paquete real macOS Silicon');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 12. AUDITORÍA DE RIGOR EPISTÉMICO & MOTOR CAS FORMAL TIMONEL F2
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n📐 FASE 12: Rigor Epistémico & Motor CAS Formal Timonel F2');
+
+// 1. Verificación de Métodos Analíticos Nativos en TimonelCAS
+assert(typeof TimonelCAS.taylor === 'function', 'TimonelCAS expone método de series de Taylor analíticas');
+assert(typeof TimonelCAS.limit === 'function', 'TimonelCAS expone método de límites analíticos');
+assert(typeof TimonelCAS.simplify === 'function', 'TimonelCAS expone método de simplificación canónica');
+assert(typeof TimonelCAS.analyzeDomain === 'function', 'TimonelCAS expone detector formal de singularidades y restricciones de dominio');
+assert(typeof TimonelCAS.verifyDerivativeOrder4 === 'function', 'TimonelCAS expone verificación cruzada O(h^4) de derivadas');
+
+// 2. Cálculo Analítico de Derivadas y Verificación Cruzada O(h^4)
+const dNative = TimonelCAS.derivative('x^3 - 4*x', 'x');
+assert(dNative.replace(/\s+/g, '') === '3*x^2-4', 'TimonelCAS deriva analíticamente d/dx(x^3 - 4*x) de forma exacta');
+
+const v4Check = TimonelCAS.verifyDerivativeOrder4('sin(x)', 'x', 1.0);
+assert(v4Check.verified === true && v4Check.absoluteError < 1e-6, 'Verificación cruzada O(h^4) valida consistencia entre derivada analítica y numérica (error < 1e-6)');
+
+// 3. Expansión en Serie de Taylor Formal
+const taylorExp = TimonelCAS.taylor('exp(x)', 'x', 0, 4);
+assert(taylorExp.includes('1') && taylorExp.includes('x') && taylorExp.includes('0.5*x^2'), 'TimonelCAS expande analíticamente serie de Maclaurin para exp(x)');
+
+const taylorSin = TimonelCAS.taylor('sin(x)', 'x', 0, 5);
+assert(taylorSin.includes('x') && taylorSin.includes('x^3') && taylorSin.includes('x^5'), 'TimonelCAS expande analíticamente serie de Maclaurin para sin(x) con potencias impares');
+
+// 4. Límites Analíticos con Regla de L\'Hôpital
+const limit0 = TimonelCAS.limit('sin(x)/x', 'x', 0);
+assert(limit0.isFinite && Math.abs(limit0.value - 1.0) < 1e-9 && limit0.lhopital === true, 'TimonelCAS resuelve límite indeterminado 0/0 para sin(x)/x aplicando Regla de L\'Hôpital (= 1)');
+
+const limitCont = TimonelCAS.limit('x^2 - 4', 'x', 2);
+assert(limitCont.isFinite && Math.abs(limitCont.value) < 1e-9, 'TimonelCAS evalúa límite continuo en x=2 para x^2 - 4 (= 0)');
+
+// 5. Análisis Formal de Singularidades y Restricciones de Dominio
+const domainResults = TimonelCAS.analyzeDomain('1/(x - 3) + ln(x) + sqrt(x - 1)');
+assert(domainResults.some(r => r.type === 'pole' && r.condition.includes('x - 3')), 'TimonelCAS detecta polo de división por cero en x - 3');
+assert(domainResults.some(r => r.type === 'branch_cut' && r.condition.includes('x > 0')), 'TimonelCAS detecta corte de rama logarítmica real (x > 0)');
+assert(domainResults.some(r => r.type === 'radical' && r.condition.includes('x - 1')), 'TimonelCAS detecta restricción de radical par real (x - 1 ≥ 0)');
+
+// 6. Certificación Formal Simbólica vs. Consistencia Muestral en Timonel Linter
+const formalRes = Timonel.checkEquivalence('x^2 + 2*x + 1', 'x^2 + 2*x + 1');
+assert(formalRes.valid === true && formalRes.status === 'formally_certified' && formalRes.formal_proof === true, 'Timonel Linter otorga certificación formal analítica cuando la identidad es exacta (residuo = 0)');
+
+const formalDiff = Timonel.checkEquivalence('x + 0', 'x');
+assert(formalDiff.valid === true && formalDiff.status === 'formally_certified', 'Timonel Linter demuestra analíticamente que la diferencia simbólica se anula idénticamente');
+
+const sampleRes = Timonel.checkEquivalence('sin(x)^2 + cos(x)^2', '1');
+assert(sampleRes.valid === true && sampleRes.status === 'numerically_consistent' && sampleRes.formal_proof === false, 'Timonel Linter distingue honestamente consistencia muestral cuando no media demostración analítica directa');
+
+// 7. Integración de Herramientas CAS en el Aula (classroom.html & classroom_controller.js)
+const classroomHtmlContent = fs.readFileSync(path.join(rootDir, 'classroom.html'), 'utf8');
+assert(classroomHtmlContent.includes('calculateTaylor') && classroomHtmlContent.includes('calculateLimit') && classroomHtmlContent.includes('calculateSimplify'), 'classroom.html provee botones de acción rápida para Taylor, Límite y Simplificar');
+
+const classroomJsContent = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'classroom_controller.js'), 'utf8');
+assert(classroomJsContent.includes('calculateTaylor') && classroomJsContent.includes('calculateLimit') && classroomJsContent.includes('calculateSimplify'), 'classroom_controller.js implementa y expone controladores de cálculo simbólico avanzado');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

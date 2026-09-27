@@ -156,6 +156,53 @@ assert(initErrors === 0, `Inicialización de 100 motores sin errores (errores: $
 assert(stepErrors === 0, `Integración temporal de 15 pasos en 100 motores sin excepciones (errores: ${stepErrors})`);
 assert(pointerErrors === 0, `Manipulación paramétrica por puntero en 100 motores sin errores (errores: ${pointerErrors})`);
 
+// ── Auditoría Modular de Motores Desacoplados (js/engines/) ──
+const enginesDir = path.join(rootDir, 'js', 'engines');
+assert(fs.existsSync(enginesDir), 'Directorio modular js/engines/ existe en disco');
+
+const typesPath = path.join(enginesDir, 'types.d.ts');
+assert(fs.existsSync(typesPath), 'Contratos formales types.d.ts existen en disco');
+
+const coreContextPath = path.join(enginesDir, 'core_context.js');
+assert(fs.existsSync(coreContextPath), 'Módulo js/engines/core_context.js existe en disco');
+const { CoreContext } = require(coreContextPath);
+assert(CoreContext && typeof CoreContext.bindCanvas === 'function', 'CoreContext expone bindCanvas y gestión de canvas');
+assert(CoreContext && typeof CoreContext.setPalette === 'function', 'CoreContext expone gestión cromática setPalette');
+
+const indexPath = path.join(enginesDir, 'index.js');
+assert(fs.existsSync(indexPath), 'Punto de entrada modular ES6 js/engines/index.js existe en disco');
+
+const epochFiles = [
+  { file: 'epoch1_ancient.js', epoch: 1, range: [0, 19] },
+  { file: 'epoch2_classical.js', epoch: 2, range: [20, 39] },
+  { file: 'epoch3_field.js', epoch: 3, range: [40, 59] },
+  { file: 'epoch4_quantum.js', epoch: 4, range: [60, 79] },
+  { file: 'epoch5_modern.js', epoch: 5, range: [80, 99] },
+];
+
+epochFiles.forEach(ep => {
+  const epPath = path.join(enginesDir, ep.file);
+  assert(fs.existsSync(epPath), `Módulo desacoplado ${ep.file} existe en disco`);
+  const { epochModule } = require(epPath);
+  assert(epochModule && epochModule.epoch === ep.epoch, `${ep.file} exporta epochModule con identificador ${ep.epoch}`);
+  assert(epochModule.inits && epochModule.inits.length === 20, `${ep.file} encapsula exactamente 20 funciones init aisladas`);
+  assert(epochModule.steps && epochModule.steps.length === 20, `${ep.file} encapsula exactamente 20 funciones step aisladas`);
+  assert(epochModule.range[0] === ep.range[0] && epochModule.range[1] === ep.range[1], `${ep.file} cubre el rango canónico [${ep.range[0]}, ${ep.range[1]}]`);
+});
+
+// Verificar que las 4 salas HTML cargan los submódulos de época
+const roomsWithEngines = ['index.html', 'shop.html', 'museum.html', 'studio.html'];
+roomsWithEngines.forEach(room => {
+  const htmlPath = path.join(rootDir, room);
+  const content = fs.readFileSync(htmlPath, 'utf8');
+  assert(content.includes('js/engines/core_context.js'), `Sala ${room} incluye js/engines/core_context.js`);
+  assert(content.includes('js/engines/epoch1_ancient.js'), `Sala ${room} incluye js/engines/epoch1_ancient.js`);
+  assert(content.includes('js/engines/epoch2_classical.js'), `Sala ${room} incluye js/engines/epoch2_classical.js`);
+  assert(content.includes('js/engines/epoch3_field.js'), `Sala ${room} incluye js/engines/epoch3_field.js`);
+  assert(content.includes('js/engines/epoch4_quantum.js'), `Sala ${room} incluye js/engines/epoch4_quantum.js`);
+  assert(content.includes('js/engines/epoch5_modern.js'), `Sala ${room} incluye js/engines/epoch5_modern.js`);
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. AUDITORÍA DE GOBERNANZA: TIMONEL LINTER F2
 // ─────────────────────────────────────────────────────────────────────────────

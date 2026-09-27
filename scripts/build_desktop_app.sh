@@ -61,6 +61,7 @@ rm -rf "$APP_BUNDLE/Contents/Resources/downloads"
 # 5. Firma de código ad-hoc
 echo "🛡️ [5/6] Aplicando firma criptográfica ad-hoc de macOS..."
 find "$APP_BUNDLE" -name ".DS_Store" -delete 2>/dev/null || true
+dot_clean "$APP_BUNDLE" 2>/dev/null || true
 xattr -cr "$APP_BUNDLE" 2>/dev/null || true
 xattr -d com.apple.FinderInfo "$APP_BUNDLE" 2>/dev/null || true
 codesign -s - --force --deep "$APP_BUNDLE"

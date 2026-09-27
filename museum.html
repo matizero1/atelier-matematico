@@ -355,9 +355,14 @@
       <span>Animar forma (visualización ilustrativa)</span>
     </button>
 
-    <button id="btn-export-stl" onclick="exportActiveAstroSTL()" class="w-full py-2 px-3 bg-[#0d1520] hover:bg-[#132032] border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-[11px] mono text-cyan-300 transition flex items-center justify-center gap-2 mb-2.5 shadow-sm font-semibold cursor-pointer">
-      <span>📥 Exportar Malla 3D STL (DFAM)</span>
-    </button>
+    <div class="grid grid-cols-2 gap-2 mb-2.5">
+      <button id="btn-export-stl" onclick="exportActiveAstroSTL()" class="py-2 px-2 bg-[#0d1520] hover:bg-[#132032] border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-[10.5px] mono text-cyan-300 transition flex items-center justify-center gap-1 shadow-sm font-semibold cursor-pointer">
+        <span>📥 STL 3D</span>
+      </button>
+      <button id="btn-slice-dfam" onclick="openActiveAstroSlicer()" class="py-2 px-2 bg-fuchsia-950/40 hover:bg-fuchsia-900/60 border border-fuchsia-500/40 hover:border-fuchsia-400 rounded-lg text-[10.5px] mono text-fuchsia-300 transition flex items-center justify-center gap-1 shadow-sm font-semibold cursor-pointer">
+        <span>🔬 Rebanar DFAM</span>
+      </button>
+    </div>
 
     <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
       <button id="btn-shutter-orbital" onclick="triggerShutter()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#f4f1ea] py-2 rounded-lg font-mono text-xs flex items-center justify-center gap-1.5 transition border border-white/10">
@@ -729,11 +734,132 @@
 </div>
 
 <!-- ========================================================================= -->
+<!-- MODAL: VISUALIZADOR DE REBANADO & G-CODE (DFAM TIMONEL F2)                -->
+<!-- ========================================================================= -->
+<div id="dfam-slicer-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md hidden">
+  <div class="max-w-4xl w-full bg-[#0c0d14] border border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto">
+    <!-- Cabecera -->
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] mono px-2 py-0.5 rounded bg-fuchsia-950/80 text-fuchsia-300 border border-fuchsia-500/30 font-semibold">DFAM SLICER MK-I · TIMONEL F2</span>
+          <span class="text-[10px] mono text-slate-400">MARLIN / REPRAP ISO G-CODE</span>
+        </div>
+        <h3 id="slicer-modal-title" class="text-base sm:text-lg font-serif font-bold text-white mt-1">Inspección de Rebanado 3D</h3>
+      </div>
+      <button onclick="closeSlicerModal()" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition text-sm cursor-pointer">✕</button>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+      <!-- Columna Izquierda: Vista 2D de Sección (Lienzo Canvas) -->
+      <div class="md:col-span-7 flex flex-col gap-3">
+        <div class="relative rounded-xl overflow-hidden border border-white/10 bg-[#08090e] shadow-inner flex items-center justify-center">
+          <canvas id="dfam-slicer-canvas" width="460" height="400" class="w-full h-auto max-h-[380px] object-contain"></canvas>
+          <div class="absolute top-2 left-2 pointer-events-none flex flex-col gap-1">
+            <span id="slicer-layer-badge" class="text-[10px] mono px-2 py-0.5 rounded bg-black/70 text-cyan-300 border border-cyan-500/30">Capa: 0 / 0</span>
+            <span id="slicer-z-badge" class="text-[10px] mono px-2 py-0.5 rounded bg-black/70 text-amber-300 border border-amber-500/30">Z: 0.00 mm</span>
+          </div>
+        </div>
+
+        <!-- Controles de Capa -->
+        <div class="bg-white/5 p-3 rounded-xl border border-white/10 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-xs mono">
+            <span class="text-slate-400">Navegador de Capas Z</span>
+            <span id="slicer-layer-counter" class="text-[#dfc285] font-bold">Capa 0</span>
+          </div>
+          <input id="slicer-layer-slider" type="range" min="0" max="0" value="0" oninput="setSlicerLayer(parseInt(this.value))" class="w-full accent-[#c5a059] cursor-pointer" />
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <button id="btn-slicer-sim" onclick="toggleSimulation()" class="flex-1 py-1.5 px-3 bg-[#c5a059]/20 hover:bg-[#c5a059]/30 text-[#dfc285] border border-[#c5a059]/40 rounded-lg text-xs mono font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span id="btn-slicer-sim-icon">▶</span> <span id="btn-slicer-sim-text">Simular Trayectoria</span>
+            </button>
+            <button onclick="setSlicerLayer(0)" class="py-1.5 px-3 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs mono transition cursor-pointer">Primera</button>
+            <button onclick="setSlicerLayer(currentSliceResult ? currentSliceResult.totalLayers - 1 : 0)" class="py-1.5 px-3 bg-white/5 hover:bg-white/10 text-slate-300 rounded-lg text-xs mono transition cursor-pointer">Última</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Parámetros & Telemetría Física -->
+      <div class="md:col-span-5 flex flex-col gap-4">
+        <!-- Parámetros de Fabricación -->
+        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 space-y-3">
+          <div class="text-xs mono uppercase text-slate-300 font-semibold tracking-wider flex items-center gap-1.5">
+            <span>⚙️ Parámetros de Impresión</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs mono">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Altura de Capa</label>
+              <select id="slicer-layer-height" class="w-full bg-[#08090e] border border-white/15 rounded-lg p-1.5 text-slate-200 cursor-pointer">
+                <option value="0.12">0.12 mm (Fino)</option>
+                <option value="0.20" selected>0.20 mm (Normal)</option>
+                <option value="0.28">0.28 mm (Rápido)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Relleno (Infill)</label>
+              <select id="slicer-infill-density" class="w-full bg-[#08090e] border border-white/15 rounded-lg p-1.5 text-slate-200 cursor-pointer">
+                <option value="0.15">15% (Ligero)</option>
+                <option value="0.25" selected>25% (Estándar)</option>
+                <option value="0.40">40% (Robusto)</option>
+                <option value="1.00">100% (Macizo)</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="recalculateSlice()" class="w-full py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs mono font-semibold transition border border-white/15 cursor-pointer">
+            🔄 Recalcular Rebanado
+          </button>
+        </div>
+
+        <!-- Telemetría Física Timonel F2 -->
+        <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 space-y-2">
+          <div class="text-xs mono uppercase text-slate-300 font-semibold tracking-wider flex items-center gap-1.5">
+            <span>📊 Telemetría Física DFAM</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5 text-xs mono">
+            <div class="bg-black/40 p-2 rounded-lg border border-white/5">
+              <span class="text-[9px] text-slate-400 block">Capas Totales</span>
+              <strong id="slicer-metric-layers" class="text-white text-sm">--</strong>
+            </div>
+            <div class="bg-black/40 p-2 rounded-lg border border-white/5">
+              <span class="text-[9px] text-slate-400 block">Altura Z</span>
+              <strong id="slicer-metric-height" class="text-cyan-300 text-sm">-- mm</strong>
+            </div>
+            <div class="bg-black/40 p-2 rounded-lg border border-white/5">
+              <span class="text-[9px] text-slate-400 block">Filamento PLA</span>
+              <strong id="slicer-metric-filament" class="text-emerald-400 text-sm">-- m (-- g)</strong>
+            </div>
+            <div class="bg-black/40 p-2 rounded-lg border border-white/5">
+              <span class="text-[9px] text-slate-400 block">Tiempo Estimado</span>
+              <strong id="slicer-metric-time" class="text-[#dfc285] text-sm">-- min</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Descarga -->
+        <div class="space-y-2 pt-1">
+          <button onclick="downloadCurrentGCode()" class="w-full py-2.5 px-3 bg-fuchsia-950/60 hover:bg-fuchsia-900/80 border border-fuchsia-500/50 hover:border-fuchsia-400 rounded-xl text-xs mono text-fuchsia-200 transition flex items-center justify-center gap-2 font-semibold shadow-sm cursor-pointer">
+            <span>💾 Descargar Código G (.gcode)</span>
+          </button>
+          <button onclick="downloadCurrentSTL()" class="w-full py-2 px-3 bg-[#0d1520] hover:bg-[#132032] border border-cyan-500/40 hover:border-cyan-400 rounded-xl text-xs mono text-cyan-300 transition flex items-center justify-center gap-2 font-semibold shadow-sm cursor-pointer">
+            <span>📥 Descargar Malla STL (100mm)</span>
+          </button>
+        </div>
+
+        <div class="text-[9.5px] mono text-slate-400 bg-black/40 p-2.5 rounded-lg border border-white/5 leading-tight">
+          🛡️ <strong class="text-slate-300">Timonel DFAM:</strong> Código G validado en silicio para boquillas 0.4mm en cinemática cartesiana/CoreXY estándar (Ender, Prusa, Voron, Bambu, etc.).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
 <!-- JAVASCRIPT: ATLAS CÓSMICO DE 100 LEYES & HILOS DE TIMONEL                  -->
 <!-- ========================================================================= -->
 <script src="js/storage_engine.js"></script>
 <script src="js/lod_governor.js"></script>
 <script src="js/stl_exporter.js"></script>
+<script src="js/dfam_slicer.js"></script>
 <script src="js/controllers/museum_models.js"></script>
 <script src="js/controllers/museum_audio.js"></script>
 <script src="js/controllers/museum_camera.js"></script>

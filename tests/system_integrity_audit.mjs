@@ -609,8 +609,9 @@ cspRooms.forEach(room => {
 const roomControllers = {
   'index.html': ['js/controllers/index_controller.js', 'js/controllers/desktop_modal.js'],
   'shop.html': ['js/controllers/shop_controller.js', 'js/controllers/desktop_modal.js'],
-  'studio.html': ['js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
+  'studio.html': ['js/dfam_slicer.js', 'js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
   'museum.html': [
+    'js/dfam_slicer.js',
     'js/controllers/museum_models.js',
     'js/controllers/museum_audio.js',
     'js/controllers/museum_camera.js',
@@ -1164,6 +1165,102 @@ assert(classroomHtmlNai.includes('id="nailang-memory-panel"'), 'classroom.html i
 
 assert(classroomJsNai.includes('tensor_matmul_3x3') && classroomJsNai.includes('elastic_stress_voigt') && classroomJsNai.includes('cellular_homogenization_1d'), 'classroom_controller.js implementa carga de presets tensoriales');
 assert(classroomJsNai.includes('nailang-memory-display') && classroomJsNai.includes('runResult.memory'), 'classroom_controller.js renderiza estado de memoria lineal Wasm en HUD');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 16. AUDITORÍA DEL MOTOR DE REBANADO PLANAR & COMPILADOR G-CODE (DFAM TIMONEL F2)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🔪 FASE 16: Motor de Rebanado Planar & Compilador G-code (DFAM Timonel F2)');
+
+const slicerJsPath = path.join(rootDir, 'js', 'dfam_slicer.js');
+assert(fs.existsSync(slicerJsPath), 'Archivo dfam_slicer.js existe en disco');
+
+const AtelierSlicer = require(slicerJsPath);
+global.AtelierSlicer = AtelierSlicer;
+
+assert(typeof AtelierSlicer.sliceGeometry === 'function', 'AtelierSlicer expone método sliceGeometry');
+assert(typeof AtelierSlicer.compileGCode === 'function', 'AtelierSlicer expone método compileGCode');
+assert(typeof AtelierSlicer.renderLayer2D === 'function', 'AtelierSlicer expone método renderLayer2D');
+assert(typeof AtelierSlicer.createToolpathWireframe === 'function', 'AtelierSlicer expone método createToolpathWireframe');
+assert(typeof AtelierSlicer.openSlicerModal === 'function', 'AtelierSlicer expone método openSlicerModal');
+assert(typeof AtelierSlicer.closeSlicerModal === 'function', 'AtelierSlicer expone método closeSlicerModal');
+assert(typeof AtelierSlicer.setSlicerLayer === 'function', 'AtelierSlicer expone método setSlicerLayer');
+
+// 1. Simulación geométrica de corte en silicio (Cubo Canónico 10x10x10 mm)
+const cubeVertices = [
+  // Z = 0
+  -5, -5, 0,   5, -5, 0,   5,  5, 0,
+  -5, -5, 0,   5,  5, 0,  -5,  5, 0,
+  // Z = 10
+  -5, -5, 10,  5,  5, 10,  5, -5, 10,
+  -5, -5, 10, -5,  5, 10,  5,  5, 10,
+  // Paredes
+  -5, -5, 0,  -5,  5, 0,  -5,  5, 10,
+  -5, -5, 0,  -5,  5, 10, -5, -5, 10,
+   5, -5, 0,   5, -5, 10,  5,  5, 10,
+   5, -5, 0,   5,  5, 10,  5,  5, 0,
+  -5, -5, 0,   5, -5, 10,   5, -5, 0,
+  -5, -5, 0,  -5, -5, 10,   5, -5, 10,
+  -5,  5, 0,   5,  5, 0,    5,  5, 10,
+  -5,  5, 0,   5,  5, 10,  -5,  5, 10
+];
+
+const mockCubeGeom = {
+  isBufferGeometry: true,
+  attributes: {
+    position: {
+      array: new Float32Array(cubeVertices),
+      itemSize: 3,
+      count: cubeVertices.length / 3
+    }
+  }
+};
+
+const sliceResult = AtelierSlicer.sliceGeometry(mockCubeGeom, {
+  layerHeight: 1.0,
+  infillDensity: 0.25,
+  targetDimensionMm: 10.0,
+  nozzleDiameter: 0.40,
+  printSpeed: 60.0
+});
+
+assert(sliceResult && sliceResult.totalLayers === 10, 'Rebanador planar genera exactamente 10 capas para cubo de 10mm con h=1.0mm');
+assert(sliceResult.layers[0].polygons.length === 1, 'Capa 0 contiene exactamente 1 contorno cerrado');
+assert(sliceResult.layers[0].polygons[0].length >= 4, 'Polígono perimetral de sección transversal es conexo y cerrado');
+assert(sliceResult.layers[0].infill.length > 0, 'Generador celular de relleno produce segmentos de infill a ±45°');
+assert(sliceResult.metrics.filamentLengthM > 0, 'Longitud de filamento calculada físicamente es positiva (> 0 m)');
+assert(sliceResult.metrics.filamentMassGrams > 0, 'Masa calculada de filamento PLA es positiva (> 0 g)');
+assert(sliceResult.metrics.printTimeMinutes > 0, 'Tiempo cinemático de impresión es positivo (> 0 min)');
+
+// 2. Compilación de G-code Marlin/RepRap ISO
+const gcodeResult = AtelierSlicer.compileGCode(sliceResult, {
+  title: 'TestCube_Timonel',
+  hotendTemp: 210,
+  bedTemp: 60
+});
+
+assert(typeof gcodeResult.text === 'string' && gcodeResult.totalLines > 50, 'Compilador G-code emite stream textual ISO');
+assert(gcodeResult.text.includes('G21') && gcodeResult.text.includes('G90') && gcodeResult.text.includes('M82'), 'G-code incluye directivas ISO fundamentales: G21 (mm), G90 (coord abs), M82 (extrusión abs)');
+assert(gcodeResult.text.includes('M104 S210') && gcodeResult.text.includes('M190 S60'), 'G-code programa térmicas de boquilla (210°C) y cama (60°C)');
+assert(gcodeResult.text.includes('G28') && gcodeResult.text.includes('; LAYER:0'), 'G-code emite secuencia de referenciamiento (G28) y marcadores de capa');
+assert(gcodeResult.text.includes('E') && /G1 (?:F\d+ )?X[0-9.-]+ Y[0-9.-]+ E[0-9.-]+/.test(gcodeResult.text), 'G-code emite trayectorias lineales de extrusión G1 X.. Y.. E..');
+assert(gcodeResult.text.includes('M104 S0') && gcodeResult.text.includes('M84 ; Apagar motores'), 'G-code emite enfriamiento seguro y liberación de motores al concluir');
+
+// 3. Verificación de UI e Integración en Museum & Studio
+const museumHtmlSlicer = fs.readFileSync(path.join(rootDir, 'museum.html'), 'utf8');
+const museumJsSlicer = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'museum_controller.js'), 'utf8');
+const studioHtmlSlicer = fs.readFileSync(path.join(rootDir, 'studio.html'), 'utf8');
+const studioJsSlicer = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'studio_controller.js'), 'utf8');
+
+assert(museumHtmlSlicer.includes('id="btn-slice-dfam"') && museumHtmlSlicer.includes('openActiveAstroSlicer()'), 'museum.html contiene botón orbital de rebanado DFAM');
+assert(museumHtmlSlicer.includes('id="dfam-slicer-modal"') && museumHtmlSlicer.includes('id="dfam-slicer-canvas"'), 'museum.html contiene modal y canvas de rebanado 2D');
+assert(museumHtmlSlicer.includes('src="js/dfam_slicer.js"'), 'museum.html enlaza script js/dfam_slicer.js');
+assert(museumJsSlicer.includes('function openActiveAstroSlicer') && museumJsSlicer.includes('window.openActiveAstroSlicer = openActiveAstroSlicer'), 'museum_controller.js implementa y expone openActiveAstroSlicer');
+
+assert(studioHtmlSlicer.includes('id="btn-studio-slice"') && studioHtmlSlicer.includes('openStudioArtworkSlicer()'), 'studio.html contiene botón de cabecera para rebanado DFAM');
+assert(studioHtmlSlicer.includes('id="btn-studio-slice-dossier"'), 'studio.html contiene botón en dossier para rebanado DFAM');
+assert(studioHtmlSlicer.includes('id="dfam-slicer-modal"'), 'studio.html contiene modal de rebanado DFAM');
+assert(studioHtmlSlicer.includes('src="js/dfam_slicer.js"'), 'studio.html enlaza script js/dfam_slicer.js');
+assert(studioJsSlicer.includes('function openStudioArtworkSlicer') && studioJsSlicer.includes('window.openStudioArtworkSlicer = openStudioArtworkSlicer'), 'studio_controller.js implementa y expone openStudioArtworkSlicer');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN

@@ -15,8 +15,8 @@
       filename: 'Atelier_Matematico_Silicon_arm64.dmg',
       arch: 'Universal ARM64 / Apple Accelerate & Metal',
       badge: 'Silicio Nativo',
-      size: '2.4 MB',
-      sha256: '54b8c66bbb61bf683c8592c5f6f66bf18d5ec3cba42e2372e520d2a69f550322',
+      size: '2.5 MB',
+      sha256: 'f9f0d96a80b0c753be395db66d616b03f25785f2e08cc8d75c9a48ec443068f2',
       reqs: 'macOS 12.0 Monterrey o superior (Recomendado M-Series)'
     },
     'macos-intel': {
@@ -25,7 +25,7 @@
       arch: 'Intel AVX2 / SSE4.2 / Accelerate',
       badge: 'Legacy x86',
       size: '2.5 MB',
-      sha256: '66cf471916b258525ffd23638f94319d2cb39ad19f452da207d233c4c0b784bc',
+      sha256: 'c71c1a6ba01da37bf59957f88d7db38f19bb6b3f2d499ea497aca44deeee8977',
       reqs: 'macOS 11.0 Big Sur o superior'
     },
     'linux': {
@@ -33,8 +33,8 @@
       filename: 'Atelier_Matematico_Linux_Portable.tar.gz',
       arch: 'Linux x86_64 / POSIX + WebKitGTK / Chromium',
       badge: 'Portable Standalone',
-      size: '2.0 MB',
-      sha256: '3e3b4a20c2744b749f755bcb43f500e517c70f2df1bf34c6e8b0b9a48a1c12c0',
+      size: '2.1 MB',
+      sha256: '2545dbb36e23c9b1dc6e7cad85c039670b7523098e52feffa131fda1474ebac0',
       reqs: 'Cualquier distribución Linux x86_64 (glibc 2.31+)'
     },
     'windows': {
@@ -43,7 +43,7 @@
       arch: 'Windows x64 / Direct3D 12 Edge App Mode',
       badge: 'Portable Standalone',
       size: '2.1 MB',
-      sha256: '8d08591ad5cb085e0a50ee5961530f358d96d664688c46eb1e2fe725a4a6a96e',
+      sha256: 'b117dccd5f7cf3289091db51146b535280539ea9d3f147f57db8a3bd38655986',
       reqs: 'Windows 10 versión 1903 o superior / Windows 11'
     }
   };

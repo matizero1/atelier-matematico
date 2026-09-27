@@ -1646,15 +1646,15 @@ function onWindowResize() {
 // ── EXPORTACIÓN DE MALLAS 3D EN SILICIO (DFAM TIMONEL F2) ────────────
 function exportActiveAstroSTL() {
   let targetAstro = cameraState.activeConfinementAstro || (cameraState.currentFocusedAstro || (typeof window !== "undefined" ? window.currentFocusedAstro : null));
-  if (!targetAstro && typeof cameraState.collimatedAstroIndex !== 'undefined' && collimatedAstroIndex >= 0) {
-    targetAstro = astros24[collimatedAstroIndex];
+  if (!targetAstro && typeof cameraState.collimatedAstroIndex !== 'undefined' && cameraState.collimatedAstroIndex >= 0) {
+    targetAstro = astros24[cameraState.collimatedAstroIndex];
   }
   if (!targetAstro) {
     targetAstro = astros24[nai3D.currentIndex] || astros24[0];
   }
 
   if (!targetAstro) {
-    speakNai("No hay ningún astro colimado para exportar.");
+    if (window.MuseumAudio) window.MuseumAudio.speakNai("No hay ningún astro colimado para exportar.");
     return;
   }
 
@@ -1696,6 +1696,48 @@ function exportActiveAstroSTL() {
   }
 }
 
+// ── REBANADO PLANAR & G-CODE EN SILICIO (DFAM TIMONEL F2) ─────────────
+function openActiveAstroSlicer() {
+  let targetAstro = cameraState.activeConfinementAstro || (cameraState.currentFocusedAstro || (typeof window !== "undefined" ? window.currentFocusedAstro : null));
+  if (!targetAstro && typeof cameraState.collimatedAstroIndex !== 'undefined' && cameraState.collimatedAstroIndex >= 0) {
+    targetAstro = astros24[cameraState.collimatedAstroIndex];
+  }
+  if (!targetAstro) {
+    targetAstro = astros24[nai3D.currentIndex] || astros24[0];
+  }
+
+  if (!targetAstro) {
+    if (window.MuseumAudio) window.MuseumAudio.speakNai("No hay ningún astro colimado para rebanar.");
+    return;
+  }
+
+  const d = targetAstro.data || {};
+  const badge = d.badge || String(targetAstro.index + 1).padStart(3, '0');
+  const title = (d.title || 'Obra').replace(/[^a-zA-Z0-9_\u00C0-\u017F]/g, '_');
+  const filename = `Atelier_3D_OBRA_${badge}_${title}`;
+
+  try {
+    if (!window.AtelierSlicer) {
+      throw new Error("Módulo AtelierSlicer no disponible.");
+    }
+
+    const meshGroup = (targetAstro.model && targetAstro.model.group) ? targetAstro.model.group : targetAstro.group;
+    if (window.MuseumAudio) {
+      window.MuseumAudio.speakNai(`Abriendo motor de rebanado DFAM para Obra ${badge}.`);
+    }
+
+    window.AtelierSlicer.openSlicerModal(meshGroup, filename, {
+      layerHeight: 0.20,
+      infillDensity: 0.25,
+      targetDimensionMm: 100.0,
+      nozzleDiameter: 0.40,
+      printSpeed: 60.0
+    });
+  } catch (err) {
+    console.error('[Timonel DFAM Slicer] Error abriendo rebanador:', err);
+    alert("Error al abrir el rebanador DFAM: " + err.message);
+  }
+}
 
 function bootAtlas() {
   initAtlasCosmico();
@@ -1720,6 +1762,7 @@ function bootAtlas() {
 
 // ── EXPORTACIÓN EXPLÍCITA Y RETROCOMPATIBILIDAD TOTAL (TIMONEL F2) ──
 window.exportActiveAstroSTL = exportActiveAstroSTL;
+window.openActiveAstroSlicer = openActiveAstroSlicer;
 window.perturbCurrentAstro = perturbCurrentAstro;
 window.navigateToActiveShop = navigateToActiveShop;
 window.enterShopMode = enterShopMode;

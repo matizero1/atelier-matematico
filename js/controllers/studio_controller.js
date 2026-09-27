@@ -471,9 +471,46 @@
       }
     }
 
+    // ── Rebanado Planar & Simulador G-code (DFAM Timonel F2) ──────────
+    function openStudioArtworkSlicer() {
+      const catalog = window.ARTWORKS_100 || [];
+      const art = catalog[currentArt];
+      if (!art) return;
+
+      const badge = art.badge || String(currentArt + 1).padStart(3, '0');
+      const title = (art.title || 'Obra').replace(/[^a-zA-Z0-9_\u00C0-\u017F]/g, '_');
+      const filename = `Atelier_3D_OBRA_${badge}_${title}`;
+
+      try {
+        if (!window.AtelierSlicer) {
+          throw new Error("Módulo AtelierSlicer no cargado.");
+        }
+        if (!window.MuseumModels || !window.MuseumModels.BESPOKE_3D_BUILDERS) {
+          throw new Error("Módulo de Variedades 3D (MuseumModels) no cargado.");
+        }
+
+        const modelKey = art.modelKey || art.archetype || 'lorenz';
+        const builders = window.MuseumModels.BESPOKE_3D_BUILDERS;
+        const builder = builders[modelKey] || builders.lorenz;
+        const manifold = builder(0xc5a059);
+
+        window.AtelierSlicer.openSlicerModal(manifold.group, filename, {
+          layerHeight: 0.20,
+          infillDensity: 0.25,
+          targetDimensionMm: 100.0,
+          nozzleDiameter: 0.40,
+          printSpeed: 60.0
+        });
+      } catch (err) {
+        console.error('[Studio DFAM Slicer] Error abriendo rebanador:', err);
+        alert("Error al abrir el rebanador DFAM: " + err.message);
+      }
+    }
+
     // Exportar funciones globalmente
     window.downloadArtworkHD = downloadArtworkHD;
     window.exportStudioArtworkSTL = exportStudioArtworkSTL;
+    window.openStudioArtworkSlicer = openStudioArtworkSlicer;
     window.selectArtwork = selectArtwork;
     window.loadArtwork = loadArtwork;
     window.cycleArtwork = cycleArtwork;

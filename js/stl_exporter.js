@@ -57,9 +57,9 @@
       const vertexCount = indexAttr ? indexAttr.count : posAttr.count;
 
       const getVertex = (idx) => {
-        let x = posAttr.getX(idx);
-        let y = posAttr.getY(idx);
-        let z = posAttr.getZ(idx);
+        let x = typeof posAttr.getX === 'function' ? posAttr.getX(idx) : (posAttr.array ? posAttr.array[idx * 3] : 0);
+        let y = typeof posAttr.getY === 'function' ? posAttr.getY(idx) : (posAttr.array ? posAttr.array[idx * 3 + 1] : 0);
+        let z = typeof posAttr.getZ === 'function' ? posAttr.getZ(idx) : (posAttr.array ? posAttr.array[idx * 3 + 2] : 0);
 
         if (matrix) {
           // Aplicar matriz de transformación en silicio

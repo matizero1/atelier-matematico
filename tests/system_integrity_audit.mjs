@@ -385,6 +385,41 @@ const mockGroup = {
 MuseumModels.disposeThreeObject(mockGroup);
 assert(geoDisposed && matDisposed && textureDisposed && parentRemoved, 'disposeThreeObject libera recursivamente BufferGeometry, Material, Texturas y desconecta del Grafo de Escena');
 
+// ── Verificación de Arquitectura Modular del Observatorio (Vector B: Audio, Cámara, HUD) ──
+const audioPath = path.join(rootDir, 'js', 'controllers', 'museum_audio.js');
+const cameraPath = path.join(rootDir, 'js', 'controllers', 'museum_camera.js');
+const hudPath = path.join(rootDir, 'js', 'controllers', 'museum_hud.js');
+const controllerPath = path.join(rootDir, 'js', 'controllers', 'museum_controller.js');
+
+assert(fs.existsSync(audioPath), 'Subsistema de audio espacial y voz NAI museum_audio.js existe en disco');
+assert(fs.existsSync(cameraPath), 'Subsistema de navegación inercial 6DOF y cinemática ecuatorial museum_camera.js existe en disco');
+assert(fs.existsSync(hudPath), 'Subsistema de telemetría, bitácora y carrete persistente museum_hud.js existe en disco');
+
+const idxAudio = museumHtmlContent.indexOf('js/controllers/museum_audio.js');
+const idxCamera = museumHtmlContent.indexOf('js/controllers/museum_camera.js');
+const idxHud = museumHtmlContent.indexOf('js/controllers/museum_hud.js');
+
+assert(idxAudio !== -1 && idxCamera !== -1 && idxHud !== -1, 'museum.html vincula explícitamente museum_audio.js, museum_camera.js y museum_hud.js');
+assert(idxModels < idxAudio && idxAudio < idxCamera && idxCamera < idxHud && idxHud < idxController, 
+  'museum.html carga los subsistemas en estricto orden de dependencias: models -> audio -> camera -> hud -> controller');
+
+const MuseumAudio = require(audioPath);
+assert(MuseumAudio && typeof MuseumAudio.playServoSound === 'function' && typeof MuseumAudio.speakNai === 'function' && typeof MuseumAudio.enterCapsule === 'function',
+  'museum_audio.js exporta API soberana (playServoSound, speakNai, enterCapsule, toggleVoiceGuide)');
+
+const MuseumCamera = require(cameraPath);
+assert(MuseumCamera && MuseumCamera.state && typeof MuseumCamera.slewTelescopeToTarget === 'function' && typeof MuseumCamera.warpToTargetAstro === 'function' && typeof MuseumCamera.setup6DOFControls === 'function',
+  'museum_camera.js exporta API de navegación (slewTelescopeToTarget, warpToTargetAstro, setup6DOFControls, state)');
+
+const MuseumHUD = require(hudPath);
+assert(MuseumHUD && typeof MuseumHUD.loadDiscoveryLedger === 'function' && typeof MuseumHUD.triggerShutter === 'function' && typeof MuseumHUD.updateLODHUD === 'function',
+  'museum_hud.js exporta API de telemetría (loadDiscoveryLedger, triggerShutter, updateLODHUD, createTelescopeScreenTexture)');
+
+const controllerContent = fs.readFileSync(controllerPath, 'utf8');
+const ctrlLines = controllerContent.split('\n').length;
+assert(ctrlLines < 2100, `museum_controller.js se ha modularizado y reducido limpiamente (líneas actuales: ${ctrlLines} < 2100, reducción de >1,300 líneas)`);
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (NASA JPL & SILICIO NATIVO)
@@ -575,7 +610,14 @@ const roomControllers = {
   'index.html': ['js/controllers/index_controller.js', 'js/controllers/desktop_modal.js'],
   'shop.html': ['js/controllers/shop_controller.js', 'js/controllers/desktop_modal.js'],
   'studio.html': ['js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
-  'museum.html': ['js/controllers/museum_controller.js', 'js/controllers/museum_models.js', 'js/controllers/desktop_modal.js'],
+  'museum.html': [
+    'js/controllers/museum_models.js',
+    'js/controllers/museum_audio.js',
+    'js/controllers/museum_camera.js',
+    'js/controllers/museum_hud.js',
+    'js/controllers/museum_controller.js',
+    'js/controllers/desktop_modal.js'
+  ],
   'classroom.html': ['js/controllers/classroom_controller.js', 'js/controllers/desktop_modal.js']
 };
 

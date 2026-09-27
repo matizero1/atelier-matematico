@@ -16,7 +16,7 @@
       arch: 'Universal ARM64 / Apple Accelerate & Metal',
       badge: 'Silicio Nativo',
       size: '2.4 MB',
-      sha256: 'a2394639a816d8c1452557e97af4598d8b5eecde7c567a09b603f2cc31859693',
+      sha256: '54b8c66bbb61bf683c8592c5f6f66bf18d5ec3cba42e2372e520d2a69f550322',
       reqs: 'macOS 12.0 Monterrey o superior (Recomendado M-Series)'
     },
     'macos-intel': {
@@ -25,7 +25,7 @@
       arch: 'Intel AVX2 / SSE4.2 / Accelerate',
       badge: 'Legacy x86',
       size: '2.5 MB',
-      sha256: '70dbb971ee36f828d661af88d87f69f78b64d0486f51f959308c17f4bd87515f',
+      sha256: '66cf471916b258525ffd23638f94319d2cb39ad19f452da207d233c4c0b784bc',
       reqs: 'macOS 11.0 Big Sur o superior'
     },
     'linux': {
@@ -34,7 +34,7 @@
       arch: 'Linux x86_64 / POSIX + WebKitGTK / Chromium',
       badge: 'Portable Standalone',
       size: '2.0 MB',
-      sha256: '208e0d8745872c981121f329102fdd7a5892a36adf4e61629615e8865a66e3f5',
+      sha256: '3e3b4a20c2744b749f755bcb43f500e517c70f2df1bf34c6e8b0b9a48a1c12c0',
       reqs: 'Cualquier distribución Linux x86_64 (glibc 2.31+)'
     },
     'windows': {
@@ -43,7 +43,7 @@
       arch: 'Windows x64 / Direct3D 12 Edge App Mode',
       badge: 'Portable Standalone',
       size: '2.1 MB',
-      sha256: 'f0fe6bf570d34a717a42d4ca1e96449b577466ee714d51215d77b5302aa23a1d',
+      sha256: '8d08591ad5cb085e0a50ee5961530f358d96d664688c46eb1e2fe725a4a6a96e',
       reqs: 'Windows 10 versión 1903 o superior / Windows 11'
     }
   };

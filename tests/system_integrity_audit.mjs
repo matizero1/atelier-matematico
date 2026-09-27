@@ -745,6 +745,67 @@ assert(museumHtml.includes('id="btn-lod-toggle"'), 'museum.html contiene botón 
 assert(museumHtml.includes('id="lod-performance-modal"'), 'museum.html contiene modal de telemetría de rendimiento (#lod-performance-modal)');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 11. AUDITORÍA DE SOBERANÍA MULTIPLATAFORMA REAL (MACOS, LINUX & WINDOWS)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🌍 FASE 11: Soberanía Multiplataforma Real (macOS, Linux & Windows Packages)');
+
+const downloadsDir = path.join(rootDir, 'downloads');
+assert(fs.existsSync(downloadsDir), 'Directorio gallery/downloads existe en disco');
+
+// 1. Verificación de existencia y peso real de los 4 paquetes físicos
+const expectedPackages = [
+  { file: 'Atelier_Matematico_Silicon_arm64.dmg', minSize: 1000000, desc: 'macOS Apple Silicon' },
+  { file: 'Atelier_Matematico_Intel_x64.dmg', minSize: 1000000, desc: 'macOS Intel x86_64' },
+  { file: 'Atelier_Matematico_Linux_Portable.tar.gz', minSize: 1000000, desc: 'Linux Portable Standalone' },
+  { file: 'Atelier_Matematico_Windows_Portable.zip', minSize: 1000000, desc: 'Windows Portable Standalone' }
+];
+
+expectedPackages.forEach(pkg => {
+  const pPath = path.join(downloadsDir, pkg.file);
+  assert(fs.existsSync(pPath), `Paquete físico real ${pkg.file} (${pkg.desc}) existe en downloads/`);
+  const sz = fs.statSync(pPath).size;
+  assert(sz >= pkg.minSize, `Paquete ${pkg.file} posee tamaño no trivial (${(sz / (1024*1024)).toFixed(2)} MB, > 1MB)`);
+});
+
+// 2. Verificación de Manifiesto SHA256SUMS.txt
+const sumsPath = path.join(downloadsDir, 'SHA256SUMS.txt');
+assert(fs.existsSync(sumsPath), 'Manifiesto criptográfico SHA256SUMS.txt existe en downloads/');
+const sumsContent = fs.readFileSync(sumsPath, 'utf8');
+expectedPackages.forEach(pkg => {
+  assert(sumsContent.includes(pkg.file), `SHA256SUMS.txt contiene firma de ${pkg.file}`);
+});
+
+// 3. Verificación de Fuentes Nativas en desktop/
+const linuxSrcPath = path.join(desktopDir, 'main_linux.c');
+assert(fs.existsSync(linuxSrcPath), 'Código nativo C99 GTK3/WebKit2GTK existe en desktop/main_linux.c');
+const linuxSrcContent = fs.readFileSync(linuxSrcPath, 'utf8');
+assert(linuxSrcContent.includes('webkit_settings_set_enable_webgl'), 'main_linux.c habilita aceleración WebGL por hardware');
+
+const winSrcPath = path.join(desktopDir, 'main_windows.c');
+assert(fs.existsSync(winSrcPath), 'Código nativo Win32 en C existe en desktop/main_windows.c');
+const winSrcContent = fs.readFileSync(winSrcPath, 'utf8');
+assert(winSrcContent.includes('--app=') && winSrcContent.includes('msedge.exe'), 'main_windows.c implementa modo Edge App acelerado por Direct3D 12');
+
+// 4. Verificación de Scripts de Automatización
+const buildLinuxScript = path.join(rootDir, 'scripts', 'build_linux_package.sh');
+const buildWinScript = path.join(rootDir, 'scripts', 'build_windows_package.sh');
+const buildAllScript = path.join(rootDir, 'scripts', 'build_all_desktop_packages.sh');
+assert(fs.existsSync(buildLinuxScript), 'Script build_linux_package.sh existe y es automatizable');
+assert(fs.existsSync(buildWinScript), 'Script build_windows_package.sh existe y es automatizable');
+assert(fs.existsSync(buildAllScript), 'Script build_all_desktop_packages.sh existe y orquesta las 3 plataformas');
+
+// 5. Verificación de Saneamiento y Cero Autoengaño en desktop_modal.js
+const modalCtrlPath = path.join(rootDir, 'js', 'controllers', 'desktop_modal.js');
+const modalCode = fs.readFileSync(modalCtrlPath, 'utf8');
+assert(!modalCode.includes('alert('), 'desktop_modal.js erradica alertas modales bloqueantes falsas');
+assert(!modalCode.includes('NASA') && !modalCode.includes('aeroespaciales'), 'desktop_modal.js erradica afirmaciones hiperbólicas infundadas ("NASA")');
+assert(!modalCode.includes('.manifest.json'), 'desktop_modal.js erradica descargas falsas de manifiestos dummy');
+assert(modalCode.includes('Atelier_Matematico_Linux_Portable.tar.gz'), 'desktop_modal.js enlaza paquete real Linux');
+assert(modalCode.includes('Atelier_Matematico_Windows_Portable.zip'), 'desktop_modal.js enlaza paquete real Windows');
+assert(modalCode.includes('Atelier_Matematico_Intel_x64.dmg'), 'desktop_modal.js enlaza paquete real macOS Intel');
+assert(modalCode.includes('Atelier_Matematico_Silicon_arm64.dmg'), 'desktop_modal.js enlaza paquete real macOS Silicon');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

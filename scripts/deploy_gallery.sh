@@ -21,7 +21,7 @@ echo "════════════════════════�
 echo -e "\n🔍 PASO 1: Ejecutando auditoría de integridad estricta..."
 if ! node "$GALLERY_ROOT/tests/system_integrity_audit.mjs"; then
   echo -e "\n❌ [ERROR CRÍTICO] La auditoría de integridad ha fallado."
-  echo "   Gobernanza NASA JPL / Timonel F2: Prohibido desplegar código con defectos."
+  echo "   Gobernanza Timonel F2: Prohibido desplegar código con defectos."
   exit 1
 fi
 echo "✓ Auditoría completada con 100% de pruebas aprobadas."

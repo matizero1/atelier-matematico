@@ -15,28 +15,36 @@
       filename: 'Atelier_Matematico_Silicon_arm64.dmg',
       arch: 'Universal ARM64 / Apple Accelerate & Metal',
       badge: 'Silicio Nativo',
+      size: '2.4 MB',
+      sha256: '789378d96e7655591eeab5b6aa468736ea853d0b94173f24a0d23bedd980fbb4',
       reqs: 'macOS 12.0 Monterrey o superior (Recomendado M-Series)'
     },
     'macos-intel': {
       label: 'macOS Intel (x86_64)',
       filename: 'Atelier_Matematico_Intel_x64.dmg',
-      arch: 'Intel AVX2 / SSE4.2',
+      arch: 'Intel AVX2 / SSE4.2 / Accelerate',
       badge: 'Legacy x86',
+      size: '2.4 MB',
+      sha256: '91826eff9cf32340fca471c40bdb5fd853deb0d9e1a0928ec793c6c94aa65476',
       reqs: 'macOS 11.0 Big Sur o superior'
     },
     'linux': {
-      label: 'Linux (.AppImage / .deb)',
-      filename: 'Atelier_Matematico_Linux_x86_64.AppImage',
-      arch: 'Linux x86_64 / glibc 2.31+ / Vulkan',
-      badge: 'Open Source Engine',
-      reqs: 'Ubuntu 20.04+, Fedora 34+, Arch Linux'
+      label: 'Linux (Portable .tar.gz)',
+      filename: 'Atelier_Matematico_Linux_Portable.tar.gz',
+      arch: 'Linux x86_64 / POSIX + WebKitGTK / Chromium',
+      badge: 'Portable Standalone',
+      size: '2.0 MB',
+      sha256: '408931e7ef89b8fe79726e986f54a304a9c523e07ba9cf07a12591418d8e19d4',
+      reqs: 'Cualquier distribución Linux x86_64 (glibc 2.31+)'
     },
     'windows': {
-      label: 'Windows 11 / 10 (x64)',
-      filename: 'Atelier_Matematico_Setup_x64.exe',
-      arch: 'Windows x64 / Direct3D 12',
-      badge: 'Standalone',
-      reqs: 'Windows 10 versión 1903 o superior'
+      label: 'Windows 11 / 10 (Portable .zip)',
+      filename: 'Atelier_Matematico_Windows_Portable.zip',
+      arch: 'Windows x64 / Direct3D 12 Edge App Mode',
+      badge: 'Portable Standalone',
+      size: '2.0 MB',
+      sha256: '2abeffa93a79596cff0972593ec589fee4c12a7f0c4804f4ddb643d2e0a95df2',
+      reqs: 'Windows 10 versión 1903 o superior / Windows 11'
     }
   };
 
@@ -74,7 +82,7 @@
           </div>
           <h2 class="serif text-2xl md:text-3xl text-[#f4f1ea] font-normal">Estación de Trabajo Soberana en Silicio</h2>
           <p class="text-xs text-[#a1a1aa] mt-1 leading-relaxed">
-            Descarga el motor de física matemática nativo compilado en C11 para tu sistema operativo. Sin sobrecoste de navegador, 100% desconectado y sin límites de memoria.
+            Descarga la suite offline y autónoma de física matemática nativa para tu plataforma. Sin sobrecoste de navegador, 100% desconectada y con aceleración gráfica completa.
           </p>
         </div>
 
@@ -99,19 +107,31 @@
 
         <!-- Tarjeta de Descarga del Paquete Seleccionado -->
         <div class="bg-[#08080a] p-4 rounded-xl luxury-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="space-y-1 text-center sm:text-left">
+          <div class="space-y-1.5 text-center sm:text-left">
             <div class="flex items-center gap-2 justify-center sm:justify-start">
               <span class="text-sm text-[#f4f1ea] font-medium" id="build-label">macOS Apple Silicon (M1 / M2 / M3 / M4)</span>
               <span class="text-[9px] mono px-2 py-0.5 rounded border border-[#c5a059]/40 text-[#c5a059] bg-[#c5a059]/10" id="build-badge">Silicio Nativo</span>
             </div>
-            <div class="text-[11px] mono text-[#71717a]" id="build-reqs">macOS 12.0 Monterrey o superior</div>
+            <div class="text-[11px] mono text-[#71717a]" id="build-reqs">macOS 12.0 Monterrey o superior · Arquitectura: Universal ARM64</div>
+            <div class="text-[10px] mono text-[#c5a059]" id="build-specs">
+              Archivo: <span id="build-filename" class="text-[#f4f1ea]">Atelier_Matematico_Silicon_arm64.dmg</span> · Tamaño: <span id="build-size" class="text-[#f4f1ea]">2.4 MB</span>
+            </div>
+            <div class="text-[9px] mono text-[#52525b] truncate max-w-xs md:max-w-md" id="build-hash">
+              SHA-256: 789378d96e7655591eeab5b6aa468736ea853d0b94173f24a0d23bedd980fbb4
+            </div>
           </div>
-          <div class="flex items-center gap-2.5 w-full sm:w-auto">
-            <button onclick="triggerDesktopDownload()" class="w-full sm:w-auto bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-2.5 px-5 rounded-full text-xs uppercase tracking-wider mono transition shadow-md flex items-center justify-center gap-2">
+          <div class="flex flex-col items-center gap-2 w-full sm:w-auto">
+            <button onclick="triggerDesktopDownload()" class="w-full sm:w-auto bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] font-semibold py-2.5 px-6 rounded-full text-xs uppercase tracking-wider mono transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
               <span>📥 Descargar Gratuito</span>
             </button>
+            <a href="downloads/SHA256SUMS.txt" target="_blank" class="text-[10px] mono text-[#a1a1aa] hover:text-[#c5a059] underline">
+              Verificar SHA256SUMS.txt
+            </a>
           </div>
         </div>
+
+        <!-- Banner de Estado de Descarga en Vivo -->
+        <div id="download-status-banner" class="hidden"></div>
 
         <!-- Matriz Comparativa Honesta: Free Web/Desktop vs Pro Unlock -->
         <div class="space-y-3">
@@ -189,10 +209,16 @@
     const label = document.getElementById('build-label');
     const badge = document.getElementById('build-badge');
     const reqs = document.getElementById('build-reqs');
+    const filename = document.getElementById('build-filename');
+    const size = document.getElementById('build-size');
+    const hash = document.getElementById('build-hash');
 
     if (label) label.textContent = b.label;
     if (badge) badge.textContent = b.badge;
     if (reqs) reqs.textContent = `${b.reqs} · Arquitectura: ${b.arch}`;
+    if (filename) filename.textContent = b.filename;
+    if (size) size.textContent = b.size;
+    if (hash) hash.textContent = `SHA-256: ${b.sha256}`;
 
     // Actualizar estilos activos de los botones
     if (typeof document !== 'undefined') {
@@ -223,49 +249,24 @@
   function triggerDesktopDownload() {
     const b = OS_BUILDS[currentOS] || OS_BUILDS['macos-arm'];
     
-    // Si es macOS Apple Silicon, descargar directamente el instalador DMG real
-    if (currentOS === 'macos-arm') {
-      const dmgLink = document.createElement('a');
-      dmgLink.href = 'downloads/Atelier_Matematico_Silicon_arm64.dmg';
-      dmgLink.download = 'Atelier_Matematico_Silicon_arm64.dmg';
-      document.body.appendChild(dmgLink);
-      dmgLink.click();
-      document.body.removeChild(dmgLink);
-    }
+    // Iniciar descarga directa del paquete real físico
+    const link = document.createElement('a');
+    link.href = 'downloads/' + b.filename;
+    link.download = b.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    // Manifiesto de verificación criptográfica de integridad
-    const manifest = {
-      app: 'Atelier Matemático Desktop Workstation',
-      version: '2.4.0-silicon',
-      target: b.label,
-      architecture: b.arch,
-      sha256: currentOS === 'macos-arm' ? 'e2f66c953d1c57f6d06af4f01ea7a03ea5b5778b0cdfddbbe14c9848a1df6ff1' : '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-      license: 'Free Tier (Zero-Cost / Offline) + Pro Core Available',
-      buildDate: '2026-09-25T11:10:00Z',
-      instructions: [
-        '1. Abre la imagen de disco descargada (DMG).',
-        '2. Arrastra Atelier Matemático a tu carpeta de Aplicaciones.',
-        '3. Para activar el modo Pro, ingresa tu clave de licencia en Preferencias -> Silicio Nativo.'
-      ]
-    };
-
-    if (typeof Blob !== 'undefined' && typeof URL !== 'undefined' && typeof document !== 'undefined') {
-      const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${b.filename}.manifest.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    if (typeof alert !== 'undefined') {
-      const msg = (currentOS === 'macos-arm')
-        ? `📥 Descarga iniciada:\n\nPaquete: ${b.filename} (2.2 MB)\nPlataforma: ${b.label}\n\nSe está descargando la imagen de disco nativa (.dmg) compilada en silicio puro y su manifiesto criptográfico SHA-256.`
-        : `📥 Descarga iniciada:\n\nPaquete: ${b.filename}\nPlataforma: ${b.label}\n\nSe ha descargado el manifiesto criptográfico de instalación. El paquete nativo está compilado bajo estándares aeroespaciales de la NASA.`;
-      alert(msg);
+    // Notificación visual en interfaz sobria y honesta
+    const statusEl = document.getElementById('download-status-banner');
+    if (statusEl) {
+      statusEl.classList.remove('hidden');
+      statusEl.innerHTML = `
+        <div class="flex items-center justify-between text-xs mono text-[#c5a059] bg-[#c5a059]/10 border border-[#c5a059]/30 rounded-lg p-3">
+          <span>✓ Descarga iniciada: <strong>${b.filename}</strong> (${b.size})</span>
+          <span class="text-[10px] text-[#a1a1aa]">SHA-256: ${b.sha256.substring(0, 16)}...</span>
+        </div>
+      `;
     }
   }
 
@@ -274,6 +275,7 @@
   root.closeDesktopModal = closeDesktopModal;
   root.switchOSBuild = switchOSBuild;
   root.triggerDesktopDownload = triggerDesktopDownload;
+  root.OS_BUILDS = OS_BUILDS;
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = { openDesktopModal, closeDesktopModal, switchOSBuild, triggerDesktopDownload, OS_BUILDS };

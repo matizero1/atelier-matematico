@@ -1009,6 +1009,120 @@ assert(classroomHtmlNai.includes('toggleClassroomNailangModal'), 'classroom.html
 const classroomJsNai = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'classroom_controller.js'), 'utf8');
 assert(classroomJsNai.includes('toggleClassroomNailangModal') && classroomJsNai.includes('executeNailangWasm') && classroomJsNai.includes('loadNailangPreset'), 'classroom_controller.js orquesta compilación y ejecución interactiva de Nailang en Wasm');
 
+console.log('\n🧠 FASE 15: Memoria Lineal Wasm, Tensores y Homogenización Celular en Silicio');
+
+// 1. Verificación de Sección 5 (Memory) y Exportación de 'memory'
+const memoryTestSrc = `
+module Test.Memory;
+
+fn mem_square_and_store(idx: f64, val: f64) -> f64 {
+    mem[idx] = val * val;
+    return mem[idx];
+}
+`;
+const memTestAst = NailangWasm.parse(NailangWasm.tokenize(memoryTestSrc));
+const memCompiled = NailangWasm.compileToWasm(memTestAst);
+assert(memCompiled.bytes.includes(0x05), 'Binario Wasm contiene Sección 5 de Memoria Lineal (0x05)');
+
+const memRun = await NailangWasm.compileAndRun(memoryTestSrc, 'mem_square_and_store', [3.0, 7.0], {
+  readMemoryOffset: 3,
+  readMemoryLength: 1
+});
+assert(memRun.result === 49.0, 'Operaciones f64.store y f64.load evalúan mem[3] = 7*7 = 49.0 en silicio');
+assert(memRun.memory && memRun.memory[0] === 49.0, 'Buffer Float64Array de Wasm exportado refleja fielmente el valor en memoria lineal');
+
+// 2. Verificación de Bucle While y Operadores Relacionales
+const loopTestSrc = `
+module Test.Loop;
+
+fn sum_first_n(n: f64) -> f64 {
+    let mut i: f64 = 0.0;
+    let mut sum: f64 = 0.0;
+    while (i < n) {
+        sum = sum + i;
+        i = i + 1.0;
+    }
+    return sum;
+}
+`;
+const loopRun = await NailangWasm.compileAndRun(loopTestSrc, 'sum_first_n', [10.0]);
+assert(loopRun.result === 45.0, 'Bucle while con operadores relacionales (<) y acumulador iterativo converge en Wasm (sum(0..9) = 45)');
+
+// 3. Kernel Canónico de Álgebra Tensorial: Multiplicación Matricial 3x3 en Memoria
+const matmulProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.tensor_matmul_3x3;
+assert(typeof matmulProg === 'string' && matmulProg.includes('matmul_3x3'), 'Kernel canónico tensor_matmul_3x3 disponible en NailangWasm');
+
+const matA = [1, 2, 0,  0, 1, 1,  2, 0, 1];
+const matB = [1, 0, 1,  0, 2, 0,  1, 1, 0];
+const expectedC = [1, 4, 1,  1, 3, 0,  3, 1, 2];
+
+const matmulRun = await NailangWasm.compileAndRun(
+  matmulProg,
+  'matmul_3x3',
+  [0.0, 9.0, 18.0],
+  {
+    initialMemory: { 0: matA, 9: matB },
+    readMemoryOffset: 18,
+    readMemoryLength: 9
+  }
+);
+assert(matmulRun.result === 1.0, 'Multiplicación 3x3 retorna elemento C[0,0] = 1.0 como residuo testigo');
+const matResidual = matmulRun.memory.reduce((max, val, i) => Math.max(max, Math.abs(val - expectedC[i])), 0);
+assert(matResidual < 1e-14, 'Residuo formal de multiplicación matricial 3x3 en memoria lineal Wasm es nulo (||C_wasm - C_exact|| < 1e-14)');
+
+// 4. Kernel Canónico de Mecánica de Medios Continuos: Contracción Voigt 6x6
+const voigtProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.elastic_stress_voigt;
+assert(typeof voigtProg === 'string' && voigtProg.includes('voigt_elastic_stress'), 'Kernel canónico elastic_stress_voigt disponible en NailangWasm');
+
+const C_stiff = new Array(36).fill(0);
+C_stiff[0] = 120; C_stiff[1] = 40;  C_stiff[2] = 40;
+C_stiff[7] = 120; C_stiff[6] = 40;  C_stiff[8] = 40;
+C_stiff[14] = 120; C_stiff[12] = 40; C_stiff[13] = 40;
+C_stiff[21] = 40; C_stiff[28] = 40; C_stiff[35] = 40;
+const eps_vec = [0.001, 0, 0, 0, 0, 0];
+
+const voigtRun = await NailangWasm.compileAndRun(
+  voigtProg,
+  'voigt_elastic_stress',
+  [0.0, 36.0, 42.0],
+  {
+    initialMemory: { 0: C_stiff, 36: eps_vec },
+    readMemoryOffset: 42,
+    readMemoryLength: 6
+  }
+);
+assert(Math.abs(voigtRun.memory[0] - 0.12) < 1e-12 && Math.abs(voigtRun.memory[1] - 0.04) < 1e-12, 'Contracción de Cauchy-Hooke sigma = C : eps calcula tensiones normales exactas en Wasm');
+assert(Math.abs(voigtRun.result - 0.08) < 1e-12, 'Tensión equivalente de Von Mises se calcula fielmente en Wasm (sigma_vm = 0.08 GPa)');
+
+// 5. Kernel Canónico de Homogenización Celular Periódica (Cotas de Hill)
+const homogProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.cellular_homogenization_1d;
+assert(typeof homogProg === 'string' && homogProg.includes('cellular_homogenize'), 'Kernel canónico cellular_homogenization_1d disponible en NailangWasm');
+
+const cellModuli = [10.0, 20.0, 50.0, 100.0];
+const homogRun = await NailangWasm.compileAndRun(
+  homogProg,
+  'cellular_homogenize',
+  [0.0, 4.0],
+  {
+    initialMemory: { 0: cellModuli },
+    readMemoryOffset: 4,
+    readMemoryLength: 3
+  }
+);
+const [eV, eR, eH] = homogRun.memory;
+assert(Math.abs(eV - 45.0) < 1e-12, 'Cota superior de Voigt (media aritmética) calculada exactamente en Wasm (E_V = 45.0 GPa)');
+assert(Math.abs(eR - 22.22222222222222) < 1e-10, 'Cota inferior de Reuss (media armónica) calculada exactamente en Wasm (E_R = 22.22 GPa)');
+assert(eR <= eH && eH <= eV, 'Invariante físico de Hill verificado estrictamente en silicio: E_Reuss <= E_Hill <= E_Voigt');
+
+// 6. Verificación de UI e Integración en Classroom
+assert(classroomHtmlNai.includes("loadNailangPreset('tensor_matmul_3x3')"), 'classroom.html incluye botón de preset para Matriz 3x3 en memoria');
+assert(classroomHtmlNai.includes("loadNailangPreset('elastic_stress_voigt')"), 'classroom.html incluye botón de preset para Contracción Voigt 6x6');
+assert(classroomHtmlNai.includes("loadNailangPreset('cellular_homogenization_1d')"), 'classroom.html incluye botón de preset para Homogenización Celular');
+assert(classroomHtmlNai.includes('id="nailang-memory-panel"'), 'classroom.html incluye panel de inspección de memoria lineal Wasm');
+
+assert(classroomJsNai.includes('tensor_matmul_3x3') && classroomJsNai.includes('elastic_stress_voigt') && classroomJsNai.includes('cellular_homogenization_1d'), 'classroom_controller.js implementa carga de presets tensoriales');
+assert(classroomJsNai.includes('nailang-memory-display') && classroomJsNai.includes('runResult.memory'), 'classroom_controller.js renderiza estado de memoria lineal Wasm en HUD');
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────

@@ -16,7 +16,7 @@
       arch: 'Universal ARM64 / Apple Accelerate & Metal',
       badge: 'Silicio Nativo',
       size: '2.4 MB',
-      sha256: '5a4cae896794eb541e3c39e347e2caea6566edc723a6709108da1c8224d3c0ec',
+      sha256: 'a2394639a816d8c1452557e97af4598d8b5eecde7c567a09b603f2cc31859693',
       reqs: 'macOS 12.0 Monterrey o superior (Recomendado M-Series)'
     },
     'macos-intel': {
@@ -24,8 +24,8 @@
       filename: 'Atelier_Matematico_Intel_x64.dmg',
       arch: 'Intel AVX2 / SSE4.2 / Accelerate',
       badge: 'Legacy x86',
-      size: '2.4 MB',
-      sha256: '3aa339c0841273e761350ea4b46f3835c84d47be83493f3073042e7dba58c2ea',
+      size: '2.5 MB',
+      sha256: '70dbb971ee36f828d661af88d87f69f78b64d0486f51f959308c17f4bd87515f',
       reqs: 'macOS 11.0 Big Sur o superior'
     },
     'linux': {
@@ -34,7 +34,7 @@
       arch: 'Linux x86_64 / POSIX + WebKitGTK / Chromium',
       badge: 'Portable Standalone',
       size: '2.0 MB',
-      sha256: 'b903db23697975c449a5956a5f25243440466ea0ac9d420d159de0a10bd5d692',
+      sha256: '208e0d8745872c981121f329102fdd7a5892a36adf4e61629615e8865a66e3f5',
       reqs: 'Cualquier distribución Linux x86_64 (glibc 2.31+)'
     },
     'windows': {
@@ -43,7 +43,7 @@
       arch: 'Windows x64 / Direct3D 12 Edge App Mode',
       badge: 'Portable Standalone',
       size: '2.1 MB',
-      sha256: '8fa0ea2400c1aecf75df0a10fe169e2e112b3c5681e125ad63d68631e6897098',
+      sha256: 'f0fe6bf570d34a717a42d4ca1e96449b577466ee714d51215d77b5302aa23a1d',
       reqs: 'Windows 10 versión 1903 o superior / Windows 11'
     }
   };

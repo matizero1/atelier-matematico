@@ -427,17 +427,26 @@
         <button onclick="toggleClassroomNailangModal()" class="text-[#a1a1aa] hover:text-[#f4f1ea] p-1.5 text-base cursor-pointer transition">✕</button>
       </div>
 
-      <!-- Presets Canónicos de Física -->
+      <!-- Presets Canónicos de Física & Álgebra Tensorial -->
       <div class="px-5 py-3 bg-[#0a0a0d] border-b border-white/[0.08] flex flex-wrap items-center gap-2">
         <span class="text-[10px] mono uppercase text-[#71717a] mr-1">Algoritmos Canónicos:</span>
         <button onclick="loadNailangPreset('lorenz_rk4')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-cyan-300 border border-cyan-500/30 transition cursor-pointer">
-          Lorenz RK4 (Caos)
+          Lorenz RK4
         </button>
         <button onclick="loadNailangPreset('riemann_zeta_kernel')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-[#dfc285] border border-[#c5a059]/30 transition cursor-pointer">
-          Riemann Línea Crítica
+          Riemann Zeta
         </button>
         <button onclick="loadNailangPreset('gyroid_tpms_sdf')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-purple-300 border border-purple-500/30 transition cursor-pointer">
-          Giroide TPMS (DFAM)
+          Giroide TPMS
+        </button>
+        <button onclick="loadNailangPreset('tensor_matmul_3x3')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-blue-300 border border-blue-500/30 transition cursor-pointer">
+          Matriz 3x3 (Memoria)
+        </button>
+        <button onclick="loadNailangPreset('elastic_stress_voigt')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-amber-300 border border-amber-500/30 transition cursor-pointer">
+          Voigt 6x6 (Continuo)
+        </button>
+        <button onclick="loadNailangPreset('cellular_homogenization_1d')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-teal-300 border border-teal-500/30 transition cursor-pointer">
+          Homogenización Celular
         </button>
         <button onclick="loadNailangPreset('kinetic_energy')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-emerald-300 border border-emerald-500/30 transition cursor-pointer">
           Energía Cinética
@@ -493,6 +502,13 @@
             <span class="text-[9px] uppercase tracking-wider text-[#71717a] mono block mb-1">Resultado Numérico en Retorno (f64 IEEE 754):</span>
             <div id="nailang-result-display" class="text-base font-mono text-cyan-300 font-bold bg-[#050508] p-3 rounded-lg border border-white/10 truncate">
               Esperando compilación...
+            </div>
+          </div>
+
+          <!-- Panel de Memoria Lineal Wasm -->
+          <div id="nailang-memory-panel" class="hidden">
+            <span class="text-[9px] uppercase tracking-wider text-[#71717a] mono block mb-1">Estado de Memoria Lineal Wasm (Float64Array Buffer):</span>
+            <div id="nailang-memory-display" class="text-xs font-mono text-emerald-300 bg-[#050508] p-3 rounded-lg border border-white/10 overflow-x-auto whitespace-pre">
             </div>
           </div>
 

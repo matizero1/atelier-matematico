@@ -1,6 +1,8 @@
 /**
  * 🌌 ATELIER MATEMÁTICO — MOTOR COMPILADOR NAILANG A WEBASSEMBLY (WASM)
  * Compilador Soberano en Silicio: Lexer -> AST -> Timonel F2 -> Wasm Binary Emitter
+ * Soporte Nativo: Aritmética f64 IEEE 754, Memoria Lineal Wasm (WebAssembly.Memory),
+ *                 Arreglos Tensoriales, Bucles Iterativos (while) y Homogenización Celular.
  * Gobernanza: NASA JPL Rule 3 · Cero Dependencias · Ejecución en Silicio a 64 bits (f64)
  */
 
@@ -83,8 +85,8 @@
         continue;
       }
 
-      // Operadores y símbolos de 1 carácter
-      if ('{}(),;:+-*/%<>=.'.includes(ch)) {
+      // Operadores y símbolos de 1 carácter (incluyendo corchetes [] para indexación)
+      if ('{}(),;:+-*/%<>=.[]'.includes(ch)) {
         tokens.push({ type: ch, value: ch, line, col });
         i++; col++;
         continue;
@@ -99,8 +101,9 @@
 
   // Precedencia de operadores
   const PRECEDENCE = {
-    '+': 1, '-': 1,
-    '*': 2, '/': 2, '%': 2
+    '==': 1, '!=': 1, '<': 1, '<=': 1, '>': 1, '>=': 1,
+    '+': 2, '-': 2,
+    '*': 3, '/': 3, '%': 3
   };
 
   // ═════════════════════════════════════════════════════════════════════
@@ -192,8 +195,13 @@
     function parseStatement() {
       const c = cur();
       if (c.value === 'let' || c.value === 'mut') {
-        const isMut = (c.value === 'mut');
+        const initialWord = c.value;
         pos++;
+        let isMut = (initialWord === 'mut');
+        if (initialWord === 'let' && cur().value === 'mut') {
+          isMut = true;
+          pos++;
+        }
         const varName = expect('IDENT').value;
         let varType = 'f64';
         if (match(':')) {
@@ -229,6 +237,29 @@
         return { type: 'IfStatement', condition: cond, consequent, alternate };
       }
 
+      if (c.value === 'while') {
+        pos++;
+        expect('(');
+        const cond = parseExpression();
+        expect(')');
+        expect('{');
+        const body = [];
+        while (!match('}')) body.push(parseStatement());
+        return { type: 'WhileStatement', condition: cond, body };
+      }
+
+      // Asignación indexada arr[index] = expr;
+      if (c.type === 'IDENT' && tokens[pos + 1] && tokens[pos + 1].type === '[') {
+        const arrName = expect('IDENT').value;
+        expect('[');
+        const indexExpr = parseExpression();
+        expect(']');
+        expect('=');
+        const val = parseExpression();
+        expect(';');
+        return { type: 'IndexAssignment', object: arrName, index: indexExpr, value: val };
+      }
+
       // Asignación simple var = expr;
       if (c.type === 'IDENT' && tokens[pos + 1] && tokens[pos + 1].type === '=') {
         const varName = expect('IDENT').value;
@@ -236,6 +267,13 @@
         const val = parseExpression();
         expect(';');
         return { type: 'AssignmentStatement', name: varName, value: val };
+      }
+
+      // Sentencia de llamada a función o expresión callee(...);
+      if (c.type === 'IDENT' && tokens[pos + 1] && tokens[pos + 1].type === '(') {
+        const expr = parseExpression();
+        expect(';');
+        return { type: 'ExpressionStatement', expression: expr };
       }
 
       throw new Error(`Nailang Parser [L${c.line}:C${c.col}]: Sentencia no válida '${c.value}'`);
@@ -285,7 +323,7 @@
         return { type: 'Literal', value: c.value };
       }
 
-      // Identificador o llamada a función intrínseca
+      // Identificador, llamada a función o acceso a arreglo
       if (c.type === 'IDENT') {
         pos++;
         const name = c.value;
@@ -298,6 +336,13 @@
             match(',');
           }
           return { type: 'CallExpression', callee: name, arguments: args };
+        }
+
+        // Acceso a arreglo/memoria lineal: arr[index] o mem[index]
+        if (match('[')) {
+          const indexExpr = parseExpression();
+          expect(']');
+          return { type: 'IndexExpression', object: name, index: indexExpr };
         }
 
         // Acceso a campo: a.a11
@@ -318,20 +363,38 @@
   // ═════════════════════════════════════════════════════════════════════
   // 3. GENERADOR DE BYTECODE WEBASSEMBLY (WASM EMITTER)
   // ═════════════════════════════════════════════════════════════════════
-  // Opcodes estándar Wasm (64-bit IEEE 754 Float Math)
+  // Opcodes estándar Wasm (64-bit IEEE 754 Float Math & Linear Memory)
   const OP = {
+    BLOCK: 0x02,
+    LOOP: 0x03,
+    IF: 0x04,
+    ELSE: 0x05,
     END: 0x0b,
+    BR: 0x0c,
+    BR_IF: 0x0d,
     CALL: 0x10,
+    DROP: 0x1a,
     LOCAL_GET: 0x20,
     LOCAL_SET: 0x21,
+    F64_LOAD: 0x2b,
+    F64_STORE: 0x39,
     F64_CONST: 0x44,
+    I32_EQZ: 0x45,
+    F64_EQ: 0x61,
+    F64_NE: 0x62,
+    F64_LT: 0x63,
+    F64_GT: 0x64,
+    F64_LE: 0x65,
+    F64_GE: 0x66,
+    F64_ABS: 0x99,
+    F64_NEG: 0x9a,
+    F64_SQRT: 0x9f,
     F64_ADD: 0xa0,
     F64_SUB: 0xa1,
     F64_MUL: 0xa2,
     F64_DIV: 0xa3,
-    F64_ABS: 0x99,
-    F64_NEG: 0x9a,
-    F64_SQRT: 0x9f
+    I32_TRUNC_F64_S: 0xaa,
+    F64_CONVERT_I32_S: 0xb7
   };
 
   function encodeUintLeb128(val) {
@@ -348,7 +411,7 @@
   function encodeF64(val) {
     const buf = new ArrayBuffer(8);
     const view = new DataView(buf);
-    view.setFloat64(0, val, true); // Little endian
+    view.setFloat64(0, val, true); // Little endian IEEE 754
     return Array.from(new Uint8Array(buf));
   }
 
@@ -374,9 +437,7 @@
     // 1: (f64, f64) -> f64 [para pow]
     // 2+: para cada función de Nailang según su aridad
     const typeEntries = [];
-    // Tipo (f64) -> f64
     typeEntries.push([0x60, 0x01, 0x7c, 0x01, 0x7c]);
-    // Tipo (f64, f64) -> f64
     typeEntries.push([0x60, 0x02, 0x7c, 0x7c, 0x01, 0x7c]);
 
     const funcTypeIndices = [];
@@ -393,15 +454,10 @@
 
     // Import Section (2)
     const importEntries = [
-      // module="m", name="sin", func type 0
       [0x01, 0x6d, 0x03, 0x73, 0x69, 0x6e, 0x00, 0x00],
-      // module="m", name="cos", func type 0
       [0x01, 0x6d, 0x03, 0x63, 0x6f, 0x73, 0x00, 0x00],
-      // module="m", name="exp", func type 0
       [0x01, 0x6d, 0x03, 0x65, 0x78, 0x70, 0x00, 0x00],
-      // module="m", name="ln", func type 0
       [0x01, 0x6d, 0x02, 0x6c, 0x6e, 0x00, 0x00],
-      // module="m", name="pow", func type 1
       [0x01, 0x6d, 0x03, 0x70, 0x6f, 0x77, 0x00, 0x01]
     ];
     const importCount = importEntries.length; // 5 funciones importadas (índices 0..4)
@@ -410,7 +466,13 @@
     // Function Section (3)
     const funcSection = createSection(3, createVector(funcTypeIndices.map(idx => encodeUintLeb128(idx))));
 
+    // Memory Section (5) — 1 memoria lineal inicial de 1 página (64 KiB = 8,192 f64)
+    const memSection = createSection(5, createVector([
+      [0x00, 0x01] // limits: flag 0x00 (min sin max), initial 1 página
+    ]));
+
     // Export Section (7)
+    // Exportar funciones y memoria lineal
     const exportEntries = functions.map((fn, idx) => {
       const nameBytes = Array.from(new TextEncoder().encode(fn.name));
       const funcIndex = importCount + idx;
@@ -421,6 +483,16 @@
         ...encodeUintLeb128(funcIndex)
       ];
     });
+
+    // Exportar memoria lineal bajo el identificador canónico 'memory'
+    const memExportName = Array.from(new TextEncoder().encode('memory'));
+    exportEntries.push([
+      ...encodeUintLeb128(memExportName.length),
+      ...memExportName,
+      0x02, // ExportKind::Memory
+      0x00  // Memory index 0
+    ]);
+
     const exportSection = createSection(7, createVector(exportEntries));
 
     // Mapa de funciones de usuario (índices Wasm desplazados por los imports)
@@ -435,15 +507,25 @@
       const localMap = new Map();
       fn.params.forEach((p, idx) => localMap.set(p.name, idx));
 
-      // Descubrir variables locales 'let' o 'mut'
+      // Descubrir variables locales 'let' o 'mut' recursivamente en todo el cuerpo
       const newLocals = [];
-      fn.body.forEach(stmt => {
-        if (stmt.type === 'VariableDeclaration') {
-          const newIdx = fn.params.length + newLocals.length;
-          localMap.set(stmt.name, newIdx);
-          newLocals.push(stmt.name);
-        }
-      });
+      function collectLocals(stmts) {
+        stmts.forEach(stmt => {
+          if (stmt.type === 'VariableDeclaration') {
+            if (!localMap.has(stmt.name)) {
+              const newIdx = fn.params.length + newLocals.length;
+              localMap.set(stmt.name, newIdx);
+              newLocals.push(stmt.name);
+            }
+          } else if (stmt.type === 'IfStatement') {
+            collectLocals(stmt.consequent);
+            if (stmt.alternate) collectLocals(stmt.alternate);
+          } else if (stmt.type === 'WhileStatement') {
+            collectLocals(stmt.body);
+          }
+        });
+      }
+      collectLocals(fn.body);
 
       const bytecodes = [];
 
@@ -469,21 +551,95 @@
         }
 
         if (expr.type === 'BinaryExpression') {
-          emitExpr(expr.left);
-          emitExpr(expr.right);
-          switch (expr.operator) {
-            case '+': bytecodes.push(OP.F64_ADD); break;
-            case '-': bytecodes.push(OP.F64_SUB); break;
-            case '*': bytecodes.push(OP.F64_MUL); break;
-            case '/': bytecodes.push(OP.F64_DIV); break;
-            default:
-              throw new Error(`Nailang Wasm: Operador binario '${expr.operator}' no soportado aún en silicio`);
+          const op = expr.operator;
+          if (op === '+' || op === '-' || op === '*' || op === '/') {
+            emitExpr(expr.left);
+            emitExpr(expr.right);
+            switch (op) {
+              case '+': bytecodes.push(OP.F64_ADD); break;
+              case '-': bytecodes.push(OP.F64_SUB); break;
+              case '*': bytecodes.push(OP.F64_MUL); break;
+              case '/': bytecodes.push(OP.F64_DIV); break;
+            }
+            return;
           }
+
+          // Operadores relacionales evaluados en expresión general (devuelven f64 0.0 o 1.0)
+          if (['<', '>', '<=', '>=', '==', '!='].includes(op)) {
+            emitExpr(expr.left);
+            emitExpr(expr.right);
+            switch (op) {
+              case '<': bytecodes.push(OP.F64_LT); break;
+              case '>': bytecodes.push(OP.F64_GT); break;
+              case '<=': bytecodes.push(OP.F64_LE); break;
+              case '>=': bytecodes.push(OP.F64_GE); break;
+              case '==': bytecodes.push(OP.F64_EQ); break;
+              case '!=': bytecodes.push(OP.F64_NE); break;
+            }
+            bytecodes.push(OP.F64_CONVERT_I32_S);
+            return;
+          }
+
+          throw new Error(`Nailang Wasm: Operador binario '${op}' no soportado aún en silicio`);
+        }
+
+        // Acceso a memoria lineal indexado: arr[idx] o mem[idx]
+        if (expr.type === 'IndexExpression') {
+          if (expr.object === 'mem' || expr.object === 'memory') {
+            emitExpr(expr.index);
+          } else if (localMap.has(expr.object)) {
+            const baseIdx = localMap.get(expr.object);
+            bytecodes.push(OP.LOCAL_GET, ...encodeUintLeb128(baseIdx));
+            emitExpr(expr.index);
+            bytecodes.push(OP.F64_ADD);
+          } else {
+            emitExpr(expr.index);
+          }
+          // Dirección en bytes: palabra * 8.0 bytes
+          bytecodes.push(OP.F64_CONST, ...encodeF64(8.0));
+          bytecodes.push(OP.F64_MUL);
+          bytecodes.push(OP.I32_TRUNC_F64_S);
+          bytecodes.push(OP.F64_LOAD, 0x03, 0x00); // align=3 (8 bytes), offset=0
           return;
         }
 
         if (expr.type === 'CallExpression') {
           const callee = expr.callee;
+
+          // Primitivas de memoria lineal directa
+          if (callee === 'mem_get') {
+            emitExpr(expr.arguments[0]);
+            bytecodes.push(OP.F64_CONST, ...encodeF64(8.0));
+            bytecodes.push(OP.F64_MUL);
+            bytecodes.push(OP.I32_TRUNC_F64_S);
+            bytecodes.push(OP.F64_LOAD, 0x03, 0x00);
+            return;
+          }
+          if (callee === 'mem_set') {
+            emitExpr(expr.arguments[0]);
+            bytecodes.push(OP.F64_CONST, ...encodeF64(8.0));
+            bytecodes.push(OP.F64_MUL);
+            bytecodes.push(OP.I32_TRUNC_F64_S);
+            emitExpr(expr.arguments[1]);
+            bytecodes.push(OP.F64_STORE, 0x03, 0x00);
+            emitExpr(expr.arguments[1]); // retorna valor asignado
+            return;
+          }
+          if (callee === 'load_f64') {
+            emitExpr(expr.arguments[0]);
+            bytecodes.push(OP.I32_TRUNC_F64_S);
+            bytecodes.push(OP.F64_LOAD, 0x03, 0x00);
+            return;
+          }
+          if (callee === 'store_f64') {
+            emitExpr(expr.arguments[0]);
+            bytecodes.push(OP.I32_TRUNC_F64_S);
+            emitExpr(expr.arguments[1]);
+            bytecodes.push(OP.F64_STORE, 0x03, 0x00);
+            emitExpr(expr.arguments[1]);
+            return;
+          }
+
           if (callee === 'sqrt') {
             emitExpr(expr.arguments[0]);
             bytecodes.push(OP.F64_SQRT);
@@ -532,27 +688,110 @@
         throw new Error(`Nailang Wasm: Tipo de nodo de expresión no soportado '${expr.type}'`);
       }
 
-      // Emitir cuerpo de la función
-      fn.body.forEach(stmt => {
+      function emitCondition(cond) {
+        if (cond.type === 'BinaryExpression' && ['<', '>', '<=', '>=', '==', '!='].includes(cond.operator)) {
+          emitExpr(cond.left);
+          emitExpr(cond.right);
+          switch (cond.operator) {
+            case '<': bytecodes.push(OP.F64_LT); break;
+            case '>': bytecodes.push(OP.F64_GT); break;
+            case '<=': bytecodes.push(OP.F64_LE); break;
+            case '>=': bytecodes.push(OP.F64_GE); break;
+            case '==': bytecodes.push(OP.F64_EQ); break;
+            case '!=': bytecodes.push(OP.F64_NE); break;
+          }
+        } else {
+          emitExpr(cond);
+          bytecodes.push(OP.F64_CONST, ...encodeF64(0.0));
+          bytecodes.push(OP.F64_NE);
+        }
+      }
+
+      function emitStatement(stmt) {
         if (stmt.type === 'VariableDeclaration') {
           emitExpr(stmt.init);
           const varIdx = localMap.get(stmt.name);
           bytecodes.push(OP.LOCAL_SET, ...encodeUintLeb128(varIdx));
-        } else if (stmt.type === 'AssignmentStatement') {
+          return;
+        }
+
+        if (stmt.type === 'AssignmentStatement') {
           emitExpr(stmt.value);
           const varIdx = localMap.get(stmt.name);
           bytecodes.push(OP.LOCAL_SET, ...encodeUintLeb128(varIdx));
-        } else if (stmt.type === 'ReturnStatement') {
-          emitExpr(stmt.value);
+          return;
         }
-      });
+
+        if (stmt.type === 'IndexAssignment') {
+          // Dirección en bytes: (base + index) * 8.0
+          if (stmt.object === 'mem' || stmt.object === 'memory') {
+            emitExpr(stmt.index);
+          } else if (localMap.has(stmt.object)) {
+            const baseIdx = localMap.get(stmt.object);
+            bytecodes.push(OP.LOCAL_GET, ...encodeUintLeb128(baseIdx));
+            emitExpr(stmt.index);
+            bytecodes.push(OP.F64_ADD);
+          } else {
+            emitExpr(stmt.index);
+          }
+          bytecodes.push(OP.F64_CONST, ...encodeF64(8.0));
+          bytecodes.push(OP.F64_MUL);
+          bytecodes.push(OP.I32_TRUNC_F64_S);
+
+          // Valor f64 a almacenar
+          emitExpr(stmt.value);
+          bytecodes.push(OP.F64_STORE, 0x03, 0x00);
+          return;
+        }
+
+        if (stmt.type === 'IfStatement') {
+          emitCondition(stmt.condition);
+          bytecodes.push(OP.IF, 0x40); // blocktype void
+          stmt.consequent.forEach(inner => emitStatement(inner));
+          if (stmt.alternate && stmt.alternate.length > 0) {
+            bytecodes.push(OP.ELSE);
+            stmt.alternate.forEach(inner => emitStatement(inner));
+          }
+          bytecodes.push(OP.END);
+          return;
+        }
+
+        if (stmt.type === 'WhileStatement') {
+          bytecodes.push(OP.BLOCK, 0x40); // block de escape
+          bytecodes.push(OP.LOOP, 0x40);  // loop de iteración
+          emitCondition(stmt.condition);
+          bytecodes.push(OP.I32_EQZ);
+          bytecodes.push(OP.BR_IF, 0x01); // Romper al bloque exterior si la condición es falsa
+          stmt.body.forEach(inner => emitStatement(inner));
+          bytecodes.push(OP.BR, 0x00);    // Continuar al inicio del loop
+          bytecodes.push(OP.END);         // Fin loop
+          bytecodes.push(OP.END);         // Fin block
+          return;
+        }
+
+        if (stmt.type === 'ExpressionStatement') {
+          emitExpr(stmt.expression);
+          bytecodes.push(OP.DROP);
+          return;
+        }
+
+        if (stmt.type === 'ReturnStatement') {
+          emitExpr(stmt.value);
+          return;
+        }
+
+        throw new Error(`Nailang Wasm: Sentencia no soportada '${stmt.type}'`);
+      }
+
+      // Emitir todas las sentencias del cuerpo
+      fn.body.forEach(stmt => emitStatement(stmt));
 
       bytecodes.push(OP.END);
 
       // Declaración de variables locales en la cabecera del cuerpo Wasm
       const localCount = newLocals.length;
       const localHeader = (localCount > 0)
-        ? [0x01, ...encodeUintLeb128(localCount), 0x7c] // 1 bloque de N variables locales de tipo f64 (0x7c)
+        ? [0x01, ...encodeUintLeb128(localCount), 0x7c] // 1 bloque de N variables locales f64
         : [0x00];
 
       const fullBody = [...localHeader, ...bytecodes];
@@ -567,8 +806,9 @@
       ...typeSection,
       ...importSection,
       ...funcSection,
-      ...exportSection,
-      ...codeSection
+      ...memSection,    // Section 5 (Memory)
+      ...exportSection, // Section 7 (Exports)
+      ...codeSection    // Section 10 (Code)
     ]);
 
     return {
@@ -596,13 +836,26 @@
     return wasmModule.instance;
   }
 
-  // Pipeline de alto nivel
-  async function compileAndRun(sourceCode, fnName, args = []) {
+  // Pipeline de alto nivel con soporte de memoria lineal y tensores
+  async function compileAndRun(sourceCode, fnName, args = [], options = {}) {
     const t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     const tokens = tokenize(sourceCode);
     const ast = parse(tokens);
     const compiled = compileToWasm(ast);
     const instance = await instantiateWasm(compiled);
+
+    // Inyectar datos iniciales en la memoria lineal Wasm si se proveen
+    if (options.initialMemory && instance.exports.memory) {
+      const f64View = new Float64Array(instance.exports.memory.buffer);
+      if (Array.isArray(options.initialMemory) || options.initialMemory instanceof Float64Array) {
+        f64View.set(options.initialMemory, options.memoryOffset || 0);
+      } else if (typeof options.initialMemory === 'object') {
+        for (const [offStr, vals] of Object.entries(options.initialMemory)) {
+          const off = parseInt(offStr, 10);
+          f64View.set(vals, off);
+        }
+      }
+    }
 
     const targetFn = instance.exports[fnName];
     if (typeof targetFn !== 'function') {
@@ -616,20 +869,116 @@
     const totalTimeMs = tRun1 - t0;
     const execTimeMicros = (tRun1 - tRun0) * 1000;
 
+    let memorySnapshot = null;
+    if (instance.exports.memory && (options.readMemoryLength || options.readMemoryOffset !== undefined)) {
+      const off = options.readMemoryOffset || 0;
+      const len = options.readMemoryLength || 16;
+      const f64View = new Float64Array(instance.exports.memory.buffer);
+      memorySnapshot = Array.from(f64View.slice(off, off + len));
+    }
+
     return {
       result,
       compiledBytes: compiled.bytes.length,
       executionTimeMicros: execTimeMicros.toFixed(2),
       totalPipelineMs: totalTimeMs.toFixed(2),
       certified: true,
-      evidenceLevel: 'VALIDATED'
+      evidenceLevel: 'VALIDATED',
+      memory: memorySnapshot,
+      wasmMemory: instance.exports.memory || null
     };
   }
 
   // ═════════════════════════════════════════════════════════════════════
-  // 5. BIBLIOTECA CANÓNICA DE FÓRMULAS DE FÍSICA EN NAILANG
+  // 5. BIBLIOTECA CANÓNICA DE FÓRMULAS DE FÍSICA Y TENSORES EN NAILANG
   // ═════════════════════════════════════════════════════════════════════
   const CANONICAL_PHYSICS_PROGRAMS = {
+    tensor_matmul_3x3: `
+module NaiPhysics.LinearAlgebra;
+
+// Multiplicación matricial 3x3 en memoria lineal Wasm: C = A * B
+// Entrada: Matrix A (offset 0..8), Matrix B (offset 9..17) -> Salida: Matrix C (offset 18..26)
+fn matmul_3x3(base_a: f64, base_b: f64, base_c: f64) -> f64 {
+    let mut i: f64 = 0.0;
+    while (i < 3.0) {
+        let mut j: f64 = 0.0;
+        while (j < 3.0) {
+            let mut dot: f64 = 0.0;
+            let mut k: f64 = 0.0;
+            while (k < 3.0) {
+                let a_val: f64 = mem[base_a + i * 3.0 + k];
+                let b_val: f64 = mem[base_b + k * 3.0 + j];
+                dot = dot + a_val * b_val;
+                k = k + 1.0;
+            }
+            mem[base_c + i * 3.0 + j] = dot;
+            j = j + 1.0;
+        }
+        i = i + 1.0;
+    }
+    return mem[base_c]; // Retorna C[0,0] como residuo testigo
+}
+`.trim(),
+
+    elastic_stress_voigt: `
+module NaiPhysics.ContinuumMechanics;
+
+// Contracción tensorial constitutiva de Cauchy-Hooke: sigma = C : epsilon (Notación Voigt 6x6)
+// Entrada: Tensor de Rigidez C 6x6 (offset 0..35), Deformación eps (offset 36..41) -> Salida: Tensión sigma (offset 42..47)
+fn voigt_elastic_stress(base_c: f64, base_eps: f64, base_sig: f64) -> f64 {
+    let mut i: f64 = 0.0;
+    while (i < 6.0) {
+        let mut sum: f64 = 0.0;
+        let mut j: f64 = 0.0;
+        while (j < 6.0) {
+            let c_ij: f64 = mem[base_c + i * 6.0 + j];
+            let eps_j: f64 = mem[base_eps + j];
+            sum = sum + c_ij * eps_j;
+            j = j + 1.0;
+        }
+        mem[base_sig + i] = sum;
+        i = i + 1.0;
+    }
+
+    // Tensión equivalente escalar de Von Mises en medios continuos 3D
+    let s0: f64 = mem[base_sig + 0.0];
+    let s1: f64 = mem[base_sig + 1.0];
+    let s2: f64 = mem[base_sig + 2.0];
+    let s3: f64 = mem[base_sig + 3.0];
+    let s4: f64 = mem[base_sig + 4.0];
+    let s5: f64 = mem[base_sig + 5.0];
+    let dev: f64 = 0.5 * ((s0 - s1)*(s0 - s1) + (s1 - s2)*(s1 - s2) + (s2 - s0)*(s2 - s0)) + 3.0 * (s3*s3 + s4*s4 + s5*s5);
+    return sqrt(dev);
+}
+`.trim(),
+
+    cellular_homogenization_1d: `
+module NaiPhysics.CellularHomogenization;
+
+// Homogenización periódica celular con evaluación rigurosa de cotas de Hill (Voigt - Reuss)
+// Entrada: Array de módulos locales E_i (offset 0..N-1), N_cells
+// Salida: mem[N] = E_Voigt, mem[N+1] = E_Reuss, mem[N+2] = E_Hill
+fn cellular_homogenize(base_moduli: f64, n_cells: f64) -> f64 {
+    let mut i: f64 = 0.0;
+    let mut sum_voigt: f64 = 0.0;
+    let mut sum_reuss: f64 = 0.0;
+    while (i < n_cells) {
+        let e_cell: f64 = mem[base_moduli + i];
+        sum_voigt = sum_voigt + e_cell;
+        sum_reuss = sum_reuss + 1.0 / e_cell;
+        i = i + 1.0;
+    }
+    let e_v: f64 = sum_voigt / n_cells;
+    let e_r: f64 = n_cells / sum_reuss;
+    let e_hill: f64 = 0.5 * (e_v + e_r);
+
+    mem[base_moduli + n_cells] = e_v;
+    mem[base_moduli + n_cells + 1.0] = e_r;
+    mem[base_moduli + n_cells + 2.0] = e_hill;
+    return e_hill;
+}
+`.trim(),
+
     lorenz_rk4: `
 module NaiPhysics.Chaos;
 

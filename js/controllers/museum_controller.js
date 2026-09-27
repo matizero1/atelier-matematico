@@ -3032,7 +3032,61 @@ function updateLODHUD(forceModalUpdate = false) {
   }
 }
 
+// ── EXPORTACIÓN DE MALLAS 3D EN SILICIO (DFAM TIMONEL F2) ────────────
+function exportActiveAstroSTL() {
+  let targetAstro = activeConfinementAstro || currentFocusedAstro;
+  if (!targetAstro && typeof collimatedAstroIndex !== 'undefined' && collimatedAstroIndex >= 0) {
+    targetAstro = astros24[collimatedAstroIndex];
+  }
+  if (!targetAstro) {
+    targetAstro = astros24[nai3D.currentIndex] || astros24[0];
+  }
+
+  if (!targetAstro) {
+    speakNai("No hay ningún astro colimado para exportar.");
+    return;
+  }
+
+  const d = targetAstro.data || {};
+  const badge = d.badge || String(targetAstro.index + 1).padStart(3, '0');
+  const title = (d.title || 'Obra').replace(/[^a-zA-Z0-9_\u00C0-\u017F]/g, '_');
+  const filename = `Atelier_3D_OBRA_${badge}_${title}.stl`;
+
+  try {
+    if (!window.Atelier3DExporter) {
+      throw new Error("Módulo Atelier3DExporter no disponible.");
+    }
+
+    const meshGroup = (targetAstro.model && targetAstro.model.group) ? targetAstro.model.group : targetAstro.group;
+    
+    speakNai(`Generando geometría STL de alta fidelidad para Obra ${badge}. Preparando para fabricación aditiva.`);
+    
+    const result = window.Atelier3DExporter.downloadSTL(meshGroup, filename, {
+      title: `Atelier Matematico Obra ${badge} ${title}`,
+      targetDimensionMm: 100.0 // 100 mm de envergadura por defecto para impresión DFAM
+    });
+
+    console.log(`[Timonel DFAM] STL generado exitosamente: ${result.triangleCount} triángulos, ${(result.byteLength / 1024).toFixed(1)} KB`);
+    
+    const btn = document.getElementById('btn-export-stl');
+    if (btn) {
+      const origHtml = btn.innerHTML;
+      btn.innerHTML = `<span>✓ STL Descargado (${result.triangleCount} Δ)</span>`;
+      btn.classList.add('bg-emerald-950/60', 'border-emerald-500/60', 'text-emerald-300');
+      setTimeout(() => {
+        btn.innerHTML = origHtml;
+        btn.classList.remove('bg-emerald-950/60', 'border-emerald-500/60', 'text-emerald-300');
+      }, 3500);
+    }
+  } catch (err) {
+    console.error('[Timonel DFAM] Error exportando STL:', err);
+    speakNai("Error al exportar la geometría 3D.");
+    alert("Error exportando STL: " + err.message);
+  }
+}
+
 // Exportación explícita para interactividad con eventos DOM y onclicks HTML
+window.exportActiveAstroSTL = exportActiveAstroSTL;
 window.warpToTargetAstro = warpToTargetAstro;
 window.enterCapsule = enterCapsule;
 window.returnToRotunda = returnToRotunda;

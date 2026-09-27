@@ -862,6 +862,89 @@ const classroomJsContent = fs.readFileSync(path.join(rootDir, 'js', 'controllers
 assert(classroomJsContent.includes('calculateTaylor') && classroomJsContent.includes('calculateLimit') && classroomJsContent.includes('calculateSimplify'), 'classroom_controller.js implementa y expone controladores de cálculo simbólico avanzado');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 13. AUDITORÍA DEL EXPORTADOR 3D STL & OBJ PARA FABRICACIÓN ADITIVA (DFAM)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n🖨️ FASE 13: Exportador 3D STL & OBJ para Fabricación Física (DFAM)');
+
+const stlExporterPath = path.join(rootDir, 'js', 'stl_exporter.js');
+assert(fs.existsSync(stlExporterPath), 'Archivo stl_exporter.js existe en disco');
+
+const Atelier3DExporter = require(stlExporterPath);
+assert(typeof Atelier3DExporter.extractTriangles === 'function', 'Atelier3DExporter expone extractTriangles');
+assert(typeof Atelier3DExporter.exportBinarySTL === 'function', 'Atelier3DExporter expone exportBinarySTL');
+assert(typeof Atelier3DExporter.exportAsciiSTL === 'function', 'Atelier3DExporter expone exportAsciiSTL');
+assert(typeof Atelier3DExporter.exportOBJ === 'function', 'Atelier3DExporter expone exportOBJ');
+assert(typeof Atelier3DExporter.downloadSTL === 'function', 'Atelier3DExporter expone downloadSTL');
+
+// 1. Verificación de Formato Binario Estándar ISO/ASTM 52915
+const testQuadGeometry = {
+  isBufferGeometry: true,
+  attributes: {
+    position: {
+      count: 6,
+      getX: (i) => [0, 1, 0, 0, 1, 1][i],
+      getY: (i) => [0, 0, 1, 0, 1, 1][i],
+      getZ: (i) => [0, 0, 0, 0, 0, 0][i]
+    }
+  }
+};
+
+const binaryResult = Atelier3DExporter.exportBinarySTL(testQuadGeometry, { targetDimensionMm: 100.0, title: 'TestQuad' });
+assert(binaryResult.triangleCount === 2, 'Exportador genera exactamente 2 triángulos para un cuadrilátero');
+assert(binaryResult.byteLength === 84 + (2 * 50), 'Tamaño exacto del buffer STL binario según ISO/ASTM 52915: 84 + N*50 bytes (184 bytes)');
+assert(binaryResult.buffer.byteLength === 184, 'Buffer físico coincide con longitud calculada');
+
+const dv = new DataView(binaryResult.buffer);
+const readCount = dv.getUint32(80, true);
+assert(readCount === 2, 'Cabecera uint32 little-endian en offset 80 registra exactamente 2 triángulos');
+assert(dv.getUint16(84 + 48, true) === 0, 'Atributo uint16 de la faceta 0 es 0 (estándar STL)');
+assert(Math.abs(binaryResult.bbox.widthMm - 100.0) < 1e-4, 'Escala DFAM milimétrica mapea la envergadura máxima a 100.0 mm');
+
+// 2. Verificación de Formato ASCII STL
+const asciiResult = Atelier3DExporter.exportAsciiSTL(testQuadGeometry, { title: 'TestMesh' });
+assert(asciiResult.text.startsWith('solid TestMesh') && asciiResult.text.endsWith('endsolid TestMesh\n'), 'STL ASCII comienza con "solid <nombre>" y finaliza con "endsolid <nombre>"');
+assert(asciiResult.text.includes('facet normal') && asciiResult.text.includes('outer loop') && asciiResult.text.includes('vertex'), 'STL ASCII contiene descriptores estándar de facetas y vértices');
+
+// 3. Verificación de Formato Wavefront OBJ
+const objResult = Atelier3DExporter.exportOBJ(testQuadGeometry);
+assert(objResult.text.includes('v ') && objResult.text.includes('vn ') && objResult.text.includes('f 1//1 2//1 3//1'), 'Exportador Wavefront OBJ genera vértices, normales y caras indexadas estándar');
+
+// 4. Verificación de Robustez: Rechazo estricto de Coordenadas Degeneradas (NaN / Infinito)
+let nanDetected = false;
+try {
+  Atelier3DExporter.exportBinarySTL({
+    isBufferGeometry: true,
+    attributes: {
+      position: {
+        count: 3,
+        getX: () => NaN,
+        getY: () => 0,
+        getZ: () => 0
+      }
+    }
+  });
+} catch (e) {
+  if (e.message.includes('Coordenada degenerada detectada')) nanDetected = true;
+}
+assert(nanDetected === true, 'Timonel STL Exporter rechaza de raíz geometrías corruptas con coordenadas NaN');
+
+// 5. Verificación de Integración en Observatorio 3D (museum.html & museum_controller.js)
+const museumHtmlSrc = fs.readFileSync(path.join(rootDir, 'museum.html'), 'utf8');
+assert(museumHtmlSrc.includes('btn-export-stl') && museumHtmlSrc.includes('exportActiveAstroSTL'), 'museum.html contiene botón de exportación STL 3D en el HUD orbital');
+assert(museumHtmlSrc.includes('src="js/stl_exporter.js"'), 'museum.html enlaza js/stl_exporter.js');
+
+const museumCtrlSrc = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'museum_controller.js'), 'utf8');
+assert(museumCtrlSrc.includes('exportActiveAstroSTL') && museumCtrlSrc.includes('window.exportActiveAstroSTL = exportActiveAstroSTL'), 'museum_controller.js implementa y expone exportActiveAstroSTL');
+
+// 6. Verificación de Integración en Estudio Paramétrico (studio.html & studio_controller.js)
+const studioHtmlSrc = fs.readFileSync(path.join(rootDir, 'studio.html'), 'utf8');
+assert(studioHtmlSrc.includes('btn-studio-stl') && studioHtmlSrc.includes('exportStudioArtworkSTL'), 'studio.html contiene botones de exportación STL 3D en cabecera y dossier');
+assert(studioHtmlSrc.includes('src="js/stl_exporter.js"'), 'studio.html enlaza js/stl_exporter.js');
+
+const studioCtrlSrc = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'studio_controller.js'), 'utf8');
+assert(studioCtrlSrc.includes('exportStudioArtworkSTL') && studioCtrlSrc.includes('window.exportStudioArtworkSTL = exportStudioArtworkSTL'), 'studio_controller.js implementa y expone exportStudioArtworkSTL');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');
@@ -874,4 +957,5 @@ if (failedTests === 0) {
 console.log('═══════════════════════════════════════════════════════════════════════\n');
 
 process.exit(failedTests === 0 ? 0 : 1);
+
 

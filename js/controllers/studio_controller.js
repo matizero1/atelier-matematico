@@ -425,8 +425,55 @@
       link.click();
     }
 
+    // ── Exportación de Malla 3D STL (DFAM para Impresión 3D) ─────────
+    function exportStudioArtworkSTL() {
+      const catalog = window.ARTWORKS_100 || [];
+      const art = catalog[currentArt];
+      if (!art) return;
+
+      const badge = art.badge || String(currentArt + 1).padStart(3, '0');
+      const title = (art.title || 'Obra').replace(/[^a-zA-Z0-9_\u00C0-\u017F]/g, '_');
+      const filename = `Atelier_3D_OBRA_${badge}_${title}.stl`;
+
+      try {
+        if (!window.Atelier3DExporter) {
+          throw new Error("Módulo Atelier3DExporter no cargado.");
+        }
+        if (!window.MuseumModels || !window.MuseumModels.BESPOKE_3D_BUILDERS) {
+          throw new Error("Módulo de Variedades 3D (MuseumModels) no cargado.");
+        }
+
+        const modelKey = art.modelKey || art.archetype || 'lorenz';
+        const builders = window.MuseumModels.BESPOKE_3D_BUILDERS;
+        const builder = builders[modelKey] || builders.lorenz;
+        const manifold = builder(0xc5a059);
+
+        const result = window.Atelier3DExporter.downloadSTL(manifold.group, filename, {
+          title: `Atelier Matematico Obra ${badge} ${title}`,
+          targetDimensionMm: 100.0
+        });
+
+        ['btn-studio-stl', 'btn-studio-stl-dossier'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<span>✓ STL Descargado (${result.triangleCount} Δ)</span>`;
+            setTimeout(() => { btn.innerHTML = orig; }, 3500);
+          }
+        });
+
+        if (typeof window.MuseumModels.disposeThreeObject === 'function') {
+          window.MuseumModels.disposeThreeObject(manifold.group);
+        }
+      } catch (err) {
+        console.error('[Studio DFAM] Error exportando STL:', err);
+        alert("Error exportando STL: " + err.message);
+      }
+    }
+
     // Exportar funciones globalmente
     window.downloadArtworkHD = downloadArtworkHD;
+    window.exportStudioArtworkSTL = exportStudioArtworkSTL;
     window.selectArtwork = selectArtwork;
     window.loadArtwork = loadArtwork;
     window.cycleArtwork = cycleArtwork;

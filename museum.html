@@ -351,8 +351,12 @@
       </div>
     </div>
 
-    <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2.5 shadow-sm">
+    <button id="btn-perturb-astro" onclick="perturbCurrentAstro()" class="w-full py-2 px-3 bg-[#16161c] hover:bg-white/10 border border-[#c5a059]/30 rounded-lg text-[11px] mono text-[#dfc285] transition flex items-center justify-center gap-2 mb-2 shadow-sm">
       <span>Animar forma (visualización ilustrativa)</span>
+    </button>
+
+    <button id="btn-export-stl" onclick="exportActiveAstroSTL()" class="w-full py-2 px-3 bg-[#0d1520] hover:bg-[#132032] border border-cyan-500/40 hover:border-cyan-400 rounded-lg text-[11px] mono text-cyan-300 transition flex items-center justify-center gap-2 mb-2.5 shadow-sm font-semibold cursor-pointer">
+      <span>📥 Exportar Malla 3D STL (DFAM)</span>
     </button>
 
     <div class="flex items-center gap-2 pt-2 border-t border-white/[0.08]">
@@ -729,6 +733,7 @@
 <!-- ========================================================================= -->
 <script src="js/storage_engine.js"></script>
 <script src="js/lod_governor.js"></script>
+<script src="js/stl_exporter.js"></script>
 <script src="js/controllers/museum_models.js"></script>
 <script src="js/controllers/museum_controller.js"></script>
 <script src="js/controllers/desktop_modal.js"></script>

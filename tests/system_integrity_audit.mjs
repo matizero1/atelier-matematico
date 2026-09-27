@@ -623,6 +623,64 @@ for (const [htmlFile, jsFiles] of Object.entries(roomControllers)) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 9. AUDITORÍA DE PERSISTENCIA DETERMINISTA: INDEXEDDB & TIMONELSTORE
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n💾 FASE 9: Persistencia Estructurada Asíncrona (IndexedDB & storage_engine.js)');
+const storagePath = path.join(rootDir, 'js', 'storage_engine.js');
+assert(fs.existsSync(storagePath), 'Archivo storage_engine.js existe en disco');
+
+const { AtelierStorage } = require(storagePath);
+assert(AtelierStorage && AtelierStorage.STORES, 'AtelierStorage expone objeto STORES');
+assert(AtelierStorage.STORES.ASTRO === 'astrophotography', 'Store astrophotography configurado canónicamente');
+assert(AtelierStorage.STORES.DISCOVERY === 'discovery_ledger', 'Store discovery_ledger configurado canónicamente');
+assert(AtelierStorage.STORES.CLASSROOM === 'classroom_notes', 'Store classroom_notes configurado canónicamente');
+assert(AtelierStorage.STORES.ACQUISITIONS === 'acquisition_orders', 'Store acquisition_orders configurado canónicamente');
+
+// Pruebas CRUD asíncronas
+const testAstroId = await AtelierStorage.saveAstrophoto({
+  artId: 45, badge: '046', title: 'Navier-Stokes', img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+});
+assert(testAstroId !== undefined, 'saveAstrophoto guarda registro y devuelve ID');
+const astrosList = await AtelierStorage.getAstrophotos();
+assert(astrosList.length >= 1, 'getAstrophotos recupera registros de carrete persistente');
+
+const testDiscId = await AtelierStorage.saveDiscovery({
+  id: 'disc_audit_01', badge: '020', title: 'Identidad de Euler', residual: 0.000001
+});
+assert(testDiscId === 'disc_audit_01', 'saveDiscovery almacena candidato Timonel F2');
+const discList = await AtelierStorage.getDiscoveries();
+assert(discList.some(d => d.id === 'disc_audit_01'), 'getDiscoveries recupera candidatos archivados');
+
+const testNoteId = await AtelierStorage.saveClassroomNote({
+  title: 'Derivación Test', formulaLatex: 'x^2 - y^2 = (x-y)(x+y)'
+});
+assert(testNoteId !== undefined, 'saveClassroomNote guarda apunte de pizarrón');
+const notesList = await AtelierStorage.getClassroomNotes();
+assert(notesList.length >= 1, 'getClassroomNotes recupera cuaderno de aula persistente');
+
+const testAcqId = await AtelierStorage.saveAcquisition({
+  artId: 1, badge: '002', format: 'fineart', sha256CertificateHash: 'test_hash_audit_256'
+});
+assert(testAcqId !== undefined, 'saveAcquisition almacena certificado con huella criptográfica');
+const acqList = await AtelierStorage.getAcquisitions();
+assert(acqList.length >= 1, 'getAcquisitions recupera archivo de certificados');
+
+const backupData = await AtelierStorage.exportFullBackup();
+assert(backupData && backupData.schema === 'AtelierMatematico-Backup-v1', 'exportFullBackup genera esquema de respaldo auditable');
+assert(backupData.counts && backupData.counts.astrophotography >= 1, 'Respaldo incluye conteo verificado de astrofotografía');
+
+await AtelierStorage.deleteAstrophoto(testAstroId);
+await AtelierStorage.deleteClassroomNote(testNoteId);
+await AtelierStorage.deleteAcquisition(testAcqId);
+
+// Verificar vinculación de storage_engine.js en las 5 salas
+const all5Rooms = ['index.html', 'shop.html', 'museum.html', 'classroom.html', 'studio.html'];
+all5Rooms.forEach(room => {
+  const content = fs.readFileSync(path.join(rootDir, room), 'utf8');
+  assert(content.includes('js/storage_engine.js'), `Sala ${room} vincula js/storage_engine.js para persistencia durable`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

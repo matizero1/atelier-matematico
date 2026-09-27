@@ -93,6 +93,9 @@
       if (params.get('autosolve') === '1') {
         this.calculateAutoSolve();
       }
+
+      // 11. Cargar cuaderno de apuntes persistente desde IndexedDB
+      this.loadSavedClassroomNotes();
     }
 
     populatePresetSelector() {
@@ -1142,6 +1145,155 @@
       if (!str) return '';
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+
+    async saveCurrentChalkboardNote() {
+      const p = this.currentProblem || {};
+      const title = p.title || 'Apunte de Derivación';
+      const cat = p.category || 'Álgebra Troncal';
+      const stepsCopy = [...(this.derivationSteps || [])];
+
+      const entry = {
+        title,
+        category: cat,
+        presetId: this.currentPresetIdx,
+        formulaLatex: (this.derivationSteps && this.derivationSteps[0]) ? this.derivationSteps[0] : (p.initialEquation || ''),
+        steps: stepsCopy,
+        timestamp: new Date().toISOString(),
+        timeFormatted: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        notes: `Derivación con ${stepsCopy.length} pasos resueltos en silicio.`
+      };
+
+      if (typeof window !== 'undefined' && window.AtelierStorage) {
+        try {
+          await window.AtelierStorage.saveClassroomNote(entry);
+        } catch(e) {
+          console.warn('Error guardando apunte de aula:', e);
+        }
+      }
+      await this.loadSavedClassroomNotes();
+      alert(`Apunte "${title}" archivado con éxito en el cuaderno persistente.`);
+    }
+
+    async loadSavedClassroomNotes() {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      try {
+        const notes = await window.AtelierStorage.getClassroomNotes();
+        this.renderNotebookDrawer(notes);
+      } catch(e) {
+        console.warn('Error recuperando notas de aula:', e);
+      }
+    }
+
+    renderNotebookDrawer(notes) {
+      if (typeof document === 'undefined') return;
+      const list = document.getElementById('notebook-list');
+      const badge = document.getElementById('saved-notes-count');
+      const text = document.getElementById('notebook-count-text');
+      const empty = document.getElementById('notebook-empty-state');
+
+      const count = Array.isArray(notes) ? notes.length : 0;
+      if (badge) badge.textContent = count;
+      if (text) text.textContent = `${count} apuntes guardados en silicio`;
+
+      if (!list) return;
+
+      if (count === 0) {
+        if (empty) {
+          empty.classList.remove('hidden');
+          list.innerHTML = '';
+          list.appendChild(empty);
+        }
+        return;
+      }
+
+      if (empty) empty.classList.add('hidden');
+      list.innerHTML = '';
+
+      notes.forEach(note => {
+        const card = document.createElement('div');
+        card.className = 'glass rounded-xl p-3.5 border border-white/10 hover:border-[#c5a059]/40 space-y-2 relative transition';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[9px] mono px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-500/30 uppercase tracking-widest">${note.category || 'Aula'}</span>
+              <h4 class="text-xs serif font-bold text-white mt-1">${note.title}</h4>
+            </div>
+            <span class="text-[10px] mono text-slate-400">${note.timeFormatted || ''}</span>
+          </div>
+          <div class="text-[11px] mono text-[#dfc285] bg-black/40 p-2 rounded truncate">
+            ${note.formulaLatex || 'Derivación simbólica'}
+          </div>
+          <div class="flex items-center gap-2 pt-1">
+            <button onclick="restoreClassroomNote(${note.id})" class="flex-1 bg-[#c5a059]/20 hover:bg-[#c5a059] hover:text-black text-[#dfc285] text-[10px] mono py-1 px-2 rounded transition font-semibold">
+              Cargar en Pizarrón ⤾
+            </button>
+            <button onclick="deleteClassroomNote(${note.id})" class="bg-black/60 hover:bg-rose-600 text-white w-6 h-6 rounded text-xs flex items-center justify-center transition" title="Eliminar apunte">
+              ✕
+            </button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    async restoreClassroomNote(id) {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      const notes = await window.AtelierStorage.getClassroomNotes();
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+
+      this.currentProblem = {
+        title: note.title,
+        category: note.category,
+        desc: note.notes || 'Derivación restaurada desde el cuaderno de aula.',
+        initialEquation: note.formulaLatex
+      };
+
+      const tEl = document.getElementById('problem-title');
+      const cEl = document.getElementById('problem-category');
+      const dEl = document.getElementById('problem-desc');
+      if (tEl) tEl.textContent = note.title;
+      if (cEl) cEl.textContent = note.category;
+      if (dEl) dEl.textContent = this.currentProblem.desc;
+
+      if (Array.isArray(note.steps)) {
+        this.derivationSteps = [...note.steps];
+        this.activeStepIdx = this.derivationSteps.length - 1;
+        this.renderSteps();
+      }
+      this.toggleNotebookDrawer();
+    }
+
+    async deleteClassroomNote(id) {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      await window.AtelierStorage.deleteClassroomNote(id);
+      this.loadSavedClassroomNotes();
+    }
+
+    async clearAllClassroomNotes() {
+      if (confirm('¿Vaciar todos los apuntes del cuaderno de aula?')) {
+        if (typeof window !== 'undefined' && window.AtelierStorage) {
+          await window.AtelierStorage.clearClassroomNotes();
+        }
+        this.loadSavedClassroomNotes();
+      }
+    }
+
+    async exportClassroomNotesJSON() {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      const notes = await window.AtelierStorage.getClassroomNotes();
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(notes, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `Atelier_Cuaderno_Aula_${Date.now()}.json`;
+      a.click();
+    }
+
+    toggleNotebookDrawer() {
+      if (typeof document === 'undefined') return;
+      const drawer = document.getElementById('classroom-notebook-drawer');
+      if (drawer) drawer.classList.toggle('translate-x-full');
+    }
   }
 
   // Instanciar y exportar
@@ -1178,6 +1330,12 @@
   root.renderStudentsGrid = (s) => controller.renderStudentsGrid(s);
   root.exportLaTeXReport = () => controller.exportLaTeXReport();
   root.downloadFineArtPlate = () => controller.downloadFineArtPlate();
+  root.saveCurrentChalkboardNote = () => controller.saveCurrentChalkboardNote();
+  root.toggleNotebookDrawer = () => controller.toggleNotebookDrawer();
+  root.restoreClassroomNote = (id) => controller.restoreClassroomNote(id);
+  root.deleteClassroomNote = (id) => controller.deleteClassroomNote(id);
+  root.clearAllClassroomNotes = () => controller.clearAllClassroomNotes();
+  root.exportClassroomNotesJSON = () => controller.exportClassroomNotesJSON();
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = controller;

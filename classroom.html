@@ -154,6 +154,12 @@
             <button onclick="newCustomProblem()" class="bg-white/5 hover:bg-white/10 text-xs mono text-white/70 px-2.5 py-1.5 rounded-lg border border-white/10 transition" title="Crear problema personalizado">
               + Nuevo
             </button>
+            <button onclick="saveCurrentChalkboardNote()" class="bg-[#c5a059]/20 hover:bg-[#c5a059]/30 text-xs mono text-[#dfc285] px-2.5 py-1.5 rounded-lg border border-[#c5a059]/40 transition flex items-center gap-1.5" title="Guardar apunte en cuaderno persistente">
+              <span>💾</span> <span>Guardar</span>
+            </button>
+            <button onclick="toggleNotebookDrawer()" class="bg-white/5 hover:bg-white/10 text-xs mono text-[#a1a1aa] hover:text-white px-2.5 py-1.5 rounded-lg border border-white/10 transition flex items-center gap-1.5" title="Abrir cuaderno de apuntes guardados">
+              <span>📖</span> <span>Apuntes (<span id="saved-notes-count">0</span>)</span>
+            </button>
           </div>
         </div>
         <p class="text-xs text-[#a1a1aa] font-light leading-relaxed" id="problem-desc">
@@ -385,12 +391,37 @@
 
   </main>
 
+  <!-- CAJÓN LATERAL: CUADERNO DE APUNTES PERSISTENTE (INDEXEDDB) -->
+  <div id="classroom-notebook-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-[#08080a]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl z-50 transform translate-x-full transition-transform duration-400 flex flex-col pointer-events-auto">
+    <div class="p-5 border-b border-white/[0.08] flex justify-between items-center">
+      <div>
+        <h3 class="serif text-base font-bold text-[#f4f1ea]">Cuaderno de Aula Persistente</h3>
+        <span id="notebook-count-text" class="text-xs mono text-[#dfc285]">0 apuntes guardados en silicio</span>
+      </div>
+      <button onclick="toggleNotebookDrawer()" class="text-[#a1a1aa] hover:text-[#f4f1ea] p-2 text-sm cursor-pointer">✕</button>
+    </div>
+    <div class="p-3 bg-[#101014] border-b border-white/[0.08] flex gap-2">
+      <button onclick="exportClassroomNotesJSON()" class="flex-1 bg-[#16161c] hover:bg-white/10 text-[#dfc285] text-xs py-2 px-3 rounded-lg mono transition border border-white/10 flex items-center justify-center gap-1.5">
+        <span>Exportar JSON</span>
+      </button>
+      <button onclick="clearAllClassroomNotes()" class="bg-[#16161c] hover:bg-rose-500/20 text-rose-300 text-xs py-2 px-3 rounded-lg mono transition border border-rose-500/20">
+        Vaciar
+      </button>
+    </div>
+    <div id="notebook-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <div id="notebook-empty-state" class="text-center py-16 text-[#71717a] mono text-xs">
+        No hay apuntes guardados aún.<br>Pulsa '💾 Guardar' para archivar derivaciones en IndexedDB.
+      </div>
+    </div>
+  </div>
+
   <!-- PIE DE PÁGINA EDITORIAL -->
   <footer class="border-t border-white/5 bg-[#08080a] py-4 px-4 text-center text-xs mono text-[#71717a]">
     ATELIER MATEMÁTICO · AULA SINCRÓNICA & LÁPIZ DE TIMONEL · FÍSICA COMPUTACIONAL EN SILICIO NATIVO © 2026
   </footer>
 
   <!-- CONTROLADOR MODULAR DESACOPLADO -->
+  <script src="js/storage_engine.js"></script>
   <script src="js/controllers/classroom_controller.js"></script>
   <script src="js/controllers/desktop_modal.js"></script>
 </body>

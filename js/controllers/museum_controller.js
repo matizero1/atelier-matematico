@@ -68,18 +68,47 @@ let telescopeAudioCtx = null;
 let discoveryLedger = [];
 let lastDiscoveryAlertTime = 0;
 
-function loadDiscoveryLedger() {
-  try {
-    const saved = localStorage.getItem('NAI_DISCOVERY_LEDGER');
-    if (saved) discoveryLedger = JSON.parse(saved);
-  } catch(e) {}
+async function loadDiscoveryLedger() {
+  if (window.AtelierStorage) {
+    try {
+      const saved = await window.AtelierStorage.getDiscoveries();
+      if (Array.isArray(saved) && saved.length > 0) {
+        discoveryLedger = saved;
+      }
+    } catch(e) {}
+  } else {
+    try {
+      const saved = localStorage.getItem('NAI_DISCOVERY_LEDGER');
+      if (saved) discoveryLedger = JSON.parse(saved);
+    } catch(e) {}
+  }
   updateDiscoveryUI();
 }
 
-function saveDiscoveryLedger() {
-  try {
-    localStorage.setItem('NAI_DISCOVERY_LEDGER', JSON.stringify(discoveryLedger));
-  } catch(e) {}
+async function saveDiscoveryLedger() {
+  if (window.AtelierStorage) {
+    try {
+      for (const item of discoveryLedger.slice(0, 50)) {
+        await window.AtelierStorage.saveDiscovery(item);
+      }
+    } catch(e) {}
+  } else {
+    try {
+      localStorage.setItem('NAI_DISCOVERY_LEDGER', JSON.stringify(discoveryLedger));
+    } catch(e) {}
+  }
+}
+
+async function clearDiscoveryLedger() {
+  if (confirm('¿Vaciar bitácora de descubrimientos?')) {
+    discoveryLedger = [];
+    if (window.AtelierStorage) {
+      await window.AtelierStorage.clearDiscoveries();
+    } else {
+      localStorage.removeItem('NAI_DISCOVERY_LEDGER');
+    }
+    updateDiscoveryUI();
+  }
 }
 
 function toggleDiscoveryDrawer() {
@@ -220,6 +249,7 @@ function initAtlasCosmico() {
 
   document.getElementById('swarm-node-id').textContent = "#" + swarmNodeId;
   loadDiscoveryLedger();
+  loadCameraRoll();
 
   buildCosmicVoid();
   buildTectonicRotunda();
@@ -2692,22 +2722,58 @@ function toggleAudioGuide() {
   }
 }
 
-// ── OBTURADOR & CARRETE ───────────────────────────────────────────
-function triggerShutter() {
+// ── OBTURADOR & CARRETE PERSISTENTE (INDEXEDDB ATELIER STORAGE) ───
+async function triggerShutter() {
   const flash = document.getElementById('camera-flash');
-  flash.classList.add('flashing');
-  setTimeout(() => flash.classList.remove('flashing'), 100);
+  if (flash) {
+    flash.classList.add('flashing');
+    setTimeout(() => flash.classList.remove('flashing'), 100);
+  }
 
   const canvas = document.getElementById('webgl-canvas');
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+  const dataUrl = canvas ? canvas.toDataURL('image/jpeg', 0.90) : '';
 
-  const title = currentFocusedAstro ? currentFocusedAstro.data.title : 'Atlas Cósmico';
-  userCameraRoll.unshift({
+  const astro = currentFocusedAstro ? currentFocusedAstro.data : null;
+  const title = astro ? astro.title : 'Atlas Cósmico';
+  const badge = astro ? astro.badge : '000';
+  const artId = astro ? astro.id : null;
+
+  const photoEntry = {
     id: Date.now(),
+    artId: artId,
+    badge: badge,
+    title: title,
     artTitle: title,
     date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    img: dataUrl
-  });
+    timestamp: new Date().toISOString(),
+    img: dataUrl,
+    ha: currentTelescopeAngles ? currentTelescopeAngles.ha : 0,
+    dec: currentTelescopeAngles ? currentTelescopeAngles.dec : 0
+  };
+
+  userCameraRoll.unshift(photoEntry);
+  if (window.AtelierStorage) {
+    try {
+      await window.AtelierStorage.saveAstrophoto(photoEntry);
+    } catch(e) {
+      console.warn('Error guardando astrofotografía en IndexedDB:', e);
+    }
+  }
+  updateRollUI();
+  speakNai(`Fotografía capturada y archivada en el carrete persistente: ${title}.`);
+}
+
+async function loadCameraRoll() {
+  if (window.AtelierStorage) {
+    try {
+      const saved = await window.AtelierStorage.getAstrophotos();
+      if (Array.isArray(saved) && saved.length > 0) {
+        userCameraRoll = saved;
+      }
+    } catch(e) {
+      console.warn('Error recuperando carrete fotográfico:', e);
+    }
+  }
   updateRollUI();
 }
 
@@ -2717,37 +2783,81 @@ function updateRollUI() {
   const capacityText = document.getElementById('roll-capacity-text');
   const emptyState = document.getElementById('roll-empty-state');
 
-  counterBadge.textContent = `${userCameraRoll.length}/30`;
-  capacityText.textContent = `${userCameraRoll.length} / 30 fotos`;
+  if (counterBadge) counterBadge.textContent = `${userCameraRoll.length}/30`;
+  if (capacityText) capacityText.textContent = `${userCameraRoll.length} / 30 fotos (Persistente)`;
+
+  if (!grid) return;
 
   if (userCameraRoll.length === 0) {
-    emptyState.classList.remove('hidden');
-    grid.innerHTML = '';
-    grid.appendChild(emptyState);
+    if (emptyState) {
+      emptyState.classList.remove('hidden');
+      grid.innerHTML = '';
+      grid.appendChild(emptyState);
+    }
     return;
   }
 
-  emptyState.classList.add('hidden');
+  if (emptyState) emptyState.classList.add('hidden');
   grid.innerHTML = '';
 
   userCameraRoll.forEach((item) => {
     const card = document.createElement('div');
-    card.className = 'glass rounded-xl p-2 relative group overflow-hidden border-white/10';
+    card.className = 'glass rounded-xl p-2 relative group overflow-hidden border border-white/10 hover:border-[#c5a059]/50 transition';
     card.innerHTML = `
       <img src="${item.img}" class="w-full h-28 object-cover rounded-lg mb-1.5 bg-black" />
       <div class="flex justify-between items-center text-[10px] mono text-slate-300">
-        <span class="truncate">${item.artTitle}</span>
-        <span class="text-purple-400">${item.date}</span>
+        <span class="truncate font-medium text-white">${item.artTitle}</span>
+        <span class="text-[#c5a059]">${item.date}</span>
       </div>
-      <button onclick="deleteRollItem(${item.id})" class="absolute top-3 right-3 bg-black/70 hover:bg-red-600 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
+      <div class="flex items-center gap-1.5 mt-1.5">
+        <button onclick="downloadAstroPlate(${item.id})" class="flex-1 bg-white/10 hover:bg-[#c5a059] hover:text-black text-white text-[9px] mono py-1 rounded transition text-center" title="Descargar Placa CCD">
+          Descargar ⬇
+        </button>
+        <button onclick="deleteRollItem(${item.id})" class="bg-black/70 hover:bg-rose-600 text-white w-6 h-6 rounded-lg text-xs flex items-center justify-center transition" title="Eliminar foto">
+          ✕
+        </button>
+      </div>
     `;
     grid.appendChild(card);
   });
 }
 
-function deleteRollItem(id) { userCameraRoll = userCameraRoll.filter(item => item.id !== id); updateRollUI(); }
-function clearCameraRoll() { if (confirm('¿Vaciar carrete?')) { userCameraRoll = []; updateRollUI(); } }
-function toggleCameraRoll() { document.getElementById('roll-drawer').classList.toggle('translate-x-full'); }
+function downloadAstroPlate(id) {
+  const item = userCameraRoll.find(x => x.id === id);
+  if (!item || !item.img) return;
+  const a = document.createElement('a');
+  a.href = item.img;
+  a.download = `Atelier_Astro_${item.badge || 'Plate'}_${item.id}.jpg`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function deleteRollItem(id) {
+  userCameraRoll = userCameraRoll.filter(item => item.id !== id);
+  if (window.AtelierStorage) {
+    try {
+      await window.AtelierStorage.deleteAstrophoto(id);
+    } catch(e) {}
+  }
+  updateRollUI();
+}
+
+async function clearCameraRoll() {
+  if (confirm('¿Vaciar carrete de astrofotografía?')) {
+    userCameraRoll = [];
+    if (window.AtelierStorage) {
+      try {
+        await window.AtelierStorage.clearAstrophotos();
+      } catch(e) {}
+    }
+    updateRollUI();
+  }
+}
+
+function toggleCameraRoll() {
+  document.getElementById('roll-drawer').classList.toggle('translate-x-full');
+}
 
 function bootAtlas() {
   initAtlasCosmico();
@@ -2796,6 +2906,7 @@ window.filterGotoCatalog = filterGotoCatalog;
 window.setGotoEpochFilter = setGotoEpochFilter;
 window.filterEpoch = filterEpoch;
 window.togglePointerLock = togglePointerLock;
+window.downloadAstroPlate = downloadAstroPlate;
 
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', bootAtlas);

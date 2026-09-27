@@ -80,6 +80,7 @@
       // 5. Cargar la obra inicial y formato activo
       selectArtwork(currentArtIdx);
       selectFormat(currentFormat);
+      loadSavedCertificates();
 
       // 6. Iniciar loop de render
       animate();
@@ -964,10 +965,96 @@
         window.AtelierDesktop.saveFile(certFilename, certDataUrl, true);
       }
 
+      // Archivar en persistencia duradera AtelierStorage (IndexedDB)
+      if (typeof window !== 'undefined' && window.AtelierStorage) {
+        try {
+          await window.AtelierStorage.saveAcquisition({
+            artId: currentArtIdx,
+            badge: art.badge,
+            title: art.title,
+            sub: art.sub,
+            format: currentFormat,
+            frameFinish: currentFrameFinish,
+            matteFinish: currentMatteFinish,
+            priceFormatted: PRICES[currentFormat].clp,
+            currency: currentCurrency,
+            sha256CertificateHash: sha256Hex,
+            timestamp: new Date().toISOString(),
+            timeFormatted: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            certFilename: certFilename
+          });
+          loadSavedCertificates();
+        } catch(e) {
+          console.warn('Error archivando certificado en AtelierStorage:', e);
+        }
+      }
+
       const link = document.createElement('a');
       link.download = certFilename;
       link.href = certDataUrl;
       link.click();
+    }
+
+    async function loadSavedCertificates() {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      try {
+        const certs = await window.AtelierStorage.getAcquisitions();
+        renderCertificatesUI(certs);
+      } catch(e) {}
+    }
+
+    function renderCertificatesUI(certs) {
+      const list = document.getElementById('certificates-list');
+      const countEl = document.getElementById('saved-cert-count');
+      const emptyEl = document.getElementById('certificates-empty-state');
+      const count = Array.isArray(certs) ? certs.length : 0;
+      if (countEl) countEl.textContent = count;
+      if (!list) return;
+
+      if (count === 0) {
+        if (emptyEl) {
+          emptyEl.classList.remove('hidden');
+          list.innerHTML = '';
+          list.appendChild(emptyEl);
+        }
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+      list.innerHTML = '';
+
+      certs.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'glass rounded-xl p-3.5 border border-[#c5a059]/30 bg-[#101014] space-y-2';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[9px] mono px-2 py-0.5 rounded bg-[#c5a059]/20 text-[#dfc285] font-bold">OBRA #${c.badge} · ${(c.format || 'fineart').toUpperCase()}</span>
+              <h4 class="text-xs serif font-bold text-white mt-1">${c.title}</h4>
+            </div>
+            <span class="text-[10px] mono text-slate-400">${c.timeFormatted || ''}</span>
+          </div>
+          <div class="text-[10px] mono text-slate-400 truncate bg-black/50 p-1.5 rounded">
+            SHA-256: <span class="text-emerald-400">${c.sha256CertificateHash || 'Verificado'}</span>
+          </div>
+          <div class="flex justify-between items-center text-[10px] mono pt-1">
+            <span class="text-[#dfc285] font-bold">${c.priceFormatted || ''}</span>
+            <button onclick="deleteSavedCertificate(${c.id})" class="text-rose-400 hover:text-rose-300 text-xs cursor-pointer">Eliminar ✕</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function toggleCertificatesModal() {
+      const m = document.getElementById('certificates-modal');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    async function deleteSavedCertificate(id) {
+      if (typeof window === 'undefined' || !window.AtelierStorage) return;
+      await window.AtelierStorage.deleteAcquisition(id);
+      loadSavedCertificates();
     }
 
     function cycleArtwork(delta) {
@@ -1000,3 +1087,5 @@
     window.downloadArtwork300DPI = downloadArtwork300DPI;
     window.startVideoRecording = startVideoRecording;
     window.togglePalette = togglePalette;
+    window.toggleCertificatesModal = toggleCertificatesModal;
+    window.deleteSavedCertificate = deleteSavedCertificate;

@@ -17,9 +17,10 @@ fi
 
 BUILD_DIR="$REPO_DIR/build/desktop"
 APP_NAME="Atelier Matematico"
-APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
+STAGE_ROOT="/tmp/atelier_build_$$"
+APP_BUNDLE="$STAGE_ROOT/$APP_NAME.app"
 DMG_NAME="Atelier_Matematico_Silicon_arm64.dmg"
-FINAL_DMG="$BUILD_DIR/$DMG_NAME"
+FINAL_DMG="$STAGE_ROOT/$DMG_NAME"
 GALLERY_DOWNLOADS="$GALLERY_DIR/downloads"
 
 echo "═══════════════════════════════════════════════════════════════════════"
@@ -29,7 +30,8 @@ echo "════════════════════════�
 
 # 1. Preparar directorios limpios
 echo "📦 [1/6] Estructurando Bundle de Aplicación macOS..."
-rm -rf "$BUILD_DIR"
+rm -rf "$STAGE_ROOT" "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 mkdir -p "$GALLERY_DOWNLOADS"
@@ -58,18 +60,17 @@ if [ -d "$GALLERY_DIR/css" ]; then cp -R "$GALLERY_DIR/css" "$APP_BUNDLE/Content
 # Eliminar posibles descargas anidadas o temporales
 rm -rf "$APP_BUNDLE/Contents/Resources/downloads"
 
-# 5. Firma de código ad-hoc
+# 5. Firma de código ad-hoc en silicio limpio
 echo "🛡️ [5/6] Aplicando firma criptográfica ad-hoc de macOS..."
 find "$APP_BUNDLE" -name ".DS_Store" -delete 2>/dev/null || true
-dot_clean "$APP_BUNDLE" 2>/dev/null || true
-xattr -cr "$APP_BUNDLE" 2>/dev/null || true
-xattr -d com.apple.FinderInfo "$APP_BUNDLE" 2>/dev/null || true
+dot_clean -m "$APP_BUNDLE" 2>/dev/null || true
+xattr -c -r "$APP_BUNDLE" 2>/dev/null || true
 codesign -s - --force --deep "$APP_BUNDLE"
 codesign -v "$APP_BUNDLE" && echo "  ✓ Firma ad-hoc verificada por Gatekeeper local."
 
 # 6. Empaquetar imagen de disco (.dmg) instalable
 echo "💿 [6/6] Creando imagen de disco DMG instalable con hdiutil..."
-STAGING_DIR="$BUILD_DIR/dmg_staging"
+STAGING_DIR="$STAGE_ROOT/dmg_staging"
 mkdir -p "$STAGING_DIR"
 cp -R "$APP_BUNDLE" "$STAGING_DIR/"
 ln -s /Applications "$STAGING_DIR/Applications"
@@ -81,12 +82,14 @@ ln -s /Applications "$STAGING_DIR/Applications"
   -format UDZO \
   "$FINAL_DMG"
 
-# Copiar DMG al directorio de descargas públicas para la web
+# Copiar artefactos finales al directorio build y downloads
+cp -R "$APP_BUNDLE" "$BUILD_DIR/"
+cp "$FINAL_DMG" "$BUILD_DIR/$DMG_NAME"
 cp "$FINAL_DMG" "$GALLERY_DOWNLOADS/$DMG_NAME"
-rm -rf "$STAGING_DIR"
+rm -rf "$STAGE_ROOT"
 
-DMG_SIZE=$(ls -lh "$FINAL_DMG" | awk '{print $5}')
-SHA256_HASH=$(shasum -a 256 "$FINAL_DMG" | awk '{print $1}')
+DMG_SIZE=$(ls -lh "$BUILD_DIR/$DMG_NAME" | awk '{print $5}')
+SHA256_HASH=$(shasum -a 256 "$BUILD_DIR/$DMG_NAME" | awk '{print $1}')
 
 echo "═══════════════════════════════════════════════════════════════════════"
 echo "✅ CONSTRUCCIÓN COMPLETADA CON ÉXITO"

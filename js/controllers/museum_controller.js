@@ -9,6 +9,9 @@ const ARTWORKS_24 = (typeof window !== 'undefined' && window.ARTWORKS_100 && win
 
 // Variables Three.js & Silicio
 let scene, camera, renderer;
+let cosmicDirLight = null;
+let cosmicStarsMesh = null;
+let isLODModalOpen = false;
 let astros24 = [];
 let knotFilamentUpdaters = [];
 
@@ -257,6 +260,19 @@ function initAtlasCosmico() {
   buildShopBay3D();
   setup6DOFControls();
   populateNaiAstroSelector();
+
+  // Inicializar Gobernador Adaptativo de Rendimiento & LOD (Timonel F2)
+  if (typeof AtelierLOD !== 'undefined') {
+    AtelierLOD.init({
+      renderer,
+      scene,
+      camera,
+      starsMesh: cosmicStarsMesh,
+      dirLight: cosmicDirLight,
+      astrosList: astros24
+    });
+  }
+
   window.addEventListener('resize', onWindowResize);
   animate();
 
@@ -296,6 +312,7 @@ function buildCosmicVoid() {
   dirLight1.shadow.bias = -0.0006;
   dirLight1.shadow.normalBias = 0.02;
   scene.add(dirLight1);
+  cosmicDirLight = dirLight1;
 
   const dirLight2 = new THREE.DirectionalLight(0x60a5fa, 0.65);
   dirLight2.position.set(-20, -15, -15);
@@ -319,6 +336,7 @@ function buildCosmicVoid() {
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xf4f1ea, size: 0.038, transparent: true, opacity: 0.55 }));
   scene.add(stars);
+  cosmicStarsMesh = stars;
 
   // Instanciar los 24 Astros Matemáticos con sus Modelos Nativos y Motor de Auto-Resolución
   ARTWORKS_24.forEach((data, index) => {
@@ -1965,6 +1983,7 @@ function filterEpoch(epochId) {
 function applyEpochFilter(epochId) {
   astros24.forEach(a => {
     const isVisible = (epochId === 0 || a.epoch === epochId);
+    a.epochHidden = !isVisible;
     a.group.visible = isVisible;
     a.group.scale.set(0.85, 0.85, 0.85);
     a.timonelRing.material.opacity = isVisible ? 0.35 : 0.0;
@@ -2348,6 +2367,14 @@ function animate() {
   const delta = (time - prevTime) / 1000;
   prevTime = time;
 
+  // Actualizar Gobernador de Rendimiento & Presupuesto de Cuadro (Timonel F2)
+  if (typeof AtelierLOD !== 'undefined') {
+    AtelierLOD.update(delta);
+    if (frameCounter % 15 === 0) {
+      updateLODHUD();
+    }
+  }
+
   // Rendering does not measure solver throughput or network participation.
   const localThroughputEl = document.getElementById('swarm-local-throughput');
   if (localThroughputEl) localThroughputEl.textContent = 'No medido';
@@ -2563,7 +2590,27 @@ function animate() {
   const isConfinement = (currentMuseumMode === MODE_SPHERE_CONFINEMENT);
 
   astros24.forEach((astro) => {
-    if (!astro.group.visible) return; // Si la época no está activa, 0% CPU
+    // Si la época está filtrada por el selector de constelaciones, 0% CPU
+    if (astro.epochHidden) {
+      astro.group.visible = false;
+      return;
+    }
+
+    const isCollimated = (!isConfinement && astro.index === collimatedAstroIndex);
+    const isActive = (isConfinement && astro === activeConfinementAstro);
+
+    // Culling por Frustum con AtelierLOD: si está fuera del cono visual y no está en foco, ocultar
+    if (!isCollimated && !isActive && typeof AtelierLOD !== 'undefined') {
+      const inFrustum = AtelierLOD.isAstroInFrustum(astro.worldPos, 4.0);
+      if (!inFrustum) {
+        astro.group.visible = false;
+        return; // Omitir recorrido en el renderizador Three.js y cálculo de física
+      } else {
+        astro.group.visible = true;
+      }
+    } else {
+      astro.group.visible = true;
+    }
 
     // Lazy Lights: Solo el astro activo/colimado activa luces dinámicas (evita saturar WebGL con 200 luces)
     const shouldLight = isConfinement ? (astro === activeConfinementAstro) : (astro.index === collimatedAstroIndex);
@@ -2578,10 +2625,15 @@ function animate() {
     // Si el usuario está en confinamiento y este no es el astro activo, no procesar física de fondo
     if (isConfinement && astro !== activeConfinementAstro) return;
 
-    // Si está a más de 130m, no calcular
-    if (distToCam > 130.0) return;
-    // Si está entre 50m y 130m, entrelazar actualización (30 FPS)
-    if (distToCam > 50.0 && ((frameCounter + astro.index) % 2 !== 0)) return;
+    // Delegar decisión de actualización numérica en AtelierLOD
+    let shouldUpdate = true;
+    if (typeof AtelierLOD !== 'undefined') {
+      shouldUpdate = AtelierLOD.shouldUpdateAstro(astro, distToCam, frameCounter);
+    } else {
+      if (distToCam > 130.0) shouldUpdate = false;
+      else if (distToCam > 50.0 && ((frameCounter + astro.index) % 2 !== 0)) shouldUpdate = false;
+    }
+    if (!shouldUpdate) return;
 
     astro.cycleT += delta;
 
@@ -2879,6 +2931,107 @@ function bootAtlas() {
   }
 }
 
+// ── GOBERNADOR ADAPTATIVO DE RENDIMIENTO & LOD (TIMONEL F2) ────────
+function toggleLODModal() {
+  const modal = document.getElementById('lod-performance-modal');
+  if (!modal) return;
+  isLODModalOpen = !isLODModalOpen;
+  if (isLODModalOpen) {
+    modal.classList.remove('hidden');
+    updateLODHUD(true);
+  } else {
+    modal.classList.add('hidden');
+  }
+}
+
+function setLODTier(tierKey) {
+  if (typeof AtelierLOD !== 'undefined') {
+    AtelierLOD.setTier(tierKey);
+    updateLODHUD(true);
+  }
+}
+
+function setLODMode(modeKey) {
+  if (typeof AtelierLOD !== 'undefined') {
+    AtelierLOD.setMode(modeKey);
+    updateLODHUD(true);
+  }
+}
+
+function updateLODHUD(forceModalUpdate = false) {
+  if (typeof AtelierLOD === 'undefined') return;
+  const t = AtelierLOD.getTelemetry();
+
+  // 1. HUD en Barra Superior y Botón
+  const hudFps = document.getElementById('lod-hud-fps');
+  const hudTier = document.getElementById('lod-hud-tier');
+  const hudDot = document.getElementById('lod-hud-dot');
+  const btnFpsShort = document.getElementById('btn-lod-fps-short');
+  const btnDot = document.getElementById('btn-lod-dot');
+
+  const fpsColor = t.fps >= 54 ? 'text-emerald-400' : (t.fps >= 35 ? 'text-amber-300' : 'text-rose-400');
+  const dotColor = t.fps >= 54 ? 'bg-emerald-400' : (t.fps >= 35 ? 'bg-amber-400' : 'bg-rose-500');
+
+  if (hudFps) {
+    hudFps.textContent = `${t.fps} FPS`;
+    hudFps.className = `${fpsColor} font-bold`;
+  }
+  if (btnFpsShort) {
+    btnFpsShort.textContent = `${t.fps} FPS`;
+    btnFpsShort.className = `${fpsColor} font-bold`;
+  }
+  if (hudTier) {
+    hudTier.textContent = `${t.mode === 'AUTO' ? 'AUTO (' + t.tier.key + ')' : t.tier.key}`;
+  }
+  if (hudDot) hudDot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
+  if (btnDot) btnDot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
+
+  // 2. Telemetría en el Modal (si está visible o forzado)
+  if (isLODModalOpen || forceModalUpdate) {
+    const modalFps = document.getElementById('lod-modal-fps');
+    const modalMs = document.getElementById('lod-modal-ms');
+    const modalDpr = document.getElementById('lod-modal-dpr');
+    const modalShadows = document.getElementById('lod-modal-shadows');
+    const modalStars = document.getElementById('lod-modal-stars');
+    const modalCalls = document.getElementById('lod-modal-calls');
+
+    if (modalFps) {
+      modalFps.textContent = `${t.fps} FPS`;
+      modalFps.className = `text-xl font-bold mono ${fpsColor}`;
+    }
+    if (modalMs) modalMs.textContent = `${t.avgMs} ms`;
+    if (modalDpr) modalDpr.textContent = `${t.dpr.toFixed(2)}x`;
+    if (modalShadows) modalShadows.textContent = t.shadowsEnabled ? 'Activas' : 'Inactivas (0% cost)';
+    if (modalStars) modalStars.textContent = `${t.maxStars.toLocaleString()} estrellas`;
+    if (modalCalls) modalCalls.textContent = `${t.drawCalls}`;
+
+    // Actualizar botones de Modo
+    const btnAuto = document.getElementById('btn-lod-mode-auto');
+    const btnManual = document.getElementById('btn-lod-mode-manual');
+    if (btnAuto && btnManual) {
+      if (t.mode === 'AUTO') {
+        btnAuto.className = 'py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-[#c5a059]/20 border-[#c5a059] text-[#dfc285] font-semibold';
+        btnManual.className = 'py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-white/5 border-white/10 text-[#a1a1aa] hover:text-white';
+      } else {
+        btnManual.className = 'py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-[#c5a059]/20 border-[#c5a059] text-[#dfc285] font-semibold';
+        btnAuto.className = 'py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-white/5 border-white/10 text-[#a1a1aa] hover:text-white';
+      }
+    }
+
+    // Actualizar botones de Tier
+    ['ULTRA', 'HIGH', 'MEDIUM', 'ECO'].forEach(tierKey => {
+      const btn = document.getElementById(`btn-lod-tier-${tierKey}`);
+      if (btn) {
+        if (t.tier.key === tierKey) {
+          btn.className = 'p-2.5 rounded-xl text-left border transition cursor-pointer bg-[#c5a059]/20 border-[#c5a059] text-[#dfc285]';
+        } else {
+          btn.className = 'p-2.5 rounded-xl text-left border transition cursor-pointer bg-white/5 border-white/10 hover:border-white/20 text-[#a1a1aa]';
+        }
+      }
+    });
+  }
+}
+
 // Exportación explícita para interactividad con eventos DOM y onclicks HTML
 window.warpToTargetAstro = warpToTargetAstro;
 window.enterCapsule = enterCapsule;
@@ -2907,6 +3060,10 @@ window.setGotoEpochFilter = setGotoEpochFilter;
 window.filterEpoch = filterEpoch;
 window.togglePointerLock = togglePointerLock;
 window.downloadAstroPlate = downloadAstroPlate;
+window.toggleLODModal = toggleLODModal;
+window.setLODTier = setLODTier;
+window.setLODMode = setLODMode;
+window.updateLODHUD = updateLODHUD;
 
 if (document.readyState === 'loading') {
   window.addEventListener('DOMContentLoaded', bootAtlas);

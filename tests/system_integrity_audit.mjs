@@ -681,6 +681,70 @@ all5Rooms.forEach(room => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 10. AUDITORÍA DE RENDIMIENTO ADAPTATIVO & GOBERNANZA LOD (LOD_GOVERNOR.JS)
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n⚡ FASE 10: Rendimiento Adaptativo WebGL & Gobernanza LOD (lod_governor.js)');
+const lodPath = path.join(rootDir, 'js', 'lod_governor.js');
+assert(fs.existsSync(lodPath), 'Archivo lod_governor.js existe en disco');
+
+const { AtelierLOD, TIERS: LOD_TIERS, MODES: LOD_MODES } = require(lodPath);
+assert(AtelierLOD && LOD_TIERS, 'AtelierLOD expone objeto TIERS canónico');
+assert(LOD_TIERS.ULTRA && LOD_TIERS.HIGH && LOD_TIERS.MEDIUM && LOD_TIERS.ECO, 'AtelierLOD define los 4 perfiles canónicos (ULTRA, HIGH, MEDIUM, ECO)');
+assert(AtelierLOD.MODES && LOD_MODES.AUTO && LOD_MODES.MANUAL, 'AtelierLOD define modos AUTO y MANUAL');
+
+// Verificación de invariantes físicas de cada Tier
+assert(LOD_TIERS.ULTRA.shadows === true && LOD_TIERS.ULTRA.maxStars >= 3000, 'Perfil ULTRA preserva fidelidad máxima (sombras y estrellas completas)');
+assert(LOD_TIERS.MEDIUM.shadows === false && LOD_TIERS.MEDIUM.dprMultiplier <= 0.85, 'Perfil MEDIUM desactiva sombras para salvaguardar hardware integrado');
+assert(LOD_TIERS.ECO.shadows === false && LOD_TIERS.ECO.maxStars <= 800 && LOD_TIERS.ECO.dprMultiplier <= 0.75, 'Perfil ECO optimiza agresivamente para dispositivos móviles/batería');
+
+// Prueba de transición manual de Tiers
+AtelierLOD.setTier('ECO');
+assert(AtelierLOD.getTier().key === 'ECO', 'setTier conmuta exitosamente al perfil ECO');
+AtelierLOD.setTier('HIGH');
+assert(AtelierLOD.getTier().key === 'HIGH', 'setTier conmuta exitosamente al perfil HIGH');
+
+// Telemetría
+const tel = AtelierLOD.getTelemetry();
+assert(typeof tel.fps === 'number' && typeof tel.avgMs === 'number', 'getTelemetry reporta métricas numéricas de cuadro');
+assert(tel.tier && tel.tier.key === 'HIGH', 'getTelemetry refleja el perfil activo');
+
+// Prueba de culling por distancia
+const mockAstro = { index: 0, worldPos: { x: 0, y: 0, z: 0 } };
+assert(AtelierLOD.shouldUpdateAstro(mockAstro, 20.0, 0) === true, 'shouldUpdateAstro aprueba actualización de astro en rango cercano');
+assert(AtelierLOD.shouldUpdateAstro(mockAstro, 999.0, 0) === false, 'shouldUpdateAstro rechaza actualización de astro más allá de maxViewDist');
+
+// Prueba de throttling entrelazado (distancia media)
+const midDist = (LOD_TIERS.HIGH.nearDist + LOD_TIERS.HIGH.midDist) / 2;
+const u0 = AtelierLOD.shouldUpdateAstro(mockAstro, midDist, 0);
+const u1 = AtelierLOD.shouldUpdateAstro(mockAstro, midDist, 1);
+assert(u0 !== u1, 'shouldUpdateAstro entrelaza la frecuencia de fotogramas en distancias medias');
+
+// Simulación de control adaptativo (Downgrade ante sobrecarga)
+AtelierLOD.setMode('AUTO');
+AtelierLOD.setTier('HIGH');
+for (let f = 0; f < 80; f++) {
+  AtelierLOD.update(0.035); // 35 ms por cuadro (~28 FPS, sobrecarga)
+}
+assert(AtelierLOD.getTier().key === 'MEDIUM', 'Gobernador adaptativo degrada automáticamente de HIGH a MEDIUM ante caída de FPS');
+
+// Simulación de control adaptativo (Upgrade ante abundancia de recursos)
+for (let f = 0; f < 200; f++) {
+  AtelierLOD.update(0.014); // 14 ms por cuadro (~71 FPS, holgura)
+}
+assert(AtelierLOD.getTier().key === 'HIGH', 'Gobernador adaptativo asciende automáticamente de MEDIUM a HIGH ante holgura de FPS');
+
+// Comprobar vinculación en las 5 salas
+all5Rooms.forEach(room => {
+  const content = fs.readFileSync(path.join(rootDir, room), 'utf8');
+  assert(content.includes('js/lod_governor.js'), `Sala ${room} vincula js/lod_governor.js para gobernanza gráfica`);
+});
+
+// Comprobar elementos DOM en museum.html
+const museumHtml = fs.readFileSync(path.join(rootDir, 'museum.html'), 'utf8');
+assert(museumHtml.includes('id="btn-lod-toggle"'), 'museum.html contiene botón de control de rendimiento (#btn-lod-toggle)');
+assert(museumHtml.includes('id="lod-performance-modal"'), 'museum.html contiene modal de telemetría de rendimiento (#lod-performance-modal)');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

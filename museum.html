@@ -243,16 +243,19 @@
     </div>
   </div>
 
-  <!-- MONITOR DE RED ENJAMBRE NAI -->
+  <!-- MONITOR DE RED ENJAMBRE NAI & GOBERNADOR LOD -->
   <div id="swarm-telemetry-pill" class="hidden xl:flex items-center gap-3 bg-[#101014]/90 backdrop-blur-md px-4 py-1.5 rounded-full luxury-border text-[11px] mono pointer-events-auto shadow-2xl">
     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
     <span class="text-[#a1a1aa]">Nodo <strong id="swarm-node-id" class="text-[#f4f1ea]">#CL-7482</strong></span>
     <span class="text-white/20">|</span>
     <span class="text-[#a1a1aa]">Cálculo: <span id="swarm-local-throughput" class="text-[#c5a059] font-bold">No medido</span></span>
     <span class="text-white/20">|</span>
-    <span class="text-emerald-400">Sesión local · red no verificada</span>
-    <span class="text-white/20">|</span>
-    <span class="text-[#dfc285]">Visualización ilustrativa</span>
+    <button onclick="toggleLODModal()" class="hover:text-[#c5a059] transition flex items-center gap-1.5 cursor-pointer" title="Abrir Gobernador de Rendimiento WebGL">
+      <span id="lod-hud-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+      <span id="lod-hud-fps" class="text-emerald-400 font-bold">60 FPS</span>
+      <span class="text-white/20">|</span>
+      <span id="lod-hud-tier" class="text-[#dfc285]">AUTO (ALTO)</span>
+    </button>
   </div>
 
   <!-- BOTÓN DE RETORNO AL TELESCOPIO (SOLO EN MODO ESFERA S², CENTRADO SIN COLISIONAR) -->
@@ -262,8 +265,12 @@
     </button>
   </div>
 
-  <!-- DERECHA: CONSOLA GOTO, AULA, MESA 2D, VITRINA 3D, VOZ, CARRETE -->
+  <!-- DERECHA: CONSOLA GOTO, AULA, MESA 2D, VITRINA 3D, VOZ, CARRETE, RENDIMIENTO -->
   <div class="flex items-center gap-2 pointer-events-auto">
+    <button id="btn-lod-toggle" onclick="toggleLODModal()" class="bg-[#101014]/90 hover:bg-white/10 luxury-border text-[#dfc285] hover:text-[#f4f1ea] text-xs px-2.5 py-1.5 rounded-full mono transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Rendimiento & LOD WebGL">
+      <span id="btn-lod-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+      <span id="btn-lod-fps-short">60 FPS</span>
+    </button>
     <button id="btn-open-telescope-goto" onclick="openTelescopeGotoTerminal()" class="bg-[#c5a059]/15 hover:bg-[#c5a059]/25 text-[#dfc285] border border-[#c5a059]/40 text-xs px-3 py-1.5 rounded-full mono transition flex items-center gap-1.5 shadow-sm cursor-pointer">
       <span>🔭</span>
       <span>Consola GoTo <kbd class="text-[9px] bg-black/40 px-1 py-0.5 rounded border border-[#c5a059]/30">[T]</kbd></span>
@@ -613,6 +620,98 @@
 </div>
 
 <!-- ========================================================================= -->
+<!-- MODAL DE GOBERNANZA DE RENDIMIENTO & LOD (TIMONEL F2)                     -->
+<!-- ========================================================================= -->
+<div id="lod-performance-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+  <div class="bg-[#101014] border border-[#c5a059]/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+    <!-- Encabezado -->
+    <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#14151f]">
+      <div class="flex items-center gap-2.5">
+        <span class="text-[#c5a059] text-base">⚡</span>
+        <div>
+          <h3 class="serif text-sm font-semibold tracking-wider text-[#f4f1ea]">RENDIMIENTO &amp; LOD ADAPTATIVO</h3>
+          <p class="text-[10px] mono text-[#a1a1aa]">Gobernanza de fotogramas y escalado dinámico de resolución (DRS)</p>
+        </div>
+      </div>
+      <button onclick="toggleLODModal()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-[#a1a1aa] hover:text-white flex items-center justify-center transition cursor-pointer text-sm">✕</button>
+    </div>
+
+    <!-- Telemetría en Silicio -->
+    <div class="p-6 space-y-5">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-[#0a0a0f] p-3 rounded-xl border border-white/5 text-center">
+          <span class="text-[10px] mono text-[#71717a] block">FOTOGRAMAS</span>
+          <span id="lod-modal-fps" class="text-xl font-bold mono text-emerald-400">60 FPS</span>
+        </div>
+        <div class="bg-[#0a0a0f] p-3 rounded-xl border border-white/5 text-center">
+          <span class="text-[10px] mono text-[#71717a] block">TIEMPO FRAME</span>
+          <span id="lod-modal-ms" class="text-xl font-bold mono text-[#f4f1ea]">16.6 ms</span>
+        </div>
+        <div class="bg-[#0a0a0f] p-3 rounded-xl border border-white/5 text-center">
+          <span class="text-[10px] mono text-[#71717a] block">ESCALA PÍXEL</span>
+          <span id="lod-modal-dpr" class="text-xl font-bold mono text-[#dfc285]">1.0x</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 text-xs mono text-[#a1a1aa] bg-[#0a0a0f] p-3 rounded-xl border border-white/5">
+        <div>
+          <span class="text-[9px] text-[#71717a] block">SOMBRAS</span>
+          <span id="lod-modal-shadows" class="text-[#f4f1ea]">Activas</span>
+        </div>
+        <div>
+          <span class="text-[9px] text-[#71717a] block">ESTRELLAS</span>
+          <span id="lod-modal-stars" class="text-[#f4f1ea]">2.200</span>
+        </div>
+        <div>
+          <span class="text-[9px] text-[#71717a] block">DRAW CALLS</span>
+          <span id="lod-modal-calls" class="text-[#f4f1ea]">0</span>
+        </div>
+      </div>
+
+      <!-- Selector de Modo: AUTO vs MANUAL -->
+      <div>
+        <label class="text-[11px] mono text-[#a1a1aa] block mb-2">MODO DE GOBERNANZA:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btn-lod-mode-auto" onclick="setLODMode('AUTO')" class="py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-[#c5a059]/20 border-[#c5a059] text-[#dfc285] font-semibold">
+            <span>🔄 Auto Adaptativo</span>
+          </button>
+          <button id="btn-lod-mode-manual" onclick="setLODMode('MANUAL')" class="py-2 px-3 rounded-xl text-xs mono border transition flex items-center justify-center gap-1.5 cursor-pointer bg-white/5 border-white/10 text-[#a1a1aa] hover:text-white">
+            <span>🔒 Manual Fijo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector de Perfiles (TIERS) -->
+      <div>
+        <label class="text-[11px] mono text-[#a1a1aa] block mb-2">PERFIL DE CALIDAD / HARDWARE:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btn-lod-tier-ULTRA" onclick="setLODTier('ULTRA')" class="p-2.5 rounded-xl text-left border transition cursor-pointer bg-white/5 border-white/10 hover:border-white/20 text-[#a1a1aa]">
+            <span class="text-xs font-semibold mono block text-[#f4f1ea]">ULTRA (Máximo)</span>
+            <span class="text-[10px] mono text-[#71717a] block">DPR 1.5 · Sombras PCFSoft · 3.5k estrellas</span>
+          </button>
+          <button id="btn-lod-tier-HIGH" onclick="setLODTier('HIGH')" class="p-2.5 rounded-xl text-left border transition cursor-pointer bg-[#c5a059]/15 border-[#c5a059]/60 text-[#dfc285]">
+            <span class="text-xs font-semibold mono block text-[#dfc285]">ALTO (Equilibrado)</span>
+            <span class="text-[10px] mono text-[#a1a1aa] block">DPR 1.0 · Sombras Basic · 2.2k estrellas</span>
+          </button>
+          <button id="btn-lod-tier-MEDIUM" onclick="setLODTier('MEDIUM')" class="p-2.5 rounded-xl text-left border transition cursor-pointer bg-white/5 border-white/10 hover:border-white/20 text-[#a1a1aa]">
+            <span class="text-xs font-semibold mono block text-[#f4f1ea]">MEDIO (Integrado)</span>
+            <span class="text-[10px] mono text-[#71717a] block">DPR 0.85 · Sin sombras · 1.2k estrellas</span>
+          </button>
+          <button id="btn-lod-tier-ECO" onclick="setLODTier('ECO')" class="p-2.5 rounded-xl text-left border transition cursor-pointer bg-white/5 border-white/10 hover:border-white/20 text-[#a1a1aa]">
+            <span class="text-xs font-semibold mono block text-[#f4f1ea]">ECO (Batería / Móvil)</span>
+            <span class="text-[10px] mono text-[#71717a] block">DPR 0.75 · Sin sombras · 600 estrellas</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="text-[10px] mono text-[#71717a] bg-[#0c0d12] p-3 rounded-lg border border-white/5">
+        🛡️ <strong class="text-[#a1a1aa]">Gobernanza Timonel F2:</strong> En modo Auto, si el tiempo de cuadro supera los 28.5 ms (&lt; 35 FPS), la calidad se reduce al vuelo para evitar tirones. Al estabilizarse a 60 FPS (&lt; 17.5 ms), la fidelidad se restituye automáticamente.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
 <!-- CONTROLES TÁCTILES MÓVILES (VIRTUAL D-PAD & THRUST 6DOF)                  -->
 <!-- ========================================================================= -->
 <div id="mobile-touch-controls" class="fixed bottom-6 left-6 z-40 flex flex-col items-center gap-1.5 select-none pointer-events-auto md:hidden opacity-85 hover:opacity-100 transition">
@@ -629,6 +728,7 @@
 <!-- JAVASCRIPT: ATLAS CÓSMICO DE 100 LEYES & HILOS DE TIMONEL                  -->
 <!-- ========================================================================= -->
 <script src="js/storage_engine.js"></script>
+<script src="js/lod_governor.js"></script>
 <script src="js/controllers/museum_models.js"></script>
 <script src="js/controllers/museum_controller.js"></script>
 <script src="js/controllers/desktop_modal.js"></script>

@@ -64,6 +64,7 @@
   <script src="js/algebrite.min.js"></script>
   <script src="js/timonel_cas.js"></script>
   <script src="js/timonel_linter.js"></script>
+  <script src="js/nailang_wasm.js"></script>
   <script src="js/room_sync.js"></script>
   <script src="js/jit_compiler.js"></script>
 </head>
@@ -125,6 +126,11 @@
           Boutique Fine Art
         </a>
       </div>
+
+      <!-- Playground de Nailang en WebAssembly -->
+      <button onclick="toggleClassroomNailangModal()" class="text-xs mono uppercase tracking-wider text-cyan-300 hover:text-white px-3 py-1.5 border border-cyan-500/40 rounded-full hover:border-cyan-400 transition bg-cyan-950/30 flex items-center gap-1.5 cursor-pointer font-semibold shadow-sm">
+        <span>⚡ Nailang Wasm</span>
+      </button>
 
       <!-- App Desktop -->
       <button onclick="openDesktopModal()" class="hidden md:flex items-center gap-1.5 text-xs mono uppercase tracking-wider text-[#f4f1ea] hover:text-[#c5a059] px-3.5 py-1.5 border border-white/20 rounded-full hover:border-[#c5a059] transition bg-white/[0.03]">
@@ -399,6 +405,117 @@
     </section>
 
   </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL INTERACTIVO: PLAYGROUND NAILANG EN WEBASSEMBLY (WASM)               -->
+  <!-- ========================================================================= -->
+  <div id="classroom-nailang-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 md:p-6 hidden">
+    <div class="bg-[#0e0e12] rounded-2xl border border-cyan-500/30 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden luxury-border">
+      
+      <!-- Cabecera del Modal -->
+      <div class="p-4 md:p-5 border-b border-white/[0.08] flex justify-between items-center bg-[#101014]">
+        <div class="flex items-center gap-3">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          <div>
+            <h3 class="serif text-base md:text-lg font-bold text-[#f4f1ea] flex items-center gap-2">
+              <span>Nailang System DSL · Playground WebAssembly (Wasm)</span>
+              <span class="text-[10px] mono text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/40">Silicio Nativo f64</span>
+            </h3>
+            <p class="text-xs text-[#a1a1aa] mono">Compilador Soberano en Navegador · NASA JPL Rule 3 · Cero Dependencias</p>
+          </div>
+        </div>
+        <button onclick="toggleClassroomNailangModal()" class="text-[#a1a1aa] hover:text-[#f4f1ea] p-1.5 text-base cursor-pointer transition">✕</button>
+      </div>
+
+      <!-- Presets Canónicos de Física -->
+      <div class="px-5 py-3 bg-[#0a0a0d] border-b border-white/[0.08] flex flex-wrap items-center gap-2">
+        <span class="text-[10px] mono uppercase text-[#71717a] mr-1">Algoritmos Canónicos:</span>
+        <button onclick="loadNailangPreset('lorenz_rk4')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-cyan-300 border border-cyan-500/30 transition cursor-pointer">
+          Lorenz RK4 (Caos)
+        </button>
+        <button onclick="loadNailangPreset('riemann_zeta_kernel')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-[#dfc285] border border-[#c5a059]/30 transition cursor-pointer">
+          Riemann Línea Crítica
+        </button>
+        <button onclick="loadNailangPreset('gyroid_tpms_sdf')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-purple-300 border border-purple-500/30 transition cursor-pointer">
+          Giroide TPMS (DFAM)
+        </button>
+        <button onclick="loadNailangPreset('kinetic_energy')" class="px-2.5 py-1 text-xs mono rounded bg-[#16161c] hover:bg-white/10 text-emerald-300 border border-emerald-500/30 transition cursor-pointer">
+          Energía Cinética
+        </button>
+      </div>
+
+      <!-- Cuerpo del Editor & Terminal -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-5 flex flex-col gap-4">
+        
+        <!-- Editor de Código Nailang -->
+        <div>
+          <div class="flex justify-between items-center text-[10px] mono text-[#71717a] mb-1.5">
+            <span>CÓDIGO FUENTE NAILANG (.nai):</span>
+            <span class="text-cyan-400/80">Estándar C99 / Wasm IEEE 754</span>
+          </div>
+          <textarea id="nailang-editor" class="w-full h-56 bg-[#050508] text-emerald-400 font-mono text-xs p-3.5 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none resize-none leading-relaxed custom-scrollbar" spellcheck="false"></textarea>
+        </div>
+
+        <!-- Barra de Parámetros y Llamada -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end bg-[#101014] p-3 rounded-xl border border-white/[0.08]">
+          <div class="md:col-span-4">
+            <label class="block text-[10px] mono text-[#71717a] uppercase mb-1">Función a Ejecutar:</label>
+            <input id="nailang-fn-name" type="text" value="lorenz_step_x" class="w-full bg-[#08080a] border border-white/10 text-xs mono text-cyan-300 px-3 py-2 rounded-lg focus:border-cyan-500 focus:outline-none">
+          </div>
+          <div class="md:col-span-5">
+            <label class="block text-[10px] mono text-[#71717a] uppercase mb-1">Argumentos f64 (separados por coma):</label>
+            <input id="nailang-args" type="text" value="0.1, 0.0, 0.0, 0.01" class="w-full bg-[#08080a] border border-white/10 text-xs mono text-[#f4f1ea] px-3 py-2 rounded-lg focus:border-cyan-500 focus:outline-none">
+          </div>
+          <div class="md:col-span-3">
+            <button onclick="executeNailangWasm()" id="btn-run-nailang-wasm" class="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-semibold text-xs mono py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-950/40">
+              <span>⚡ Compilar & Ejecutar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetría en Silicio & Resultados -->
+        <div class="bg-[#08080a] rounded-xl p-4 border border-white/[0.08] flex flex-col gap-3">
+          <div class="flex flex-wrap justify-between items-center text-xs mono gap-2">
+            <div class="flex items-center gap-2">
+              <span id="nailang-status-pill" class="px-2.5 py-0.5 rounded-full bg-cyan-950/50 border border-cyan-500/40 text-cyan-300 text-[10px]">
+                Wasm: LISTO PARA COMPILAR
+              </span>
+              <span id="nailang-cert-pill" class="px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-[10px]">
+                CONTRATOS: TIMONEL F2 VALIDADO
+              </span>
+            </div>
+            <div class="text-[11px] text-[#71717a]">
+              Latencia Silicio: <strong id="nailang-latency-val" class="text-white">-- µs</strong> | Tamaño: <strong id="nailang-size-val" class="text-white">-- bytes</strong>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-[9px] uppercase tracking-wider text-[#71717a] mono block mb-1">Resultado Numérico en Retorno (f64 IEEE 754):</span>
+            <div id="nailang-result-display" class="text-base font-mono text-cyan-300 font-bold bg-[#050508] p-3 rounded-lg border border-white/10 truncate">
+              Esperando compilación...
+            </div>
+          </div>
+
+          <div>
+            <span class="text-[9px] uppercase tracking-wider text-[#71717a] mono block mb-1">Muestra de Bytecode Wasm Binario Ensamblado:</span>
+            <div id="nailang-hex-preview" class="text-[10px] mono text-[#a1a1aa] overflow-x-auto p-2.5 bg-[#050508] rounded border border-white/5 whitespace-pre">
+00 61 73 6d 01 00 00 00 ...
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie del Modal -->
+      <div class="p-3.5 bg-[#101014] border-t border-white/[0.08] flex justify-between items-center text-[11px] mono text-[#71717a]">
+        <span>Compilador nativo Wasm sin backend de servidor · Ejecutado directamente en tu CPU</span>
+        <button onclick="toggleClassroomNailangModal()" class="px-4 py-1.5 bg-[#16161c] hover:bg-white/10 text-white rounded-lg transition cursor-pointer">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- CAJÓN LATERAL: CUADERNO DE APUNTES PERSISTENTE (INDEXEDDB) -->
   <div id="classroom-notebook-drawer" class="fixed top-0 right-0 w-full max-w-md h-full bg-[#08080a]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl z-50 transform translate-x-full transition-transform duration-400 flex flex-col pointer-events-auto">

@@ -16,7 +16,7 @@
       arch: 'Universal ARM64 / Apple Accelerate & Metal',
       badge: 'Silicio Nativo',
       size: '2.4 MB',
-      sha256: 'a36ba577d5e23d2abcc2fa7b64c7668470fa1f86b9534ba5a3d67d57d0955976',
+      sha256: '5a4cae896794eb541e3c39e347e2caea6566edc723a6709108da1c8224d3c0ec',
       reqs: 'macOS 12.0 Monterrey o superior (Recomendado M-Series)'
     },
     'macos-intel': {
@@ -25,7 +25,7 @@
       arch: 'Intel AVX2 / SSE4.2 / Accelerate',
       badge: 'Legacy x86',
       size: '2.4 MB',
-      sha256: '59e710fa32857fa5a563d8accc37a80ac1d7e532175bf4a50096137b1a20353a',
+      sha256: '3aa339c0841273e761350ea4b46f3835c84d47be83493f3073042e7dba58c2ea',
       reqs: 'macOS 11.0 Big Sur o superior'
     },
     'linux': {
@@ -34,7 +34,7 @@
       arch: 'Linux x86_64 / POSIX + WebKitGTK / Chromium',
       badge: 'Portable Standalone',
       size: '2.0 MB',
-      sha256: '23a131c74fe3494c8ff0ca6e55c50127c95a8dadcce4165cf92debb943eba3ed',
+      sha256: 'b903db23697975c449a5956a5f25243440466ea0ac9d420d159de0a10bd5d692',
       reqs: 'Cualquier distribución Linux x86_64 (glibc 2.31+)'
     },
     'windows': {
@@ -42,8 +42,8 @@
       filename: 'Atelier_Matematico_Windows_Portable.zip',
       arch: 'Windows x64 / Direct3D 12 Edge App Mode',
       badge: 'Portable Standalone',
-      size: '2.0 MB',
-      sha256: '14d56fe6b962abef44f585daebd9144f615459fec769aeade360982519bec4fe',
+      size: '2.1 MB',
+      sha256: '8fa0ea2400c1aecf75df0a10fe169e2e112b3c5681e125ad63d68631e6897098',
       reqs: 'Windows 10 versión 1903 o superior / Windows 11'
     }
   };

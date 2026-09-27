@@ -945,6 +945,71 @@ const studioCtrlSrc = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 's
 assert(studioCtrlSrc.includes('exportStudioArtworkSTL') && studioCtrlSrc.includes('window.exportStudioArtworkSTL = exportStudioArtworkSTL'), 'studio_controller.js implementa y expone exportStudioArtworkSTL');
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 14. AUDITORÍA DEL COMPILADOR NAILANG A WEBASSEMBLY (WASM) EN SILICIO
+// ─────────────────────────────────────────────────────────────────────────────
+console.log('\n⚡ FASE 14: Compilador Nailang a WebAssembly (Wasm) en Silicio');
+
+const nailangWasmPath = path.join(rootDir, 'js', 'nailang_wasm.js');
+assert(fs.existsSync(nailangWasmPath), 'Archivo nailang_wasm.js existe en disco');
+
+const NailangWasm = require(nailangWasmPath);
+assert(typeof NailangWasm.tokenize === 'function', 'NailangWasm expone método tokenize');
+assert(typeof NailangWasm.parse === 'function', 'NailangWasm expone método parse');
+assert(typeof NailangWasm.compileToWasm === 'function', 'NailangWasm expone método compileToWasm');
+assert(typeof NailangWasm.compileAndRun === 'function', 'NailangWasm expone método compileAndRun');
+assert(NailangWasm.CANONICAL_PHYSICS_PROGRAMS && typeof NailangWasm.CANONICAL_PHYSICS_PROGRAMS.lorenz_rk4 === 'string', 'NailangWasm incluye biblioteca canónica de física');
+
+// 1. Verificación de Lexer & Parser AST
+const sampleNailang = `
+module Test.Math;
+
+fn square_plus_one(x: f64) -> f64 {
+    let one: f64 = 1.0;
+    return x * x + one;
+}
+`;
+const testTokens = NailangWasm.tokenize(sampleNailang);
+assert(testTokens.length > 5 && testTokens.some(t => t.type === 'IDENT' && t.value === 'square_plus_one'), 'Lexer de Nailang genera flujo de tokens canónico');
+
+const testAst = NailangWasm.parse(testTokens);
+assert(testAst.type === 'Program' && testAst.declarations.length === 1 && testAst.declarations[0].name === 'square_plus_one', 'Parser de Nailang genera AST fidedigno');
+
+// 2. Compilación a WebAssembly Binario
+const compiledWasm = NailangWasm.compileToWasm(testAst);
+assert(compiledWasm.bytes instanceof Uint8Array, 'Compilador genera buffer Uint8Array con binario WebAssembly');
+assert(compiledWasm.bytes[0] === 0x00 && compiledWasm.bytes[1] === 0x61 && compiledWasm.bytes[2] === 0x73 && compiledWasm.bytes[3] === 0x6d, 'Binario Wasm contiene cabecera mágica estándar \\0asm (0x00, 0x61, 0x73, 0x6d)');
+assert(compiledWasm.bytes[4] === 0x01 && compiledWasm.bytes[5] === 0x00 && compiledWasm.bytes[6] === 0x00 && compiledWasm.bytes[7] === 0x00, 'Binario Wasm especifica versión 1 estándar (0x01, 0x00, 0x00, 0x00)');
+
+// 3. Ejecución en Silicio Nativo de Algoritmos Canónicos
+const runMath = await NailangWasm.compileAndRun(sampleNailang, 'square_plus_one', [4.0]);
+assert(runMath.result === 17.0, 'Función compilada a Wasm evalúa correctamente square_plus_one(4.0) = 17.0 en silicio');
+assert(runMath.certified === true && runMath.evidenceLevel === 'VALIDATED', 'Nailang Wasm emite evidencia certificada Timonel F2');
+
+// 4. Kernel Canónico de Lorenz RK4 (Caos en Silicio)
+const lorenzProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.lorenz_rk4;
+const runLorenz = await NailangWasm.compileAndRun(lorenzProg, 'lorenz_step_x', [0.1, 0.0, 0.0, 0.01]);
+assert(Math.abs(runLorenz.result - 0.09048375) < 1e-6, 'Paso Runge-Kutta 4 del Atractor de Lorenz converge numéricamente en Wasm');
+
+// 5. Kernel Canónico de Línea Crítica de Riemann
+const riemannProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.riemann_zeta_kernel;
+const runRiemann = await NailangWasm.compileAndRun(riemannProg, 'riemann_term', [1.0, 14.134725]);
+assert(Math.abs(runRiemann.result - (-0.1586748)) < 1e-5, 'Kernel analítico de Riemann sobre línea crítica se calcula con precisión de máquina en Wasm');
+
+// 6. Kernel Canónico de Celosía Celular Giroide TPMS (DFAM)
+const gyroidProg = NailangWasm.CANONICAL_PHYSICS_PROGRAMS.gyroid_tpms_sdf;
+const runGyroid = await NailangWasm.compileAndRun(gyroidProg, 'gyroid_eval', [0.5, 1.2, 0.8]);
+assert(Math.abs(runGyroid.result - 1.45262) < 1e-4, 'Función implícita SDF de Giroide TPMS se evalúa fielmente en Wasm');
+
+// 7. Integración en Aula Sincrónica (classroom.html & classroom_controller.js)
+const classroomHtmlNai = fs.readFileSync(path.join(rootDir, 'classroom.html'), 'utf8');
+assert(classroomHtmlNai.includes('src="js/nailang_wasm.js"'), 'classroom.html incluye el motor js/nailang_wasm.js');
+assert(classroomHtmlNai.includes('id="classroom-nailang-modal"'), 'classroom.html contiene modal interactivo del Playground de Nailang');
+assert(classroomHtmlNai.includes('toggleClassroomNailangModal'), 'classroom.html expone botón de apertura del Playground Wasm');
+
+const classroomJsNai = fs.readFileSync(path.join(rootDir, 'js', 'controllers', 'classroom_controller.js'), 'utf8');
+assert(classroomJsNai.includes('toggleClassroomNailangModal') && classroomJsNai.includes('executeNailangWasm') && classroomJsNai.includes('loadNailangPreset'), 'classroom_controller.js orquesta compilación y ejecución interactiva de Nailang en Wasm');
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESUMEN FINAL DE CERTIFICACIÓN
 // ─────────────────────────────────────────────────────────────────────────────
 console.log('\n═══════════════════════════════════════════════════════════════════════');

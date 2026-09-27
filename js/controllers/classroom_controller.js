@@ -1341,6 +1341,108 @@
       const drawer = document.getElementById('classroom-notebook-drawer');
       if (drawer) drawer.classList.toggle('translate-x-full');
     }
+
+    // ── PLAYGROUND WEBASSEMBLY DE NAILANG EN SILICIO ─────────────────
+    toggleClassroomNailangModal() {
+      if (typeof document === 'undefined') return;
+      const modal = document.getElementById('classroom-nailang-modal');
+      if (!modal) return;
+      const isHidden = modal.classList.contains('hidden');
+      if (isHidden) {
+        modal.classList.remove('hidden');
+        const editor = document.getElementById('nailang-editor');
+        if (editor && !editor.value.trim() && window.NailangWasm) {
+          this.loadNailangPreset('lorenz_rk4');
+        }
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    loadNailangPreset(name) {
+      if (typeof document === 'undefined' || !window.NailangWasm) return;
+      const editor = document.getElementById('nailang-editor');
+      const fnInput = document.getElementById('nailang-fn-name');
+      const argsInput = document.getElementById('nailang-args');
+      if (!editor) return;
+
+      if (name === 'lorenz_rk4') {
+        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.lorenz_rk4;
+        if (fnInput) fnInput.value = 'lorenz_step_x';
+        if (argsInput) argsInput.value = '0.1, 0.0, 0.0, 0.01';
+      } else if (name === 'riemann_zeta_kernel') {
+        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.riemann_zeta_kernel;
+        if (fnInput) fnInput.value = 'riemann_term';
+        if (argsInput) argsInput.value = '1.0, 14.134725';
+      } else if (name === 'gyroid_tpms_sdf') {
+        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.gyroid_tpms_sdf;
+        if (fnInput) fnInput.value = 'gyroid_eval';
+        if (argsInput) argsInput.value = '0.5, 1.2, 0.8';
+      } else if (name === 'kinetic_energy') {
+        editor.value = `module Physics.Kinetic;\n\nfn kinetic_energy(mass: f64, velocity: f64) -> f64 {\n    let half: f64 = 0.5;\n    return half * mass * velocity * velocity;\n}`;
+        if (fnInput) fnInput.value = 'kinetic_energy';
+        if (argsInput) argsInput.value = '10.0, 3.0';
+      }
+    }
+
+    async executeNailangWasm() {
+      if (typeof document === 'undefined' || !window.NailangWasm) return;
+      const editor = document.getElementById('nailang-editor');
+      const fnInput = document.getElementById('nailang-fn-name');
+      const argsInput = document.getElementById('nailang-args');
+      const resDisplay = document.getElementById('nailang-result-display');
+      const hexPreview = document.getElementById('nailang-hex-preview');
+      const statusPill = document.getElementById('nailang-status-pill');
+      const latencyVal = document.getElementById('nailang-latency-val');
+      const sizeVal = document.getElementById('nailang-size-val');
+
+      if (!editor || !fnInput || !argsInput) return;
+
+      const src = editor.value.trim();
+      const fnName = fnInput.value.trim();
+      const rawArgs = argsInput.value.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+
+      try {
+        if (statusPill) {
+          statusPill.textContent = 'Wasm: COMPILANDO...';
+          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-amber-950/50 border border-amber-500/40 text-amber-300 text-[10px] animate-pulse';
+        }
+
+        const runResult = await window.NailangWasm.compileAndRun(src, fnName, rawArgs);
+
+        if (statusPill) {
+          statusPill.textContent = `Wasm: COMPILADO & EJECUTADO`;
+          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-[10px]';
+        }
+        if (resDisplay) {
+          resDisplay.textContent = `${fnName}(${rawArgs.join(', ')}) = ${runResult.result}`;
+        }
+        if (latencyVal) {
+          latencyVal.textContent = `${runResult.executionTimeMicros} µs (${runResult.totalPipelineMs} ms total)`;
+        }
+        if (sizeVal) {
+          sizeVal.textContent = `${runResult.compiledBytes} bytes`;
+        }
+
+        const tokens = window.NailangWasm.tokenize(src);
+        const ast = window.NailangWasm.parse(tokens);
+        const compiled = window.NailangWasm.compileToWasm(ast);
+        if (hexPreview && compiled.bytes) {
+          const hexArr = Array.from(compiled.bytes.slice(0, 48)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+          hexPreview.textContent = hexArr + (compiled.bytes.length > 48 ? ' ...' : '');
+        }
+
+      } catch (err) {
+        console.error('[Nailang Wasm Error]', err);
+        if (statusPill) {
+          statusPill.textContent = 'Wasm: ERROR DE COMPILACIÓN';
+          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-rose-950/50 border border-rose-500/40 text-rose-300 text-[10px]';
+        }
+        if (resDisplay) {
+          resDisplay.textContent = 'Error: ' + err.message;
+        }
+      }
+    }
   }
 
   // Instanciar y exportar
@@ -1386,6 +1488,9 @@
   root.deleteClassroomNote = (id) => controller.deleteClassroomNote(id);
   root.clearAllClassroomNotes = () => controller.clearAllClassroomNotes();
   root.exportClassroomNotesJSON = () => controller.exportClassroomNotesJSON();
+  root.toggleClassroomNailangModal = () => controller.toggleClassroomNailangModal();
+  root.loadNailangPreset = (name) => controller.loadNailangPreset(name);
+  root.executeNailangWasm = () => controller.executeNailangWasm();
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = controller;

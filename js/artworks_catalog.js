@@ -164,7 +164,7 @@
     "phi": 0.25,
     "archetype": "kepler_ellipse",
     "pal": 1,
-    "modelKey": "kepler",
+    "modelKey": "kepler_first_law",
     "epistemology": {
       "category": "A",
       "tag": "ASTRODINÁMICA · ÓRBITA EN ℝ³",
@@ -191,7 +191,7 @@
     "phi": 0.16,
     "archetype": "kepler_area",
     "pal": 2,
-    "modelKey": "kepler",
+    "modelKey": "kepler_second_law",
     "epistemology": {
       "category": "A",
       "tag": "CONSERVACIÓN · MOMENTO ANGULAR EN ℝ³",
@@ -218,7 +218,7 @@
     "phi": 0.27,
     "archetype": "kepler_harmonic",
     "pal": 3,
-    "modelKey": "kepler",
+    "modelKey": "kepler_third_law",
     "epistemology": {
       "category": "A",
       "tag": "ARMONÍA CÓSMICA · RELACIÓN EN ℝ³",
@@ -272,7 +272,7 @@
     "phi": 0.24,
     "archetype": "cartesian",
     "pal": 1,
-    "modelKey": "pythagoras",
+    "modelKey": "descartes_analytic",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · SISTEMA COORDENADO",
@@ -326,7 +326,7 @@
     "phi": 0.28,
     "archetype": "fermat_principle",
     "pal": 3,
-    "modelKey": "snell",
+    "modelKey": "fermat_least_time",
     "epistemology": {
       "category": "A",
       "tag": "PRINCIPIO VARIACIONAL · ÓPTICA EN ℝ³",
@@ -407,7 +407,7 @@
     "phi": 0.15,
     "archetype": "newton_fma",
     "pal": 2,
-    "modelKey": "newton_mechanics",
+    "modelKey": "newton_second_law",
     "epistemology": {
       "category": "A",
       "tag": "DINÁMICA VECTORIAL · LEY SUPREMA EN ℝ³",
@@ -434,7 +434,7 @@
     "phi": 0.25,
     "archetype": "newton_reaction",
     "pal": 3,
-    "modelKey": "newton_mechanics",
+    "modelKey": "newton_third_law",
     "epistemology": {
       "category": "A",
       "tag": "TERCERA LEY · ACCIÓN-REACCIÓN EN ℝ³",
@@ -650,7 +650,7 @@
     "phi": 0.46,
     "archetype": "euler_lagrange",
     "pal": 3,
-    "modelKey": "euler",
+    "modelKey": "euler_lagrange",
     "epistemology": {
       "category": "B",
       "tag": "MECÁNICA ANALÍTICA · ESPACIO DE CONFIGURACIÓN",
@@ -785,7 +785,7 @@
     "phi": 0.36,
     "archetype": "laplace_harmonic",
     "pal": 0,
-    "modelKey": "chladni",
+    "modelKey": "laplace_potential",
     "epistemology": {
       "category": "B",
       "tag": "TEORÍA DEL POTENCIAL · SUPERFICIE ARMÓNICA",
@@ -812,7 +812,7 @@
     "phi": 0.45,
     "archetype": "poisson_potential",
     "pal": 1,
-    "modelKey": "chladni",
+    "modelKey": "poisson_potential",
     "epistemology": {
       "category": "B",
       "tag": "TEORÍA DEL POTENCIAL · POZO POISSONIANO",
@@ -839,7 +839,7 @@
     "phi": 0.32,
     "archetype": "fourier_spectral",
     "pal": 2,
-    "modelKey": "chladni",
+    "modelKey": "fourier_transform",
     "epistemology": {
       "category": "B",
       "tag": "ANÁLISIS ESPECTRAL · ESPACIO DE FRECUENCIAS",
@@ -866,7 +866,7 @@
     "phi": 0.48,
     "archetype": "fourier_heat",
     "pal": 3,
-    "modelKey": "chladni",
+    "modelKey": "heat_diffusion",
     "epistemology": {
       "category": "A",
       "tag": "DIFUSIÓN TÉRMICA · CAMPO EN ℝ³",
@@ -920,7 +920,7 @@
     "phi": 0.43,
     "archetype": "ohm_conduction",
     "pal": 1,
-    "modelKey": "coulomb_field",
+    "modelKey": "ohm_conduction",
     "epistemology": {
       "category": "A",
       "tag": "ELECTRODINÁMICA · CONDUCCIÓN EN ℝ³",
@@ -1163,7 +1163,7 @@
     "phi": 0.55,
     "archetype": "maxwell_faraday",
     "pal": 2,
-    "modelKey": "faraday_maxwell",
+    "modelKey": "faraday_maxwell_curl",
     "epistemology": {
       "category": "A",
       "tag": "ELECTROMAGNETISMO · INDUCCIÓN DE FARADAY EN ℝ³",
@@ -1271,7 +1271,7 @@
     "phi": 0.53,
     "archetype": "first_law_thermo",
     "pal": 2,
-    "modelKey": "carnot_cycle",
+    "modelKey": "first_law_thermodynamics",
     "epistemology": {
       "category": "B",
       "tag": "TERMODINÁMICA · ESPACIO ENERGÉTICO ΔU",
@@ -1325,7 +1325,7 @@
     "phi": 0.56,
     "archetype": "boltzmann_entropy",
     "pal": 0,
-    "modelKey": "boltzmann_entropy",
+    "modelKey": "boltzmann_statistical_entropy",
     "epistemology": {
       "category": "B",
       "tag": "MECÁNICA ESTADÍSTICA · ESPACIO DE FASES",
@@ -1406,7 +1406,7 @@
     "phi": 0.67,
     "archetype": "riemann_metric",
     "pal": 3,
-    "modelKey": "riemann",
+    "modelKey": "riemann_curvature_tensor",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · TENSOR MÉTRICO RIEMANNIANO",
@@ -1460,7 +1460,7 @@
     "phi": 0.63,
     "archetype": "wien_displacement",
     "pal": 1,
-    "modelKey": "planck_quantum",
+    "modelKey": "wien_displacement",
     "epistemology": {
       "category": "B",
       "tag": "ESPECTROFOTOMETRÍA · DESPLAZAMIENTO DE WIEN",
@@ -1514,7 +1514,7 @@
     "phi": 0.66,
     "archetype": "lorentz_transform",
     "pal": 3,
-    "modelKey": "minkowski",
+    "modelKey": "lorentz_transformation",
     "epistemology": {
       "category": "B",
       "tag": "RELATIVIDAD ESPECIAL · ESPACIO-TIEMPO HIPERBÓLICO",
@@ -1568,7 +1568,7 @@
     "phi": 0.65,
     "archetype": "apollonian",
     "pal": 1,
-    "modelKey": "fibonacci",
+    "modelKey": "apollonian_gasket",
     "epistemology": {
       "category": "B",
       "tag": "GEOMETRÍA FRACTAL · TAMIZ DE APOLONIO",
@@ -1622,7 +1622,7 @@
     "phi": 0.68,
     "archetype": "von_mises",
     "pal": 3,
-    "modelKey": "gyroid",
+    "modelKey": "von_mises_yield",
     "epistemology": {
       "category": "B",
       "tag": "MECÁNICA DE MATERIALES · CILINDRO DE PLASTIFICACIÓN",
@@ -1649,7 +1649,7 @@
     "phi": 0.77,
     "archetype": "planck_quantum",
     "pal": 0,
-    "modelKey": "planck_quantum",
+    "modelKey": "planck_energy_quanta",
     "epistemology": {
       "category": "B",
       "tag": "FÍSICA CUÁNTICA · MODOS DE CAVIDAD CUANTIZADOS",
@@ -1676,7 +1676,7 @@
     "phi": 0.88,
     "archetype": "photoelectric",
     "pal": 1,
-    "modelKey": "planck_quantum",
+    "modelKey": "photoelectric_effect",
     "epistemology": {
       "category": "A",
       "tag": "FÍSICA CUÁNTICA · FOTOEMISIÓN EN ℝ³",
@@ -1703,7 +1703,7 @@
     "phi": 0.81,
     "archetype": "mass_energy",
     "pal": 2,
-    "modelKey": "einstein_curvature",
+    "modelKey": "mass_energy_equivalence",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · EQUIVALENCIA MASA-ENERGÍA",
@@ -1730,7 +1730,7 @@
     "phi": 0.93,
     "archetype": "minkowski_spacetime",
     "pal": 3,
-    "modelKey": "minkowski",
+    "modelKey": "minkowski_interval",
     "epistemology": {
       "category": "B",
       "tag": "GEOMETRÍA PSEUDO-RIEMANNIANA · CONO DE LUZ",
@@ -1757,7 +1757,7 @@
     "phi": 0.78,
     "archetype": "einstein_field",
     "pal": 0,
-    "modelKey": "einstein_curvature",
+    "modelKey": "einstein_field_equations",
     "epistemology": {
       "category": "B",
       "tag": "RELATIVIDAD GENERAL · CURVATURA ESPACIOTEMPORAL",
@@ -1919,7 +1919,7 @@
     "phi": 0.82,
     "archetype": "hopf_fibration",
     "pal": 2,
-    "modelKey": "hopf",
+    "modelKey": "hopf_fibration_3d",
     "epistemology": {
       "category": "B",
       "tag": "TOPOLOGÍA 4D · FIBRACIÓN S³ → S²",
@@ -1973,7 +1973,7 @@
     "phi": 0.76,
     "archetype": "friedmann_cosmos",
     "pal": 0,
-    "modelKey": "hubble_expansion",
+    "modelKey": "friedmann_cosmology",
     "epistemology": {
       "category": "B",
       "tag": "COSMOLOGÍA RELATIVISTA · VARIEDAD FLRW",
@@ -2000,7 +2000,7 @@
     "phi": 0.9,
     "archetype": "noether_symmetry",
     "pal": 1,
-    "modelKey": "mobius",
+    "modelKey": "noether_symmetry",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · TEOREMA DE NOETHER",
@@ -2027,7 +2027,7 @@
     "phi": 0.83,
     "archetype": "pauli_exclusion",
     "pal": 2,
-    "modelKey": "heisenberg",
+    "modelKey": "pauli_exclusion",
     "epistemology": {
       "category": "B",
       "tag": "FÍSICA ATÓMICA · ANDAMIAJE FERMIÓNICO",
@@ -2054,7 +2054,7 @@
     "phi": 0.96,
     "archetype": "bose_einstein",
     "pal": 3,
-    "modelKey": "quantum_orbital",
+    "modelKey": "bose_einstein_condensate",
     "epistemology": {
       "category": "B",
       "tag": "CONDENSACIÓN CUÁNTICA · MACROESTADO",
@@ -2081,7 +2081,7 @@
     "phi": 0.77,
     "archetype": "black_hole_entropy",
     "pal": 0,
-    "modelKey": "schwarzschild",
+    "modelKey": "bekenstein_hawking_entropy",
     "epistemology": {
       "category": "B",
       "tag": "GRAVEDAD CUÁNTICA · ENTROPÍA HOLOGRÁFICA",
@@ -2108,7 +2108,7 @@
     "phi": 0.92,
     "archetype": "hawking_radiation",
     "pal": 1,
-    "modelKey": "schwarzschild",
+    "modelKey": "hawking_radiation",
     "epistemology": {
       "category": "A",
       "tag": "GRAVEDAD CUÁNTICA · EVAPORACIÓN EN ℝ³",
@@ -2135,7 +2135,7 @@
     "phi": 0.85,
     "archetype": "yang_mills",
     "pal": 2,
-    "modelKey": "hopf",
+    "modelKey": "yang_mills_gauge",
     "epistemology": {
       "category": "B",
       "tag": "TEORÍA DE CALIBRE NO ABELIANA · SALTO DE MASA",
@@ -2270,7 +2270,7 @@
     "phi": 1.25,
     "archetype": "shannon_capacity",
     "pal": 3,
-    "modelKey": "shannon_entropy",
+    "modelKey": "shannon_hartley_capacity",
     "epistemology": {
       "category": "B",
       "tag": "TELECOMUNICACIONES · VARIEDAD DE SHANNON-HARTLEY",
@@ -2297,7 +2297,7 @@
     "phi": 1.12,
     "archetype": "turing_morphogenesis",
     "pal": 0,
-    "modelKey": "gyroid",
+    "modelKey": "turing_morphogenesis",
     "epistemology": {
       "category": "A",
       "tag": "BIOLOGÍA TEÓRICA · MORFOGÉNESIS EN ℝ³",
@@ -2324,7 +2324,7 @@
     "phi": 1.22,
     "archetype": "belousov_zhabotinsky",
     "pal": 1,
-    "modelKey": "gyroid",
+    "modelKey": "belousov_zhabotinsky",
     "epistemology": {
       "category": "A",
       "tag": "SISTEMAS DISIPATIVOS · ONDAS QUÍMICAS EN ℝ³",
@@ -2432,7 +2432,7 @@
     "phi": 1.24,
     "archetype": "mandelbrot_julia",
     "pal": 1,
-    "modelKey": "fibonacci",
+    "modelKey": "mandelbrot_fractal",
     "epistemology": {
       "category": "B",
       "tag": "FRACTALES COMPLEJOS · CONJUNTO DE JULIA 3D",
@@ -2540,7 +2540,7 @@
     "phi": 1.23,
     "archetype": "rule_110",
     "pal": 1,
-    "modelKey": "automata",
+    "modelKey": "cellular_automata_rule110",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · AUTÓMATA TURING-COMPLETO",
@@ -2567,7 +2567,7 @@
     "phi": 1.08,
     "archetype": "langton_ant",
     "pal": 2,
-    "modelKey": "automata",
+    "modelKey": "langton_ant",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · SISTEMA DINÁMICO DISCRETO",
@@ -2594,7 +2594,7 @@
     "phi": 1.26,
     "archetype": "yoshida_symplectic",
     "pal": 3,
-    "modelKey": "kepler",
+    "modelKey": "yoshida_symplectic",
     "epistemology": {
       "category": "B",
       "tag": "MECÁNICA COMPUTACIONAL · ÓRBITA SIMPLÉCTICA",
@@ -2621,7 +2621,7 @@
     "phi": 1.11,
     "archetype": "beal_conjecture",
     "pal": 0,
-    "modelKey": "elliptic_curve",
+    "modelKey": "beal_conjecture",
     "epistemology": {
       "category": "C",
       "tag": "PROYECCIÓN CANÓNICA · TEORÍA DE NÚMEROS PURA",
@@ -2702,7 +2702,7 @@
     "phi": 1.28,
     "archetype": "standard_model",
     "pal": 3,
-    "modelKey": "higgs",
+    "modelKey": "standard_model_lagrangian",
     "epistemology": {
       "category": "B",
       "tag": "FÍSICA FUNDAMENTAL · GRUPOS DE CALIBRE",

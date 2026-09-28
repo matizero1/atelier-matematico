@@ -3572,6 +3572,18 @@ const BESPOKE_3D_BUILDERS = {
   shannon_entropy: buildShannonEntropy3D
 };
 
+// Integración modular de las 43 variedades bespoke extendidas
+if (typeof require === 'function') {
+  try {
+    const ext = require('./museum_models_extended');
+    if (ext && typeof ext === 'object') {
+      Object.assign(BESPOKE_3D_BUILDERS, ext);
+    }
+  } catch (_) {}
+} else if (typeof root !== 'undefined' && root.NEW_BESPOKE_3D_BUILDERS) {
+  Object.assign(BESPOKE_3D_BUILDERS, root.NEW_BESPOKE_3D_BUILDERS);
+}
+
   // ── RECOLECTOR DETERMINISTA DE RECURSOS WEBGL & VRAM (TIMONEL F2) ───
   function disposeMaterial(mat) {
     if (!mat) return;

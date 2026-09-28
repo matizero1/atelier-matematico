@@ -349,7 +349,7 @@ assert(idxModels < idxController, 'museum.html carga museum_models.js ANTES de m
 const MuseumModels = require(modelsPath);
 assert(MuseumModels && typeof MuseumModels.BESPOKE_3D_BUILDERS === 'object', 'museum_models.js exporta catálogo BESPOKE_3D_BUILDERS');
 const numBuilders = Object.keys(MuseumModels.BESPOKE_3D_BUILDERS || {}).length;
-assert(numBuilders >= 37, `BESPOKE_3D_BUILDERS contiene constructores procedurales exhaustivos (encontrados: ${numBuilders} >= 37)`);
+assert(numBuilders >= 100, `BESPOKE_3D_BUILDERS contiene constructores procedurales exhaustivos (encontrados: ${numBuilders} >= 100)`);
 
 let missingModelKeys = 0;
 ARTWORKS.forEach(art => {
@@ -359,6 +359,9 @@ ARTWORKS.forEach(art => {
   }
 });
 assert(missingModelKeys === 0, `100% de las 100 obras del catálogo resuelven a un constructor 3D canónico en BESPOKE_3D_BUILDERS (defectos: ${missingModelKeys})`);
+
+const uniqueModelKeys = new Set(ARTWORKS.map(art => art.modelKey));
+assert(uniqueModelKeys.size === 100, `100% de las 100 obras poseen una variedad 3D bespoke única y exclusiva sin clones ni duplicados (encontradas: ${uniqueModelKeys.size}/100)`);
 
 // Verificación del Recolector Determinista de Basura VRAM / WebGL (disposeThreeObject)
 assert(typeof MuseumModels.disposeThreeObject === 'function', 'museum_models.js exporta función disposeThreeObject');
@@ -609,10 +612,11 @@ cspRooms.forEach(room => {
 const roomControllers = {
   'index.html': ['js/controllers/index_controller.js', 'js/controllers/desktop_modal.js'],
   'shop.html': ['js/controllers/shop_controller.js', 'js/controllers/desktop_modal.js'],
-  'studio.html': ['js/dfam_slicer.js', 'js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
+  'studio.html': ['js/dfam_slicer.js', 'js/controllers/museum_models.js', 'js/controllers/museum_models_extended.js', 'js/controllers/studio_controller.js', 'js/controllers/desktop_modal.js'],
   'museum.html': [
     'js/dfam_slicer.js',
     'js/controllers/museum_models.js',
+    'js/controllers/museum_models_extended.js',
     'js/controllers/museum_audio.js',
     'js/controllers/museum_camera.js',
     'js/controllers/museum_hud.js',

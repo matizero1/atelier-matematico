@@ -1,11 +1,21 @@
 /**
- * 🏛️ ATELIER MATEMÁTICO — CONTROLADOR DE SALA V: CÁTEDRA & LABORATORIO MATEMÁTICO
+ * 🏛️ ATELIER MATEMÁTICO — CONTROLADOR MAESTRO DE SALA V: CÁTEDRA & LABORATORIO
  * Nai Systems · Arquitectura Modular Desacoplada
- * Estándar: Timonel F2 · Graficador Cartesiano 2D · KaTeX Tipográfico · Tiza Libre
+ * Estándar: Timonel F2 · Orquestador Prefrontal · Integración KaTeX, CAS, Grapher, Chalk & Wasm
  */
 
 (function(root) {
   'use strict';
+
+  // Carga de submódulos desacoplados en entornos CommonJS/Node o Browser
+  const GrapherClass = (typeof ClassroomGrapher !== 'undefined') ? ClassroomGrapher :
+    ((typeof require === 'function') ? require('./classroom_grapher') : null);
+  const ChalkboardClass = (typeof ClassroomChalkboard !== 'undefined') ? ClassroomChalkboard :
+    ((typeof require === 'function') ? require('./classroom_chalkboard') : null);
+  const CASClass = (typeof ClassroomCAS !== 'undefined') ? ClassroomCAS :
+    ((typeof require === 'function') ? require('./classroom_cas') : null);
+  const NailangClass = (typeof ClassroomNailang !== 'undefined') ? ClassroomNailang :
+    ((typeof require === 'function') ? require('./classroom_nailang') : null);
 
   class ClassroomController {
     constructor() {
@@ -17,19 +27,11 @@
       this.activeStepIdx = 0;
       this.inputDebounceTimer = null;
 
-      // Estado del Graficador Cartesiano 2D
-      this.graphScale = 32; // píxeles por unidad matemática
-      this.graphOriginX = 0;
-      this.graphOriginY = 0;
-      this.mouseMathX = 0;
-      this.mouseMathY = 0;
-
-      // Estado de la Pizarra de Tiza Libre
-      this.isDrawingChalk = false;
-      this.chalkColor = '#f4f1ea';
-      this.chalkMode = 'chalk'; // 'chalk' | 'eraser'
-      this.lastChalkX = 0;
-      this.lastChalkY = 0;
+      // Submódulos desacoplados
+      this.grapher = GrapherClass ? new GrapherClass(this) : null;
+      this.chalkboard = ChalkboardClass ? new ChalkboardClass(this) : null;
+      this.cas = CASClass ? new CASClass(this) : null;
+      this.nailang = NailangClass ? new NailangClass(this) : null;
 
       // Simuladores
       this.jitSimulator = null;
@@ -43,23 +45,23 @@
       this.loadPreset(0);
 
       // 3. Inicializar Graficador Cartesiano
-      this.initCartesianGrapher();
+      if (this.grapher) this.grapher.init();
 
       // 4. Inicializar Simulador JIT de Fluidos/Partículas
       this.initJITSimulator();
 
       // 5. Inicializar Pizarra de Tiza Libre
-      this.initChalkboard();
+      if (this.chalkboard) this.chalkboard.init();
 
       // 6. Conectar a Sala Sincrónica P2P
-      const params = new URLSearchParams(window.location.search);
+      const params = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : new URLSearchParams();
       const roomParam = params.get('room') || 'EULR';
       const roleParam = params.get('role') || 'student';
       this.setRole(roleParam, false);
       this.joinRoom(roomParam);
 
       // 7. Escuchar eventos P2P
-      if (window.RoomSync) {
+      if (typeof window !== 'undefined' && window.RoomSync) {
         window.RoomSync.on('students_updated', (students) => {
           this.renderStudentsGrid(students);
         });
@@ -74,11 +76,13 @@
       }
 
       // 8. Manejo de redimensionamiento de pantalla
-      window.addEventListener('resize', () => {
-        this.resizeCanvases();
-        this.renderCartesianGraph();
-        if (this.jitSimulator) this.jitSimulator.resize();
-      });
+      if (typeof window !== 'undefined') {
+        window.addEventListener('resize', () => {
+          this.resizeCanvases();
+          if (this.grapher) this.grapher.render();
+          if (this.jitSimulator) this.jitSimulator.resize();
+        });
+      }
 
       // 9. Configurar modo inicial del visor
       this.switchVisorMode('grapher');
@@ -99,6 +103,7 @@
     }
 
     populatePresetSelector() {
+      if (typeof document === 'undefined') return;
       const sel = document.getElementById('preset-selector');
       if (!sel) return;
 
@@ -138,7 +143,7 @@
 
       if (selVal.startsWith('art_')) {
         const artId = parseInt(selVal.replace('art_', ''), 10);
-        if (window.AtelierMath && window.AtelierMath.ARTWORKS && window.AtelierMath.ARTWORKS[artId]) {
+        if (typeof window !== 'undefined' && window.AtelierMath && window.AtelierMath.ARTWORKS && window.AtelierMath.ARTWORKS[artId]) {
           const art = window.AtelierMath.ARTWORKS[artId];
           p = {
             title: `Obra ${art.badge}: ${art.title}`,
@@ -149,7 +154,7 @@
         }
       } else {
         const idx = parseInt(selVal.replace('eng_', ''), 10) || 0;
-        const presets = (window.TimonelLinter && typeof window.TimonelLinter.getEngineeringPresets === 'function') ?
+        const presets = (typeof window !== 'undefined' && window.TimonelLinter && typeof window.TimonelLinter.getEngineeringPresets === 'function') ?
           window.TimonelLinter.getEngineeringPresets() : [];
         p = presets[idx] || {
           title: 'Diferencia de Cuadrados (Álgebra Troncal)',
@@ -161,42 +166,38 @@
 
       if (!p) return;
 
-      const tEl = document.getElementById('problem-title');
-      const cEl = document.getElementById('problem-category');
-      const dEl = document.getElementById('problem-desc');
-      if (tEl) tEl.textContent = p.title;
-      if (cEl) cEl.textContent = p.category;
-      if (dEl && p.desc) dEl.textContent = p.desc;
+      if (typeof document !== 'undefined') {
+        const tEl = document.getElementById('problem-title');
+        const cEl = document.getElementById('problem-category');
+        const dEl = document.getElementById('problem-desc');
+        if (tEl) tEl.textContent = p.title;
+        if (cEl) cEl.textContent = p.category;
+        if (dEl && p.desc) dEl.textContent = p.desc;
+      }
 
       this.derivationSteps = [...p.steps];
       this.activeStepIdx = Math.max(0, this.derivationSteps.length - 1);
       this.renderSteps();
 
-      if (this.currentRole === 'teacher' && window.RoomSync) {
+      if (this.currentRole === 'teacher' && typeof window !== 'undefined' && window.RoomSync) {
         window.RoomSync.updateMasterBoard(p.title, p.category, this.derivationSteps, this.currentMode);
       }
     }
 
     getArtworkCanonicalSteps(artId) {
       switch (artId) {
-        case 0: // Pitágoras
-          return ['a^2 + b^2', 'c^2'];
-        case 8: // Péndulo
-          return ['theta\'\' + (g/L)*sin(theta)', '0'];
-        case 20: // Ondas D Alembert
-          return ['u_tt - c^2*u_xx', '0'];
-        case 39: // Navier-Stokes
-          return ['rho*(u_t + u*u_x) + p_x - mu*u_xx', '0'];
-        case 50: // Riemann
-          return ['zeta(s)', 'sum(1/n^s, n, 1, inf)'];
-        case 86: // Lorenz
-          return ['dx/dt', 'sigma*(y - x)'];
-        default:
-          return ['f(x)', 'x^2 - 4'];
+        case 0: return ['a^2 + b^2', 'c^2'];
+        case 8: return ['theta\'\' + (g/L)*sin(theta)', '0'];
+        case 20: return ['u_tt - c^2*u_xx', '0'];
+        case 39: return ['rho*(u_t + u*u_x) + p_x - mu*u_xx', '0'];
+        case 50: return ['zeta(s)', 'sum(1/n^s, n, 1, inf)'];
+        case 86: return ['dx/dt', 'sigma*(y - x)'];
+        default: return ['f(x)', 'x^2 - 4'];
       }
     }
 
     newCustomProblem() {
+      if (typeof prompt === 'undefined') return;
       const title = prompt('Título del Teorema o Ejercicio:', 'Ecuación Fundamental');
       if (!title) return;
       const initialStep = prompt('Paso Inicial / Ecuación de Partida:', 'x^2 - 9');
@@ -217,13 +218,14 @@
     // ─────────────────────────────────────────────────────────────────────────
 
     renderSteps() {
+      if (typeof document === 'undefined') return;
       const container = document.getElementById('steps-container');
       if (!container) return;
 
-      const t0 = performance.now();
-      const audit = (window.TimonelLinter && typeof window.TimonelLinter.auditDerivation === 'function') ?
+      const t0 = (typeof performance !== 'undefined') ? performance.now() : 0;
+      const audit = (typeof window !== 'undefined' && window.TimonelLinter && typeof window.TimonelLinter.auditDerivation === 'function') ?
         window.TimonelLinter.auditDerivation(this.derivationSteps) : [];
-      const dt = (performance.now() - t0).toFixed(2);
+      const dt = ((typeof performance !== 'undefined' ? performance.now() : 0) - t0).toFixed(2);
 
       const timeEl = document.getElementById('eval-telemetry-time');
       if (timeEl) timeEl.textContent = `${dt} ms`;
@@ -314,7 +316,7 @@
         const el = document.getElementById(`katex-step-${idx}`);
         if (!el) return;
         const latex = this.mathStringToLaTeX(stepText);
-        if (typeof window.katex !== 'undefined') {
+        if (typeof window !== 'undefined' && typeof window.katex !== 'undefined') {
           try {
             window.katex.render(latex, el, { throwOnError: false, displayMode: false });
           } catch (e) {
@@ -326,8 +328,8 @@
       });
 
       // Actualizar Graficador Cartesiano si está en modo grapher
-      if (this.visorMode === 'grapher') {
-        this.renderCartesianGraph();
+      if (this.visorMode === 'grapher' && this.grapher) {
+        this.grapher.render();
       }
     }
 
@@ -336,11 +338,13 @@
       this.activeStepIdx = idx;
 
       // Actualizar KaTeX en vivo
-      const kEl = document.getElementById(`katex-step-${idx}`);
-      if (kEl && typeof window.katex !== 'undefined') {
-        try {
-          window.katex.render(this.mathStringToLaTeX(val), kEl, { throwOnError: false, displayMode: false });
-        } catch (_) {}
+      if (typeof document !== 'undefined') {
+        const kEl = document.getElementById(`katex-step-${idx}`);
+        if (kEl && typeof window !== 'undefined' && typeof window.katex !== 'undefined') {
+          try {
+            window.katex.render(this.mathStringToLaTeX(val), kEl, { throwOnError: false, displayMode: false });
+          } catch (_) {}
+        }
       }
 
       // Debounce para análisis completo y graficación
@@ -351,6 +355,7 @@
     }
 
     mathStringToLaTeX(str) {
+      if (this.cas) return this.cas.mathStringToLaTeX(str);
       if (!str || !str.trim()) return '';
       let s = str.trim();
       s = s.replace(/\*/g, ' \\cdot ');
@@ -379,12 +384,13 @@
     }
 
     resetSteps() {
-      if (confirm('¿Restablecer la derivación al problema de origen?')) {
+      if (typeof confirm !== 'undefined' && confirm('¿Restablecer la derivación al problema de origen?')) {
         this.loadPreset(this.currentPresetIdx);
       }
     }
 
     insertMathSymbol(sym) {
+      if (typeof document === 'undefined') return;
       const input = document.getElementById(`input-step-${this.activeStepIdx}`);
       if (!input) return;
 
@@ -403,544 +409,44 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // MOTOR DE CÁLCULO SIMBÓLICO EN SILICIO (TIMONEL CAS)
+    // DELEGACIÓN CAS EN SILICIO
     // ─────────────────────────────────────────────────────────────────────────
 
-    calculateAutoSolve() {
-      const cas = window.TimonelCAS;
-      if (!cas) {
-        alert('Motor Timonel CAS no inicializado.');
-        return;
-      }
-
-      // Tomar el paso activo o la premisa inicial
-      const currentExpr = (this.derivationSteps[this.activeStepIdx] && this.derivationSteps[this.activeStepIdx].trim()) 
-        ? this.derivationSteps[this.activeStepIdx].trim() 
-        : (this.derivationSteps[0] || 'x^2 - 9 = 0');
-
-      const stepsResult = cas.solveStepByStep(currentExpr);
-      if (Array.isArray(stepsResult) && stepsResult.length > 0) {
-        // Reemplazar la derivación con los pasos generados deterministamente
-        this.derivationSteps = stepsResult.map(s => s.step);
-        this.activeStepIdx = this.derivationSteps.length - 1;
-        this.renderSteps();
-
-        // Notificar al aula sincrónica P2P si actúa como docente
-        if (this.currentRole === 'teacher' && window.RoomSync) {
-          window.RoomSync.broadcastStep(this.activeStepIdx, this.derivationSteps[this.activeStepIdx]);
-        }
-      }
-    }
-
-    calculateFactor() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^2 - 9';
-
-      const factored = cas.factor(curr);
-      if (factored && factored !== curr) {
-        this.appendCalculatedStep(factored);
-      }
-    }
-
-    calculateExpand() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || '(x - 3)*(x + 3)';
-
-      const expanded = cas.expand(curr);
-      if (expanded && expanded !== curr) {
-        this.appendCalculatedStep(expanded);
-      }
-    }
-
-    calculateDerivative() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^3 - 4*x';
-
-      const d = cas.derivative(curr, 'x');
-      if (d) {
-        this.appendCalculatedStep(d);
-      }
-    }
-
-    calculateIntegral() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || '3*x^2 - 4';
-
-      const integ = cas.integral(curr, 'x');
-      if (integ) {
-        this.appendCalculatedStep(integ);
-      }
-    }
-
-    calculateRoots() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x^2 - 9 = 0';
-
-      const rootsList = cas.roots(curr);
-      if (Array.isArray(rootsList) && rootsList.length > 0) {
-        let solStr = '';
-        if (rootsList.length === 1) {
-          solStr = `x = ${rootsList[0]}`;
-        } else {
-          solStr = rootsList.map((r, i) => `x_${i + 1} = ${r}`).join('  \\lor  ');
-        }
-        this.appendCalculatedStep(solStr);
-      }
-    }
-
-    calculateTaylor() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'sin(x)';
-
-      const t = cas.taylor(curr, 'x', 0, 4);
-      if (t) {
-        this.appendCalculatedStep(t);
-      }
-    }
-
-    calculateLimit() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'sin(x)/x';
-
-      const lim = cas.limit(curr, 'x', 0);
-      if (lim && Number.isFinite(lim.value)) {
-        this.appendCalculatedStep(`${curr} = ${lim.value}`);
-      }
-    }
-
-    calculateSimplify() {
-      const cas = window.TimonelCAS;
-      if (!cas) return;
-
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const curr = this.derivationSteps[activeIdx] || this.derivationSteps[0] || 'x + 0';
-
-      const s = cas.simplify(curr);
-      if (s && s !== curr) {
-        this.appendCalculatedStep(s);
-      }
-    }
-
-    appendCalculatedStep(newStepText) {
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      // Si el paso activo está vacío, reemplazarlo
-      if (activeIdx >= 0 && (!this.derivationSteps[activeIdx] || !this.derivationSteps[activeIdx].trim())) {
-        this.derivationSteps[activeIdx] = newStepText;
-      } else {
-        // Insertar después del paso activo o al final
-        this.derivationSteps.splice(activeIdx + 1, 0, newStepText);
-        this.activeStepIdx = activeIdx + 1;
-      }
-      this.renderSteps();
-
-      // Foco en el nuevo paso
-      setTimeout(() => {
-        const input = document.getElementById(`input-step-${this.activeStepIdx}`);
-        if (input) input.focus();
-      }, 50);
-
-      // Notificar aula P2P
-      if (this.currentRole === 'teacher' && window.RoomSync) {
-        window.RoomSync.broadcastStep(this.activeStepIdx, this.derivationSteps[this.activeStepIdx]);
-      }
-    }
+    calculateAutoSolve() { if (this.cas) this.cas.calculateAutoSolve(); }
+    calculateFactor() { if (this.cas) this.cas.calculateFactor(); }
+    calculateExpand() { if (this.cas) this.cas.calculateExpand(); }
+    calculateDerivative() { if (this.cas) this.cas.calculateDerivative(); }
+    calculateIntegral() { if (this.cas) this.cas.calculateIntegral(); }
+    calculateRoots() { if (this.cas) this.cas.calculateRoots(); }
+    calculateTaylor() { if (this.cas) this.cas.calculateTaylor(); }
+    calculateLimit() { if (this.cas) this.cas.calculateLimit(); }
+    calculateSimplify() { if (this.cas) this.cas.calculateSimplify(); }
+    appendCalculatedStep(s) { if (this.cas) this.cas.appendCalculatedStep(s); }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // GRAFICADOR CARTESIANO 2D INTERACTIVO (y = f(x))
+    // DELEGACIÓN GRAFICADOR CARTESIANO 2D
     // ─────────────────────────────────────────────────────────────────────────
 
-    initCartesianGrapher() {
-      const canvas = document.getElementById('cartesian-canvas');
-      if (!canvas) return;
-
-      const rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : { width: 500, height: 320 };
-      canvas.width = rect.width * (window.devicePixelRatio || 1);
-      canvas.height = rect.height * (window.devicePixelRatio || 1);
-
-      this.graphOriginX = canvas.width / 2;
-      this.graphOriginY = canvas.height / 2;
-
-      // Eventos de mouse para coordenadas interactivas
-      canvas.addEventListener('mousemove', (e) => {
-        const cRect = canvas.getBoundingClientRect();
-        const px = (e.clientX - cRect.left) * (canvas.width / cRect.width);
-        const py = (e.clientY - cRect.top) * (canvas.height / cRect.height);
-
-        const dpr = window.devicePixelRatio || 1;
-        const scale = this.graphScale * dpr;
-
-        this.mouseMathX = (px - this.graphOriginX) / scale;
-        this.mouseMathY = -(py - this.graphOriginY) / scale;
-
-        const coordsEl = document.getElementById('graph-cursor-coords');
-        if (coordsEl) {
-          coordsEl.textContent = `X: ${this.mouseMathX.toFixed(2)} | Y: ${this.mouseMathY.toFixed(2)}`;
-        }
-      });
-    }
-
-    renderCartesianGraph() {
-      const canvas = document.getElementById('cartesian-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width;
-      const H = canvas.height;
-      const dpr = window.devicePixelRatio || 1;
-      const scale = this.graphScale * dpr;
-
-      // 1. Fondo Obsidian de lujo
-      ctx.fillStyle = '#08080a';
-      ctx.fillRect(0, 0, W, H);
-
-      // Centrar ejes
-      this.graphOriginX = W / 2;
-      this.graphOriginY = H / 2;
-      const ox = this.graphOriginX;
-      const oy = this.graphOriginY;
-
-      // 2. Rejilla Cartesiana Sutil
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.lineWidth = 1;
-
-      const xMinMath = -ox / scale;
-      const xMaxMath = (W - ox) / scale;
-      const yMinMath = -(H - oy) / scale;
-      const yMaxMath = oy / scale;
-
-      // Líneas verticales de la rejilla
-      const stepGrid = scale < 20 ? 5 : (scale < 40 ? 2 : 1);
-      const startX = Math.floor(xMinMath / stepGrid) * stepGrid;
-      for (let x = startX; x <= xMaxMath; x += stepGrid) {
-        const px = ox + x * scale;
-        ctx.beginPath();
-        ctx.moveTo(px, 0);
-        ctx.lineTo(px, H);
-        ctx.stroke();
-
-        // Etiquetas numéricas
-        if (x !== 0 && Math.abs(x) < 50) {
-          ctx.fillStyle = '#71717a';
-          ctx.font = `${10 * dpr}px 'Space Mono', monospace`;
-          ctx.fillText(String(x), px + 3, oy + 12 * dpr);
-        }
-      }
-
-      // Líneas horizontales de la rejilla
-      const startY = Math.floor(yMinMath / stepGrid) * stepGrid;
-      for (let y = startY; y <= yMaxMath; y += stepGrid) {
-        const py = oy - y * scale;
-        ctx.beginPath();
-        ctx.moveTo(0, py);
-        ctx.lineTo(W, py);
-        ctx.stroke();
-
-        if (y !== 0 && Math.abs(y) < 50) {
-          ctx.fillStyle = '#71717a';
-          ctx.font = `${10 * dpr}px 'Space Mono', monospace`;
-          ctx.fillText(String(y), ox + 4, py - 3);
-        }
-      }
-
-      // 3. Ejes Principales X e Y
-      ctx.strokeStyle = '#3f3f46';
-      ctx.lineWidth = 1.5 * dpr;
-
-      // Eje X
-      ctx.beginPath();
-      ctx.moveTo(0, oy);
-      ctx.lineTo(W, oy);
-      ctx.stroke();
-
-      // Eje Y
-      ctx.beginPath();
-      ctx.moveTo(ox, 0);
-      ctx.lineTo(ox, H);
-      ctx.stroke();
-
-      // Origen (0,0)
-      ctx.fillStyle = '#a1a1aa';
-      ctx.font = `${9 * dpr}px 'Space Mono', monospace`;
-      ctx.fillText('0', ox - 10 * dpr, oy + 12 * dpr);
-
-      // 4. Compilar y graficar la Premisa Inicial (Paso 0) como Guía de Referencia
-      const step0Text = this.derivationSteps[0] || '0';
-      const fnPremise = this.compileMathExpr(step0Text);
-
-      ctx.save();
-      ctx.strokeStyle = '#c5a059';
-      ctx.lineWidth = 1.5 * dpr;
-      ctx.setLineDash([4 * dpr, 4 * dpr]); // Línea punteada dorada
-      this.plotFunctionCurve(ctx, fnPremise, ox, oy, scale, W);
-      ctx.restore();
-
-      // 5. Compilar y graficar el Paso Activo
-      const activeIdx = Math.min(this.activeStepIdx, this.derivationSteps.length - 1);
-      const activeText = this.derivationSteps[activeIdx] || '0';
-      const isSolutionStep = activeText.includes('\\lor') || activeText.includes('x_1') || (activeText.includes('x =') && !activeText.includes('^'));
-      const graphText = (isSolutionStep && activeIdx > 0) ? this.derivationSteps[activeIdx - 1] : activeText;
-      const fnActive = this.compileMathExpr(graphText);
-
-      // Determinar si el paso activo está certificado por Timonel
-      const audit = (window.TimonelLinter && typeof window.TimonelLinter.auditDerivation === 'function') ?
-        window.TimonelLinter.auditDerivation(this.derivationSteps) : [];
-      const isCertified = (audit[activeIdx] && audit[activeIdx].valid);
-
-      ctx.save();
-      if (activeIdx === 0) {
-        ctx.strokeStyle = '#38bdf8'; // Azul premisa
-        ctx.lineWidth = 2.5 * dpr;
-      } else if (isCertified) {
-        ctx.strokeStyle = '#34d399'; // Esmeralda certificado
-        ctx.lineWidth = 2.5 * dpr;
-        ctx.shadowColor = 'rgba(52, 211, 153, 0.4)';
-        ctx.shadowBlur = 8 * dpr;
-      } else {
-        ctx.strokeStyle = '#f87171'; // Rojo divergente
-        ctx.lineWidth = 2.8 * dpr;
-        ctx.shadowColor = 'rgba(248, 113, 113, 0.6)';
-        ctx.shadowBlur = 12 * dpr;
-      }
-
-      this.plotFunctionCurve(ctx, fnActive, ox, oy, scale, W);
-      ctx.restore();
-
-      // 6. Detectar y marcar raíces en el paso activo
-      let explicitRoots = null;
-      if (isSolutionStep && window.TimonelLinter && window.TimonelLinter.instance) {
-        explicitRoots = window.TimonelLinter.instance.extractCandidateRoots(activeText);
-      }
-      this.findAndMarkRoots(ctx, fnActive, ox, oy, scale, xMinMath, xMaxMath, dpr, explicitRoots);
-    }
-
-    compileMathExpr(exprStr) {
-      if (!exprStr) return () => 0;
-      let clean = exprStr.replace(/\s+/g, '');
-      
-      // Si contiene signo '=', tomar el lado izquierdo menos el derecho: f(x) = L - R = 0
-      if (clean.includes('=')) {
-        const parts = clean.split('=');
-        clean = `(${parts[0]}) - (${parts[1] || '0'})`;
-      }
-
-      // Normalización de expresiones y comandos LaTeX estándar
-      clean = clean.replace(/\\cdot/g, '*').replace(/\\times/g, '*');
-      clean = clean.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '(($1)/($2))');
-      clean = clean.replace(/\\sqrt\{([^}]+)\}/g, 'sqrt($1)');
-      clean = clean.replace(/\\([a-zA-Z]+)/g, '$1');
-      clean = clean.replace(/\{/g, '(').replace(/\}/g, ')');
-
-      // Compilación determinista y segura mediante AST con Timonel JIT Compiler
-      if (window.JITMathCompiler && typeof window.JITMathCompiler.compile === 'function') {
-        try {
-          const compiledFn = window.JITMathCompiler.compile(clean, ['x']);
-          return function(x) {
-            try {
-              const v = compiledFn(x);
-              return (typeof v === 'number' && isFinite(v)) ? v : NaN;
-            } catch (e) {
-              return NaN;
-            }
-          };
-        } catch (err) {
-          return () => 0;
-        }
-      }
-
-      return () => 0;
-    }
-
-    plotFunctionCurve(ctx, fn, ox, oy, scale, W) {
-      ctx.beginPath();
-      let started = false;
-
-      for (let px = 0; px <= W; px += 2) {
-        const xMath = (px - ox) / scale;
-        const yMath = fn(xMath);
-
-        if (isNaN(yMath) || !isFinite(yMath) || Math.abs(yMath) > 100) {
-          started = false;
-          continue;
-        }
-
-        const py = oy - yMath * scale;
-        if (!started) {
-          ctx.moveTo(px, py);
-          started = true;
-        } else {
-          ctx.lineTo(px, py);
-        }
-      }
-      ctx.stroke();
-    }
-
-    findAndMarkRoots(ctx, fn, ox, oy, scale, xMin, xMax, dpr, explicitRoots = null) {
-      const roots = (Array.isArray(explicitRoots) && explicitRoots.length > 0) ? [...explicitRoots] : [];
-
-      if (roots.length === 0) {
-        const numSamples = 200;
-        const dx = (xMax - xMin) / numSamples;
-        let prevX = xMin;
-        let prevY = fn(prevX);
-
-        for (let i = 1; i <= numSamples; i++) {
-          const currX = xMin + i * dx;
-          const currY = fn(currX);
-
-          if (isFinite(prevY) && isFinite(currY) && (prevY * currY <= 0) && Math.abs(currY - prevY) < 20) {
-            let r = (prevX + currX) / 2;
-            roots.push(r);
-            if (roots.length >= 4) break;
-          }
-          prevX = currX;
-          prevY = currY;
-        }
-      }
-
-      // Dibujar puntos de raíces en el canvas
-      roots.forEach(r => {
-        const px = ox + r * scale;
-        const py = oy;
-
-        ctx.fillStyle = '#34d399';
-        ctx.beginPath();
-        ctx.arc(px, py, 4 * dpr, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#08080a';
-        ctx.lineWidth = 1.5 * dpr;
-        ctx.stroke();
-      });
-
-      // Actualizar información en el overlay
-      const rootsEl = document.getElementById('graph-roots-info');
-      if (rootsEl) {
-        if (roots.length > 0) {
-          rootsEl.textContent = `Raíces: ${roots.map(r => 'x = ' + (typeof r === 'number' ? r.toFixed(2) : r)).join(', ')}`;
-        } else {
-          rootsEl.textContent = 'Sin raíces reales visibles';
-        }
-      }
-    }
-
-    zoomGraph(factor) {
-      this.graphScale = Math.max(8, Math.min(180, this.graphScale * factor));
-      this.renderCartesianGraph();
-    }
-
-    resetGraphView() {
-      this.graphScale = 32;
-      this.renderCartesianGraph();
-    }
+    initCartesianGrapher() { if (this.grapher) this.grapher.init(); }
+    renderCartesianGraph() { if (this.grapher) this.grapher.render(); }
+    zoomGraph(factor) { if (this.grapher) this.grapher.zoom(factor); }
+    resetGraphView() { if (this.grapher) this.grapher.resetView(); }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // PIZARRA DE TIZA LIBRE (FREEHAND CHALKBOARD)
+    // DELEGACIÓN PIZARRA DE TIZA LIBRE
     // ─────────────────────────────────────────────────────────────────────────
 
-    initChalkboard() {
-      const canvas = document.getElementById('chalk-canvas');
-      if (!canvas) return;
-
-      const getPos = (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-          x: (clientX - rect.left) * (canvas.width / rect.width),
-          y: (clientY - rect.top) * (canvas.height / rect.height)
-        };
-      };
-
-      const startDraw = (e) => {
-        this.isDrawingChalk = true;
-        const pos = getPos(e);
-        this.lastChalkX = pos.x;
-        this.lastChalkY = pos.y;
-      };
-
-      const draw = (e) => {
-        if (!this.isDrawingChalk) return;
-        const pos = getPos(e);
-        const ctx = canvas.getContext('2d');
-        const dpr = window.devicePixelRatio || 1;
-
-        ctx.beginPath();
-        ctx.moveTo(this.lastChalkX, this.lastChalkY);
-        ctx.lineTo(pos.x, pos.y);
-
-        if (this.chalkMode === 'eraser') {
-          ctx.strokeStyle = '#08080a';
-          ctx.lineWidth = 24 * dpr;
-          ctx.lineCap = 'round';
-        } else {
-          ctx.strokeStyle = this.chalkColor;
-          ctx.lineWidth = 3 * dpr;
-          ctx.lineCap = 'round';
-          ctx.shadowColor = this.chalkColor;
-          ctx.shadowBlur = 4 * dpr;
-        }
-
-        ctx.stroke();
-        this.lastChalkX = pos.x;
-        this.lastChalkY = pos.y;
-      };
-
-      const endDraw = () => {
-        this.isDrawingChalk = false;
-      };
-
-      canvas.addEventListener('mousedown', startDraw);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('mouseup', endDraw);
-      canvas.addEventListener('mouseleave', endDraw);
-
-      canvas.addEventListener('touchstart', startDraw, { passive: false });
-      canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
-      canvas.addEventListener('touchend', endDraw);
-    }
-
-    setChalkColor(color) {
-      this.chalkMode = 'chalk';
-      this.chalkColor = color;
-    }
-
-    setChalkMode(mode) {
-      this.chalkMode = mode;
-    }
-
-    clearChalkboard() {
-      const canvas = document.getElementById('chalk-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#08080a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    initChalkboard() { if (this.chalkboard) this.chalkboard.init(); }
+    setChalkColor(col) { if (this.chalkboard) this.chalkboard.setChalkColor(col); }
+    setChalkMode(mod) { if (this.chalkboard) this.chalkboard.setChalkMode(mod); }
+    clearChalkboard() { if (this.chalkboard) this.chalkboard.clearChalkboard(); }
 
     // ─────────────────────────────────────────────────────────────────────────
     // SIMULADOR JIT DE FLUIDOS / PARTÍCULAS
     // ─────────────────────────────────────────────────────────────────────────
 
     initJITSimulator() {
+      if (typeof document === 'undefined') return;
       const canvas = document.getElementById('jit-stage');
       if (canvas && window.JITMathCompiler) {
         this.jitSimulator = window.JITMathCompiler.createParticleSimulator(canvas, '-y', 'x');
@@ -948,6 +454,7 @@
     }
 
     updateJITFields() {
+      if (typeof document === 'undefined') return;
       const uVal = document.getElementById('jit-input-u')?.value || '-y';
       const vVal = document.getElementById('jit-input-v')?.value || 'x';
       if (this.jitSimulator) {
@@ -961,6 +468,8 @@
 
     switchVisorMode(mode) {
       this.visorMode = mode;
+      if (typeof document === 'undefined') return;
+
       const vGraph = document.getElementById('view-grapher');
       const vSim = document.getElementById('view-sim');
       const vChalk = document.getElementById('view-chalk');
@@ -969,7 +478,6 @@
       const tSim = document.getElementById('tab-sim');
       const tChalk = document.getElementById('tab-chalk');
 
-      // Resetear clases de pestañas
       [tGraph, tSim, tChalk].forEach(t => {
         if (t) t.className = 'px-2.5 py-1 rounded text-[#a1a1aa] hover:text-white transition flex items-center gap-1.5';
       });
@@ -982,7 +490,7 @@
         if (vGraph) vGraph.classList.remove('hidden');
         if (tGraph) tGraph.className = 'px-2.5 py-1 rounded bg-[#c5a059] text-black font-semibold transition flex items-center gap-1.5';
         this.resizeCanvases();
-        this.renderCartesianGraph();
+        if (this.grapher) this.grapher.render();
       } else if (mode === 'sim') {
         if (vSim) vSim.classList.remove('hidden');
         if (tSim) tSim.className = 'px-2.5 py-1 rounded bg-[#c5a059] text-black font-semibold transition flex items-center gap-1.5';
@@ -996,7 +504,8 @@
     }
 
     resizeCanvases() {
-      const dpr = window.devicePixelRatio || 1;
+      if (typeof document === 'undefined') return;
+      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
       const gCanvas = document.getElementById('cartesian-canvas');
       if (gCanvas && gCanvas.parentElement) {
         gCanvas.width = gCanvas.parentElement.clientWidth * dpr;
@@ -1016,30 +525,32 @@
 
     setRole(role, notify = true) {
       this.currentRole = role;
-      const btnT = document.getElementById('btn-role-teacher');
-      const btnS = document.getElementById('btn-role-student');
+      if (typeof document !== 'undefined') {
+        const btnT = document.getElementById('btn-role-teacher');
+        const btnS = document.getElementById('btn-role-student');
 
-      if (btnT && btnS) {
-        if (role === 'teacher') {
-          btnT.classList.add('bg-[#c5a059]', 'text-black', 'font-semibold');
-          btnT.classList.remove('text-white/60');
-          btnS.classList.remove('bg-[#c5a059]', 'text-black', 'font-semibold');
-          btnS.classList.add('text-white/60');
-        } else {
-          btnS.classList.add('bg-[#c5a059]', 'text-black', 'font-semibold');
-          btnS.classList.remove('text-white/60');
-          btnT.classList.remove('bg-[#c5a059]', 'text-black', 'font-semibold');
-          btnT.classList.add('text-white/60');
+        if (btnT && btnS) {
+          if (role === 'teacher') {
+            btnT.classList.add('bg-[#c5a059]', 'text-black', 'font-semibold');
+            btnT.classList.remove('text-white/60');
+            btnS.classList.remove('bg-[#c5a059]', 'text-black', 'font-semibold');
+            btnS.classList.add('text-white/60');
+          } else {
+            btnS.classList.add('bg-[#c5a059]', 'text-black', 'font-semibold');
+            btnS.classList.remove('text-white/60');
+            btnT.classList.remove('bg-[#c5a059]', 'text-black', 'font-semibold');
+            btnT.classList.add('text-white/60');
+          }
         }
       }
 
-      if (notify && window.RoomSync && window.RoomSync.currentRoom) {
+      if (notify && typeof window !== 'undefined' && window.RoomSync && window.RoomSync.currentRoom) {
         window.RoomSync.joinRoom(window.RoomSync.currentRoom, this.currentRole);
       }
     }
 
     joinRoom(roomCode) {
-      if (!window.RoomSync) return;
+      if (typeof window === 'undefined' || !window.RoomSync) return;
       const joined = window.RoomSync.joinRoom(roomCode, this.currentRole);
       const bEl = document.getElementById('current-room-badge');
       if (bEl) bEl.textContent = joined;
@@ -1047,40 +558,49 @@
     }
 
     promptJoinRoom() {
-      const current = (window.RoomSync && window.RoomSync.currentRoom) ? window.RoomSync.currentRoom : 'EULR';
+      if (typeof prompt === 'undefined') return;
+      const current = (typeof window !== 'undefined' && window.RoomSync && window.RoomSync.currentRoom) ? window.RoomSync.currentRoom : 'EULR';
       const code = prompt('Ingresa el código de 4 caracteres de la sala:', current);
       if (code) {
         const clean = code.toUpperCase().trim();
-        window.history.replaceState({}, '', `?room=${clean}&role=${this.currentRole}`);
+        if (typeof window !== 'undefined' && window.history) {
+          window.history.replaceState({}, '', `?room=${clean}&role=${this.currentRole}`);
+        }
         this.joinRoom(clean);
       }
     }
 
     copyRoomLink() {
+      if (typeof window === 'undefined') return;
       const room = (window.RoomSync && window.RoomSync.currentRoom) ? window.RoomSync.currentRoom : 'EULR';
       const url = `${window.location.origin}${window.location.pathname}?room=${room}&role=student`;
-      navigator.clipboard.writeText(url).then(() => {
-        alert(`¡Enlace copiado al portapapeles!\nComparte este link con tus alumnos:\n${url}`);
-      });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          alert(`¡Enlace copiado al portapapeles!\nComparte este link con tus alumnos:\n${url}`);
+        });
+      }
     }
 
     toggleExamMode() {
       this.currentMode = this.currentMode === 'study' ? 'exam' : 'study';
-      const dot = document.getElementById('mode-dot');
-      const label = document.getElementById('mode-label');
+      if (typeof document !== 'undefined') {
+        const dot = document.getElementById('mode-dot');
+        const label = document.getElementById('mode-label');
 
-      if (this.currentMode === 'exam') {
-        if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500';
-        if (label) label.textContent = 'Modo Examen Oficial';
-        alert('Modo Examen Oficial Activado: las sugerencias intermedias de Timonel quedan bloqueadas para evaluación.');
-      } else {
-        if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
-        if (label) label.textContent = 'Modo Socrático';
+        if (this.currentMode === 'exam') {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500';
+          if (label) label.textContent = 'Modo Examen Oficial';
+          alert('Modo Examen Oficial Activado: las sugerencias intermedias de Timonel quedan bloqueadas para evaluación.');
+        } else {
+          if (dot) dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+          if (label) label.textContent = 'Modo Socrático';
+        }
       }
       this.renderSteps();
     }
 
     renderStudentsGrid(students) {
+      if (typeof document === 'undefined') return;
       const grid = document.getElementById('students-grid');
       const countEl = document.getElementById('student-count');
       if (!grid) return;
@@ -1125,7 +645,7 @@
         window.AtelierDesktop.saveFile(texFilename, tex, false);
       }
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(tex).then(() => {
           alert('Código LaTeX formal copiado al portapapeles con éxito.');
         }).catch(() => {
@@ -1135,6 +655,7 @@
     }
 
     downloadFineArtPlate() {
+      if (typeof document === 'undefined') return;
       const canvas = document.createElement('canvas');
       canvas.width = 1600;
       canvas.height = 1000;
@@ -1218,7 +739,7 @@
         }
       }
       await this.loadSavedClassroomNotes();
-      alert(`Apunte "${title}" archivado con éxito en el cuaderno persistente.`);
+      if (typeof alert !== 'undefined') alert(`Apunte "${title}" archivado con éxito en el cuaderno persistente.`);
     }
 
     async loadSavedClassroomNotes() {
@@ -1318,7 +839,7 @@
     }
 
     async clearAllClassroomNotes() {
-      if (confirm('¿Vaciar todos los apuntes del cuaderno de aula?')) {
+      if (typeof confirm !== 'undefined' && confirm('¿Vaciar todos los apuntes del cuaderno de aula?')) {
         if (typeof window !== 'undefined' && window.AtelierStorage) {
           await window.AtelierStorage.clearClassroomNotes();
         }
@@ -1342,185 +863,36 @@
       if (drawer) drawer.classList.toggle('translate-x-full');
     }
 
-    // ── PLAYGROUND WEBASSEMBLY DE NAILANG EN SILICIO ─────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELEGACIÓN PLAYGROUND NAILANG WASM
+    // Presets canónicos: tensor_matmul_3x3, elastic_stress_voigt, cellular_homogenization_1d
+    // Renderizado en DOM: nailang-memory-display con runResult.memory
+    // ─────────────────────────────────────────────────────────────────────────
+
     toggleClassroomNailangModal() {
-      if (typeof document === 'undefined') return;
-      const modal = document.getElementById('classroom-nailang-modal');
-      if (!modal) return;
-      const isHidden = modal.classList.contains('hidden');
-      if (isHidden) {
-        modal.classList.remove('hidden');
-        const editor = document.getElementById('nailang-editor');
-        if (editor && !editor.value.trim() && window.NailangWasm) {
-          this.loadNailangPreset('lorenz_rk4');
-        }
-      } else {
-        modal.classList.add('hidden');
-      }
+      if (this.nailang) this.nailang.toggleClassroomNailangModal();
     }
 
     loadNailangPreset(name) {
-      if (typeof document === 'undefined' || !window.NailangWasm) return;
-      const editor = document.getElementById('nailang-editor');
-      const fnInput = document.getElementById('nailang-fn-name');
-      const argsInput = document.getElementById('nailang-args');
-      if (!editor) return;
-
-      if (name === 'lorenz_rk4') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.lorenz_rk4;
-        if (fnInput) fnInput.value = 'lorenz_step_x';
-        if (argsInput) argsInput.value = '0.1, 0.0, 0.0, 0.01';
-      } else if (name === 'riemann_zeta_kernel') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.riemann_zeta_kernel;
-        if (fnInput) fnInput.value = 'riemann_term';
-        if (argsInput) argsInput.value = '1.0, 14.134725';
-      } else if (name === 'gyroid_tpms_sdf') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.gyroid_tpms_sdf;
-        if (fnInput) fnInput.value = 'gyroid_eval';
-        if (argsInput) argsInput.value = '0.5, 1.2, 0.8';
-      } else if (name === 'tensor_matmul_3x3') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.tensor_matmul_3x3;
-        if (fnInput) fnInput.value = 'matmul_3x3';
-        if (argsInput) argsInput.value = '0.0, 9.0, 18.0';
-      } else if (name === 'elastic_stress_voigt') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.elastic_stress_voigt;
-        if (fnInput) fnInput.value = 'voigt_elastic_stress';
-        if (argsInput) argsInput.value = '0.0, 36.0, 42.0';
-      } else if (name === 'cellular_homogenization_1d') {
-        editor.value = window.NailangWasm.CANONICAL_PHYSICS_PROGRAMS.cellular_homogenization_1d;
-        if (fnInput) fnInput.value = 'cellular_homogenize';
-        if (argsInput) argsInput.value = '0.0, 4.0';
-      } else if (name === 'kinetic_energy') {
-        editor.value = `module Physics.Kinetic;\n\nfn kinetic_energy(mass: f64, velocity: f64) -> f64 {\n    let half: f64 = 0.5;\n    return half * mass * velocity * velocity;\n}`;
-        if (fnInput) fnInput.value = 'kinetic_energy';
-        if (argsInput) argsInput.value = '10.0, 3.0';
-      }
+      if (this.nailang) this.nailang.loadNailangPreset(name);
     }
 
     async executeNailangWasm() {
-      if (typeof document === 'undefined' || !window.NailangWasm) return;
-      const editor = document.getElementById('nailang-editor');
-      const fnInput = document.getElementById('nailang-fn-name');
-      const argsInput = document.getElementById('nailang-args');
-      const resDisplay = document.getElementById('nailang-result-display');
-      const hexPreview = document.getElementById('nailang-hex-preview');
-      const statusPill = document.getElementById('nailang-status-pill');
-      const latencyVal = document.getElementById('nailang-latency-val');
-      const sizeVal = document.getElementById('nailang-size-val');
+      if (this.nailang) await this.nailang.executeNailangWasm();
+    }
 
-      if (!editor || !fnInput || !argsInput) return;
-
-      const src = editor.value.trim();
-      const fnName = fnInput.value.trim();
-      const rawArgs = argsInput.value.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-
-      try {
-        if (statusPill) {
-          statusPill.textContent = 'Wasm: COMPILANDO...';
-          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-amber-950/50 border border-amber-500/40 text-amber-300 text-[10px] animate-pulse';
-        }
-
-        let options = {};
-        if (fnName === 'matmul_3x3') {
-          options = {
-            initialMemory: {
-              0: [1, 2, 0,  0, 1, 1,  2, 0, 1], // Matrix A
-              9: [1, 0, 1,  0, 2, 0,  1, 1, 0]  // Matrix B
-            },
-            readMemoryOffset: 18,
-            readMemoryLength: 9
-          };
-        } else if (fnName === 'voigt_elastic_stress') {
-          const C = new Array(36).fill(0);
-          C[0] = 120; C[1] = 40;  C[2] = 40;
-          C[6] = 40;  C[7] = 120; C[8] = 40;
-          C[12] = 40; C[13] = 40; C[14] = 120;
-          C[21] = 40; C[28] = 40; C[35] = 40;
-          options = {
-            initialMemory: {
-              0: C,
-              36: [0.001, 0, 0, 0, 0, 0]
-            },
-            readMemoryOffset: 42,
-            readMemoryLength: 6
-          };
-        } else if (fnName === 'cellular_homogenize') {
-          options = {
-            initialMemory: {
-              0: [10.0, 20.0, 50.0, 100.0]
-            },
-            readMemoryOffset: 4,
-            readMemoryLength: 3
-          };
-        }
-
-        const runResult = await window.NailangWasm.compileAndRun(src, fnName, rawArgs, options);
-
-        if (statusPill) {
-          statusPill.textContent = `Wasm: COMPILADO & EJECUTADO`;
-          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-[10px]';
-        }
-        if (resDisplay) {
-          resDisplay.textContent = `${fnName}(${rawArgs.join(', ')}) = ${runResult.result}`;
-        }
-        if (latencyVal) {
-          latencyVal.textContent = `${runResult.executionTimeMicros} µs (${runResult.totalPipelineMs} ms total)`;
-        }
-        if (sizeVal) {
-          sizeVal.textContent = `${runResult.compiledBytes} bytes`;
-        }
-
-        const memPanel = document.getElementById('nailang-memory-panel');
-        const memDisplay = document.getElementById('nailang-memory-display');
-        if (memPanel && memDisplay) {
-          if (runResult.memory && runResult.memory.length > 0) {
-            memPanel.classList.remove('hidden');
-            if (fnName === 'matmul_3x3') {
-              const c = runResult.memory;
-              memDisplay.textContent = `Matriz C (3x3) resultante en Memoria Lineal Wasm:\n` +
-                `[ ${c[0].toFixed(2)}, ${c[1].toFixed(2)}, ${c[2].toFixed(2)} ]\n` +
-                `[ ${c[3].toFixed(2)}, ${c[4].toFixed(2)}, ${c[5].toFixed(2)} ]\n` +
-                `[ ${c[6].toFixed(2)}, ${c[7].toFixed(2)}, ${c[8].toFixed(2)} ]\n` +
-                `Residuo testigo C[0,0] = ${runResult.result}`;
-            } else if (fnName === 'voigt_elastic_stress') {
-              const s = runResult.memory;
-              memDisplay.textContent = `Tensor de Tensión de Cauchy (Voigt 6D) en Memoria Wasm:\n` +
-                `σ_x  = ${s[0].toFixed(4)} GPa | σ_y  = ${s[1].toFixed(4)} GPa | σ_z  = ${s[2].toFixed(4)} GPa\n` +
-                `τ_yz = ${s[3].toFixed(4)} GPa | τ_xz = ${s[4].toFixed(4)} GPa | τ_xy = ${s[5].toFixed(4)} GPa\n` +
-                `Tensión Equivalente Von Mises = ${runResult.result.toFixed(6)} GPa`;
-            } else if (fnName === 'cellular_homogenize') {
-              const h = runResult.memory;
-              memDisplay.textContent = `Cotas de Homogenización Celular (Hill) en Memoria Wasm:\n` +
-                `Cota Superior (Voigt):  E_V = ${h[0].toFixed(4)} GPa\n` +
-                `Cota Inferior (Reuss):  E_R = ${h[1].toFixed(4)} GPa\n` +
-                `Módulo Efectivo (Hill): E_H = ${h[2].toFixed(4)} GPa\n` +
-                `Condición Física: E_R <= E_H <= E_V [CUMPLIDA Y CERTIFICADA]`;
-            } else {
-              memDisplay.textContent = runResult.memory.map((v, i) => `[${i}]: ${v}`).join('  ');
-            }
-          } else {
-            memPanel.classList.add('hidden');
-          }
-        }
-
-        const tokens = window.NailangWasm.tokenize(src);
-        const ast = window.NailangWasm.parse(tokens);
-        const compiled = window.NailangWasm.compileToWasm(ast);
-        if (hexPreview && compiled.bytes) {
-          const hexArr = Array.from(compiled.bytes.slice(0, 48)).map(b => b.toString(16).padStart(2, '0')).join(' ');
-          hexPreview.textContent = hexArr + (compiled.bytes.length > 48 ? ' ...' : '');
-        }
-
-      } catch (err) {
-        console.error('[Nailang Wasm Error]', err);
-        if (statusPill) {
-          statusPill.textContent = 'Wasm: ERROR DE COMPILACIÓN';
-          statusPill.className = 'px-2.5 py-0.5 rounded-full bg-rose-950/50 border border-rose-500/40 text-rose-300 text-[10px]';
-        }
-        if (resDisplay) {
-          resDisplay.textContent = 'Error: ' + err.message;
-        }
+    /**
+     * Evaluación segura JIT de expresiones matemáticas en silicio.
+     * Evaluación 100% segura mediante AST y Timonel JIT. Delega en JITMathCompiler.compile.
+     */
+    compileMathExpr(exprStr) {
+      if (this.grapher && typeof this.grapher.compileMathExpr === 'function') {
+        return this.grapher.compileMathExpr(exprStr);
       }
+      if (typeof window !== 'undefined' && window.JITMathCompiler && typeof window.JITMathCompiler.compile === 'function') {
+        return window.JITMathCompiler.compile(exprStr, ['x']);
+      }
+      return () => 0;
     }
   }
 

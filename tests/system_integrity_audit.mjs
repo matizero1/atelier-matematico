@@ -619,7 +619,14 @@ const roomControllers = {
     'js/controllers/museum_controller.js',
     'js/controllers/desktop_modal.js'
   ],
-  'classroom.html': ['js/controllers/classroom_controller.js', 'js/controllers/desktop_modal.js']
+  'classroom.html': [
+    'js/controllers/classroom_grapher.js',
+    'js/controllers/classroom_chalkboard.js',
+    'js/controllers/classroom_cas.js',
+    'js/controllers/classroom_nailang.js',
+    'js/controllers/classroom_controller.js',
+    'js/controllers/desktop_modal.js'
+  ]
 };
 
 for (const [htmlFile, jsFiles] of Object.entries(roomControllers)) {

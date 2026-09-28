@@ -1,7 +1,7 @@
 /**
  * Atelier Matemático - Museum Controller
  * 3D Celestial Observatory (Atlas Cósmico de 100 Leyes)
- * NASA JPL-Grade Modular Architecture
+ * Timonel F2 Sovereign Modular Architecture
  * Orquestador Three.js: Bóveda Celeste, 100 Leyes, Boutique Orbital & Ciclo de Renderizado
  * Silicio Nativo · Timonel F2 · Rendimiento Térmico Gobernado
  */

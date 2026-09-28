@@ -310,9 +310,9 @@ htmlRooms.forEach(room => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. AUDITORÍA DE CONTROLADORES MODULARES (NASA JPL ARCHITECTURE)
+// 5. AUDITORÍA DE CONTROLADORES MODULARES (TIMONEL F2 ARCHITECTURE)
 // ─────────────────────────────────────────────────────────────────────────────
-console.log('\n🚀 FASE 5: Arquitectura Modular de Controladores NASA JPL');
+console.log('\n🚀 FASE 5: Arquitectura Modular de Controladores Timonel F2');
 const controllers = [
   { file: 'classroom_controller.js', room: 'classroom.html' },
   { file: 'museum_controller.js', room: 'museum.html' },
@@ -425,9 +425,9 @@ assert(ctrlLines < 2100, `museum_controller.js se ha modularizado y reducido lim
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (NASA JPL & SILICIO NATIVO)
+// 6. AUDITORÍA DEL COMPILADOR SOBERANO NAILANG (TIMONEL F2 & SILICIO NATIVO)
 // ─────────────────────────────────────────────────────────────────────────────
-console.log('\n⚡ FASE 6: Compilador Soberano Nailang (NASA JPL Rule 3 & Silicio Nativo)');
+console.log('\n⚡ FASE 6: Compilador Soberano Nailang (Timonel F2 & Silicio Nativo)');
 const candidateRtPaths = [
   path.join(rootDir, '..', 'tools', 'nailangc', 'nailang_rt.h'),
   '/Users/mati/Desktop/Nai-Workspace/tools/nailangc/nailang_rt.h'
@@ -436,7 +436,7 @@ const nailangRtPath = candidateRtPaths.find(p => fs.existsSync(p)) || candidateR
 assert(fs.existsSync(nailangRtPath), 'Header de runtime nailang_rt.h existe en disco');
 const rtContent = fs.readFileSync(nailangRtPath, 'utf8');
 assert(rtContent.includes('NaiArena') && rtContent.includes('nai_arena_init') && rtContent.includes('nai_arena_alloc'),
-  'nailang_rt.h implementa NaiArena conforme a Regla 3 NASA JPL (Cero fragmentación post-init)');
+  'nailang_rt.h implementa NaiArena conforme a Timonel F2 (Cero fragmentación post-init)');
 
 const candidateNailangc = [
   path.join(rootDir, '..', 'tools', 'nailangc', 'nailangc'),

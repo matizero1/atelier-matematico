@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
 // ATELIER MATEMÁTICO — MOTOR DE PERSISTENCIA DETERMINISTA EN SILICIO
 // Almacenamiento Estructurado Asíncrono: IndexedDB + Fallback Resiliente
-// Gobernanza: Timonel F2 | Cero Volatilidad de Datos | NASA JPL Spec
+// Gobernanza: Timonel F2 | Cero Volatilidad de Datos | Persistencia Determinista
 // ═══════════════════════════════════════════════════════════════════
 
 (function(root) {

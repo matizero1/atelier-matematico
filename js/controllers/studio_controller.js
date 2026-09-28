@@ -1,7 +1,7 @@
 /**
  * Atelier Matemático - Studio Controller
  * 2D Sovereign Workbench (100 Obras Canónicas)
- * NASA JPL-Grade Modular Architecture
+ * Timonel F2 Sovereign Modular Architecture
  */
 
     // ═══════════════════════════════════════════════════════════════════

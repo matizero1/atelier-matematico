@@ -3,7 +3,7 @@
  * Compilador Soberano en Silicio: Lexer -> AST -> Timonel F2 -> Wasm Binary Emitter
  * Soporte Nativo: Aritmética f64 IEEE 754, Memoria Lineal Wasm (WebAssembly.Memory),
  *                 Arreglos Tensoriales, Bucles Iterativos (while) y Homogenización Celular.
- * Gobernanza: NASA JPL Rule 3 · Cero Dependencias · Ejecución en Silicio a 64 bits (f64)
+ * Gobernanza: Timonel F2 · Asignación Acotada · Cero Dependencias · Silicio f64
  */
 
 (function(root) {

@@ -1,7 +1,7 @@
 /**
  * Atelier Matemático - Index Controller
  * Hero Canvas & Interactive Catalog
- * NASA JPL-Grade Modular Architecture
+ * Timonel F2 Sovereign Modular Architecture
  */
 
     // 1. Estado y Control de Obras en el Muro de Travertino

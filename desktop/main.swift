@@ -74,7 +74,7 @@ class NativeBridge: NSObject, WKScriptMessageHandler {
             return
         }
 
-        // Sanitización estricta contra Path Traversal (NASA JPL & Timonel F2)
+        // Sanitización estricta contra Path Traversal (Timonel F2)
         let safeName = URL(fileURLWithPath: rawFilename).lastPathComponent
         guard !safeName.isEmpty, safeName != ".", safeName != ".." else {
             dispatchCallback(id: callbackId, data: ["success": false, "error": "Nombre de archivo no válido"])

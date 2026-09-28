@@ -1184,6 +1184,7 @@ assert(typeof AtelierSlicer.createToolpathWireframe === 'function', 'AtelierSlic
 assert(typeof AtelierSlicer.openSlicerModal === 'function', 'AtelierSlicer expone método openSlicerModal');
 assert(typeof AtelierSlicer.closeSlicerModal === 'function', 'AtelierSlicer expone método closeSlicerModal');
 assert(typeof AtelierSlicer.setSlicerLayer === 'function', 'AtelierSlicer expone método setSlicerLayer');
+assert(typeof AtelierSlicer.setSlicerViewMode === 'function', 'AtelierSlicer expone método setSlicerViewMode');
 
 // 1. Simulación geométrica de corte en silicio (Cubo Canónico 10x10x10 mm)
 const cubeVertices = [
@@ -1231,6 +1232,19 @@ assert(sliceResult.metrics.filamentLengthM > 0, 'Longitud de filamento calculada
 assert(sliceResult.metrics.filamentMassGrams > 0, 'Masa calculada de filamento PLA es positiva (> 0 g)');
 assert(sliceResult.metrics.printTimeMinutes > 0, 'Tiempo cinemático de impresión es positivo (> 0 min)');
 
+// 1b. Infill Celular TPMS Giroide (Superficie Mínima de Schwarz)
+const gyroidSliceResult = AtelierSlicer.sliceGeometry(mockCubeGeom, {
+  layerHeight: 1.0,
+  infillDensity: 0.25,
+  infillPattern: 'GYROID',
+  targetDimensionMm: 10.0,
+  nozzleDiameter: 0.40,
+  printSpeed: 60.0
+});
+assert(gyroidSliceResult && gyroidSliceResult.totalLayers === 10, 'Rebanador planar genera 10 capas con infill celular GYROID');
+assert(gyroidSliceResult.layers[0].infill.length > 0, 'Infill TPMS Giroide genera trayectorias sinusoidales continuas en silicio');
+assert(gyroidSliceResult.metrics.filamentLengthM > 0, 'Métrica de filamento con patrón Giroide calculada con éxito');
+
 // 2. Compilación de G-code Marlin/RepRap ISO
 const gcodeResult = AtelierSlicer.compileGCode(sliceResult, {
   title: 'TestCube_Timonel',
@@ -1253,12 +1267,16 @@ const studioJsSlicer = fs.readFileSync(path.join(rootDir, 'js', 'controllers', '
 
 assert(museumHtmlSlicer.includes('id="btn-slice-dfam"') && museumHtmlSlicer.includes('openActiveAstroSlicer()'), 'museum.html contiene botón orbital de rebanado DFAM');
 assert(museumHtmlSlicer.includes('id="dfam-slicer-modal"') && museumHtmlSlicer.includes('id="dfam-slicer-canvas"'), 'museum.html contiene modal y canvas de rebanado 2D');
+assert(museumHtmlSlicer.includes('id="btn-slicer-view-3d"') && museumHtmlSlicer.includes('id="dfam-slicer-3d-mount"'), 'museum.html contiene selector y mount para visualización órbita 3D Toolpath');
+assert(museumHtmlSlicer.includes('id="slicer-infill-pattern"') && museumHtmlSlicer.includes('value="GYROID"'), 'museum.html incluye selector de patrones con opción Giroide activa');
 assert(museumHtmlSlicer.includes('src="js/dfam_slicer.js"'), 'museum.html enlaza script js/dfam_slicer.js');
 assert(museumJsSlicer.includes('function openActiveAstroSlicer') && museumJsSlicer.includes('window.openActiveAstroSlicer = openActiveAstroSlicer'), 'museum_controller.js implementa y expone openActiveAstroSlicer');
 
 assert(studioHtmlSlicer.includes('id="btn-studio-slice"') && studioHtmlSlicer.includes('openStudioArtworkSlicer()'), 'studio.html contiene botón de cabecera para rebanado DFAM');
 assert(studioHtmlSlicer.includes('id="btn-studio-slice-dossier"'), 'studio.html contiene botón en dossier para rebanado DFAM');
 assert(studioHtmlSlicer.includes('id="dfam-slicer-modal"'), 'studio.html contiene modal de rebanado DFAM');
+assert(studioHtmlSlicer.includes('id="btn-slicer-view-3d"') && studioHtmlSlicer.includes('id="dfam-slicer-3d-mount"'), 'studio.html contiene selector y mount para visualización órbita 3D Toolpath');
+assert(studioHtmlSlicer.includes('id="slicer-infill-pattern"') && studioHtmlSlicer.includes('value="GYROID"'), 'studio.html incluye selector de patrones con opción Giroide activa');
 assert(studioHtmlSlicer.includes('src="js/dfam_slicer.js"'), 'studio.html enlaza script js/dfam_slicer.js');
 assert(studioJsSlicer.includes('function openStudioArtworkSlicer') && studioJsSlicer.includes('window.openStudioArtworkSlicer = openStudioArtworkSlicer'), 'studio_controller.js implementa y expone openStudioArtworkSlicer');
 

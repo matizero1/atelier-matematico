@@ -1,7 +1,7 @@
 /**
  * Atelier Matemático - Shop Controller
  * Fine Art 3D Boutique & Acquisition System
- * NASA JPL-Grade Modular Architecture
+ * Arquitectura Modular Desacoplada · Timonel F2
  */
 
     // ── ESTADO DEL SISTEMA ──────────────────────────────────────────

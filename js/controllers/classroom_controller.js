@@ -1,7 +1,7 @@
 /**
  * 🏛️ ATELIER MATEMÁTICO — CONTROLADOR DE SALA V: CÁTEDRA & LABORATORIO MATEMÁTICO
  * Nai Systems · Arquitectura Modular Desacoplada
- * Estándar: NASA JPL · Graficador Cartesiano 2D · KaTeX Tipográfico · Tiza Libre
+ * Estándar: Timonel F2 · Graficador Cartesiano 2D · KaTeX Tipográfico · Tiza Libre
  */
 
 (function(root) {

@@ -162,6 +162,53 @@
 
     if (!isFinite(minX)) return [];
 
+    // ── Relleno Celular Giroide TPMS (Superficie Mínima Triplemente Periódica) ──
+    if (pattern === 'GYROID') {
+      const lambda = spacing * 1.6;
+      const k = (2 * Math.PI) / lambda;
+      const phaseZ = layerIndex * 0.45;
+      const stepX = Math.max(0.6, nozzleDiameter * 1.2);
+
+      for (let y = minY - spacing; y <= maxY + spacing; y += spacing) {
+        let currentSegment = null;
+        for (let x = minX; x <= maxX; x += stepX) {
+          const waveY = y + (spacing * 0.38) * Math.sin(k * x + phaseZ);
+          const pt = { x, y: waveY };
+          const isInside = polygons.some(poly => isPointInsidePolygon(pt, poly));
+          if (isInside) {
+            if (!currentSegment) {
+              currentSegment = [pt];
+            } else {
+              currentSegment.push(pt);
+            }
+          } else {
+            if (currentSegment && currentSegment.length >= 2) {
+              for (let s = 0; s < currentSegment.length - 1; s++) {
+                infillSegments.push({
+                  x1: currentSegment[s].x,
+                  y1: currentSegment[s].y,
+                  x2: currentSegment[s + 1].x,
+                  y2: currentSegment[s + 1].y
+                });
+              }
+            }
+            currentSegment = null;
+          }
+        }
+        if (currentSegment && currentSegment.length >= 2) {
+          for (let s = 0; s < currentSegment.length - 1; s++) {
+            infillSegments.push({
+              x1: currentSegment[s].x,
+              y1: currentSegment[s].y,
+              x2: currentSegment[s + 1].x,
+              y2: currentSegment[s + 1].y
+            });
+          }
+        }
+      }
+      return infillSegments;
+    }
+
     // Patrón de líneas alternadas a 45° y -45°
     const angleRad = (pattern === 'GRID' || (layerIndex % 2 === 0)) ? (Math.PI / 4) : (-Math.PI / 4);
     const cosA = Math.cos(angleRad), sinA = Math.sin(angleRad);
@@ -614,6 +661,147 @@
   let currentTargetTitle = 'Atelier_Matematico_3D';
   let isSimulating = false;
   let simulationTimer = null;
+  let currentViewMode = '2D';
+
+  let slicer3D = {
+    renderer: null,
+    scene: null,
+    camera: null,
+    wireframeGroup: null,
+    isInitialized: false,
+    animFrameId: null,
+    rotX: 0.45,
+    rotY: 0.65,
+    zoom: 160,
+    isDragging: false,
+    prevX: 0,
+    prevY: 0
+  };
+
+  function setSlicerViewMode(mode) {
+    currentViewMode = mode;
+    const btn2D = document.getElementById('btn-slicer-view-2d');
+    const btn3D = document.getElementById('btn-slicer-view-3d');
+    const canvas2D = document.getElementById('dfam-slicer-canvas');
+    const mount3D = document.getElementById('dfam-slicer-3d-mount');
+    const badges2D = document.getElementById('dfam-slicer-2d-badges');
+    const hint3D = document.getElementById('slicer-3d-hint');
+
+    if (mode === '3D') {
+      if (btn2D) {
+        btn2D.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition cursor-pointer';
+      }
+      if (btn3D) {
+        btn3D.className = 'px-2.5 py-1 rounded bg-[#c5a059] text-black font-semibold transition cursor-pointer';
+      }
+      if (canvas2D) canvas2D.classList.add('hidden');
+      if (mount3D) mount3D.classList.remove('hidden');
+      if (badges2D) badges2D.classList.add('hidden');
+      if (hint3D) hint3D.style.display = 'flex';
+      initOrUpdate3DView();
+    } else {
+      if (btn2D) {
+        btn2D.className = 'px-2.5 py-1 rounded bg-[#c5a059] text-black font-semibold transition cursor-pointer';
+      }
+      if (btn3D) {
+        btn3D.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition cursor-pointer';
+      }
+      if (canvas2D) canvas2D.classList.remove('hidden');
+      if (mount3D) mount3D.classList.add('hidden');
+      if (badges2D) badges2D.classList.remove('hidden');
+      if (hint3D) hint3D.style.display = 'none';
+      if (slicer3D.animFrameId) {
+        cancelAnimationFrame(slicer3D.animFrameId);
+        slicer3D.animFrameId = null;
+      }
+    }
+  }
+
+  function initOrUpdate3DView() {
+    const mount = document.getElementById('dfam-slicer-3d-mount');
+    if (!mount || typeof window === 'undefined' || !window.THREE) return;
+
+    const width = mount.clientWidth || 460;
+    const height = 380;
+
+    if (!slicer3D.isInitialized) {
+      slicer3D.scene = new window.THREE.Scene();
+      slicer3D.scene.background = new window.THREE.Color(0x08090e);
+
+      slicer3D.camera = new window.THREE.PerspectiveCamera(45, width / height, 1, 2000);
+      slicer3D.renderer = new window.THREE.WebGLRenderer({ antialias: true, alpha: false });
+      slicer3D.renderer.setSize(width, height);
+      slicer3D.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      mount.appendChild(slicer3D.renderer.domElement);
+
+      // Cama de impresión 3D
+      const grid = new window.THREE.GridHelper(220, 22, 0xc5a059, 0x222638);
+      grid.position.y = 0;
+      slicer3D.scene.add(grid);
+
+      // Contenedor para el wireframe
+      slicer3D.wireframeGroup = new window.THREE.Group();
+      slicer3D.scene.add(slicer3D.wireframeGroup);
+
+      // Eventos de ratón y táctiles para rotación
+      const dom = slicer3D.renderer.domElement;
+      dom.addEventListener('mousedown', (e) => {
+        slicer3D.isDragging = true;
+        slicer3D.prevX = e.clientX;
+        slicer3D.prevY = e.clientY;
+      });
+      window.addEventListener('mouseup', () => { slicer3D.isDragging = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (!slicer3D.isDragging) return;
+        const dx = e.clientX - slicer3D.prevX;
+        const dy = e.clientY - slicer3D.prevY;
+        slicer3D.rotY += dx * 0.01;
+        slicer3D.rotX = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, slicer3D.rotX + dy * 0.01));
+        slicer3D.prevX = e.clientX;
+        slicer3D.prevY = e.clientY;
+      });
+      dom.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        slicer3D.zoom = Math.max(40, Math.min(600, slicer3D.zoom + e.deltaY * 0.2));
+      }, { passive: false });
+
+      slicer3D.isInitialized = true;
+    }
+
+    // Actualizar Malla Wireframe 3D
+    if (slicer3D.wireframeGroup) {
+      while (slicer3D.wireframeGroup.children.length > 0) {
+        const obj = slicer3D.wireframeGroup.children[0];
+        slicer3D.wireframeGroup.remove(obj);
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      }
+      if (currentSliceResult) {
+        const wireframe = createToolpathWireframe(currentSliceResult, window.THREE);
+        if (wireframe) {
+          slicer3D.wireframeGroup.add(wireframe);
+        }
+      }
+    }
+
+    // Loop de renderizado 3D continuo
+    if (!slicer3D.animFrameId) {
+      function render3DLoop() {
+        if (currentViewMode !== '3D') return;
+        slicer3D.animFrameId = requestAnimationFrame(render3DLoop);
+
+        const cy = Math.cos(slicer3D.rotX) * slicer3D.zoom;
+        const cx = Math.sin(slicer3D.rotY) * Math.sin(slicer3D.rotX) * slicer3D.zoom;
+        const cz = Math.cos(slicer3D.rotY) * Math.sin(slicer3D.rotX) * slicer3D.zoom;
+
+        slicer3D.camera.position.set(cx, cy, cz);
+        slicer3D.camera.lookAt(0, (currentSliceResult ? currentSliceResult.totalHeightMm * 0.4 : 20), 0);
+
+        slicer3D.renderer.render(slicer3D.scene, slicer3D.camera);
+      }
+      render3DLoop();
+    }
+  }
 
   function ensureModalInDOM() {
     if (typeof document === 'undefined') return;
@@ -638,11 +826,23 @@
 
           <!-- Contenido Principal -->
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-            <!-- Columna Izquierda: Vista 2D de Sección (Lienzo Canvas) -->
+            <!-- Columna Izquierda: Vista 2D / 3D (Lienzo Canvas / WebGL) -->
             <div class="md:col-span-7 flex flex-col gap-3">
-              <div class="relative rounded-xl overflow-hidden border border-white/10 bg-[#08090e] shadow-inner flex items-center justify-center">
+              <!-- Selector de Pestañas de Vista -->
+              <div class="flex items-center justify-between pb-1">
+                <div class="flex items-center gap-1 bg-black/60 p-1 rounded-lg border border-white/10 text-[10px] mono">
+                  <button id="btn-slicer-view-2d" onclick="setSlicerViewMode('2D')" class="px-2.5 py-1 rounded bg-[#c5a059] text-black font-semibold transition cursor-pointer">Sección 2D</button>
+                  <button id="btn-slicer-view-3d" onclick="setSlicerViewMode('3D')" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition cursor-pointer">Órbita 3D Toolpath</button>
+                </div>
+                <div class="flex items-center gap-1 text-[10px] mono text-slate-400" id="slicer-3d-hint" style="display:none;">
+                  <span>🖱️ Arrastrar para rotar · Rueda zoom</span>
+                </div>
+              </div>
+
+              <div id="dfam-slicer-viewport-box" class="relative rounded-xl overflow-hidden border border-white/10 bg-[#08090e] shadow-inner flex items-center justify-center min-h-[380px]">
                 <canvas id="dfam-slicer-canvas" width="460" height="400" class="w-full h-auto max-h-[380px] object-contain"></canvas>
-                <div class="absolute top-2 left-2 pointer-events-none flex flex-col gap-1">
+                <div id="dfam-slicer-3d-mount" class="w-full h-[380px] hidden"></div>
+                <div id="dfam-slicer-2d-badges" class="absolute top-2 left-2 pointer-events-none flex flex-col gap-1">
                   <span id="slicer-layer-badge" class="text-[10px] mono px-2 py-0.5 rounded bg-black/70 text-cyan-300 border border-cyan-500/30">Capa: 0 / 0</span>
                   <span id="slicer-z-badge" class="text-[10px] mono px-2 py-0.5 rounded bg-black/70 text-amber-300 border border-amber-500/30">Z: 0.00 mm</span>
                 </div>
@@ -672,22 +872,30 @@
                 <div class="text-xs mono uppercase text-slate-300 font-semibold tracking-wider flex items-center gap-1.5">
                   <span>⚙️ Parámetros de Impresión</span>
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-xs mono">
+                <div class="grid grid-cols-3 gap-2 text-xs mono">
                   <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">Altura de Capa</label>
+                    <label class="text-[10px] text-slate-400 block mb-1">Altura Capa</label>
                     <select id="slicer-layer-height" class="w-full bg-[#08090e] border border-white/15 rounded-lg p-1.5 text-slate-200 cursor-pointer">
-                      <option value="0.12">0.12 mm (Fino)</option>
-                      <option value="0.20" selected>0.20 mm (Normal)</option>
-                      <option value="0.28">0.28 mm (Rápido)</option>
+                      <option value="0.12">0.12 mm</option>
+                      <option value="0.20" selected>0.20 mm</option>
+                      <option value="0.28">0.28 mm</option>
                     </select>
                   </div>
                   <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">Relleno (Infill)</label>
+                    <label class="text-[10px] text-slate-400 block mb-1">Relleno</label>
                     <select id="slicer-infill-density" class="w-full bg-[#08090e] border border-white/15 rounded-lg p-1.5 text-slate-200 cursor-pointer">
-                      <option value="0.15">15% (Ligero)</option>
-                      <option value="0.25" selected>25% (Estándar)</option>
-                      <option value="0.40">40% (Robusto)</option>
-                      <option value="1.00">100% (Macizo)</option>
+                      <option value="0.15">15%</option>
+                      <option value="0.25" selected>25%</option>
+                      <option value="0.40">40%</option>
+                      <option value="1.00">100%</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">Patrón</label>
+                    <select id="slicer-infill-pattern" class="w-full bg-[#08090e] border border-white/15 rounded-lg p-1.5 text-slate-200 cursor-pointer">
+                      <option value="GYROID" selected>Giroide</option>
+                      <option value="LINES">Líneas</option>
+                      <option value="GRID">Grilla</option>
                     </select>
                   </div>
                 </div>
@@ -762,6 +970,11 @@
   function closeSlicerModal() {
     if (typeof document === 'undefined') return;
     stopSimulation();
+    if (slicer3D.animFrameId) {
+      cancelAnimationFrame(slicer3D.animFrameId);
+      slicer3D.animFrameId = null;
+    }
+    setSlicerViewMode('2D');
     const modal = document.getElementById('dfam-slicer-modal');
     if (modal) modal.classList.add('hidden');
   }
@@ -771,14 +984,16 @@
 
     const layerHeightEl = document.getElementById('slicer-layer-height');
     const infillDensityEl = document.getElementById('slicer-infill-density');
+    const infillPatternEl = document.getElementById('slicer-infill-pattern');
 
     const layerHeight = layerHeightEl ? parseFloat(layerHeightEl.value) : 0.20;
     const infillDensity = infillDensityEl ? parseFloat(infillDensityEl.value) : 0.25;
+    const infillPattern = infillPatternEl ? infillPatternEl.value : 'GYROID';
 
     currentSliceResult = sliceGeometry(currentTargetObject, {
       layerHeight,
       infillDensity,
-      infillPattern: 'LINES',
+      infillPattern,
       targetDimensionMm: 100.0
     });
 
@@ -805,6 +1020,10 @@
     if (timeEl) timeEl.textContent = `${m.printTimeMinutes} min`;
 
     setSlicerLayer(0);
+
+    if (currentViewMode === '3D') {
+      initOrUpdate3DView();
+    }
   }
 
   function setSlicerLayer(layerIdx) {
@@ -900,6 +1119,7 @@
     downloadTextFile,
     openSlicerModal,
     closeSlicerModal,
+    setSlicerViewMode,
     setSlicerLayer,
     toggleSimulation,
     recalculateSlice,
@@ -914,6 +1134,7 @@
   // Bindings globales HTML
   root.openSlicerModal = openSlicerModal;
   root.closeSlicerModal = closeSlicerModal;
+  root.setSlicerViewMode = setSlicerViewMode;
   root.setSlicerLayer = setSlicerLayer;
   root.toggleSimulation = toggleSimulation;
   root.recalculateSlice = recalculateSlice;

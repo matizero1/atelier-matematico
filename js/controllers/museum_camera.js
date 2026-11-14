@@ -341,7 +341,7 @@
     state.currentFocusedAstro = astro;
     root.currentFocusedAstro = astro;
     state.mode = state.MODE_SPHERE_CONFINEMENT;
-    if (root.MuseumHUD) root.MuseumHUD.isHudMinimized = false;
+    if (root.MuseumHUD?.isHudMinimized) root.MuseumHUD.toggleHudCardMinimize();
 
     if (typeof document !== 'undefined' && document.pointerLockElement && document.exitPointerLock) {
       document.exitPointerLock();
@@ -444,8 +444,6 @@
         }
 
         hudCard.classList.remove('opacity-0', 'translate-x-8', 'pointer-events-none');
-        hudCard.style.opacity = '1';
-        hudCard.style.transform = 'none';
       }
     }
 
@@ -827,6 +825,7 @@
 
   const MuseumCamera = {
     state,
+    polarTiltRadians: LAT_PARANAL,
     slewTelescopeToTarget,
     openTelescopeGotoTerminal,
     closeTelescopeGotoTerminal,

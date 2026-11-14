@@ -11,6 +11,8 @@ const ARTWORKS_24 = (typeof window !== 'undefined' && window.ARTWORKS_100 && win
 
 // Variables Three.js & Silicio
 let scene, camera, renderer;
+// Se reutilizan en cada cuadro después de inicializar Three.js.
+let _camEuler, _naiTarget, _targetCam;
 let cosmicDirLight = null;
 let cosmicStarsMesh = null;
 let astros24 = [];
@@ -90,6 +92,9 @@ function navigateToActiveShop() {
 // ── INICIALIZACIÓN PRINCIPAL ──────────────────────────────────────
 function initAtlasCosmico() {
   const canvas = document.getElementById('webgl-canvas');
+  _camEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+  _naiTarget = new THREE.Vector3();
+  _targetCam = new THREE.Vector3();
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x08080a);
   scene.fog = new THREE.FogExp2(0x08080a, 0.0022);
@@ -162,7 +167,7 @@ function initAtlasCosmico() {
   }
 
   window.addEventListener('resize', onWindowResize);
-  requestAnimationFrame(animate);
+  animate();
 
   const loadingEl = document.getElementById('loading-screen');
   if (loadingEl) {
@@ -447,7 +452,7 @@ function buildTectonicRotunda() {
   // C. Cuña Polar Ecuatorial (Latitud Paranal -24.6°)
   const polarWedgeGroup = new THREE.Group();
   polarWedgeGroup.position.set(0, 1.52, 5.0);
-  polarWedgeGroup.rotation.x = LAT_PARANAL;
+  polarWedgeGroup.rotation.x = window.MuseumCamera.polarTiltRadians;
 
   const wedgeGeo = new THREE.CylinderGeometry(1.15, 1.25, 0.32, 24);
   const wedge = new THREE.Mesh(wedgeGeo, castIronMat);
@@ -464,7 +469,7 @@ function buildTectonicRotunda() {
 
   // D. Horquilla Ecuatorial Rotatoria (Eje Polar / Eje de Ascensión Recta)
   telescopeForkGroup = new THREE.Group();
-  telescopeForkGroup.rotation.y = currentTelescopeAngles.ha;
+  telescopeForkGroup.rotation.y = cameraState.currentTelescopeAngles.ha;
   polarWedgeGroup.add(telescopeForkGroup);
 
   const forkHubGeo = new THREE.CylinderGeometry(1.08, 1.08, 0.30, 24);
@@ -500,7 +505,7 @@ function buildTectonicRotunda() {
   // E. Eje de Declinación & Tubo Óptico Principal (OTA)
   telescopeOtaGroup = new THREE.Group();
   telescopeOtaGroup.position.set(0, 1.52, 0);
-  telescopeOtaGroup.rotation.x = currentTelescopeAngles.dec;
+  telescopeOtaGroup.rotation.x = cameraState.currentTelescopeAngles.dec;
   telescopeForkGroup.add(telescopeOtaGroup);
 
   // Eje transversal de declinación en acero templado
@@ -1258,6 +1263,7 @@ function processDirectCheckout() {
 let prevTime = performance.now();
 let isTabVisible = true;
 let frameCounter = 0;
+let animationFrame = null;
 
 const isAutomationOrDirect = (typeof navigator !== 'undefined' && (navigator.webdriver || !navigator.onLine)) ||
   (typeof window !== 'undefined' && (window.location.search.includes('direct') || window.location.search.includes('warp') || window.location.search.includes('astro')));
@@ -1269,21 +1275,23 @@ document.addEventListener('visibilitychange', () => {
   } else {
     isTabVisible = !document.hidden;
   }
-  if (isTabVisible) {
+  if (isTabVisible && frameCounter > 0) {
     prevTime = performance.now();
-    requestAnimationFrame(animate);
+    scheduleFrame();
   }
 });
 
-// Static reusable transform objects to avoid GC spikes in 60 FPS animation loop
-const _camEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-const _naiTarget = new THREE.Vector3();
-const _targetCam = new THREE.Vector3();
+function scheduleFrame() {
+  if (animationFrame !== null) return;
+  animationFrame = requestAnimationFrame(() => {
+    animationFrame = null;
+    animate();
+  });
+}
 
 function animate() {
   if (!isTabVisible && !isAutomationOrDirect) return; // 0% CPU/GPU en segundo plano
   frameCounter++;
-  requestAnimationFrame(animate);
 
   const time = performance.now();
   const delta = (time - prevTime) / 1000;
@@ -1389,7 +1397,7 @@ function animate() {
 
     // Calcular colimación astronómica con la lente del telescopio cada 2 frames
     if (frameCounter % 2 === 0) {
-      updateTelescopeCollimation();
+      window.MuseumCamera.updateTelescopeCollimation();
     }
 
     // 4. ANIMACIÓN SUAVE DE SERVOMOTORES DEL TELESCOPIO (GOTO SLEW)
@@ -1404,7 +1412,7 @@ function animate() {
         telescopeOtaGroup.rotation.x = cameraState.currentTelescopeAngles.dec;
         if (progress >= 1.0) {
           cameraState.isTelescopeSlewing = false;
-          updateTelescopeCollimation();
+          window.MuseumCamera.updateTelescopeCollimation();
         }
       }
     }
@@ -1634,6 +1642,7 @@ function animate() {
     }
   }
   renderer.render(scene, camera);
+  scheduleFrame();
 }
 
 function onWindowResize() {
@@ -1740,8 +1749,18 @@ function openActiveAstroSlicer() {
 }
 
 function bootAtlas() {
-  initAtlasCosmico();
-  if (window.location.href.includes('skip_foyer') || window.location.href.includes('enter') || window.location.hash.includes('enter') || window.location.href.includes('direct') || window.location.href.includes('warp=')) {
+  try {
+    if (!window.MuseumCamera || !window.MuseumAudio || !ARTWORKS_24.length) {
+      throw new Error('Faltan módulos o datos del observatorio');
+    }
+    initAtlasCosmico();
+  } catch (error) {
+    console.error('No se pudo iniciar el Observatorio 3D:', error);
+    document.getElementById('museum-unavailable').hidden = false;
+    return;
+  }
+  document.getElementById('museum-enter').disabled = false;
+  if (window.location.href.includes('skip_foyer') || window.location.href.includes('enter') || window.location.hash.includes('enter') || window.location.href.includes('direct') || window.location.href.includes('warp=') || window.location.search.includes('astro=')) {
     const foyer = document.getElementById('foyer-screen');
     if (foyer) {
       foyer.style.setProperty('display', 'none', 'important');

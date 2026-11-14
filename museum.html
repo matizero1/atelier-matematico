@@ -55,6 +55,14 @@
   }
   #webgl-canvas:active { cursor: grabbing; }
 
+  #museum-unavailable {
+    position: fixed; inset: 0; z-index: 60;
+    display: grid; place-items: center; padding: 1.5rem;
+    background: var(--bg-base); text-align: center;
+  }
+  #museum-unavailable[hidden] { display: none; }
+  #museum-unavailable a { color: var(--gold-light); text-decoration: underline; }
+
   /* Flash de cámara */
   #camera-flash {
     position: fixed; inset: 0; background: #f4f1ea; z-index: 100;
@@ -166,12 +174,18 @@
 
 <!-- CANVAS PRINCIPAL 3D -->
 <canvas id="webgl-canvas"></canvas>
+<div id="museum-unavailable" role="alert" hidden>
+  <div>
+    <h1>No se pudo abrir el Observatorio 3D</h1>
+    <p>Recarga la página o ábrela en un navegador compatible con WebGL.</p>
+    <a href="shop.html">Ver la galería de obras</a>
+  </div>
+</div>
 
 <!-- ========================================================================= -->
 <!-- FOYER SOBERANO DE ADMISIÓN (SALA IV · ROTONDA TECTÓNICA)                  -->
 <!-- ========================================================================= -->
 <div id="foyer-screen" class="fixed inset-0 z-50 bg-[#08080a] flex flex-col justify-between p-6 md:p-12 transition-opacity duration-1000">
-  <script>if (window.location.search.includes('direct') || window.location.search.includes('warp=') || window.location.search.includes('skip_foyer') || window.location.search.includes('astro=')) { document.getElementById('foyer-screen').style.display = 'none'; }</script>
   <div class="flex justify-between items-center max-w-6xl w-full mx-auto">
     <div class="flex items-center gap-4">
       <a href="index.html" class="flex items-center gap-2 text-xs mono text-[#a1a1aa] hover:text-[#f4f1ea] transition uppercase tracking-widest">
@@ -213,7 +227,7 @@
       </p>
 
       <div class="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-        <button onclick="enterCapsule(true)" class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs px-6 py-3 rounded-full font-medium transition shadow-lg flex items-center gap-2 mono uppercase tracking-wider font-semibold cursor-pointer">
+        <button id="museum-enter" onclick="enterCapsule(true)" disabled class="bg-[#c5a059] hover:bg-[#dfc285] text-[#08080a] text-xs px-6 py-3 rounded-full font-medium transition shadow-lg flex items-center gap-2 mono uppercase tracking-wider font-semibold cursor-pointer disabled:opacity-50">
           <span>Entrar al Observatorio 3D →</span>
         </button>
         <a href="shop.html" class="bg-[#101014] hover:bg-white/10 text-[#f4f1ea] text-xs px-5 py-3 rounded-full mono transition flex items-center gap-2 luxury-border">
@@ -883,9 +897,9 @@
 <script src="js/controllers/museum_models.js"></script>
 <script src="js/controllers/museum_models_extended.js"></script>
 <script src="js/controllers/museum_audio.js"></script>
-<script src="js/controllers/museum_camera.js"></script>
+<script src="js/controllers/museum_camera.js?v=observatory-20261113"></script>
 <script src="js/controllers/museum_hud.js"></script>
-<script src="js/controllers/museum_controller.js"></script>
+<script src="js/controllers/museum_controller.js?v=observatory-20261113" onerror="document.getElementById('museum-unavailable').hidden = false"></script>
 <script src="js/controllers/desktop_modal.js"></script>
 </body>
 </html>
